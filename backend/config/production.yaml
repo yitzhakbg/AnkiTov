@@ -1,0 +1,31 @@
+# AnkiTov — Production Configuration
+# Database URL set via DATABASE_URL environment variable
+
+logger:
+  level: info
+  format: compact
+  rotation: daily
+  dir: ./logs
+  filename_prefix: ankitov
+
+server:
+  port: 3000
+  host: 0.0.0.0
+
+database:
+  # Override via: DATABASE_URL=libsql://your-turso-db.turso.io?authToken=...
+  uri: {{ get_env(name="DATABASE_URL", default="sqlite://data/ankitov.db?mode=rwc") }}
+  enable_logging: false
+  connect_timeout: 2000
+  idle_timeout: 2000
+  min_connections: 4
+  max_connections: 16
+  auto_migrate: true
+  dangerously_truncate: false
+  dangerously_recreate: false
+
+queue:
+  uri: {{ get_env(name="REDIS_URL", default="memory://") }}
+
+workers:
+  enable: true

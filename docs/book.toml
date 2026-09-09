@@ -1,0 +1,20 @@
+[book]
+title = "AnkiTov Architecture"
+authors = ["AnkiTov Team"]
+language = "en"
+description = "Internal architecture documentation for the AnkiTov platform"
+
+[output.html]
+no-section-label = true
+git-repository-url = "https://github.com/yitzhakbg/AnkiTov"
+edit-url-template = "https://github.com/yitzhakbg/AnkiTov/edit/main/docs/{path}"
+additional-css = ["src/custom.css"]
+
+[output.html.search]
+enable = true
+limit-results = 20
+
+[rust]
+edition = "2021"
+
+[preprocessor]

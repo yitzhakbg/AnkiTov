@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "author_name": "AnkiTov Pilot Seed",
+  "license": "CC0-1.0",
+  "source_url": null,
+  "decks": [
+    {
+      "locale": "en",
+      "slug": "english-vocabulary",
+      "file": "packages/english-vocabulary-en.apkg",
+      "title": "AnkiTov Pilot — English Vocabulary",
+      "card_count": 105,
+      "note_type_census": {
+        "basic": 58,
+        "cloze": 21,
+        "type_in": 26
+      },
+      "sha256": "eb2e8efc6c3c67450f8dbdfe65da7cf35f4469e48afd4c9285fca8b4c25ea009",
+      "rtl": false
+    },
+    {
+      "locale": "en",
+      "slug": "math-definitions",
+      "file": "packages/math-definitions-en.apkg",
+      "title": "AnkiTov Pilot — Math Definitions",
+      "card_count": 105,
+      "note_type_census": {
+        "basic": 47,
+        "cloze": 47,
+        "type_in": 11
+      },
+      "sha256": "a791dc87efe3449e693ad8dbc85cbb3013a8518e7c613ad6a83734904e624446",
+      "rtl": false
+    },
+    {
+      "locale": "he",
+      "slug": "math-definitions",
+      "file": "packages/math-definitions-he.apkg",
+      "title": "AnkiTov Pilot — הגדרות מתמטיקה",
+      "card_count": 105,
+      "note_type_census": {
+        "basic": 47,
+        "cloze": 47,
+        "type_in": 11
+      },
+      "sha256": "d7f03251f5e00a4b8b6c4c50fe91098ae329a776d3fb327e058004b2d0ff66e1",
+      "rtl": true
+    }
+  ],
+  "generated_at": "2026-09-09T17:24:53Z"
+}

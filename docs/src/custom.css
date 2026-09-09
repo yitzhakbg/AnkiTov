@@ -1,0 +1,28 @@
+:root {
+  --content-max-width: 800px;
+}
+
+header h1 a {
+  font-weight: 700;
+}
+
+table {
+  width: 100%;
+}
+
+th {
+  font-weight: 600;
+  background: #f0f4f8;
+}
+
+code {
+  background: #f1f5f9;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.9em;
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+}

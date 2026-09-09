@@ -1,0 +1,3 @@
+# Pin to stable toolchain — rustup manages rust-analyzer as a component
+[toolchain]
+channel = "stable"

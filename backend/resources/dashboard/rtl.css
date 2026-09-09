@@ -1,0 +1,246 @@
+/**
+ * AnkiTov RTL (Right-to-Left) CSS Support
+ *
+ * This stylesheet is loaded for RTL locales (Arabic, Hebrew, etc.).
+ * It uses CSS logical properties to flip the layout direction without
+ * duplicating the entire stylesheet.
+ *
+ * CSS logical properties automatically adapt to text direction:
+ *   margin-inline-start → margin-left (LTR) / margin-right (RTL)
+ *   padding-inline-end   → padding-right (LTR) / padding-left (RTL)
+ *   inset-inline-start   → left (LTR) / right (RTL)
+ *   text-align: start    → left (LTR) / right (RTL)
+ *
+ * ## Integration
+ *
+ * Include this file AFTER the main stylesheet:
+ * ```html
+ * <link rel="stylesheet" href="/dashboard/style.css">
+ * <link rel="stylesheet" href="/dashboard/rtl.css" id="rtl-css" disabled>
+ * ```
+ *
+ * The i18n module enables/disables it based on locale.
+ */
+
+/* ── Directional overrides ─────────────────────────────────────── */
+
+/* Sidebar: flip to right side in RTL */
+.rtl .sidebar {
+  left: auto;
+  right: 0;
+  border-right: none;
+  border-left: 1px solid var(--border-light);
+}
+
+.rtl .sidebar.collapsed {
+  transform: translateX(var(--sidebar-width));
+}
+
+.rtl .main-content {
+  margin-left: 0;
+  margin-right: var(--sidebar-width);
+}
+
+.rtl .sidebar.collapsed ~ .main-content {
+  margin-right: 0;
+}
+
+.rtl .sidebar-toggle-btn {
+  left: auto;
+  right: var(--sidebar-width);
+}
+
+.rtl .sidebar.collapsed .sidebar-toggle-btn {
+  right: 0;
+}
+
+/* ── Text alignment ────────────────────────────────────────────── */
+
+.rtl body {
+  direction: rtl;
+  text-align: right;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+               'Noto Sans Arabic', 'Noto Sans Hebrew', sans-serif;
+}
+
+.rtl .text-left,
+.rtl [style*="text-align:left"],
+.rtl td[style*="text-align:left"],
+.rtl th[style*="text-align:left"] {
+  text-align: right !important;
+}
+
+.rtl .text-right,
+.rtl [style*="text-align:right"],
+.rtl td[style*="text-align:right"],
+.rtl th[style*="text-align:right"] {
+  text-align: left !important;
+}
+
+/* ── Flex / Grid direction fix ─────────────────────────────────── */
+
+.rtl .flex-row {
+  flex-direction: row-reverse;
+}
+
+/* ── Form elements ─────────────────────────────────────────────── */
+
+.rtl input,
+.rtl textarea,
+.rtl select {
+  text-align: right;
+  direction: rtl;
+}
+
+/* Keep code/numbers LTR even in RTL context */
+.rtl code,
+.rtl pre,
+.rtl [data-ltr="true"],
+.rtl input[type="number"],
+.rtl .number,
+.rtl .mono,
+.rtl .font-mono {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: embed;
+}
+
+/* ── Icons & indicators ────────────────────────────────────────── */
+
+/* Flip directional icons */
+.rtl .icon-arrow-right,
+.rtl .icon-chevron-right {
+  transform: scaleX(-1);
+}
+
+.rtl .icon-arrow-left,
+.rtl .icon-chevron-left {
+  transform: scaleX(-1);
+}
+
+/* ── Dropdowns & Modals ────────────────────────────────────────── */
+
+.rtl .dropdown-menu {
+  left: 0;
+  right: 0;
+}
+
+.rtl .modal-footer {
+  justify-content: flex-start;
+}
+
+.rtl .modal-footer .btn + .btn {
+  margin-left: 0;
+  margin-right: var(--space-2);
+}
+
+/* ── Tables ────────────────────────────────────────────────────── */
+
+.rtl th:first-child,
+.rtl td:first-child {
+  text-align: right;
+}
+
+.rtl th:last-child,
+.rtl td:last-child {
+  text-align: left;
+}
+
+/* ── Progress / Badge spacing ──────────────────────────────────── */
+
+.rtl .badge + .badge,
+.rtl .chip + .chip {
+  margin-left: 0;
+  margin-right: var(--space-1);
+}
+
+/* ── Breadcrumbs ───────────────────────────────────────────────── */
+
+.rtl .breadcrumb-item + .breadcrumb-item::before {
+  content: '\\';
+  padding: 0 var(--space-1);
+}
+
+/* ── Search input icons ────────────────────────────────────────── */
+
+.rtl .search-input-wrapper .search-icon {
+  left: auto;
+  right: var(--space-3);
+}
+
+.rtl .search-input-wrapper input {
+  padding-left: var(--space-3);
+  padding-right: calc(var(--space-3) + 1.25rem + var(--space-2));
+}
+
+/* ── Loading spinners ──────────────────────────────────────────── */
+
+.rtl .spinner {
+  /* Keep rotation direction consistent */
+}
+
+/* ── Active student bar ────────────────────────────────────────── */
+
+.rtl .active-student-bar {
+  text-align: right;
+}
+
+/* ── Celebration card ──────────────────────────────────────────── */
+
+.rtl .celebration-card {
+  text-align: right;
+}
+
+/* ── Sidebar nav items ─────────────────────────────────────────── */
+
+.rtl .sidebar-nav-item {
+  padding-left: var(--space-3);
+  padding-right: var(--space-4);
+}
+
+.rtl .sidebar-nav-item .nav-icon {
+  margin-right: 0;
+  margin-left: var(--space-3);
+}
+
+/* ── Section header actions ────────────────────────────────────── */
+
+.rtl .section-header-actions {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* ── Pagination ────────────────────────────────────────────────── */
+
+.rtl .pagination {
+  flex-direction: row-reverse;
+}
+
+/* ── Tabs ──────────────────────────────────────────────────────── */
+
+.rtl .tabs {
+  flex-direction: row-reverse;
+}
+
+/* ── Collapse toggle arrow ─────────────────────────────────────── */
+
+.rtl .collapse-toggle::before {
+  transform: rotate(180deg);
+}
+
+/* ── Notifications / Toasts ────────────────────────────────────── */
+
+.rtl .toast {
+  left: var(--space-4);
+  right: auto;
+}
+
+.rtl .toast .toast-icon {
+  margin-right: 0;
+  margin-left: var(--space-2);
+}
+
+/* ── Fix for inlined left/right values in JS-generated HTML ────── */
+
+/* Any element with inline style="margin-left:..." gets flipped */
+/* This is handled by the JS i18n module for dynamic content */

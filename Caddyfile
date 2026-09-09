@@ -1,0 +1,50 @@
+# Caddy reverse proxy configuration for AnkiTov.
+#
+# Caddy handles:
+#   - Automatic HTTPS (Let's Encrypt in production, self-signed in dev)
+#   - Reverse proxy to backend API and dashboard
+#   - WebSocket upgrade for streaming (future Selkies)
+#
+# Domains are set via ANKITOV_DOMAIN env var (default: localhost).
+
+{$ANKITOV_DOMAIN:localhost} {
+    # ── Backend API ──
+    handle /api/* {
+        reverse_proxy backend:5150
+    }
+    handle /health {
+        reverse_proxy backend:5150
+    }
+
+    # ── Dashboard & PWA ──
+    handle /dashboard/* {
+        reverse_proxy backend:5150
+    }
+    handle /imp-console* {
+        reverse_proxy backend:5150
+    }
+    handle /locales/* {
+        reverse_proxy backend:5150
+    }
+
+    # ── Default: dashboard ──
+    handle {
+        reverse_proxy backend:5150
+    }
+
+    # ── Logging ──
+    log {
+        output stdout
+        format json
+    }
+
+    # ── Headers ──
+    header {
+        # Security headers
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        # Enable for production:
+        # Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    }
+}

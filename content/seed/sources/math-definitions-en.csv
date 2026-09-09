@@ -1,0 +1,106 @@
+note_type,concept_id,unit,grades,front,back,extra
+basic,prime-number,01,7 8,What is a prime number?,"A whole number greater than 1 whose only positive divisors are 1 and itself. The first primes are 2, 3, 5, 7, and 11.",
+basic,composite-number,01,7,What is a composite number?,"A whole number greater than 1 that has more than two positive divisors. Example: 12 has divisors 1, 2, 3, 4, 6, and 12.",
+basic,rational-number,01,7 8,What is a rational number?,"Any number that can be written as a ratio of two integers with a nonzero denominator. Examples: 3/4, -5, and 0.25.",
+basic,real-number,01,8,What is a real number?,Any number on the number line; the real numbers include all rational and irrational numbers.,
+basic,square-root,01,8,What is the square root of a number?,A value that when multiplied by itself gives the number. Example: the square root of 49 is 7.,
+basic,perfect-square,01,8,What is a perfect square?,"A whole number that is the square of an integer. Examples: 1, 4, 9, 16, and 25.",
+basic,distributive-property,02,7,What is the distributive property?,Multiplying a sum by a number gives the same result as multiplying each addend and then adding: a(b + c) = ab + ac.,
+basic,inverse-operation,02,7,What are inverse operations?,"Operations that undo each other, such as addition and subtraction or multiplication and division.",
+basic,reciprocal,02,7,What is a reciprocal?,The multiplicative inverse of a nonzero number; a number times its reciprocal equals 1. The reciprocal of 5 is 1/5.,
+basic,proper-fraction,03,7,What is a proper fraction?,"A fraction whose numerator is less than its denominator, so its value is less than 1. Example: 3/5.",
+basic,mixed-number,03,7,What is a mixed number?,A whole number written together with a proper fraction. Example: 2 1/3 means 2 + 1/3.,
+basic,repeating-decimal,03,7,What is a repeating decimal?,A decimal in which a digit or block of digits repeats forever. Example: 1/3 = 0.333...,
+basic,percent,03,7,What does percent mean?,Out of 100; a percent is a ratio that compares a number to 100. Example: 45% = 45/100.,
+basic,proportion,03,7,What is a proportion?,An equation stating that two ratios are equal. Example: 1/2 = 4/8.,
+basic,scale-factor,03,8,What is a scale factor?,The ratio of a length in a scale drawing or image to the corresponding length in the original figure.,
+basic,proportional-relationship,03,7,What is a proportional relationship?,A relationship in which two quantities keep a constant ratio; its graph is a line through the origin.,
+basic,variable,04,7,What is a variable in algebra?,"A symbol, usually a letter, that stands for an unknown or changing value. Example: x in 2x + 3.",
+basic,like-terms,04,7,What are like terms?,"Terms with exactly the same variable factors, such as 5x and -2x. Like terms can be combined.",
+basic,equation,04,7,What is an equation?,"A statement that two expressions are equal, written with an equals sign. Example: 3x = 12.",
+basic,slope,04,8,What is the slope of a line?,The ratio of vertical change to horizontal change between two points on the line: rise over run.,
+basic,slope-intercept-form,04,8,What is slope-intercept form?,"The form y = mx + b, where m is the slope and b is the y-intercept of the line.",
+basic,function,04,8 9,What is a function?,A rule that assigns exactly one output to each input.,
+basic,range-of-a-function,04,8,"In a function, what is the range?","The set of all output values of the function. For f(x) = x + 2, the outputs are the inputs plus 2.",
+basic,radius,05,7,What is the radius of a circle?,The distance from the center of the circle to any point on the circle.,
+basic,perimeter,05,7,What is the perimeter of a figure?,The distance around the outside edge of the figure. A square with side 5 has perimeter 20.,
+basic,area,05,7,What is the area of a figure?,The number of square units needed to cover the figure. A rectangle 3 by 4 has area 12.,
+basic,congruent-figures,05,8,What does it mean for two figures to be congruent?,They have the same size and shape; one can be placed exactly on the other by a rigid transformation.,
+basic,equilateral-triangle,05,7,What is an equilateral triangle?,A triangle whose three sides are congruent; each angle measures 60 degrees.,
+basic,quadrilateral,05,7,What is a quadrilateral?,"A polygon with exactly four sides. Squares, rectangles, and trapezoids are quadrilaterals.",
+basic,transversal,06,8,What is a transversal?,A line that intersects two or more other lines at distinct points. With parallel lines it forms equal angle pairs.,
+basic,parallel-lines,06,7,What are parallel lines?,"Lines in the same plane that never intersect, no matter how far they are extended.",
+basic,perpendicular-lines,06,7,What are perpendicular lines?,Lines that intersect to form a 90-degree angle.,
+basic,midpoint,06,8,What is the midpoint of a segment?,The point that divides the segment into two congruent segments.,
+basic,translation-geometry,06,8,"In geometry, what is a translation?",A transformation that slides every point of a figure the same distance in the same direction.,
+basic,rotation-geometry,06,8,"In geometry, what is a rotation?",A transformation that turns a figure about a fixed point through a given angle.,
+basic,reflection-geometry,06,8,"In geometry, what is a reflection?",A transformation that flips a figure across a line to produce a mirror image.,
+basic,dilation,06,8,What is a dilation in geometry?,A transformation that enlarges or reduces a figure from a center point by a scale factor.,
+basic,mean,07,7 8,What is the mean of a data set?,"The sum of the data values divided by the number of values. For 2, 4, and 9 the mean is 5.",
+basic,median,07,7,What is the median of a data set?,"The middle value when the data are in order; with an even count, the mean of the two middle values.",
+basic,mode,07,7,What is the mode of a data set?,The value that occurs most often. A data set can have no mode or more than one mode.,
+basic,outlier,07,8,What is an outlier?,A data value that is much greater or much less than the rest of the data.,
+basic,histogram,07,8,What is a histogram?,A bar graph of grouped numerical data in which touching bars show the frequency of each interval.,
+basic,scatter-plot,07,8,What is a scatter plot?,"A graph of points (x, y) that shows the relationship between two sets of data.",
+basic,independent-events,07,7,What are independent events?,Events for which one outcome does not change the probability of the other. Example: two coin flips.,
+basic,sample-space,07,7,What is a sample space?,The set of all possible outcomes of an experiment. For one number cube it is 1 through 6.,
+basic,arithmetic-sequence,08,9,What is an arithmetic sequence?,"A sequence in which each term after the first is found by adding the same number. Example: 3, 7, 11, 15.",
+basic,geometric-sequence,08,9,What is a geometric sequence?,"A sequence in which each term after the first is found by multiplying by the same nonzero number. Example: 2, 6, 18, 54.",
+cloze,greatest-common-factor,01,7,The {{c1::greatest common factor}} of two numbers is the largest number that divides both with no remainder.,,Example: the GCF of 12 and 18 is 6.
+cloze,least-common-multiple,01,7,The {{c1::least common multiple}} of two numbers is the smallest positive number that is a multiple of both.,,Example: the LCM of 4 and 6 is 12.
+cloze,irrational-number,01,8,An {{c1::irrational number}} cannot be written as a ratio of two integers; its decimal never repeats or terminates.,,Examples: pi and the square root of 2.
+cloze,absolute-value,01,7 8,The {{c1::absolute value}} of a number is its distance from zero on the number line.,,"Distance is never negative, so |-5| = 5."
+cloze,cube-root,01,8,The {{c1::cube root}} of a number is a value whose cube is the original number.,,Example: the cube root of 27 is 3.
+cloze,order-of-operations,01,7,The {{c1::order of operations}} puts multiplication and division before addition and subtraction.,,"Parentheses come first, then exponents."
+cloze,commutative-property,02,7,The {{c1::commutative property}} says the order of two addends or factors does not change the result.,,Example: 3 + 4 = 4 + 3.
+cloze,associative-property,02,7,The {{c1::associative property}} says regrouping addends or factors does not change the result.,,Example: (2 + 3) + 4 = 2 + (3 + 4).
+cloze,multiplicative-identity,02,7,Multiplying any number by {{c1::1}} leaves the number unchanged; 1 is the multiplicative identity.,,Example: 7 x 1 = 7.
+cloze,prime-factorization,02,7,A {{c1::prime factorization}} expresses a composite number as a product of prime numbers.,,Example: 60 = 2 x 2 x 3 x 5.
+cloze,improper-fraction,03,7,An {{c1::improper fraction}} has a numerator greater than or equal to its denominator.,,Example: 7/4.
+cloze,equivalent-fractions,03,7,{{c1::Equivalent fractions}} name the same amount with different numerators and denominators.,,Example: 1/2 = 2/4.
+cloze,terminating-decimal,03,7,A {{c1::terminating decimal}} has a finite number of digits after the decimal point.,,Example: 0.75.
+cloze,ratio,03,7,A {{c1::ratio}} compares two quantities by division and may be written 3:2 or 3/2.,,Example: 3:2 means 3 to 2.
+cloze,unit-rate,03,7,A {{c1::unit rate}} tells how many units of the first quantity correspond to one unit of the second.,,Example: 60 miles in 2 hours is 30 miles per hour.
+cloze,simple-interest,03,8,"{{c1::Simple interest}} is figured only on the original principal, never on accumulated interest.",,Formula: I = prt.
+cloze,constant-term,04,7,A {{c1::constant term}} is a term of an expression that has no variable factor.,,In 3x + 5 the constant term is 5.
+cloze,algebraic-expression,04,7,An {{c1::algebraic expression}} joins numbers and variables with operations and has no equals sign.,,Examples: 4x - 7 and 2y + 9.
+cloze,linear-equation,04,8,A {{c1::linear equation}} has variables only to the first power and graphs as a straight line.,,Example: y = 2x + 1.
+cloze,y-intercept,04,8,The {{c1::y-intercept}} of a line is the point where the line crosses the y-axis.,,In y = mx + b the value b is the y-intercept.
+cloze,system-of-equations,04,8,A {{c1::system of equations}} is a set of equations that share variables and are solved together.,,A solution satisfies every equation in the set.
+cloze,domain-of-a-function,04,8 9,The {{c1::domain}} of a function is the set of all its allowable input values.,,"For f(x) = 1/x, x cannot be 0."
+cloze,inequality,04,7,"An {{c1::inequality}} compares expressions with symbols such as &lt;, &gt;, &lt;=, or &gt;=.",,Example: x + 3 &gt; 7.
+cloze,polygon,05,7,A {{c1::polygon}} is a closed plane figure with three or more straight sides.,,Triangles and quadrilaterals are polygons.
+cloze,regular-polygon,05,7,A {{c1::regular polygon}} has all sides congruent and all angles congruent.,,A square is a regular quadrilateral.
+cloze,diameter,05,7,A {{c1::diameter}} of a circle is a segment through the center with both endpoints on the circle.,,The diameter is twice the radius.
+cloze,circumference,05,7,The {{c1::circumference}} of a circle is the distance around the circle.,,Circumference = pi times the diameter.
+cloze,volume,05,8,{{c1::Volume}} is the number of cubic units needed to fill a solid figure.,,A cube with edge 2 has volume 8.
+cloze,similar-figures,05,8,{{c1::Similar figures}} have congruent corresponding angles and proportional corresponding sides.,,Congruent figures are similar with scale factor 1.
+cloze,right-triangle,05,8,A {{c1::right triangle}} has exactly one angle that measures 90 degrees.,,The side opposite the right angle is the hypotenuse.
+cloze,acute-angle,06,7,An {{c1::acute angle}} measures less than 90 degrees.,,Example: a 45-degree angle.
+cloze,obtuse-angle,06,7,An {{c1::obtuse angle}} measures more than 90 degrees but less than 180 degrees.,,Example: a 120-degree angle.
+cloze,complementary-angles,06,7,{{c1::Complementary angles}} are two angles whose measures add to 90 degrees.,,A 30-degree and a 60-degree angle are complementary.
+cloze,supplementary-angles,06,7,{{c1::Supplementary angles}} are two angles whose measures add to 180 degrees.,,Angles forming a linear pair are supplementary.
+cloze,vertical-angles,06,8,{{c1::Vertical angles}} are the congruent opposite angles formed by two intersecting lines.,,"If one is 40 degrees, its opposite is 40 degrees."
+cloze,adjacent-angles,06,7,{{c1::Adjacent angles}} share a vertex and a side but do not overlap.,,Together they form a larger angle.
+cloze,angle-bisector,06,8,An {{c1::angle bisector}} is a ray that divides an angle into two congruent angles.,,It splits a 60-degree angle into two 30-degree angles.
+cloze,interquartile-range,07,7,The {{c1::interquartile range}} is the distance from the first quartile to the third quartile.,,It spans the middle 50 percent of the data.
+cloze,box-plot,07,7,"A {{c1::box plot}} shows a data set using the minimum, maximum, median, and quartiles.",,The box spans the interquartile range.
+cloze,line-of-best-fit,07,8,A {{c1::line of best fit}} is the line that lies closest to all the points of a scatter plot.,,It shows the trend and supports predictions.
+cloze,theoretical-probability,07,7,{{c1::Theoretical probability}} is favorable outcomes over total outcomes when all are equally likely.,,One fair coin: P(heads) = 1/2.
+cloze,experimental-probability,07,7,{{c1::Experimental probability}} is the ratio of the times an event occurs to the number of trials.,,"Computed from actual trials, not from a model."
+cloze,dependent-events,07,7,{{c1::Dependent events}} are events in which one outcome changes the probability of the other.,,Drawing two cards without replacement is dependent.
+cloze,permutation,08,9,A {{c1::permutation}} is an arrangement of objects in which order matters.,,ABC and BAC are different arrangements.
+cloze,combination,08,9,A {{c1::combination}} is a selection of objects in which order does not matter.,,Choosing 2 toppings from 5 is a combination.
+cloze,quadratic-equation,08,9,A {{c1::quadratic equation}} can be written ax^2 + bx + c = 0 where a is nonzero.,,"It has 0, 1, or 2 real solutions."
+cloze,discriminant,08,9,The {{c1::discriminant}} b^2 - 4ac tells how many real solutions a quadratic equation has.,,Positive: 2; zero: 1; negative: none real.
+type_in,integer,01,7,"Type the math term: any whole number, whether positive, negative, or zero.",integer,
+type_in,exponent,01,7,Type the math term: the number that shows how many times a base is used as a factor.,exponent,
+type_in,scientific-notation,02,8,Type the math term: a number written as a x 10^n where 1 &lt;= a &lt; 10.,scientific notation,
+type_in,numerator,03,7,Type the math term: the number above the fraction bar in a fraction.,numerator,
+type_in,denominator,03,7,Type the math term: the number below the fraction bar in a fraction.,denominator,
+type_in,coefficient,04,8,Type the math term: the numerical factor multiplied by a variable in a term.,coefficient,
+type_in,isosceles-triangle,05,7,Type the math term: a triangle with exactly two congruent sides.,isosceles triangle,
+type_in,parallelogram,05,7,Type the math term: a quadrilateral with two pairs of parallel sides.,parallelogram,
+type_in,trapezoid,05,7,Type the math term: a quadrilateral with exactly one pair of parallel sides.,trapezoid,
+type_in,octagon,05,7,Type the math term: a polygon with exactly eight sides.,octagon,
+type_in,hypotenuse,05,8,Type the math term: the side opposite the right angle in a right triangle.,hypotenuse,

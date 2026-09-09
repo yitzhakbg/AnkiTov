@@ -1,0 +1,18 @@
+You are an invariant auditor for AnkiTov. Read backend/src/services/capsule_generator.rs, backend/src/services/capsule_slicer.rs, and backend/tests/imp_pipeline_test.rs.
+Verify these invariants and report VIOLATED or VERIFIED for each with line numbers and reasoning:
+
+INVARIANT P — Rate limiting: generate_capsule returns RateLimited if pending/in_progress capsule exists for student within 30 minutes (created_at >= now_ts() - 1800).
+
+INVARIANT Q — Profile resolution priority: 1) Direct profile_id in request, 2) Student override (TargetType=student), 3) Cohort default (TargetType=cohort via subsection_id), 4) Legacy fallback (first profile in junction table).
+
+INVARIANT R — N-Lever math: capsule_size = ceil(pool/N) clamped by hard_cap, time_bound, pool. N=1 → full pool attempted. N=7 → ~pool/7 per session. N=3, pool=90 → capsule <= ceil(90/3).
+
+INVARIANT S — Empty profile: No tracks in profile → NoTracksInProfile error. No crash, no empty capsule.
+
+INVARIANT T — No due cards: Empty ranked list → NoDueCards error. No crash, no empty session persisted.
+
+INVARIANT U — CapsuleSession persistence: After success: status='pending', cards_completed=0, cards_total=slice.selected.len(), valid UUID, created_at set, completed_at=None.
+
+INVARIANT V — session_duration resolution: 1) request param if >0, 2) profile.session_duration_minutes if >0, 3) DEFAULT_SESSION_DURATION_MINUTES (10).
+
+INVARIANT W — N-value resolution: 1) request.n_value if Some, 2) profile.n_value if Some, 3) DEFAULT_N_VALUE (3). Missing >0 guard allows zero-card capsule — hardening note.

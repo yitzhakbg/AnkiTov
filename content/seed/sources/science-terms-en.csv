@@ -1,0 +1,106 @@
+note_type,concept_id,unit,grades,front,back,extra
+basic,cell,01,7,What is a cell?,The smallest structural and functional unit of all living organisms. Cells contain cytoplasm and a nucleus that controls activity.,Plant cells have walls; animal cells do not.
+basic,cytoplasm,01,7,What is cytoplasm?,The jelly-like substance inside the cell membrane that fills the cell and holds the organelles in place.,It is where many chemical reactions happen.
+basic,nucleus,01,7,What is the nucleus?,The control center of a eukaryotic cell that stores genetic material and directs cell activities.,It is surrounded by a double membrane.
+basic,mitochondria,01,7 8,What are mitochondria?,Organelles that generate most of the cell's energy through cellular respiration by breaking down glucose.,They are called the powerhouse of the cell.
+basic,ribosomes,01,7,What are ribosomes?,Small organelles that build proteins by reading instructions carried from the nucleus.,They can float freely or attach to the endoplasmic reticulum.
+basic,cell-membrane,01,7,What is a cell membrane?,A thin flexible outer layer that controls which substances enter and leave the cell.,It is described as selectively permeable.
+basic,cell-wall,01,7,What is a cell wall?,"A rigid outer layer in plant cells, fungi, and bacteria that gives structure and protection.",It is made of cellulose in plants.
+basic,organelle,01,7,What is an organelle?,"A specialized structure inside a cell that performs a specific job, like making proteins or producing energy.",Nucleus and mitochondria are organelles.
+basic,chromosome,01,8,What is a chromosome?,A tightly coiled structure of DNA and protein that carries genes; humans have 46 of them.,They are visible under a microscope when cells divide.
+basic,protein,01,7 8,What is a protein?,"A large molecule built from amino acids that performs many jobs such as building tissue, transporting substances, and speeding up reactions.",Enzymes are proteins.
+basic,photosynthesis,02,7,What is photosynthesis?,"The process by which plants convert sunlight, water, and carbon dioxide into glucose and oxygen, using chlorophyll.",It happens in the chloroplasts of leaf cells.
+basic,chloroplast,02,7,What is a chloroplast?,A green organelle in plant cells that contains chlorophyll and is the site of photosynthesis.,Its green pigment absorbs light energy.
+basic,light-reaction,02,8,What are light reactions?,"The first stage of photosynthesis in which light energy splits water and produces oxygen, ATP, and NADPH.",They occur in the thylakoid membranes.
+basic,calvin-cycle,02,8,What is the Calvin cycle?,The light-independent stage of photosynthesis where carbon dioxide is fixed and glucose is built.,It is also called the dark reaction.
+basic,respiration,02,7,What is cellular respiration?,The process in which cells break down glucose with oxygen to release energy stored as ATP.,It takes place in the mitochondria.
+basic,atp,02,8,What is ATP?,"Adenosine triphosphate, the molecule that stores and transports energy inside cells for every activity.",It is often called the energy currency of the cell.
+basic,aerobic-respiration,02,8,What is aerobic respiration?,Respiration that requires oxygen and releases more energy from glucose than fermentation does.,It produces carbon dioxide and water as waste.
+basic,fermentation,02,8,What is fermentation?,An anaerobic process where glucose is broken down without oxygen to produce a small amount of energy and lactic acid or alcohol.,Muscle cells use it during intense exercise.
+basic,dna,03,8,What is DNA?,A molecule shaped like a double helix that carries the genetic instructions for building and running an organism.,It is located in the nucleus of eukaryotic cells.
+basic,genetics,03,8,What is genetics?,The branch of biology that studies heredity and the variation of traits from parents to offspring.,Mendel is considered the father of genetics.
+basic,chromosome-number,03,8,How many chromosomes do human cells have?,"Human cells have 46 chromosomes, arranged in 23 pairs, one set inherited from each parent.",Sex cells have only 23.
+basic,meiosis,03,8,What is meiosis?,"A type of cell division that halves the chromosome number to produce gametes, or sex cells, for sexual reproduction.",It happens in two stages.
+basic,dominant-allele,03,8,What is a dominant allele?,An allele that shows its trait in the organism even when paired with a different recessive allele.,It is usually written with a capital letter.
+basic,recessive-allele,03,8,What is a recessive allele?,"An allele that only shows its trait when two copies are present, because a paired dominant allele hides it.",It is written with a lowercase letter.
+basic,homozygous,03,8,What does homozygous mean?,"Having two identical alleles for a gene, such as AA or aa.","It contrasts with heterozygous, which has two different alleles."
+basic,phenotype,03,8,What is a phenotype?,"The observable physical or biochemical traits of an organism, determined by both its genes and the environment.",Eye color and height are phenotypes.
+basic,heredity,03,8,What is heredity?,The passing of traits from parents to offspring through genes.,It explains why children resemble their parents.
+basic,gene,03,7,What is a gene?,A section of DNA that carries the instructions for making one protein or RNA molecule.,"Humans have about 20,000 genes."
+basic,genotype,03,8,What is a genotype?,"The genetic makeup of an organism, written with letters such as Aa or AA.","It differs from the phenotype, which is what you can observe."
+basic,hybrid-cross,03,8,What is a hybrid cross?,"A cross between organisms with different alleles for a trait, like a tall plant crossed with a short one.",The offspring genotype may be Aa.
+basic,punnett-square,03,8,What is a Punnett square?,A grid used to predict the possible genotypes and traits of offspring from a genetic cross.,It shows probability percentages.
+basic,ecosystem,04,7,What is an ecosystem?,A community of living organisms interacting with each other and with the physical environment of a specific area.,"A pond, forest, and desert are ecosystems."
+basic,food-chain,04,7,What is a food chain?,"A linear sequence showing how energy and nutrients move from one organism to another in an ecosystem, starting with a producer.",A grass to rabbit to fox chain is an example.
+basic,trophic-level,04,7 8,What is a trophic level?,"A position in a food chain or food web occupied by organisms sharing the same source of nutrition, like producers or top predators.",Energy decreases at each level.
+basic,biodiversity,04,7 8,What is biodiversity?,"The variety of all life forms in an ecosystem, including species diversity, genetic diversity, and ecosystem diversity.",High biodiversity makes ecosystems more resilient.
+basic,decomposer,04,7,What is a decomposer?,"An organism, such as a bacterium or fungus, that breaks down dead matter and returns nutrients to the soil.",Mold on a decaying apple is a decomposer.
+basic,natural-selection,04,8,What is natural selection?,"The process by which organisms with traits better suited to their environment survive and reproduce more, passing those traits on.",It is the mechanism of evolution.
+basic,adaptation,04,8,What is an adaptation?,"A trait that helps an organism survive and reproduce in its environment, shaped by natural selection over many generations.",A polar bear's thick fur is an adaptation.
+basic,migration,04,8,What is migration?,"The seasonal movement of animals from one region to another in search of food, shelter, or breeding grounds.",Many birds migrate between summer and winter grounds.
+basic,habitat,04,7,What is a habitat?,"The natural home or environment where a particular species lives, providing food, water, and shelter.",A coral reef is a habitat for many marine species.
+basic,extinction,04,8,What is extinction?,"The complete disappearance of a species from the planet, with no living members remaining.",Habitat loss is a leading cause.
+basic,symbiosis,04,8,What is symbiosis?,"A close long-term interaction between two different species, which can benefit both, one at the other's expense, or both harmed.",Bees and flowers are a symbiotic pair.
+basic,apex-predator,04,8,What is an apex predator?,"A top-of-the-food-chain animal with no natural predators, whose population controls the ecosystem's balance.",A lion or eagle is an apex predator.
+basic,biome,04,8,What is a biome?,"A large community of plants and animals adapted to a particular climate, such as a tundra, desert, or rainforest.",Each biome has a distinct climate and life.
+basic,atom,05,7,What is an atom?,"The smallest unit of an element that still keeps its chemical properties, made of a nucleus and electrons.","Atoms are about 100,000 times smaller than a human hair."
+basic,proton,05,7,What is a proton?,A positively charged particle in the nucleus of an atom; its count determines the element's identity.,The number of protons is the atomic number.
+basic,neutron,05,7,What is a neutron?,A neutral particle with no charge found in the nucleus of an atom alongside protons.,Its mass is nearly the same as a proton's.
+basic,electron,05,7,What is an electron?,A negatively charged particle that orbits the nucleus of an atom in energy levels or shells.,Electrons are much lighter than protons.
+basic,periodic-table,05,8,What is the periodic table?,"A chart that organizes all known chemical elements by atomic number, with rows for periods and columns for groups.",Elements in the same group share similar properties.
+basic,atomic-number,05,8,What is an atomic number?,"The number of protons in an atom's nucleus, which uniquely identifies each element.",Hydrogen has atomic number 1.
+basic,atomic-mass,05,8,What is atomic mass?,"The average mass of all the isotopes of an element, measured in atomic mass units.",It appears above each element's symbol in the periodic table.
+basic,valence-electron,05,8,What is a valence electron?,An electron in the outermost shell of an atom that is involved in chemical bonding.,The number of valence electrons predicts reactivity.
+basic,isotope,05,8,What is an isotope?,"An atom of the same element with a different number of neutrons, giving it a different mass.",Carbon-12 and carbon-14 are isotopes of carbon.
+basic,chemical-bond,06,8,What is a chemical bond?,"The force that holds atoms together in a molecule or compound, formed by the interaction of their electrons.",Ionic and covalent are the two main types.
+basic,ionic-bond,06,8,What is an ionic bond?,"A bond formed when one atom transfers an electron to another, creating oppositely charged ions that attract.",Sodium chloride is an ionic compound.
+basic,covalent-bond,06,8,What is a covalent bond?,A bond in which two atoms share a pair of electrons to complete their outer shells.,A water molecule is held together by covalent bonds.
+basic,chemical-reaction,06,8,What is a chemical reaction?,"A process in which substances change into new substances with different properties, rearranging atoms into new combinations.",Burning wood is a chemical reaction.
+basic,oxidation,06,8,What is oxidation?,"A reaction in which a substance loses electrons, often involving combining with oxygen, as when iron rusts.",Rusting is a slow oxidation.
+basic,combustion,06,8,What is combustion?,"A rapid oxidation reaction that releases energy as heat and light, requiring a fuel and oxygen.",Burning methane is a combustion reaction.
+basic,corrosion,06,8,What is corrosion?,"The gradual destruction of a material, usually a metal, by chemical reaction with its environment, like rusting of iron.",Rust is hydrated iron oxide.
+basic,reactant,06,8,What is a reactant?,A starting substance in a chemical reaction that gets transformed into a product.,"In the equation, reactants appear on the left side."
+basic,product,06,8,What is a product?,A new substance formed as the result of a chemical reaction.,Products appear on the right side of a balanced equation.
+basic,catalyst,06,8,What is a catalyst?,A substance that speeds up a chemical reaction without being consumed or changed by the reaction itself.,Enzymes are biological catalysts.
+cloze,cell-theory,01,7,The {{c1::cell theory}} states that all living things are made of cells and that all cells come from existing cells.,,It was developed by Schleiden and Schwann in the 1830s.
+cloze,cytoplasm-role,01,7,{{c1::Cytoplasm}} fills the cell and provides the medium in which organelles float and reactions occur.,,It is mostly water with dissolved chemicals.
+cloze,nucleus-function,01,7,The {{c1::nucleus}} controls cell activity by storing the genetic instructions in DNA.,,It is the largest organelle in most animal cells.
+cloze,photosynthesis-eq,02,7,"In {{c1::photosynthesis}}, plants use light energy to turn carbon dioxide and water into glucose and oxygen.",,It is the opposite of cellular respiration.
+cloze,oxygen-byproduct,02,7,{{c1::Oxygen}} is released as a waste product of photosynthesis in plants.,,This is the oxygen we breathe.
+cloze,mitochondria-energy,02,7,{{c1::Mitochondria}} are the organelles that produce most of a cell's energy.,,They were once free-living bacteria.
+cloze,atp-structure,02,8,{{c1::ATP}} is often called the energy currency of the cell because it carries usable energy.,,It is made of three phosphate groups.
+cloze,anaerobic,02,8,"{{c1::Anaerobic}} processes occur without oxygen, like fermentation in yeast.",,They release much less energy than aerobic respiration.
+cloze,genetics,03,8,{{c1::Genetics}} is the study of heredity and how traits are passed from parents to offspring.,,Gregor Mendel's pea plant experiments laid its foundation.
+cloze,dna-shape,03,8,DNA has a twisted ladder shape called a {{c1::double helix}}.,,Watson and Crick described it in 1953.
+cloze,meiosis-result,03,8,"Meiosis produces {{c1::four haploid gametes}}, each with half the original chromosome number.",,This halves the chromosome count before fertilization.
+cloze,homozygous-def,03,8,An organism is {{c1::homozygous}} for a trait when it carries two identical alleles for that gene.,,"For example, AA or aa are homozygous."
+cloze,phenotype-def,03,8,"The {{c1::phenotype}} is the visible expression of an organism's genes, shaped also by environment.",,A plant's height is a phenotype.
+cloze,dominant-recessive,03,8,A {{c1::dominant}} allele masks a recessive allele when the two are paired together.,,It is written with a capital letter.
+cloze,heredity-def,03,8,{{c1::Heredity}} is the transmission of characteristics from parents to offspring through genes.,,It explains family resemblances.
+cloze,decomposer-role,04,7,{{c1::Decomposers}} break down dead matter and return nutrients to the soil.,,Fungi and bacteria are major decomposers.
+cloze,producer-def,04,7,A {{c1::producer}} is an organism that makes its own food through photosynthesis and starts a food chain.,,Grass is a producer.
+cloze,food-chain-flow,04,7,Energy flows through a food chain from the {{c1::producer}} to consumers and finally to decomposers.,,Some energy is lost as heat at each step.
+cloze,adaptation-def,04,8,A {{c1::adaptation}} is a trait that helps an organism survive in its environment.,,"It can be structural, behavioral, or physiological."
+cloze,apex-predator,04,8,An {{c1::apex predator}} has no natural predators at the top of its food chain.,,Its population size influences the whole ecosystem.
+cloze,migration-def,04,8,{{c1::Migration}} is the seasonal movement of animals between different regions.,,Some whales migrate thousands of kilometers.
+cloze,periodic-table,05,8,The {{c1::periodic table}} arranges elements by atomic number and groups them by similar properties.,,It was organized by Dmitri Mendeleev.
+cloze,proton-identity,05,8,The number of {{c1::protons}} in an atom's nucleus defines which element it is.,,Carbon always has 6 protons.
+cloze,electron-charge,05,7,{{c1::Electrons}} are negatively charged and orbit the nucleus in shells.,,They are transferred or shared to form bonds.
+cloze,isotope-def,05,8,Isotopes of an element have the same number of protons but different numbers of {{c1::neutrons}}.,,They have different masses.
+cloze,ionic-bond,06,8,"An {{c1::ionic bond}} forms when electrons are transferred between atoms, creating oppositely charged ions.",,It is typical in salts like table salt.
+cloze,covalent-bond,06,8,A {{c1::covalent bond}} forms when two atoms share a pair of electrons.,,Molecules like H2O are held by covalent bonds.
+cloze,combustion-def,06,8,"{{c1::Combustion}} is a fast oxidation that releases heat and light, like a burning candle.",,"It needs fuel, oxygen, and heat to start."
+cloze,rusting-causes,06,8,{{c1::Rusting}} happens when iron reacts with oxygen and water over time.,,It weakens metal structures.
+cloze,ph-neutral,07,7,"A substance with a {{c1::pH}} of exactly 7 is neutral, like pure water.",,Lower pH means more acidic; higher means more basic.
+cloze,acid-ion,07,7,Acids release {{c1::hydrogen ions}} (H+) when dissolved in water.,,Bases release hydroxide ions (OH-).
+cloze,neutralization-result,07,8,Neutralization of an acid and a base produces a {{c1::salt and water}}.,,It is a common type of double replacement reaction.
+type_in,mitosis,02,8,Type the term: cell division that produces two identical daughter cells.,mitosis,
+type_in,allele,03,8,Type the term: one of the alternative forms of a gene.,allele,
+type_in,enzyme,06,8,Type the term: a protein that speeds up a chemical reaction.,enzyme,
+type_in,catalyst,06,8,Type the term: a substance that speeds up a reaction without being consumed.,catalyst,
+type_in,oxidation,06,8,Type the term: a reaction in which a substance loses electrons.,oxidation,
+type_in,friction,08,7,Type the term: the force that opposes sliding surfaces.,friction,
+type_in,inertia,08,8,Type the term: an object's resistance to changes in its motion.,inertia,
+type_in,momentum,08,8,Type the term: mass times velocity of a moving object.,momentum,
+type_in,amplitude,09,7,Type the term: the maximum displacement of a wave from rest.,amplitude,
+type_in,refraction,09,8,Type the term: the bending of light as it enters a new medium.,refraction,

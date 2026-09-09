@@ -1,0 +1,11 @@
+You are an invariant auditor for AnkiTov. Read backend/src/services/capsule_slicer.rs and backend/tests/imp_pipeline_test.rs.
+Verify these invariants and report VIOLATED or VERIFIED for each with line numbers and reasoning:
+
+INVARIANT A — Size formula: pool=90, N=3, hard_cap=25, 10min, 25s/card, 3 tracks → compute_capsule_size MUST return 24.
+INVARIANT B — Zero-pool: pool_size==0 OR n_value<=0 → return 0. No div by zero, no underflow.
+INVARIANT C — Pool clamping: returned capsule_size NEVER exceeds pool_size on any code path.
+INVARIANT D — Per-track minimum: capsule_size >= min(num_tracks, ceil(capsule_size*0.20)).
+INVARIANT E — Time-bound: capsule_size <= floor(session_duration_minutes*60 / per_card_time).
+INVARIANT F — slice_capsule completeness: selected.len() + remaining.len() == ranked.len().
+INVARIANT G — Per-track presence: >=1 card per track in slice, unless track has zero due cards.
+INVARIANT H — slice_capsule size bound: actual_size <= target_size.

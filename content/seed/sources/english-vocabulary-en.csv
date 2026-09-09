@@ -1,0 +1,106 @@
+note_type,concept_id,unit,grades,front,back,extra,direction
+basic,abundance,01,7 8,abundance,The state of having a very large supply; a great quantity of something.,The harvest brought an abundance of apples and pears.,en-he
+basic,scarcity,01,7 8,scarcity,The state of a thing being rare or in short supply; a lack of enough of something.,Scarcity of fresh water forced the village to ration its use.,en-he
+basic,adequate,01,7,adequate,Enough or good enough for a particular purpose; sufficient.,The food the family stored was adequate for the winter.,en-he
+basic,ambiguous,01,8 9,ambiguous,Open to more than one interpretation; not having one clear meaning.,The instructions were so ambiguous that no one knew what to do.,en-he
+basic,benevolent,02,8 9,benevolent,"Kind, generous, and caring about the well-being of others.",The benevolent neighbor shared her garden with the whole street.,en-he
+basic,gratitude,02,7 8,gratitude,The feeling of being thankful; gratefulness.,She expressed her gratitude with a handwritten note.,en-he
+basic,indulge,02,9,indulge,"To allow yourself to enjoy something, especially something you ought to limit.","After hours of studying, he indulged in a slice of chocolate cake.",en-he
+basic,mild,02,7,mild,Gentle in strength or degree; not harsh or extreme.,The school has a mild winter when the temperature never falls below freezing.,en-he
+basic,reconcile,02,9,reconcile,To restore harmony between people; to bring differing views into agreement.,It took weeks before the two friends could reconcile after the argument.,en-he
+basic,vivid,03,7 8,vivid,"Producing powerful, clear, and detailed images in the mind.",The witness gave a vivid description of the car that hit him.,en-he
+basic,compel,03,8 9,compel,To force or oblige someone to do something; to make it impossible not to feel a certain way.,The evidence compelled the jury to reach a guilty verdict.,en-he
+basic,diligent,03,7 8,diligent,"Showing steady, careful effort and hard work; industrious.",A diligent student checks the homework list every single day.,en-he
+basic,empathy,03,8 9,empathy,The ability to understand and share the feelings of another person.,Empathy helped her see why her classmate was upset.,en-he
+basic,feasible,04,8 9,feasible,Possible and practical to do easily; can be done successfully.,Building a bridge that long is not feasible without much more funding.,en-he
+basic,grievous,04,9,grievous,"Very serious, severe, or causing great sorrow and distress.",The news of the grievous loss made the whole town mourn.,en-he
+basic,hostile,04,7 8,hostile,Unfriendly; openly opposed or unfriendly to someone.,The strangers were hostile at first until they were shown the camp's rules.,en-he
+basic,integrity,04,7 8 9,integrity,The quality of being honest and having strong moral principles.,The judge praised the young man's integrity when he returned the lost wallet.,en-he
+basic,modest,05,7 8,modest,Not large or impressive in size or amount; showing humility and not being boastful.,The scientist is modest about the awards she has won.,en-he
+basic,nominate,05,8,nominate,"To formally propose someone for an award, position, or role.",The committee nominated the teacher for the prize of the year.,en-he
+basic,obsolete,05,8 9,obsolete,No longer produced or used; out of date; no longer in use.,The old fax machine is obsolete now that everyone uses email.,en-he
+basic,persuade,05,7 8,persuade,To convince someone to do something or believe something by reasoning or argument.,The mayor tried to persuade the citizens to support the new library.,en-he
+basic,profound,06,8 9,profound,Very deep or intense; having a strong effect; creating a deep sense of something.,The book made a profound impression on every reader in the class.,en-he
+basic,reluctant,06,7 8,reluctant,Unwilling and hesitant to do something; not eager or willing to act.,He was reluctant to speak in front of the whole assembly.,en-he
+basic,scattered,06,7,scattered,Spread or placed at random over an area; not kept together in one place.,The scattered seeds took months to grow into a full garden.,en-he
+basic,tremendous,07,7 8,tremendous,"Very large, great, or impressive in size, amount, or degree.",The crowd gave the player a tremendous applause after the final game.,en-he
+basic,vulnerable,07,7 8 9,vulnerable,Able to be physically or emotionally hurt easily; defenseless.,The injured deer lay vulnerable beside the road at dawn.,en-he
+basic,allegiance,07,8 9,allegiance,"Loyalty or firm commitment to a person, group, or cause.",His deep allegiance to his country kept him serving for decades.,en-he
+basic,barren,07,9,barren,(of land) not able to produce much or no crops; unproductive and empty.,The barren hillside turned green once the rains finally returned.,en-he
+basic,contemplate,07,8,contemplate,"To think about something in a calm, serious way for a long time; to ponder.",She sat by the window to contemplate her decision about moving.,en-he
+basic,devastate,08,8 9,devastate,To damage something very badly; to destroy; to cause great distress or shock.,The flood devastated the farmland along the river for years.,en-he
+basic,elaborate,08,8,elaborate,To add more details to something in order to make it fuller or clearer; to expand on.,The speaker elaborated on each point with concrete examples.,en-he
+basic,fragile,08,7 8,fragile,Easily broken or damaged; delicate and not able to withstand much shock.,Handle the old porcelain cups with care; they are extremely fragile.,en-he
+basic,hazard,08,7 8,hazard,A danger or risk; something that might cause harm to a person or place.,Swimming in the stormy sea is a serious hazard for the crew.,en-he
+basic,incentive,09,8 9,incentive,"A reward, reason, or extra benefit given to motivate someone to do something.",The bonus was an incentive for the workers to finish the project early.,en-he
+basic,jeopardize,09,9,jeopardize,To put something at risk or in danger; to threaten to harm or spoil.,Skipping breakfast before the exam will jeopardize her concentration.,en-he
+basic,kindred,09,7,kindred,Of the same family; related by blood; similar or kind in kind and character.,The two cousins have kindred interests in music and sports.,en-he
+basic,labored,09,8,labored,Done with visible effort or difficulty; hard-earned and not smooth.,The hikers made labored progress up the steep rocky mountain trail.,en-he
+basic,meticulous,10,8 9,meticulous,Showing great care and attention to detail; very thorough and exacting.,A meticulous map-maker checked every distance twice before printing.,en-he
+basic,negligence,10,9,negligence,The failure to take proper care in doing something; carelessness or thoughtlessness.,The fire was caused by simple negligence in the kitchen.,en-he
+basic,obedient,10,7,obedient,Willing to follow orders or rules; well-mannered and compliant with what is asked.,The obedient dog sat and waited before taking its treat.,en-he
+basic,plausible,10,8,plausible,"Seeming reasonable, probable, or believable; making a good argument for being true.","His explanation for being late was plausible, but the teacher was not sure.",en-he
+basic,quench,11,7 8,quench,To satisfy a thirst or desire; to put out or extinguish a fire or flame completely.,A large glass of cold water quenched her thirst after the long run.,en-he
+basic,refuge,11,7 8,refuge,"A place of safety, shelter, or protection; a place to flee to for safety.",The forest gave the lost hikers a temporary refuge from the rain.,en-he
+basic,scrutinize,11,9,scrutinize,To examine or inspect something very carefully and in detail; to look closely for faults.,The judge will scrutinize every page of the long contract before signing.,en-he
+basic,tenacious,11,9,tenacious,Holding firmly; persisting and not giving up; difficult to remove or shake off.,The tenacious climber refused to give up on the steep cliff face.,en-he
+basic,ultimately,12,7 8,ultimately,In the end; finally; as the final result or ultimate outcome.,"Ultimately, the team won the championship after a long, hard season.",en-he
+basic,warrant,12,8 9,warrant,"To justify, authorise, or give a good reason for something; to call for something.",No single mistake is enough to warrant expelling a student from school.,en-he
+basic,zeal,12,9,zeal,"Great energy, enthusiasm, or passionate dedication in pursuit of something.",The volunteers worked with zeal to rebuild the damaged community hall.,en-he
+basic,run-errands,01,7,run errands,"To go do small tasks or chores for someone else (buying things, mailing letters, etc.).",My older sister runs errands for our family on Saturday mornings.,en-he
+basic,break-ice,02,7,break the ice,To ease the tension or awkwardness at the start of a meeting or social gathering; to get a conversation started.,The teacher asked for a short icebreaker to break the ice with the new student.,en-he
+basic,bite-bullet,04,8,bite the bullet,To accept a difficult or unpleasant situation with good humor and without complaining.,She had to bite the bullet and tell her friend the exam results were bad.,en-he
+basic,hit-nail-head,06,8,hit the nail on the head,To do or say something exactly right; to be precisely accurate or correct.,His explanation hit the nail on the head about why the experiment failed.,en-he
+basic,once-for-all,07,8 9,once and for all,"In a final, complete, and decisive way; ending something permanently with no repetition.",The council voted to fix the leaking roof once and for all.,en-he
+basic,by-a-hair,09,7,by a hair,By a very small amount or margin; almost not; barely enough.,"The team lost the game by a hair, with one point to spare.",en-he
+basic,cut-corners,10,8,cut corners,"To do something in a quicker or cheaper way, usually reducing quality or safety.",Cutting corners on the construction plan is not allowed on any job site.,en-he
+basic,spill-beans,03,7,spill the beans,To tell a secret that was supposed to be kept private; to reveal information too soon.,Don't spill the beans about the surprise party before Friday.,en-he
+basic,hit-the-road,05,7,hit the road,"To leave or set off on a journey, usually by car or on foot.",We hit the road at dawn to reach the coast before lunch.,en-he
+basic,piece-of-cake,08,7,a piece of cake,Something very easy to do; a simple task that requires little effort.,The history quiz was a piece of cake after two weeks of study.,en-he
+cloze,word-concise,01,8 9,"A {{c1::concise}} statement says the same thing in fewer words than a long, wordy one.",,The manager replaced the ten-line memo with a concise three-line one.,en-he
+cloze,word-generous,02,7 8,"A {{c1::generous}} person is happy to give time, money, or help to others without being asked.",,"He was generous with his time, helping every new student in the club.",en-he
+cloze,word-resilient,03,8 9,"A {{c1::resilient}} person recovers quickly from difficulties, setbacks, or illness.",,The resilient farmer replanted his field after the unexpected frost.,en-he
+cloze,word-inevitable,04,8,An {{c1::inevitable}} result is something that is certain to happen and cannot be avoided.,,The players accepted their defeat as inevitable once the star player was injured.,en-he
+cloze,word-skeptical,05,8,A {{c1::skeptical}} person is doubtful or unconvinced about a claim until real evidence is shown.,,He was skeptical of the advertisement until he read the full product reviews.,en-he
+cloze,word-tolerant,06,7 8,"A {{c1::tolerant}} person accepts and respects views, habits, or people that differ from their own.",,A tolerant community welcomes newcomers with different traditions.,en-he
+cloze,word-verify,07,8,"To {{c1::verify}} something means to check that it is true, accurate, or valid before accepting it.",,The editor verified every statistic in the article before it was published.,en-he
+cloze,word-wary,08,7,"A {{c1::wary}} person is cautious, watchful, and suspicious of possible danger or harm.",,The hikers were wary of the dark tunnel and moved slowly through it.,en-he
+cloze,phrase-in-advance,01,7,Doing something {{c1::in advance}} means doing it before the time it is needed or expected.,,Please register in advance so the organizers can reserve your seat.,en-he
+cloze,phrase-in-debt,02,7 8,"Being {{c1::in debt}} means owing money to a bank, person, or organization that must be paid back.",,The small shop was in debt until the new customer orders arrived.,en-he
+cloze,phrase-at-odds,03,8,Two people who are {{c1::at odds}} disagree or are in conflict or tension with each other.,,The brothers were at odds over which route to take on the hike.,en-he
+cloze,phrase-on-purpose,04,7,"Doing something {{c1::on purpose}} means doing it deliberately and intentionally, not by accident.",,She was not late by mistake; she went on purpose to watch the sunset first.,en-he
+cloze,phrase-in-vain,05,8 9,Trying something {{c1::in vain}} means the effort was made but failed; it was useless or pointless.,,All his attempts to convince the jury were in vain.,en-he
+cloze,phrase-at-a-loss,06,7 8,Being {{c1::at a loss}} means not knowing what to say or do in a difficult situation.,,"When asked to explain the mistake, she stood at a loss for words.",en-he
+cloze,phrase-keep-eye,07,7,To {{c1::keep an eye}} on something means to watch it carefully and stay alert for changes or problems.,,Please keep an eye on my bag while I step inside to use the restroom.,en-he
+cloze,phrase-in-a-pinch,08,8,Helping someone {{c1::in a pinch}} means helping them in a difficult or urgent situation when they need it most.,,She always comes in a pinch to lend money or a ride to a friend.,en-he
+cloze,phrase-over-moon,09,7,"Being {{c1::over the moon}} means being extremely happy, pleased, or delighted about something.",,The children were over the moon when the zoo announced a new panda exhibit.,en-he
+cloze,phrase-radar,10,8 9,Something that stays {{c1::under the radar}} is not noticed or detected by other people or authorities.,,The quiet inventor developed her idea under the radar of big companies.,en-he
+cloze,phrase-nick-time,11,8,Arriving {{c1::in the nick of time}} means arriving just before it is too late to be useful.,,The bus arrived in the nick of time as the station was about to close.,en-he
+cloze,phrase-miss-bus,12,7,"If you {{c1::miss}} the bus, you fail to board it because you were late or it left without you.",,I missed the first train and had to wait forty minutes for the next one.,en-he
+cloze,phrase-throw-together,03,8,"To {{c1::throw something together}} means to make or arrange it quickly, without much care for quality.",,We threw together a small dinner for the unexpected visitors.,en-he
+type_in,typein-abundance,01,7,Type the English word: a great quantity; having a very large supply of something.,abundance,,
+type_in,typein-scarcity,01,8,Type the English word: the quality of being too little of something; a shortage.,scarcity,,
+type_in,typein-ambiguous,02,9,Type the English word: open to more than one interpretation; not clear or definite.,ambiguous,,
+type_in,typein-benevolent,02,9,"Type the English word: kind, generous, and caring about the well-being of others.",benevolent,,
+type_in,typein-reconcile,02,9,Type the English word: to restore harmony; to bring two parties back into agreement.,reconcile,,
+type_in,typein-vivid,03,7,"Type the English word: producing clear, powerful, detailed images in the mind.",vivid,,
+type_in,typein-compel,03,8,Type the English word: to force or make someone do something; to make it unavoidable.,compel,,
+type_in,typein-diligent,03,7,"Type the English word: showing steady, careful effort and hard work; industrious.",diligent,,
+type_in,typein-feasible,04,8,Type the English word: possible and practical to do; can be carried out successfully.,feasible,,
+type_in,typein-integrity,04,7,Type the English word: the quality of being honest and having strong moral principles.,integrity,,
+type_in,typein-modest,05,7,"Type the English word: not large or impressive in size; showing humility, not boasting.",modest,,
+type_in,typein-nominate,05,8,"Type the English word: to formally propose someone for an award, position, or role.",nominate,,
+type_in,typein-obsolete,06,8,"Type the English word: no longer produced or used; out of date, no longer in use.",obsolete,,
+type_in,typein-profound,06,9,"Type the English word: very deep or intense; having a strong, lasting effect on someone.",profound,,
+type_in,typein-tremendous,07,7,"Type the English word: very large, great, or impressive in size, amount, or degree.",tremendous,,
+type_in,typein-vulnerable,07,8,"Type the English word: able to be hurt, damaged, or affected easily; defenseless.",vulnerable,,
+type_in,typein-allegiance,07,9,"Type the English word: loyalty or firm commitment to a person, group, or cause.",allegiance,,
+type_in,typein-contemplate,07,8,Type the English word: to think about something calmly and seriously for a long time.,contemplate,,
+type_in,typein-fragile,08,7,"Type the English word: easily broken or damaged; delicate, not able to withstand shock.",fragile,,
+type_in,typein-hazard,08,8,"Type the English word: a danger, risk, or something that may cause harm to a person.",hazard,,
+type_in,typein-incentive,09,8,"Type the English word: a reward, reason, or extra benefit given to motivate someone.",incentive,,
+type_in,typein-meticulous,10,9,Type the English word: showing great care and attention to detail; very thorough.,meticulous,,
+type_in,typein-plausible,10,8,"Type the English word: seeming reasonable, probable, or believable; convincing.",plausible,,
+type_in,typein-refuge,11,7,"Type the English word: a place of safety, shelter, or protection; a place to flee to.",refuge,,
+type_in,typein-scrutinize,11,9,Type the English word: to examine or inspect something very carefully and in detail.,scrutinize,,
+type_in,typein-zeal,12,9,"Type the English word: great energy, enthusiasm, or passionate dedication in doing something.",zeal,,

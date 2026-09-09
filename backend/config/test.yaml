@@ -1,0 +1,28 @@
+# AnkiTov — Test Configuration
+# Required fields only — all loco-rs 0.11 Config struct fields
+logger:
+  enable: true
+  pretty_backtrace: true
+  level: trace
+  format: json
+  file_appender: null
+
+server:
+  binding: localhost:5555
+  port: 5555
+  host: localhost
+  ident: null
+
+database:
+  uri: "sqlite::memory:"
+  enable_logging: false
+  min_connections: 1
+  max_connections: 1
+  connect_timeout: 60000
+  idle_timeout: 60000
+  auto_migrate: true
+  dangerously_truncate: false
+  dangerously_recreate: false
+
+workers:
+  mode: ForegroundBlocking

@@ -1,0 +1,46 @@
+# AnkiTov Backend — Multi-stage Docker build
+#
+# Stage 1: Build the Rust binary (cached dependencies)
+# Stage 2: Minimal runtime image
+
+# ── Stage 1: Builder ──
+FROM rust:1.85-slim-bookworm AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Cache dependencies first (layer caching)
+COPY Cargo.toml Cargo.lock ./
+RUN mkdir src && echo 'fn main() {}' > src/main.rs
+RUN cargo build --release 2>/dev/null || true
+RUN rm -rf src
+
+# Copy actual source
+COPY src/ src/
+COPY resources/ resources/
+COPY i18n/ i18n/
+
+# Build release binary
+RUN cargo build --release
+
+# ── Stage 2: Runtime ──
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=builder /app/target/release/backend /app/backend
+
+EXPOSE 5150
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
+    CMD curl -f http://localhost:5150/health || exit 1
+
+ENTRYPOINT ["/app/backend"]

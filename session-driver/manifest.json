@@ -1,0 +1,9 @@
+{
+    "package": "ankitov_session_driver",
+    "name": "AnkiTov Session Driver",
+    "author": "AnkiTov",
+    "version": "1.0.0",
+    "min_point_version": 50,
+    "max_point_version": 300,
+    "description": "Bridges server-side IMP capsules to Anki's reviewer via filtered decks. No GUI."
+}

@@ -1,0 +1,16 @@
+You are an invariant auditor for AnkiTov. Read backend/src/services/fsrs_sort.rs and backend/tests/imp_pipeline_test.rs.
+Verify these invariants and report VIOLATED or VERIFIED for each with line numbers and reasoning:
+
+INVARIANT I — Urgency sort: fetch_and_sort returns cards ordered by lowest approximate_recall first (most urgent). compute_approximate_recall uses overdue_days and ivl — monotonic and NaN-free.
+
+INVARIANT J — Cross-domain independence: A card's urgency depends ONLY on its own overdue_days and ivl. No cross-track leakage. Math fail does not change vocab interval.
+
+INVARIANT K — Deterministic sort: Same inputs MUST produce the same sort order. No randomness. Tie-breaking by overdue_days desc, then card_id asc. ORDER BY c.id in SQL.
+
+INVARIANT L — Due card filter: c.queue >= 0 (admits new/learn/review, excludes suspended/buried). type=2 due where due_day <= today_day. type=1 due where due_ts <= now_secs. type=0 always included.
+
+INVARIANT M — Empty tags → empty result: When tags is empty, fetch_and_sort returns Ok with empty ranked list. No panic, no error, no file open.
+
+INVARIANT N — Track counts: sort_result.track_counts[t] == number of due cards with tag t. Sum of all counts == ranked.len().
+
+INVARIANT O — Missing database → CannotOpen: When anki2_path is nonexistent, fetch_and_sort returns Err(CannotOpen), not panic.

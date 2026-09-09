@@ -1,0 +1,28 @@
+# AnkiTov — Development Configuration
+# Used by `cargo loco start` and `cargo loco check`
+
+logger:
+  enable: true
+  level: debug
+  format: pretty
+  rotation: daily
+  dir: ./logs
+
+server:
+  port: 5150
+  host: 0.0.0.0
+
+database:
+  # libSQL local WAL database — zero-config, file-based, concurrent reads
+  uri: sqlite://data/ankitov.db?mode=rwc
+  enable_logging: true
+  connect_timeout: 60000
+  idle_timeout: 60000
+  min_connections: 1
+  max_connections: 4
+  auto_migrate: true
+  dangerously_truncate: false
+  dangerously_recreate: false
+
+workers:
+  mode: BackgroundAsync

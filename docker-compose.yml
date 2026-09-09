@@ -1,0 +1,125 @@
+# ─────────────────────────────────────────────────────────────────
+# AnkiTov — Production Docker Compose Stack
+#
+# Services:
+#   backend      — Loco.rs API server (:5150)
+#   sync-server  — Anki sync server (:8080), no AnkiWeb dependency
+#   libsql       — libSQL database (WAL mode, :8081)
+#
+# Volumes:
+#   libsql-data  — Database persistence
+#   sync-data    — Sync server collections (one per student)
+# ─────────────────────────────────────────────────────────────────
+
+services:
+  # ── Caddy Reverse Proxy (Automatic HTTPS) ──
+  caddy:
+    image: caddy:2-alpine
+    container_name: ankitov-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      ANKITOV_DOMAIN: "${ANKITOV_DOMAIN:-localhost}"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  # ── Backend API ──
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../Dockerfile.backend
+    container_name: ankitov-backend
+    # Backend ports are internal — Caddy handles external traffic
+    expose:
+      - "5150"
+      - "3000"
+    environment:
+      # App
+      ANKITOV_JWT_SECRET: "${ANKITOV_JWT_SECRET}"
+      ANKITOV_PORT: "5150"
+      ANKITOV_DASHBOARD_PORT: "3000"
+      # Database
+      DATABASE_URL: "${DATABASE_URL:-libsql://libsql:8081/ankitov?auth_token=${LIBSQL_AUTH_TOKEN:-}}"
+      # Sync server
+      ANKITOV_SYNC_URL: "http://sync-server:8080"
+      ANKITOV_SYNC_USER_FILE: "/etc/ankitov/sync-users.env"
+      # AnkiConnect
+      ANKICONNECT_PORT: "8765"
+    volumes:
+      # Shared sync-user config with sync-server
+      - sync-user-config:/etc/ankitov
+    depends_on:
+      libsql:
+        condition: service_healthy
+      sync-server:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5150/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # ── Anki Sync Server ──
+  sync-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.sync-server
+    container_name: ankitov-sync-server
+    expose:
+      - "8080"
+    environment:
+      SYNC_USER_FILE: "/etc/ankitov/sync-users.env"
+      SYNC_HOST: "0.0.0.0"
+      SYNC_PORT: "8080"
+      SYNC_BASE: "/data/sync-server"
+    volumes:
+      - sync-data:/data/sync-server
+      - sync-user-config:/etc/ankitov
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ── libSQL Database ──
+  libsql:
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    container_name: ankitov-libsql
+    expose:
+      - "8081"
+    environment:
+      SQLD_NODE: primary
+      SQLD_HTTP_AUTH: basic
+      SQLD_AUTH_JWT_KEY: "${LIBSQL_AUTH_TOKEN:-ankitov-dev-auth}"
+    volumes:
+      - libsql-data:/var/lib/sqld
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+# ── Volumes ──
+volumes:
+  caddy-data:
+    driver: local
+  caddy-config:
+    driver: local
+  libsql-data:
+    driver: local
+  sync-data:
+    driver: local
+  sync-user-config:
+    driver: local

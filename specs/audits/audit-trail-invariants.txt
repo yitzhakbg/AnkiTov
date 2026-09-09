@@ -1,0 +1,16 @@
+You are an invariant auditor for AnkiTov. Read backend/src/services/audit_logger.rs, backend/src/services/telemetry_ingestor.rs, and backend/src/services/capsule_generator.rs.
+Verify these invariants and report VIOLATED or VERIFIED for each with line numbers and reasoning:
+
+INVARIANT X — Fire-and-forget: log_event returns (), never propagates errors. DB failures traced at error! level but caller never blocks on audit write failures.
+
+INVARIANT Y — All N-changes logged: Every N-value mutation results in audit_log entry with event_type='n_change', containing old_n, new_n, cohort_id in event_data. Verify calls exist in track_profiles.rs and tracks.rs.
+
+INVARIANT Z — Profile assign/revoke logged: Every profile assignment → audit_log with event_type='profile_assign'. Every revocation → audit_log with event_type='profile_revoke'. Both contain student_id and profile_id in event_data.
+
+INVARIANT AA — Capsule generations logged: Every successful generate_capsule → log_capsule_generate call with session_id, student_id, capsule_size, n_value in event_data.
+
+INVARIANT BB — UUID uniqueness: Every audit_log entry gets uuid::Uuid::new_v4(). No sequential or deterministic IDs.
+
+INVARIANT CC — Timestamp correctness: Every audit entry has created_at = now_ts() at logging time. Timestamps are wall-clock monotonic within single process.
+
+INVARIANT DD — Telemetry completeness: ingest_card_answer enriches with ingested_at, writes to audit_log via log_event with event_type='card_answer', includes student_id/card_id/ease/time_ms/session_uuid in event_data, and never fails due to audit write.

@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AnkiTov — Management Console</title>
+  <style>
+    /* ═══════════════════════════════════════════════════════════════
+       Design System — Teacher-Friendly Light Theme
+       ═══════════════════════════════════════════════════════════════ */
+    :root {
+      --color-bg-base:        #f0f4f8;
+      --color-bg-surface:     #ffffff;
+      --color-bg-card:        #ffffff;
+      --color-bg-hover:       #eef2f7;
+      --color-bg-muted:       #f1f5f9;
+      --color-border:         #e2e8f0;
+      --color-border-light:   #cbd5e1;
+      --color-text-primary:   #1e293b;
+      --color-text-secondary: #475569;
+      --color-text-muted:     #94a3b8;
+      --color-accent:         #4f46e5;
+      --color-accent-hover:   #4338ca;
+      --color-accent-bg:      rgba(79, 70, 229, 0.08);
+      --color-success:        #16a34a;
+      --color-success-bg:     rgba(22, 163, 74, 0.10);
+      --color-danger:         #dc2626;
+      --color-danger-bg:      rgba(220, 38, 38, 0.10);
+      --color-warning:        #d97706;
+      --color-warning-bg:     rgba(217, 119, 6, 0.10);
+      --color-info:           #2563eb;
+      --color-info-bg:        rgba(37, 99, 235, 0.10);
+      --space-xs: 6px;  --space-sm: 8px;  --space-md: 12px;
+      --space-lg: 16px; --space-xl: 24px; --space-2xl: 32px;
+      --sidebar-w: 260px; --topbar-h: 60px;
+      --radius: 12px; --radius-sm: 8px; --radius-pill: 999px;
+      --font-mono: 'SF Mono', 'Fira Code', monospace;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--color-bg-base); color: var(--color-text-primary);
+      overflow: hidden; font-size: 14px;
+    }
+
+    /* ── Layout Root ──────────────────────────────────────────── */
+    .layout-root { display: flex; height: 100%; width: 100%; overflow: hidden; }
+
+    /* ── Sidebar ──────────────────────────────────────────────── */
+    .sidebar {
+      display: flex; flex-direction: column;
+      width: var(--sidebar-w); min-width: var(--sidebar-w); height: 100%;
+      background: var(--color-bg-surface); border-right: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+    }
+    .sidebar-brand { padding: var(--space-lg) var(--space-xl); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; gap: var(--space-sm); }
+    .sidebar-brand .anki-logo { width: 32px; height: 32px; flex-shrink: 0; }
+    .sidebar-brand .anki-word { font-size: 13.5px; font-weight: normal; color: var(--color-text-secondary); letter-spacing: 0.02em; }
+    .sidebar-brand .anki-word strong { font-weight: bold; color: var(--color-text-primary); }
+    .sidebar-nav { flex: 1; display: flex; flex-direction: column; gap: var(--space-sm); padding: var(--space-lg); overflow-y: auto; }
+    .sidebar-nav-group { display: flex; flex-direction: column; gap: 2px; }
+    .sidebar-nav-label { font-size: 13.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-muted); padding: var(--space-sm) var(--space-md) var(--space-xs); }
+    .sidebar-nav-item { display: flex; align-items: center; gap: var(--space-sm); padding: 10px var(--space-md); border-radius: var(--radius-sm); font-size: 14px; color: var(--color-text-secondary); text-decoration: none; transition: background 0.15s, color 0.15s; cursor: pointer; }
+    .sidebar-nav-item:hover { background: var(--color-bg-hover); color: var(--color-text-primary); }
+    .sidebar-nav-item.active { background: var(--color-accent-bg); color: var(--color-accent); font-weight: 600; }
+    .sidebar-nav-item .icon { font-size: 18px; width: 24px; text-align: center; }
+    .sidebar-divider { height: 1px; background: var(--color-border); margin: var(--space-sm) 0; }
+    .sidebar-footer { padding: var(--space-md) var(--space-lg); border-top: 1px solid var(--color-border); font-size: 13.5px; color: var(--color-text-muted); }
+    .sidebar-footer-line { line-height: 1.6; }
+
+    /* Custom progress bar styles added */
+    .theme-progress-bar { height: 10px; width: 100%; background: var(--color-bg-base); border-radius: var(--radius-pill); overflow: hidden; margin-top: 6px; border: 1px solid var(--color-border); }
+    .theme-progress-bar-fill { height: 100%; background: var(--color-accent); border-radius: var(--radius-pill); transition: width 0.4s ease; width: 0%; }
+
+    /* ── Main Content ─────────────────────────────────────────── */
+    .main-content { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; height: var(--topbar-h); min-height: var(--topbar-h); padding: 0 var(--space-2xl); background: var(--color-bg-surface); border-bottom: 1px solid var(--color-border); box-shadow: var(--shadow-sm); }
+    .topbar-left { display: flex; align-items: center; gap: var(--space-sm); }
+    .topbar-breadcrumb { font-size: 15px; color: var(--color-text-muted); display: flex; align-items: center; gap: var(--space-sm); }
+    .topbar-breadcrumb .current { color: var(--color-text-primary); font-weight: 600; }
+    .topbar-right { display: flex; align-items: center; gap: var(--space-sm); }
+
+    /* Profile Switcher */
+    .profile-switcher { position: relative; }
+    .profile-select {
+      appearance: none; background: var(--color-bg-base); border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm); color: var(--color-text-primary); font-size: 13px;
+      padding: 8px 32px 8px var(--space-md); cursor: pointer; min-width: 180px;
+      font-weight: 500;
+    }
+    .profile-select:hover { border-color: var(--color-accent); }
+    .profile-select::after { content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--color-text-muted); }
+
+    .topbar-search { display: flex; align-items: center; gap: var(--space-sm); padding: 8px var(--space-md); background: var(--color-bg-base); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 13px; color: var(--color-text-muted); }
+    .topbar-search input { background: none; border: none; outline: none; color: var(--color-text-primary); font-size: 13px; width: 160px; }
+    .topbar-search input::placeholder { color: var(--color-text-muted); }
+
+    .health-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: var(--radius-pill); font-size: 13px; font-weight: 500; }
+    .health-badge-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-text-muted); }
+    .health-badge.ok    { background: var(--color-success-bg); color: var(--color-success); }
+    .health-badge.warn  { background: var(--color-warning-bg); color: var(--color-warning); }
+    .health-badge.error { background: var(--color-danger-bg);  color: var(--color-danger); }
+    .health-badge.ok    .health-badge-dot { background: var(--color-success); }
+    .health-badge.warn  .health-badge-dot { background: var(--color-warning); }
+    .health-badge.error .health-badge-dot { background: var(--color-danger); }
+
+    /* ── Content ──────────────────────────────────────────────── */
+    .content-scroll { flex: 1; overflow-y: auto; padding: var(--space-2xl); display: flex; flex-direction: column; gap: var(--space-xl); }
+.section-panel { display: none; flex-direction: column; gap: var(--space-xl); }
+    .section-panel.active { display: flex; }
+
+    /* Metrics */
+    .metrics-row { display: flex; gap: var(--space-lg); flex-wrap: wrap; }
+    .stat-card { flex: 1; min-width: 170px; display: flex; flex-direction: column; gap: var(--space-sm); padding: var(--space-xl) var(--space-xl); background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+    .stat-card-header { display: flex; align-items: center; justify-content: space-between; }
+    .stat-card-icon { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 20px; }
+    .stat-card-icon.blue   { background: var(--color-info-bg); }
+    .stat-card-icon.green  { background: var(--color-success-bg); }
+    .stat-card-icon.amber { background: var(--color-warning-bg); }
+    .stat-card-icon.purple { background: var(--color-accent-bg); }
+    .stat-card-icon.red   { background: var(--color-danger-bg); }
+    .stat-card-value { font-size: 30px; font-weight: 700; line-height: 1; color: var(--color-text-primary); }
+    .stat-card-label { font-size: 14px; color: var(--color-text-secondary); font-weight: 500; }
+    .stat-card-sub { font-size: 12px; color: var(--color-text-muted); }
+
+    /* Chart */
+    .chart-card { display: flex; flex-direction: column; gap: var(--space-sm); padding: var(--space-xl); background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+    .chart-card-header { display: flex; align-items: center; justify-content: space-between; }
+    .chart-card-title { font-size: 16px; font-weight: 600; color: var(--color-text-primary); }
+    .chart-card-subtitle { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
+    .chart-card-filter { display: flex; gap: 4px; padding: 3px; background: var(--color-bg-base); border: 1px solid var(--color-border); border-radius: var(--radius-sm); }
+    .chart-card-filter button { padding: 5px 14px; border: none; border-radius: 6px; background: transparent; color: var(--color-text-secondary); font-size: 13px; cursor: pointer; transition: all 0.15s; }
+    .chart-card-filter button:hover { background: var(--color-bg-hover); }
+    .chart-card-filter button.active { background: var(--color-accent); color: #fff; }
+    .chart-area { height: 180px; background: var(--color-bg-base); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); font-size: 13px; overflow: hidden; }
+    .chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 100%; width: 100%; padding: var(--space-lg); }
+    .chart-bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+    .chart-bar { width: 100%; max-width: 36px; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, var(--color-accent) 0%, var(--color-info) 100%); opacity: 0.8; min-height: 4px; transition: height 0.3s, opacity 0.15s; }
+    .chart-bar:hover { opacity: 1; }
+    .chart-bar-label { font-size: 10px; color: var(--color-text-muted); }
+
+    /* Table */
+    .table-card { display: flex; flex-direction: column; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+    .table-card-header { display: flex; align-items: center; justify-content: space-between; padding: var(--space-lg) var(--space-xl); border-bottom: 1px solid var(--color-border); }
+    .table-card-title { font-size: 16px; font-weight: 600; color: var(--color-text-primary); }
+    .table-card-actions { display: flex; gap: var(--space-sm); }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+    .btn-primary { background: var(--color-accent); color: #fff; }
+    .btn-primary:hover { background: var(--color-accent-hover); }
+    .btn-ghost { background: var(--color-bg-base); color: var(--color-text-secondary); border: 1px solid var(--color-border); }
+    .btn-ghost:hover { background: var(--color-bg-hover); }
+    .btn-sm { padding: 5px 14px; border: none; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; cursor: pointer; }
+    .btn-health { background: var(--color-accent-bg); color: var(--color-accent); }
+    .btn-health:hover { background: var(--color-accent); color: #fff; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead { background: var(--color-bg-muted); }
+    thead th { padding: 12px var(--space-xl); text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-secondary); border-bottom: 1px solid var(--color-border); }
+    tbody td { padding: 12px var(--space-xl); border-bottom: 1px solid var(--color-border); }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--color-bg-hover); }
+    .mono { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-muted); }
+    .muted { color: var(--color-text-muted); }
+    .badge { display: inline-block; padding: 3px 12px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 500; }
+    .badge-ok { background: var(--color-success-bg); color: var(--color-success); }
+    .badge-warn { background: var(--color-warning-bg); color: var(--color-warning); }
+    .badge-error { background: var(--color-danger-bg); color: var(--color-danger); }
+    .badge-idle { background: var(--color-bg-muted); color: var(--color-text-muted); }
+    .table-footer { display: flex; align-items: center; justify-content: space-between; padding: var(--space-md) var(--space-xl); border-top: 1px solid var(--color-border); font-size: 13px; color: var(--color-text-muted); }
+
+    /* Deck Detail Panel */
+    .detail-panel { display: none; flex-direction: column; gap: var(--space-sm); padding: var(--space-xl); background: var(--color-bg-card); border: 1px solid var(--color-accent); border-radius: var(--radius); box-shadow: var(--shadow-md); }
+    .detail-panel.visible { display: flex; }
+    .detail-header { display: flex; align-items: center; justify-content: space-between; }
+    .detail-title { font-size: 17px; font-weight: 600; color: var(--color-text-primary); }
+    .detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-sm); }
+    .detail-item { display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; background: var(--color-bg-base); border-radius: 8px; }
+    .detail-item-label { font-size: 13.5px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .detail-item-value { font-size: 20px; font-weight: 600; color: var(--color-text-primary); }
+
+    /* School Metrics — Teacher-friendly */
+    .school-metrics-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .school-metrics-header { display: flex; align-items: center; justify-content: space-between; padding: var(--space-lg) var(--space-xl); border-bottom: 1px solid var(--color-border); }
+    .school-metrics-title { font-size: 16px; font-weight: 600; color: var(--color-text-primary); }
+    .school-metrics-subtitle { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
+    .school-metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: var(--space-sm); padding: var(--space-xl); }
+    .metric-tile { display: flex; flex-direction: column; gap: 6px; padding: var(--space-lg); border-radius: 10px; background: var(--color-bg-base); border: 1px solid var(--color-border); transition: box-shadow 0.15s; }
+    .metric-tile:hover { box-shadow: var(--shadow-sm); }
+    .metric-tile-label { font-size: 12px; color: var(--color-text-secondary); font-weight: 600; }
+    .metric-tile-value { font-size: 28px; font-weight: 700; color: var(--color-text-primary); line-height: 1.2; }
+    .metric-tile-sub { font-size: 13px; color: var(--color-text-muted); line-height: 1.4; }
+    .metric-tile.good { border-left: 4px solid var(--color-success); }
+    .metric-tile.warn { border-left: 4px solid var(--color-warning); }
+    .metric-tile.error { border-left: 4px solid var(--color-danger); }
+    .metric-tile.neutral { border-left: 4px solid var(--color-border-light); }
+
+    /* Traffic light indicator */
+    .traffic-light { display: inline-flex; align-items: center; gap: 6px; }
+    .traffic-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .traffic-dot.green { background: var(--color-success); }
+    .traffic-dot.amber { background: var(--color-warning); }
+    .traffic-dot.red { background: var(--color-danger); }
+    .traffic-dot.gray { background: var(--color-text-muted); }
+
+    /* Progress bar */
+    .progress-bar { height: 8px; background: var(--color-bg-muted); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+    .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+    .progress-fill.good { background: var(--color-success); }
+    .progress-fill.warn { background: var(--color-warning); }
+    .progress-fill.error { background: var(--color-danger); }
+
+    .suitability-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 6px; font-size: 14px; font-weight: 600; }
+    .suitability-badge.Optimal { background: var(--color-success-bg); color: var(--color-success); }
+    .suitability-badge.Too-Hard { background: var(--color-danger-bg); color: var(--color-danger); }
+    .suitability-badge.Too-Easy { background: var(--color-info-bg); color: var(--color-info); }
+
+    .health-score { font-size: 36px; font-weight: 800; }
+    .health-score.good { color: var(--color-success); }
+    .health-score.mid { color: var(--color-warning); }
+    .health-score.low { color: var(--color-danger); }
+
+    /* Error banner */
+    .error-banner { display: none; padding: 14px var(--space-xl); background: var(--color-danger-bg); border: 1px solid var(--color-danger); border-radius: var(--radius-sm); color: var(--color-danger); font-size: 14px; }
+    .error-banner.visible { display: block; }
+
+    /* Info banner (for sync) */
+    .info-banner { display: none; padding: 14px var(--space-xl); background: var(--color-info-bg); border: 1px solid var(--color-info); border-radius: var(--radius-sm); color: var(--color-info); font-size: 14px; }
+    .info-banner.visible { display: block; }
+
+    /* Empty state */
+    .empty-state { display: flex; align-items: center; justify-content: center; gap: var(--space-sm); padding: var(--space-2xl); color: var(--color-text-muted); font-size: 15px; }
+
+    /* ── Rig AI Chatbox ── */
+    .chat-toggle-btn { position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px; border-radius: 50%; background: var(--color-accent); color: #fff; border: none; font-size: 26px; cursor: pointer; box-shadow: 0 4px 20px rgba(79,70,229,0.4); z-index: 9999; transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; animation: chat-pulse 2s ease-in-out infinite; }
+    @keyframes chat-pulse { 0%, 100% { box-shadow: 0 4px 20px rgba(79,70,229,0.4); } 50% { box-shadow: 0 4px 36px rgba(79,70,229,0.7); } }
+    .chat-toggle-btn:hover { transform: scale(1.1); box-shadow: 0 6px 30px rgba(79,70,229,0.6); animation: none; }
+    .chat-toggle-btn.active { background: var(--color-danger); animation: none; }
+    .chat-panel { position: fixed; bottom: 96px; right: 24px; width: 420px; max-height: 560px; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius); box-shadow: 0 8px 32px rgba(0,0,0,0.2); z-index: 9998; display: none; flex-direction: column; overflow: hidden; }
+    .chat-panel.open { display: flex; }
+    .chat-panel-header { padding: 14px 16px; border-bottom: 1px solid var(--color-border); display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; }
+    .chat-panel-header .rig-badge { font-size: 13.5px; background: var(--color-accent-bg); color: var(--color-accent); padding: 2px 8px; border-radius: 10px; }
+    .chat-panel-body { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; max-height: 340px; }
+    .chat-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+    .chat-chip { font-size: 12px; padding: 5px 10px; border-radius: 14px; border: 1px solid var(--color-border); background: var(--color-bg); color: var(--color-text-secondary); cursor: pointer; transition: background 0.15s, border-color 0.15s; white-space: nowrap; }
+    .chat-chip:hover { background: var(--color-accent-bg); border-color: var(--color-accent); color: var(--color-accent); }
+    .chat-msg { font-size: 13px; line-height: 1.5; padding: 10px 14px; border-radius: var(--radius-sm); max-width: 90%; word-wrap: break-word; }
+    .chat-msg.user { align-self: flex-end; background: var(--color-accent); color: #fff; }
+    .chat-msg.assistant { align-self: flex-start; background: var(--color-bg); border: 1px solid var(--color-border); }
+    .chat-msg.assistant .summary { font-weight: 600; margin-bottom: 8px; }
+    .chat-result-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--color-border); font-size: 12px; }
+    .chat-result-row:last-child { border-bottom: none; }
+    .chat-result-status { padding: 2px 8px; border-radius: 8px; font-size: 13.5px; font-weight: 600; }
+    .chat-result-status.danger { background: #fde8e8; color: #b91c1c; }
+    .chat-result-status.warn { background: #fef3c7; color: #92400e; }
+    .chat-result-status.ok { background: #d1fae5; color: #065f46; }
+    .chat-input-row { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--color-border); }
+    .chat-input-row input { flex: 1; padding: 8px 14px; border: 1px solid var(--color-border); border-radius: 20px; font-size: 13px; background: var(--color-bg); color: var(--color-text); outline: none; }
+    .chat-input-row input:focus { border-color: var(--color-accent); }
+    .chat-input-row button { padding: 8px 16px; border-radius: 20px; border: none; background: var(--color-accent); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .chat-input-row button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .chat-typing { font-size: 12px; color: var(--color-text-muted); padding: 8px 14px; font-style: italic; }
+  </style>
+</head>
+<body>
+  <div class="layout-root">
+    <!-- ════ SIDEBAR ════ -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <img class="anki-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4bWw6c3BhY2U9InByZXNlcnZlIiB3aWR0aD0iNTUiIGhlaWdodD0iNTYiIGZpbGw9Im5vbmUiPgogIDxpbWFnZSB4bGluazpocmVmPSJkYXRhOmltYWdlL3BuZztiYXNlNjQsaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQVNBQUFBRWdDQVlBQUFBVWc2NkFBQUFBQ1hCSVdYTUFBQXNUQUFBTEV3RUFtcHdZQUFBRSA3bWxVV0hSWVRVdzZZMjl0TG1Ga2IySmxMbmh0Y0FBQUFBQUFQRDk0Y0dGamEyVjBJR0psWjJsdVBTTHZ1NzhpSUdsa1BTSlhOVTB3IFRYQkRaV2hwU0hweVpWTjZUbFJqZW10ak9XUWlQejRnUEhnNmVHMXdiV1YwWVNCNGJXeHVjenA0UFNKaFpHOWlaVHB1Y3pwdFpYUmggTHlJZ2VEcDRiWEIwYXowaVFXUnZZbVVnV0UxUUlFTnZjbVVnT1M0eExXTXdNRElnTnprdVlUWmhOak01Tml3Z01qQXlOQzh3TXk4eCBNaTB3TnpvME9Eb3lNeUFnSUNBZ0lDQWdJajRnUEhKa1pqcFNSRVlnZUcxc2JuTTZjbVJtUFNKb2RIUndPaTh2ZDNkM0xuY3pMbTl5IFp5OHhPVGs1THpBeUx6SXlMWEprWmkxemVXNTBZWGd0Ym5NaklqNGdQSEprWmpwRVpYTmpjbWx3ZEdsdmJpQnlaR1k2WVdKdmRYUTkgSWlJZ2VHMXNibk02ZUcxd1BTSm9kSFJ3T2k4dmJuTXVZV1J2WW1VdVkyOXRMM2hoY0M4eExqQXZJaUI0Yld4dWN6cGtZejBpYUhSMCBjRG92TDNCMWNtd3ViM0puTDJSakwyVnNaVzFsYm5Sekx6RXVNUzhpSUhodGJHNXpPbkJvYjNSdmMyaHZjRDBpYUhSMGNEb3ZMMjV6IExtRmtiMkpsTG1OdmJTOXdhRzkwYjNOb2IzQXZNUzR3THlJZ2VHMXNibk02ZUcxd1RVMDlJbWgwZEhBNkx5OXVjeTVoWkc5aVpTNWogYjIwdmVHRndMekV1TUM5dGJTOGlJSGh0Ykc1ek9uTjBSWFowUFNKb2RIUndPaTh2Ym5NdVlXUnZZbVV1WTI5dEwzaGhjQzh4TGpBdiBjMVI1Y0dVdlVtVnpiM1Z5WTJWRmRtVnVkQ01pSUhodGNEcERjbVZoZEc5eVZHOXZiRDBpUVdSdlltVWdVR2h2ZEc5emFHOXdJREkxIExqa2dLRmRwYm1SdmQzTXBJaUI0YlhBNlEzSmxZWFJsUkdGMFpUMGlNakF5TkMweE1DMHdOMVF3TmpvME5Ub3dOU3N3Tnpvd01DSWcgZUcxd09rMXZaR2xtZVVSaGRHVTlJakl3TWpRdE1UQXRNRGxVTVRjNk5URTZNVEVyTURjNk1EQWlJSGh0Y0RwTlpYUmhaR0YwWVVSaCBkR1U5SWpJd01qUXRNVEF0TURsVU1UYzZOVEU2TVRFck1EYzZNREFpSUdSak9tWnZjbTFoZEQwaWFXMWhaMlV2Y0c1bklpQndhRzkwIGIzTm9iM0E2UTI5c2IzSk5iMlJsUFNJeklpQjRiWEJOVFRwSmJuTjBZVzVqWlVsRVBTSjRiWEF1YVdsa09tWTJaak13TXpFM0xXRXkgWW1FdE5EUTBaUzFpWVdNNUxURTFNMkl3Wm1NMU16UTNZU0lnZUcxd1RVMDZSRzlqZFcxbGJuUkpSRDBpZUcxd0xtUnBaRHBtTm1ZeiBNRE14TnkxaE1tSmhMVFEwTkdVdFltRmpPUzB4TlROaU1HWmpOVE0wTjJFaUlIaHRjRTFOT2s5eWFXZHBibUZzUkc5amRXMWxiblJKIFJEMGllRzF3TG1ScFpEcG1ObVl6TURNeE55MWhNbUpoTFRRME5HVXRZbUZqT1MweE5UTmlNR1pqTlRNME4yRWlQaUE4ZUcxd1RVMDYgU0dsemRHOXllVDRnUEhKa1pqcFRaWEUrSUR4eVpHWTZiR2tnYzNSRmRuUTZZV04wYVc5dVBTSmpjbVZoZEdWa0lpQnpkRVYyZERwcCBibk4wWVc1alpVbEVQU0o0YlhBdWFXbGtPbVkyWmpNd016RTNMV0V5WW1FdE5EUTBaUzFpWVdNNUxURTFNMkl3Wm1NMU16UTNZU0lnIGMzUkZkblE2ZDJobGJqMGlNakF5TkMweE1DMHdOMVF3TmpvME5Ub3dOU3N3Tnpvd01DSWdjM1JGZG5RNmMyOW1kSGRoY21WQloyVnUgZEQwaVFXUnZZbVVnVUdodmRHOXphRzl3SURJMUxqa2dLRmRwYm1SdmQzTXBJaTgrSUR3dmNtUm1PbE5sY1Q0Z1BDOTRiWEJOVFRwSSBhWE4wYjNKNVBpQThMM0prWmpwRVpYTmpjbWx3ZEdsdmJqNGdQQzl5WkdZNlVrUkdQaUE4TDNnNmVHMXdiV1YwWVQ0Z1BEOTRjR0ZqIGEyVjBJR1Z1WkQwaWNpSS9QdEU4TmlvQUFEeWpTVVJCVkhqYTdaMEhmRnZWK2ZkL1dwNnliSGtuZ1F3eVNVSUkyUVRhVWpnSkVBSmggbEIwb3M0VXl5MzVwZ1VKTEthT2xRQ21VRmlpYmtqQkNBaG1jQVAwREdaQUZXUTBaWkpEaGJjbVNMVnVTOVo0ajZ6bzN4azdzNUo2ciA0ZWYzK1FqTERyN3lQZU43bitjNTV6eVBKUktKZ0VRaWtlSWhDd0dJUkNJUmdFZ2tFZ0dJUkNLUkNFQWtFb2tBUklxUFR1UjExblEwIEY5dUEvQXcwanhUdmh6Z1E2V0VGTXV5SXVPVC8wd2pycmlBczN6ZkNzaUVBNjdvd1VCR0NwWll6VjVCYWtFUUFJblZKazdnM0l3ZmggeWZrSVQzY2hQRmE4Nzl2VmF3Z1FWWHRoKzhZSDYzTHg5ZDA2MkJaL3pIS2FxWFZKQkNCU3V6cVQxNTVRaXVCdmloRTgwUUpZOWYvVyBERXZVbW9uSXQ2Sy8wUElmUyt4bmtiM2ZSeXppRisxdHJ5MHNvb1k5Y013dWcrT0JPU3gzTGJVMmlRQkVpbW9hcnoxK09Cb1dDSmNxIFUvZmpTRmhBeDRLSVZRREZwa0duazVLOTJTeWdGWmJmMkJCSjAvK2pjTmZxL29lTVN6eXdmYkNRdVVMVUF5UUNVRGZVYWR3emFCQUMgSHdnM2E0QU9ISm8xWXpYd296cTg3a1prL0tZQzlzYy9ZcTRHNmhFU0FhZ2I2QVJlWittSHhuLzJSdE9WOG50aDZUUUpLOFhSUlN2biBrSUFrcktPUXRlVXpvOTl2UXZwRHU1RjJEOFdKU0FTZ0ZOWVU3dWsvR3ZYcnRja3ZZenM2RUppcW1Kc1dGUEJMbDkvTE9ORjZaSnovIERuUFBwcDRpRVlCU1RCZnc2dHNISS9DSURqeDJFNjJlL1lFb0xGMDBMWGhkQzl2YS95SHp4L09acTVwNmpVUUFTZ0ZkeFN0bjlrTFQgT1pybFlYQ014MEFXdFl3SCtaOE55TGpqVFpiL0tQVWVpUUNVeExxR1YvQVNCRStLcDd2VlZZdkkwckx5Qmorc085WWc4NWg1TExlSyBlcEpFQUVwUytJUmhhZFJpTFVtaTZEWUFiUW4vYTJSTmZvL2xmVVE5U2lJQUpZbW04NnFIKzZQeGppU0VUNnYwVnR0MnBMMzBJaXU4IGpIcVdSQUJLY0ozSmE5blJxUDhvRnUrUk1SVkxFdDlPSkhZZnRnWllLMWNocS84QzV2SlNMNU1JUUFtb1NkeWJPUkcrZW0zeUpqbDggV2hYYnJ4UjF5WllqZXpnZDZTQVJnQkpRditabEcrWHVabjB3TjFXa2g5QmFaRjQ0azduZnBCNG5FWUFTUk5wZW4yWWcxTjZoMEZTUSBIcXlia2Y3SXE2emdUdXA1RWdFb3pqcUZlMHJHdzc4bk5ra1RkYStQWVJ5U214ZmxQWmJCc2ZCWlZzUm9CSkFJUUhIVTlieDhhUUZDIDQvUnVTcXBMV3lYendMWmhOVEtQWE1oY05KQklCQ0N6TlpWN2pob04vemZkQ1Q2YXRHMEdEY0lZV29ic25uU2dsVVFBTWxtMzhMTHYgWk9iQ2J1QjZkUVNoS0hnYllhMzVDbGtsQ3lrZExJa0FaSTVrWHA4eDhHL283dTJnQmQ0bGpKWWdPNWN6VjRCR0I0a0FwRmkvNEJWeiBlaUI0bXNuV2o3N0RFbWFma1FZaEdSdGFpdXo4QmN6bG94RkNJZ0FwMGlUdXpab0luejlHQk9VQWtoTmM3cXpXN3kvUzBtbkk5NG13IDlLOC92ckVFemdKSzYwRWlBQ25TK2J6NnhpRUlQS0Y2MDZHRW0zd2RDREFTVUJGWW11TWRDTmREU0ZoQ1BlZXgzTjAwV2tnRUlJTjEgTXkvYmtJdndJSldwTnZSd3E0VnQvVzQ0bmd6QXVpSUVTNFVEa1Y1cGlBekpSUFB3UW9TbTVpRGNYd01XV3ZicHhHMG50djd2L2dyWiBSM3pJY3IrakVVTWlBQm1rVTdtbmRCejh1OUVta1pmUmxvL20xbjJOckorK3gvSSszZC8vZnpxdkhWR0s0QU05RVp6VzNqWGlBS0hXIHoxNk83R0Z6V080Nkdqa2tBcEF4N3RjTnd2MTZVbFc2RGYza1hRS25lejV6MVhiMmR4bjNadlJINHl3Qm84bWFOWUtXMkpIcElOSmIgUWl1Uk5mWjlscmVNUmcrSkFIU0l1b0dYTDh0SGFMVENjMS9Say9RcmtIWE1iSmEzNm1BdUlDeWkwVWVoNFJQaHF1WEk3K04xUmszLyB1WWR5UDkxVkovSTZpOHdoTGlpZUt4NTJycFlYM0xHMnJSY0RKUkFSRDhJUVVCT0VwVWI4T0x5UXVjSUVvQlNWc0REU2o0TXZvQWVGIHNSTzJKYWEwQ2VtL2Y0MFYzSHVvMTd1SVY5ODdFSUg3OWRlT3B6c21JSFMwZ05BM05KTDJsVXpsa283SUVabG9IcFdPNWlPejBEelMgS2I0ZVRIbHVtVTYzQW80UDZtRmQ3SVAxNDBaWWR5WHFMblVDVUJlbGJUNVVNWmsxYTZFUmxscmhldVYveW5JTTZaeXAzRE4wTlB4ciBkVzZSRlNidklhS1kwQS9Ia1lETldBR1lrM0lSUGk0SHpmMDZHay9hQ21mcnBHMVRtbHV2OXVyTUNSRHRyb2I5czJyWVh2YkFQamVSIFlFUUE2cUl1NE5XM0RVYmdVUlV1alJZeitSOHlydnNQeS8rN0xHUm9GSVJPNGw3N2tRZ3NLa0JvYk52NFREeGlRdDB0c2RsazdzMXggSW54Q0tZSzM1eU04cm9QWVlTUWszS25ZZmkrckpWb3hxY3Z4dTlieTNQS3JIWkdNdGpBcmcrT2pIVWk3WWk3TDNVTUFTaktwT3Z1bCB2OTRpT0owZk1aZGZ4ZDkvTWErNmJ3QWFmeGV2dUpEK001Y2hlL0FITFBmYlZCd244dUVoM0tpK0F2aS9La0xvWisyNVVpMGJTYVZsIEU0a0JSMGtLMzBoemRDSENFbWxiajA2QWlHOUYydlI1TExlTUFKUWt1by92VXRKZ0dvRGtvSGlXRlUxU2VROW44NXFwUjZGaGRyd2cgcElldGdOQkFBYUZOcVRBMnBKVXBvRFBDamZCbC9kQjRRd2ZXU1VUblJwbCtsQ2EyVHd6NmgrZFdwRCs3RTQ0YmVSd09FaE9BdXFCVCB1S2ZIZVBoM3FmeU1GY2dhTlp2bHJWUjlMMU80NTRpeDhHK09venZXQ3FHdmtOM3ZRNWE3TlZuSHhSbThkcUt3ZEg1UmpORFVERFFYIDdMWDJMRUdkZFpOd21SSmlXelNnOVgwOFNqQVJnTHFnYzNqTk9jUFJNRlBsWjN3Qlo1cFpUeUo1bmsxQXFOeUJTSGFjTENIOWp1bisgQWtKYmttVXNuTVk5UTBvUXZMY0hnbWZwNHl5eGdIRllCcFNUSlQyTGZqL2JEcVM5OGdJcnZKUUFsSUM2bUZmOWZnQWFmd3VEbDk4MSBhNkFPdHMxL1lTVURUSFliTEVlallZdU1VY1JqbVY0UHZrUzNoSVRWMks4SW9Uc09SOU1WYmMvY3liYVRRZU5rTFVZUTZ3ZjV0MXRrIGxzdHZrRFhVak5VeUFsQVhkQ1d2Zk9Nd05GMWdkQUJhbTRUZklmMXZMN09DRytKeGJ6ZnhzblY1Q0IrWkFER2hZUjhrMEJLOWdNN2ggYm9TdTZJdW11OXF1S09uaUtjbGUvMDF2RFVVVHpJVmdDU3hGdGt1MU5VNEE2b0p1NE9Vcjh4RWFxUXBBd2dlZkpIeHdIcS83dTU2WCBmMVdBMEpoNHg0VGl2Vm54Wk83TkY5QzVyQmpCeTkwSUQyL0h5ckdtQ25EMjU1SkpDQzFCZHM1QzVnb1JnT0lzdWF3NkViNDZHUzlSIHNBUWZuZkRpaVZNOGorVld4UE0rcitVVm40aUpkMEk4Tml6cXdiY0tXVCtheGZJK04rdXo1WkdIUElTbUN2ZnFFV0VKRHRIL201eUkgMGlyb1RpbDNOVXVvU1hoa1MrSE1WK1dPRVlBNnFWZ0NNbCswell3RlVPdUorcytRWTB1RVhhcS80Qld6ZWlCNGhqNHVFQThJQ1l2dyBSR0VSZnFMeTg2Wnl6ekFaVEJhdTlYbHQvdzY1Wkc3Mi9TZWlKVlFCKzJkL1o4VS9KZ0RGT1JZd0Z2N3RPbWhZREpwd1Vaakp6djRjIHpreWpkajRmcXE3Z2xhOExhK0RDT0ZWNWJXM2YxY2ljOWc1enYyL2t4VS9sbnQ3Q3RacmVENDMzdElucmFEWFBMTjBWT2gyRkI5WWggODlJWnpQMEtBU2hPRWsvSzRhUGhYMjAwZ0xRT3JvUjk2ZE9zZUVJaTNmTmx2UEs1UG1pNk9rNTVoVnJiZUEweXozMmJ1UTlwKzRQYyA5K1JHNkpJaWhDN01SWGl3dnYwdGU0ODdFSFQyMHcrTDRYUXRZSzQ2QWxBY2RDYXZQZUZvMUg5aU5JQTBYM3NyMHA5K2lSVmNuMmozIGZTbXZlbHhZQ2pmSElHU3FaYUQvelBYSXVPWXRsditQcnZ6K1pPNTFGU0Y0eTJFSVhxL2ZJSWpZbWF2dUZ0YzUxSWVrRjdiTmp4dTggVFlRQTFFbjlqTmRjT0F3TnJ4dHREY2dBcDNRRE5pRGpsamRaL3VPSmVPL2EvcWM0eFlSYTIzc3owaDk2bFJYY2ZRRG9PSVdsOC9OZSBDUDVhUzFOTGNSMUQraUhxaXE5RjV2U1p6UDBhQWNoa1hjQ3JieCtNd0NORzc1TVJBR29RQU1vVUhYdWg2TmczRS9YK0JZUWVGQkM2IE8xNHhJYTBlL1M0NDN2c25LenBMK3dlNWVpV3NtOTdaYUdZOTBIU3pmdG1jNGpwcUhnU2ZJY2YrTWNzSkU0RE1kVVdlbEFjTWpTN0IgckFIb0cyU2UraTV6ejB2a05wak9xeDdxajhhNzRwVnJXb04vTmV5cmRzTHh1enlFejg5SDZIZ0JuOFAxRTBVZWhiQWdZaVAzU2szNyBiMEw2SDE1akJmY1FnRXpVRmJ6eWxjUFJOTjNvUE5BYTBGWWg2OWhaTEc5Sm9yZkRKYnpxc1NQUWVHc2NFNXY5d0FLVDBKSDlJbytSIGtIdWx2dTFqRlhCek9ITTFFWUJNMGxXODhwMWVhRHJMWUF1bzFiVklwdHc0R29UaUVSUFNKZ0ppKzdIazl3UWQ4NlNOZnlOV0pnbEEgWFpCV2h0bG9BR2tUSjltSytBbVg5Sy9DSmIwcFRqRWhVdHpjc0pZRHkwWnRUaVFBZFZLLzVCWHpTaEU4MlVnQTZXTXBBa0FsQWtEbCB5ZFFtQWtKUENRaGRIOC82WTZudTliVE4rMnhweDlJek84bVoxdDlmd0prcDNMQUFBY2dFYVdla2pFeFowYWIrVjFMV1VyK01WejdiIEIwMi9qRmRNS0FXQkU4M25MTDg1bUFlZGJtT2xNcXRVbXdOcmtYbmVUT2FlUVFBeVFiL2k1WjhYSVhTY0tnQXRoak52QVhONWtyRnQgZnM2cm51bUx4bXRpYldNbkNIVnRESWgyQzNVRUhBbDJ1V215Q1paYUgyd2I2bUg5SmdqTEx0SE9tYUtScytYL2s0WG13WVVJL1ZTciBBYWVIaEVvTHlJamQrd1NnVHVvNlhyNUVkUEo0aFFBeWZKdDdIQzBoaWdsMTB0SnBDNTFHV0dzOHNIM3RoWFdSQU00OEFad1ZuUzFRIElCT201U0o4M2lBRS9xVEJTMUZmUkdPWGNpNzhudlZJSXdDWm9CdDQrWXA4aEk1UkFTQnBOZ3NYTEU5VkpReXpkQW12K3NzUmFQdzEgeFlUYWorVjBGS1BaQThlOGF0ai80NFAxSTJIZFZCenE4dllrN3MwWWlvWmxlUWdQVS8xQVdBUm5saGkzRFFRZ3hicVJsNjJXdTJ5TiAzQW10MjFmUnVCVFo3a1BweUVTUmZyTWlzRy8xaGU0R25lWlkyWjBmcG05RmFDdlNueExRZVNZQXl4WWpTeW5yYThuZHp2ZnNGdTVaIHFjb0h3cUZtc0NRQWRiSlRSNkordlR4RnJRSkE0cW5uL3hMWmhZZTZvcEFvdW9oWDN6MFFnUWU3STRSa256YTNKS1czNlMyUEJsZ3IgaGFYemFpWHNUMzdJY3I4ejQyODVtWHVMSnNDbmRHVjFOVExQZUllNVp4T0FGQVBvR05SdmRDSGNYd1dBWk5ZNUFhRGloUWJzTEUwVSBhV2Zub0V1NGx1b3hIV250Nk4xeldSSzVISTUzSkhUaXRjbjBHbDd4Y1FtQ1AxVmdCVVhqUUJ1UWNmT2JMUDhKQXBCQ25janJyTWZBIC81MFR6YjFWQUNnQWEvVnlaSlhHb3pDY1NwM0xhNjRhaW9aLzZnZHNDbGs2N1ZwMzB0TFpEY2UvYTJCL1hnRG8yM2hudUJSOWNLWG8gZzM4cEtEWVE3YzlETGFSQUFPcUVUdUplMnlqVTd4RCtkQThWQUJLRHRrd0E2RENWeWIvak9BRXVGUlBnSmYzOUpuZGN4eEpxNzZDciBuSWpDMG5sTXVGZmJFdWtQbnNacmp4dUorcytOUGtTdFdWVGZJKzJ0NTFuaCtRUWd0UUN5ajBiOTdrdzBGeG81aVRTWStXSGR0UUxaIHZZMUtjWkJvT3B2WG5IRVVHbWJwN3ptWi9uNnQyR0RiUThoeTlVcTgvakNMNVgyUnFILzdLZHhUTUI3K1NsVUFFaTdtZjU5aFJTY1EgZ0JTS2NhOWpET3JMMHRIc1ZnRWdIMnpiVmlMcmlFUklTSzlLWi9IYXlTTlFQeitaTENIWlAvS3JIcGdWc0g5UkFjYy9hbUY3NnlQbSBha3lDc1p0eEhId05xZ0JVQmZ1eXY3SGlzUVFneFFBU0Z0Q2VERFRuRTRBT1huS2ozRmo0dHlRb2hDSzZNMVg3dUZleVl1MU9PQjczIHdEWnpIc3N0UzhZMlZ3V2czWERNZlk0VlRTRUFKVFdBck50WElydGZxZ05JYWhMM1pvc0pVZFpTano3K1J6ZTBaZlAySnVkM1NIK2kgSFBhSGt5bEx3UTh0ejVyVFJxQmhqdEZITXpRQUhXb3RlUUpRNTJKQTBnWGJMUk9iSzRvQjdWaUI3TDdkQVVCU2NsdkQwYWhmSGR1cCBLKzg1WXFZMTFOSDVLOWtmZStDWVV3N0hYMmF4dk05U29hMHY1TlYzRFVMZ0lWV3JZSjNKMDAwQU9uUUFxUTVDNzR3Rm9adTdVN3RxIFJ6ZjBiYUVhUEpHV1RZS092WDFnQ1FvMzRyMUsySityZy9YVFZGdUoxUEpZS1hCNW93QmFoOHlyWmpEMzh3UWdBbEJTNm5SZU8zb1UgNnBmcDRrSkdwZlRvTUtZakphRHpmcG13ZE9waFhmcFJpdXhBYjgvUy9CRjhqVEhnS3RtSHRRcFpQejRVYTVFQTFIa0E3UlFBS3FabCBlT01sVjJxR29XR2xWcE85dmRXblRnSW5lc0xjZ29pMXZkOFZWczZTNzVGMnAyanZ4YW0yNmJNOXlXS01ZK0hmclBJenZrSjJudzlaIDduWUNrSG9BZlM4QVZLSUNRSExML2dwa0hXN2tvY1JrMUptOGxnMUh3eHh0djQxY3VXa0JVVVJyYjh1KzFvMGxvdTFJanNWeTlubkMgTjhKU1d3a0hyNGJ0bFZyWTUzUTNDL01pWG4zUFFBUWVnTUpkNkovRDZUZ1V0NVVBMURrQXlaM1EzOGRPRmhzR0lPMWFCS0I5M1lhZSBDTjdkRzAyM3luMVhYZmxkMlk1ZTJMNFJyNDg5c0wwbEFMUk50R20zSGVDMzhMTHZjaER1cStvY1dCQ1d1ait5SHE1RHVSQUJxUE1BIGloN0ZJQUNaSTNuK0xodmhFVVVJM2VaRzZFZWl3ZFBURU1tVDhReVp0S3NCbHQwQldMYzF3UHB0SFd5ekJXeldOOEZTbVlySFdRNUcgcDNKUHozSHc3OVFEdzBENlJNZnRUcVM5L1M5VytETUNrSWtBVW5FV1RBQm96NHFXczJBRW9BTkFTWjdEV3RnTjRqZUhxdW04NnVIKyBhTHhEeGVxaXRxZG9EVExQZnB1NTN5VUFxUi80QWtEKzdkbG83a21IVVVuSk1GN0hDT3RIeGl4VkFtZ0puTzc1ekZWTEFETGh5UnNEIFVDOUZBQ29YQU9wRkFDSVpJVzFyZ3dyNGFHTldicDU5akpYMlB0VHJFWUM2NklLcGlBR1JCVVF5VXIvZ0ZiTjdJRGpWNlBOZlVscHAgOHExSWYvb2xWbkE5QWNnY0FGRTZEbEpTYURMMzVod0xuMWZWem5MdHVxdVFkY0lzbHZkZkFwQUpVcCtPby9zY1JpV3AxZVc4OHNYZSBhTHBNUmJZQmJUbGZmbDBNWis1SHpPVWpBSm1nU2R5YlBnYis4alJFWENvQVZBZmJscStST2FBNzcxa2hHZktnVERzT1BtVTVpalNYIHJnd08vaXdybW1URU5RbEFuUU5ReGpqNHErMklaS29Ba0JlMlRTdVJOVWdycDBJaUhZeTBwWGNvMnZtc1dVQkdMTDhUZ0xvR29LenggOE5kSStodTVxMVFEVUMxczY1OWdKVU9wcFVrSHE1TzQxM0lzL0FHangyaGIrTWdsK0MvZ3pEQXFYRUFBNm9RbWM2OXpBbndlemY4MSBHa0Exc0sxNWtwVWNSUzFOT2xocFpaQlVsMlBlaHJSLy9ac1ZYbTNVUlFsQW5RT1E2MWdCSVAyVHdCZ0F0V3pvcW9IOTZ5ZFo4VWhxIGFkTEJpSEZ2K2tUNC9CSThxbFBkSHVycGR3TFFRZWhrN3MwVEZsQ05LZ0JWdzc3eUtWWThpbHFhZEpEV3oyM0MrbmxVeGI0ZnZmVWogYTU0OXdrcUxqTHd3QWFoekFNb1hBS3BTQmFCRHJTeEE2cjZTZTlTT2h5K29CNFhSbjZHQmJRMHlMM2lidWY5REFESWZRUG9hMjRaMSBzZzVBWHdvQWphZVdKblZWbC9LcUovdWg4UVpWR3cvMUQ5elBrR016ZXE4YUFhZ1RPcFY3ZW8rRGYxdXNNeXhHQTZnUzlxVlBzK0lKIDFOS2tybWdTOTJaT2hLOWU1V2RvMXM5R1pQem1kWmIvUjZPdlR3RHFoRTdqbm9GajRQL1c2TkltMnZYMndMSGdINnpvWkdwcFVsZDAgRmErYzJRdE41NmhZZG05ci9TeUdNMzhCYzlVUWdPS2cwM250cUZHb1gyNDhnRnJNNXUxSWUrbEZWbmdadFRTcHN6cUZlNFRQN2k4eiBPaXpRM2dOeUI5TGVlSUVWWHFUaVBnaEFuZENadlBiRW8xRy9VRUYxeWVpUzZXYWtQL0lxSzdpVFdwclVXVjNOSzk3cmllQTBveCtLICt3N1BGcWg5aGV6ZUg3TGNIUVNnT09rS1h2bnE0V2k2V0JXQU5pRGo1amRaL2hQVTBxVE9hQXIzOUI0TC96YVYxbyt1OXZ0WGYyUEYgNDFUZEN3SG9BTklYejRQeHVYV2puYndXbVJmT1pPNDNxYlZKbmRFdmVjWGNVZ1JQVWJqdnAxWExrRDNvQTVhN2tRQmtzcWJ4Mmg4TiBROE5jV2NOYzBVZTB3dXhyWkUxNmorVnhhblZTSjZ5ZmFLMHZoYTVYcTJXdTJ2b2hBTFVqdWV0NUlBSWZGU0EwUnRjWlJsWHI3TWpIIDdpOTg3QzNVK3FRRDZUYStSNllHUGx6VnlwZVV0aml5Rk5tbDgxaHVHUUhJSlBBSXMvYVBmZEY0clFZSVdmeE9WU2Zya2p1RkY4UHAgVE5YeXdDVGpkRGF2T2VNb05NeUN3a0tEbWx1M0Uya3ovc1VLejFOOVQ5MGVRTElzY0U4RUg1RzdTWFhnYVZaNW9FOFBvQ1pZUEEreCBIbmswdlVnSDBwMThUMVVHbXZQTjJQZnpKYklQbTh0eWR4S0FGRWxXdXVpQnB0OFBRT1BkYmVqdlVQVjBhYy9Qcm9OdDgxOVl5UUNhIFhxVDlTVHR3cXZLMHUyN2Z6MnN2c01McFp0eFh0d09RTFAxYmd1QzFReEI0V3Qvd3N1Q2RLbmVyWXdiQjhoM1MvL295Sy9nMVRURlMgUjVJWk9XTkhMaXlxOC8zSU4wYlUreUlBdFFPZUlvU21EMFhEeTIwYUhXWllQQjFwR2JJSGZzQnlOOUUwSTNXa1MzalZvMGVnOFRhdCBKSTdLa01CMnBQMzdSVlo0dVZuMzFpMEFkQjZ2dnJvdm12NlFpZVppbmF1VmxnaC9tNG9UeHFUVWtWWm1wNjJWb2twZndKbk9tYXVKIEFHU0F6dVUxbHdoWDYzbHR2NFI4Z29qM2R0VUI1czQrYmN6WVowRktibDNESzNnSmdpZXBTcmVoaFNEa0hObUU5RCs4eGdydU1mUCsgVWc1QTB0VXFRT2ljWVdoNFV3T05uUER5cGFvREQ3YkR2MGJXaWUreHZFOW9tcEhhazVhRlFhWGxvenJmVDdjQmtLd0s0RWI0QW1IeCB2S2p6azVYdTVUbklEbzhHRVJ0aHJma1RLODJuYVVicVNEZnhzblY1Q0IrcGN0T2hGbGRhajR4cjMyTDV6NXA5anlrQm9QTjU5WFY5IDBYUi9CcG9MWW8xcTJuTDZ3WGI0V21TZU41TzVaOUEwSTdXMTRHVjl1RE41N2FTalViOWc3M05MUmJxTkZyY3VCRXRnQ2JLZEM1bkwgOU5MZ1NRMGdHVndlak1EZk5kY3FVV0k4KzRGUE5QaGRBZnNYZjJmRng5TjBJM1drVzNuWlZpZkNmVlRHZm5TSG9hZUxoK0ZyOGJqUCBwQVRRMmJ4bTZuQTB2SmVvTVo3OVdUNU5zSGdYdzVsSFZWQkoreG5mcHg2RmhnOFZIemlOd2tkRnBZdVVCWkF3UzM4NkNJRTNNdEZjIG9yVmpvc1Y0OWdjZk92ZEY2b3p1NXJ0OU1ndUQ2aHBmVWl1UU5XWTJ5MXRPQU5xUHB2SGFIL2RCNDlOdWhJZnJYSm1FalBHMGZkQUkgRXpvc0xUTS9yRHRXSXF1LzhMT0ROTVZJSGVsbnZPYkNZV2g0WGVWZU5RMXNpVkFRTTZFQmRCcjNEQmlBd093OGhJZkk3NlZKS2cyZSBSSGExTk9uTjU5MXd6SG1PRloxTzA0dTBQOGtBOUU5UXAzd1pYSE8vbHNCWlBKKzVLZ2hBYlhRSzl4VDBRK003eFFqOXVMMEpuZmhXIGp5V2svYTN4V3Q0a0paOHU1TlYzRGtMZ1R6QWgzY1oycEQzL0lpdThLdDczbkZBQW1zeTk3c1BROU9UaGFKcmVodFlXSkw2N0JmMksgaFJlMlRRSStFK2V4M0FxYVdxUURpWEd2NHpqNG12UVdpaXJMUjc1ZkRLZHJBWFBWRVlCaXBtY2ZORDNWRjQzWGFUNHFXb2hqUzRiQiAweGFTbEdTZTFGVnBCMDdWSHJsb3VmWm1wRC8wS2l1NE94SHVPKzRBT3B2WFREc0tEZS9wVEVSbEozNFZnR2NmVUZiRHZsekE1eVR4IFpQSFFsQ0oxVnBPNE4zc2lmRDV0VEtsNDhPcXRuOC9odEM1a3JvUndmZUlHb0ZPNXAzUXdBcC9tSWp4WW83TnNvRVJmVXRmNk0rWkwgUjBFcHN4cXVSK1paZEs2TGREQzZsRmM5MVErTjE4c2R5WFpFTXRROUwyRlpoOHpMWnpEM3Z4UGwzazBIMEVuY2F6c013YWUwM011UiBLSHVpVmtReWdFY3pZMjJhdTdVUkdmZTl6dklmb0dsRU9oanBZejlRRjN5T1hsZHVnbjJJOWNoTnBQczNGVUN5eFBIUmFGZ3NvL0JKIEZ1ZjV3WVpINFVjL1dnYkgvUjh4bDUrbUVlbGdkUkd2dm1jZ0FnK29YT1hWVnI1V0l1dTQ5MW5lb200Sm9DdDU1WDhPUTFNMHk3NWkgVTlOUThPaVgxS1Zrbld6eHVsS0FwNEdtRCtsUVpNYStIdzFzSHRpKy9Tc3JHWnhvYmFBY1FLZHh6NUJqVVArMXRxdFRaWlJmUWNmWiBOWk40Tnh4enR5SDkwdm5NVlVsVGgyU0V6dWZWTnd4QjRFbVZycGRXNFdVRnNrYlBabmtydWhXQXB2T3FoL3FqOGE2WUU1b1UrM2xhIERyWmF3cHJWVXc3SHA5dVFkdm1ITEhjclRSbVNrVkpkWmtkNzJGZkF2dWp2clBpNFJHd0RKUUE2aVh2dHc5Q3dNbloyS3hrT2pHcC8gWXlzZ3EyRmZ1UVhwRjN6QWNyK2xxVUl5V21mdzJvbkNNL2hpNzNOUFhlVmRZZjBjTGF5ZmI3b0ZnS1p3eitGajRkOHUzeWZCb2RFZiB4SGpxWU51eUFSbW5DL0NzbzJsQ1VxV3JlT1U3dmRCMGxxcERwN3E4NDEvK2pSV1BUOVIyTUJSQU1rL1BVV2lZclRmL0V2WEdZN1hBIHJOb3FYQzFzYTc5RCtoWHZzN3d2YVhxUVZFcGY2VUpsdWxXcEw1SGRZeTdMM1pQeUFMcUlWOTg3RUlIN3pXalVRMzB5NkpPWHlkM0wgMjVCMm5RRFBVcG9hSkROMExxKzVkQ2dhWGxKby9VUjNVKytDWTlZL1dkR1ppZHdXaGdEb01sNzVYQjgwWFozQW13cmJpL0dzMm9xMCBueWVxYjB4S1hWM0h5eGNYSWpSQjBkNmYxbUtiaStETStZaTVmQ2tOb0N0NTVSdUhvZW1DR0hXdFNMQjRUOXRPbHFmVXYwWEdsQTlZIDdrYWFDaVN6RmR2NTNJaVdNc3VHZXdyYVdVcGgxZi9qMzZ6d21rUnZqME1DME9XODhvWGVhTG84RVpmWVpReEtmdFZjTFpuOTdUdWsgWFNZc25sVTBEVWp4MGxUdUdUSWEvdlVxM0M4OTBKWWl1MlFleXkxUFdRRHBZajV4cjYvZXRoLzBLMXMxc0szWml2VEwzMmQ1eTJqNCBrK0t0aTNuVjd3YWc4VDRWaXpTYXRTODN6VDdIaXFZa1Ezc2NGSUMwSUZvaXdhZXRGVllQNng3aGF2MXNGc3Y3Z29ZOUtWRjBIUzlmIFVvalFlQVh1Vit1K24rWElIalluU2JhUmRCbEFwL1BhWTBhaGZrVmJreStPNEFuTEFMUDJOSkYvMDJwa1RYbVg1YzJuNFU1S05OM0MgeXpibklIeUUwWE5IdTE0QTF1cUhXV2xCc3JSSGx3QTBtWHVkeDhKWHAwMzhPSjlrajRSZ2FkUU90VXJ6Y3dQU2IzcUw1VDlEdzV5VSBxTHFQNzRxMHRWaU10b0JXSTNQS084dzlOK1VBZEJNdld5OHJWTVFiUG0zOTU0M0l1SGNQSEE5K3pIS2FhWWlUdWltQTlqRUtGc0daIG1RejE1em9OSUZsL2ZRZ0NmNHVuMjlWMm41SE1iUnZMeWROSVE1dVVETHFhVjd6WEU4RnBxaDdpMmpKOHNnU2lPd1dnU2R5Yk1SRysgaG5pNVhtMlRsOGtUNmh1UmZpcW5DcU9rSkpOV2VGQmxBakx0MnNJVm15WmNzZmVUSGtCWDhNcVhEMGZUSmZGSUdLL2ZMeEdBdFdvZCBNaWJOWm5rcmFTaVRrbEduY3M5aDQrRGZvYmpPWGF0N3R4VFpoZk5ZYmxYU0F1aGs3czJmQUY4VjRyRGtydThrS25WRFNoWGR3c3MyIDVTRGNYK1dCYlMxVTRvZDExMk9zdEZmU0F1aDZYdjVWQVVKanpIUzk5SEdtU3RpWGZvc01sdWhuV2tpa0xyaGg1d28zN0MzVkhvVTIgWjdjaDdWLy9ab1ZYSngyQVR1R2VIdVBoMzJYaTM5T2FRbEorc3c2WlY4NWc3aGRveUpKU1Nhd2xwdXFYRDFuRkQvYldaSUNya0hYQyBMSmIzMzZRQzBEVzg0cU1TQkprWksxK3hGUzdaV0RZdmJKdlhJSE9Fc0hycWFiaVNVbEdYOHFySCs2SHhadFY1czlvc3pXY2syb3B4IGh3Q2F4TDNPaVhzM0hTb0ZrUDc2MjVIMjRvdXM4QW9hb3FSVWxreGJMRmVXSlh4TW1GL2gySU45MCtPc1pHQlNBT2hjWG5QRlVEUTggcnpyMm83KytzSG91ZUp1NS8wUERrOVFkZEQ2di90VVFCSjQyeWNPSXpyTXRTSC9zRlZad2U4SURTTGhmSHd2MzY2ZXFzclpKNmMzUCBaY2dlUkRsNlNOMU52K1c3QXpJUWJRS0U5SWRWUjh4aHVhc1RGa0JtNUt6Vld6Nkp2bGVCUkZJbFdTMTRGT3FYbTVGRHZVMDhLQ3NSIGltdTJDNkNwM0hQVWFQaS9VZGdvclRRV2xzOWdLbjFENnM3U3FnYWJzZEZYODJqcVlOdjZGMWJTTHlFQmRBR3Z2bjB3QW84b2JKQW8gZ0ZZaDY5aFpMRzhKRFVGU2QxWXNUV3RUV3l0Rk5ZUzJJdjNwbDFqQjlRa0hvRi93aWprOUVEeE54WFp4RFdyaTVwOFJOLzhyR240ayBFbkFXcnpsbEJCcm1RbDJaNXJZV1FEUzA4ZzJ5VG42WDVTMUlLQURkek1zMjVDSTh5R2dYVEUvM3orRk1YOGhjVFRUMFNLUVc2ZmJkIG1YSHFvQlYwUytBc25zOWNGUWtCb0JONG5XVUMvRlhwYUhZYjNSRGE5YjVGeHAxdnNQeEhhTWlSU0h0MUlxK3ovZ2gxWWIyRm92THogTkErbkNSYlBRNnhIWGtJQVNQaWphYkd5SVVZM1FpdHhGOE9aczRET2RwRklQOUFVN2psaUxQeWIyODRaVmRMaVFmRXFZdmdEQUUzaSAzdXlKOFBtTWJnQU5aZzJ3Vmo3Q1NvdG9xSkZJN2VzaVhuM1BRQVFlVUp5eVEyY0p0WVJhMWlIenNobk0vVks4QWRSNkJNTmdBRVhkIEx4OXMyLzdNU3ZyU01DT1JPdFlOdkh4WlBrS2p6ZGdmaERodWl6SFRBb29DU0piTGVaU1Y5cUFoUmlKMXJKTzROKzM0V0NqRURGZE0gRjI2SmZJWWN1MW41MWRzRFVKWk1GYURLQlpOZkY4UHBUSVJkbUNSU0l1c01YanZtR05SL1pkYm5hZFpXR1J3TG4yVkZMQzRBa3BINCBDZkRWT2hESlViQUtGb1hRV21ST244bmNyOUVRSTVIMnIwdDQxV05Ib1BGVzgrSkJMWit6SGhuWHZNWHkvMkU2Z0tTMDhqc3E5d0V0IGdqT2I4djJRU0FmV3IzblpKaGZDL1ZVZURHL0hGWk5uTkV2bnNkd3kwd0drZUNkMHRCRjlzRzcvTXl2dFE4T0xSTnEvOUF0REpoMWEgalVJb0NFdmRIMWtQbCtrQXVvaFgvMllnQW45UVJWenR1anVROXNZTHJQQWlHbUlrMHY1MUZxODllUVRxNSsxbGhQS2dkTlJiVWIwLyBxRjBBN1UwUm9NN3YxRzZ3QnJZMWE1RTVjaUZ6aFdtWWtVZ2RTNHNIbVZVZ1l1OTVzY3lwN3pMM0I2WUJhREwzdW8rRnI3cXRUNmdLIFF2TDlWOGp1OHlITDNVN0RqRVRxV0RmeHNuVjVDQjlwUmxCYVB6OFh3NW03Z0xtOHBnQkk2a1pldnNxTjBOR3FiMVR2MDhvVDhqdmggK0RXblVzc2tVcnZTcCs0d0l4Nmt6Zjk2V0hjL3lrcDdtZ2FnODNuMWpVTVFlTUxNb0pmMi9iZkkrSCs3NFhqNFU1WVRvU0ZISXUyciAwN2huNkJqNDE2cjJVRFJwTWRzdFNILzhGVlp3aXlrQUVtNllTN2hobnIyTVVKNmpKQktDcGRHT1NJYjhKZ2hMdmJqaHV5dGdmM29oIGM0Vm8ySkZJK3hnSU53Z0Q0VWtUQzRaR0diQVNXV1BmWjNuTGxBTkk2bGU4L1ArS0VQcVJHWlRWKzUxb29WMXJvMjVIMnZNN2tYYXIgOEVFOU5QUklwQlpkeXlzK0xVYndKMlo3S1o4aHgyYlVVWTM5QW1nSzkvUWZDLyttZURSdTdJWXRlc3VyREk1UHltRC9jeDFzQ3pseiBCV2dJa3JxelpPNnVINk11S0IvV1p1WVBFZ2JCU3kreXdzdVVBMGpxQmw2K0loK2hZOHlzRGYvREcwZEl3a2o3ZlBuOUhqam1WTUR4IDFIc3M3Mk1haXFUdXFwTzVOMzhDZkZWdHJSU1ZicGg4c3dKWm8yZXp2QlhLQVNSdXNFamNZSG5zd3dFVDh0WHVqOER5cTM1VkxnaUwgWDFoR0gxVEIvb3dQMWkrRVpSU2tZVW5xVGpxSDE1dzFIQTN2eEl3RXE4bzVxcmw3SVZnYUhtUTlzcFFEU09wU1h2WFhmbWk4eVl5eSBJWjNFY0ZqQUtOemVMdTBhMkwvZUNjZERYdGhtZlVSdUdxbWI2R3BlOFY1UEJLZVp1VFQvSGRLZmVKa1YzS3djUUZKMzg5MCtCeUxaIFpwM0s3U3lMSWpITHJEM1RzeGEyLzVYRDhhS0EwWHNCV0xiUWFob3BsWFVYMzEyVGpraWVtWXRHaDdxQnVOTUEwb29WdHZVRkUweFIgSUVXRWRTUytXUFJQZ2dDczFSV3d6L2ZBOXBZQTBuektSMFJLTlozS1BiM0d3Zis5U1Y1SUZISmlMbTErbkpVTVVBNGdLZTJRYWp3RCAwbDMxVnlON1hUVTlNQ00rMkxidmdmM0ZXdGhuQ090b3ZiQ09hTk1qS2VsMUhxKysra2dFbmpQSlU0a2FJcXVSZWNZN3pEMWJyc3AxIGRmTndsd0FrZFJNdlc1T0g4REF6Y3BNWWJCazFDeGdKYWtkczdabW53anBhSk55MXB6MHRzU00vRFdWU3N1cGFYdkZKTVlJbnFKNmogV3J4SmVCZFZ5NUJWZERBUDhTNERTRis3S01rZ3RJLzVpQmFUeU5LZUs5a0FhL2x1T0Y2cGcrMERQNnhmZlVRbGhFaEpKRGxIajIvWiBIMlJWSFpUV0dIQ3dHUlM3RENDcGs3azNid0o4TlMwVVRLaWc5S0ZZU0xIWTBiN0wvUExmcW1CZkxsNHpoYi83OWdjc2R4TU5jVktpIDYzUmVPM0lVNmxmcVhTVlZEM1BOby9nY3pyU0ZYZHdHYzFBQWtwckNQWDNHd3I4MWhTQ2tiMVM1ekIrUzdscmJwMGNqckRYbHNNOFIgTHR2ajliQitRM21NU0ltcWkzblY3d2FnOFQ3Vk1WdHQvbTlHK3FPdnNvSTdUQUZRekJJcUZKWlFSVEs3WTUwaHZPYXl0V2ZLQ2hCOSBWZ2JIRXg3WTVsQWFFVktpNldaZTlyOWNoQWViVkY5TVdrR09ybXgzT1NRQVNjbjhKQ05SLzEwMm1udVpzUk16RVZ3MW9NTjlSK3QzIEN4Z0pWKzJkZVN5M2dvWS9LZDZheEwyWkUrR3JiK3N1cVhsV3d5S3NvSWVFRlhTM2FRRFNkQm12Zks0UG1xNDI0VVlURGtneWRpVGMgTmF2ZXpLMkNmWmx3MVo2cmdmMDFxdjVCaXFkK3htdk9IWWFHdHhTbldJN08rU1pZUEl2aGRIZDJPZDR3QUVtZHpXdk9PQW9OczdRNCBTc3hTc0hXWGp0YnRPOXJudUVvNUhQL2RqclNyS0lCTmlwZHU1T1hmdUJFNnlnd0lyVVhtZVRPWmU0YnBBSkk2aFh1S0JZUldaYUU1IFduNDVVYzZQbVdvV3hlSkcraFA4VW5Xd2JkMkM5Q3ZwQkQvSmJPbFB6VVBScXBnR3QxclkxajdCU29iSEJVQ2FMdVRWZHc1QzRFL2EgaEpSZnVwTTFwSWRSekJKc2RVbmxDZjQxeUR6cGZaYTNsS1lHeVN4ZHdLdHZINHpBSXdwREpOR1FoTHoyTW1RUEV4Yi91cmdCU0lweCBiOFpoYUhxcUQ1cXVhbU9tV1pDNmdlcjl3a2crSlRTTHNCcjJsWnVRZnZwY2xydVRwZ2ZKREdrSFZsVlpRZHBxK0Zha1Avc1NLN2cyIHJnRFNtMzhERVBpd0VLSHhlbk90bzJNUnFhNjJDZGFFejN5aDhKbmZwT2xCVXEzVGVlMklVYWovV2xVc1NGZFZ0WDRKbkRrSFN0MXEgQ29BMFRlV2VvVWNnOEI4M3dxMytZUWlXZ0NSbU53UlJSRzUyMUFaQlY1Y3ZTYVNEbFpiclhYWGw0NitRM2ZkRGxyc3RZUUNrQTlHdyBVZ1R2NzRXbWMvUi90SmlNOXU0SW90aFR3eWJjc2QrOXhncnVweWxDVWlsOTJnNFY4U0J0MCtNR1pOejZKc3YvUzhJQlNKTXMvVk9BIDBEV0RFSGk0blVrWjZZNnhvcVhJTHFaTmpDVFZ1b0pYdm53NG1pNVI0WXBwVVBQRHV1c3hWdG9yWVFHa1NlWVJFVzdacEQ1b2ZGSnUgRzkrWHBqSVBkRFM1bUMyVllhUjFXZ09zWlkrdzBsS2FJaVNWbXNJOS9jYkN2Mlh2OEZNenR3NVV3aWNoQU5TZVZTVGNzNXV5MGR5eiBqVy9aS0NkcEtoMTgvU0dIb2dtZXByekQzSE5wbXBCVVNqc25wdkxrd2lwa0hUK0w1WDJSTkFEUzZ6VHVHWlF2WU5RRHdZc3kwVnlpIHR4WmlBVng3S3JscG1qbGNEc2VuejdDaW45SVVJYW5VTkY0N1lTVHFGNnQ4bUc1RXhtOWZaL2tQSmlXQU5Na0VTeGxvUHR5RjhKbUYgQ0Ywc0xLU3g3Ymt3UU1kSnhwTEpEWlB2bHlLN1pCN0xMYWRwUWxLcC84ZDMxNlloa211MEc2YU41ZDF3dlA4Y0s1cVcxQUJxcTVPNCBOMDJZamljSnkraGVBYVFKN1ZrU0xUQkt2bjFHMnRHVkRjaTQvVTJXL3hoTkVaSksvWnhYL2IwdkdxODFPbWVRQnFCNndhQkhXV25QIGxBSlFXK3ZJaWZBWTRhcGRYWXJRT2Vsb2RyZHBpTERPWFV2NG95RGFRUERCdXYzUHJMUVBUUkdTWWpmc1I4SU4reitqVjhNMEFNa0MgaGwvQW1kM1I2ZmlrQjFCYnlYcjJib1NtdXhFK1RiaHFZL1JtcGR5ZklHODVaaGtsckt1bVFXZ1JuRmxVUG9pazJKdHdIQTlmRXd5dSBmS3dCU0ZyMGk1R2QzVkhtMEpRRGtGNlR1TmVaaGVhUndsMDdSN2hxcCtjZzNMKzl0dHBma3JGNFNIc2FyVUhtMlc4ejk3czBUVWdxIGRTdmZzODJKNXQ1R3VtRWFnT1JEZnpHY3pvNnloYVkwZ05vQlVwYUEwRW1sQ041WmhOQng3VFZhekYyenhUT3pvellRZHNNeDV6bFcgZERwTkVaSkszY1RMMXVVaGZLU1JhVnMxQU1teHZLZ0ZRSUZ1RDZDMm1zbzlRd1NRcGhVaitIUFpBVzNiVUI0UGFTOHh2VGtNRWlROCBnUDlNSWlVRGdJUUZsTk5SS0tGYkEwZ3Z4cjNwd2xVNzFZM3d4WVVJc2xqS2dyYVdrZWxuMVVUbjVTNWdMaS8xRUVtVjltWkxWQUtnIFp1bUNFWUM2b0pPNDE1NkJ5SUNXMkZId0F2M3BmWDBEQStyalJpdVJkZHo3TEc4UjlRcEpsZTdqdXlKNmFCZ0pJQm5QbEVGbzNrRzkgTUFKUUp4U0xIYkZlQ042Zmo5QkkvYjhwTEhjU2RjTzJJUDNQcjdDQzI2Z1hTQ3AwR3ZjTUdRUC9lb1hMOEFGaEFXVjNkQjZNQU5SRiBuY2pyYkhrSW5kb1R3WHNLRUJwbjlKTkQxNEhSUUhRZGJKdi93a29HVU1zZldGTzRwNjhUNFVscHdub1ZGbXkvVERRUEVLOWVzaDJiIFpTYmNXT3FUc0pnVWpiRHNhWVIxWnhNc080T3c3QkkvS3hQdnQ0cjNXOFcvbFludmc5MGg5bllqTDFzdExYeWp4N0F1TVpsL0VadzUgM1dZZmtKbVNLV2NIb1BIREVnUi9xbW9ucWN3czkwZldJNXRhdTMyZHlqMjl4Y1BnMFZJRVQ3Y2prbW5VZGFWbDY0TnRxM2dBckc2QSA1WnNBckdzRW9EYUpKM3E1ZUhrRW9Cb09sTzB2MGFYTDIyNzRhWGh0L0ZiQi91WGZXUEg0anY0L0FwQUI3dGxFK1B3SzhxcTBEb29sIGNMcm5NMWN0dGZaZXlUaGRIelM5ZURpYXB1c0h2U3lMSk5PM2FCdE5MVzBtVm1UdmhqdEF0d2RNVG9YT3BuMlJjS3FIYmFjQTAzWUIgcHUxK1dKZUtyMStMaDhVTzhkcVRESnRITCtEVnR3eEc0TTl0eDVyUjQvYzdwUC8xWlZid2F3S1FPaXNvN1RqNEdoVzRZcTJEWWdXeSB4c3htZWN1cHRWdDBPcThkTlFyMXJlMGhkOXRLK0J2VTlscEFOdEt5MEdDSjZNcHpXNFNWbFhHZ0o3K0FVV1c5QUZNRHJGdnFZUDFVIGZGMGtYaHM2Mmd0amNzeG4wQUFFWnVVaFBFUlYrRUN2dGNpOGFDWnp2MEVBVXFqcmVmbVg4b1MrMFFGcFhhRzMvWFppZDlLNXZPYlMgb1doNHFjVVNpVnFkZHBpN1lUU2loMU4wRW5YaDBMTnc0N3dlMk5iNFlmdEd1blpOc0c2S1dVNjdoV3ZuL1ZoQjNFbFk2ZG55UklDdyBHSitSeSsxNjBLcHV1OFZ3NWkxZ0xnOEJTS0V1NDVYUGlzNzlwZEZKdmpXZ2JVVEdmYSt6L0FlNmV6dFA1MVVQOVVmalhXWTh1US9GIGN0cG5nblh4ektHd2xNcDlzRzRVZ0ZyZENNdEdBYVU5b1dpUUhEVUN1TUxWaHkvU0VsQVhIeFFGb0dhZDJZUjFsaU1heENYR29OdUIgeUdGeTEzOFJRbFAxdWJSTWFydW85UzdINys5WnovMkdKUWhBQnVnOFhuM05rUWc4WXp5QVd1SktCOHFwMGgzMGMxNzFURjgwWGhNTCA5c2Z0bUl4UkZ0VGVyOUhEMFZiVm1ScGlwYUNzWmtCYmUzQnVRdm9mWG1NRjl4Q0FGT3NNWGp2dUdOUXZOZG9GMDY3WGxWSzNLV3I1IFBDd3NuenZpNUhMRkFVeVc1cjF1M2w2TFF0Nzcvc2FYVnZoU2kxZkYwaGViZnE1UlY1YW45NGNzZHdjQlNMRjBaVTZNVG1rUVhkb1Agd0ZxOUhGbWxIZTBtVFdWZHlLdnZHb1RBUXlsZytSZ05xaDlPNWdSSU1hTTlORDJ3ZmZ0WFZqTDRRUDgvQWNnQXliUWZ4OEpYSzJHaCBZanU3Zk44ZGwrTFA1VFZYREVYRDgxQll0WUZrdVBVVHplaTVGcG5ueldUdUdRUWdFM1FTOTFwR29HR2pDK0grQnJ0aFduMDA2M0prIGo1akRjbGQzbHpadHM5Uk9BRW9DYVdOZnJ2UjlpZXk4aGN4MVFMZ1FnQXpTTDNuRi9GSUVKeHNkaUpabmFlVGVrelhJUFBkdDVwN1ogSGRweU12Zm1DSXZTcTNkRGFZUWxnVzhZNjZ0MXlMeHFCbk0vTCt2OUhlZzRDd0hJSUdtck5Kb0phalNBdmtYR25XK3cvRWRTdlIzbCBvSjBJWDUwRGtXeUZCMzFKeHNNbkdpNlExczlEckVkdVozK1BBR1Jjdk9LcW9XajRwOUZQYk0yaStoNXBiejdQQ2k5TTlYYThnWmV2IHlFZm9HSUpQY2dKb0JiSkd6V1o1S3dsQUp1c01YanZtR05SL1pYVE1RcmNVdi80SlZqSTBsZHZ3WWw3MSt3Rm8vQzNCSjdtazdWZmIgZ2JSWFhtQ0ZsM2JsZHdsQUJ1a1U3aWtZRDMrbDBRRFNaNWI3QWs1N1p3Sjd5YWlwM0ROOE5QeXJhU1FsSjN5RTYrVVJybGRlVjMrZiBBR1NRWkgyeWlmRFZ5L2lQZ3R3cVViZnVjemdkQWtDaFZHdTdOZ2Q2S2VpY1BHNVhhMThkYk9wZ0FwQ0J1cFB2cWN4QWM0SFJBTktlIE1rdmdMSmpQWE5XcDFtNDM4UEtWTXRPazBTdUlKTlg4YWJIeVZ5SnIvUHNzNzh1RHVRZ0J5RUJkeDhzWHkxTFJxZ0FrT25xQzZPaWwgcWRSbUYvTHFPd1loOEREQkp6bmhzd2FaUDN1YnVkOCsyQXNSZ0F6VTVienloZDVvdWx3VmdOWWg4OG9aelAxQ3FyU1h6RTB6QnY0TiBOSEtTUi9vRkFnR2Zzd1I4M2p1VTZ4R0FqSDJhSzBseHFmbmFXNUgrOUV1czRQcFVhQ3VaMGZCNCtHSnBKUkl1dFFhcG5XRVlzMUxUIFkyN1hXR0dOTHp2VWl4S0FETlE1dk9abnc5RXd3L0NlajAzUU1qZytlWllWblpnS2JmVXJYdjVGRVVJVEZhU3lKU2tZZjJoNW9scDkgc0cxYmpjeWpGakJYblJIWEpnQVpxS25jTTJ3MC9HdFVBY2dMMjZiSFdjbkFaRytuODNuMWpVTVFlTUxFL1Q0SHNrZ2pIU1FTQTdyeCBHYlMydGU4MkkvMlJWMW5CblVaK0JnSElRSjNNdlhrVDRLdFJOWUZraFl3bGNEby9UdUp5TVZPNDU0aXg4Ry91SkJnTWcvZWhYQ0tXIFp5ZmNBcVZvd250cktydU1iWk9YeVN5Tnd1bzVlaTdMM1dQMFp4R0FESlE4eC9RVDFEV3JuRnlMNE14S2hxb0xIZWxldmlzVVMxdWkgZkwrUEhqN2FVckhjcjJWREpNT09pRnU4Q3ROYTZvZU56MEx6VVBHK3AzaC9tSGdWSHdnd2NwSks5eEd4eEYreHJJYldSTWpKY3lqZyBrU1hJdGNUN011YnpQMlJjUHBPNVgxZjFtUVFnNHllWWxqaExDWUMrUlBaaDRrbTBNeG5iNW1wZThXNVBCTTgwS2VqYzJ2NWZJMnZ5IGV5enZvODcrSXVQZWRFY0xvSXJGMTM0WmlJd1FVQnFlaHVaU0FhcStUalQzUHRCRTFzcjg2TW9ESmFURnBKVXkwaWZXYjRTbGRndlMgN3lxSDR6blZ4UmtKUUFiclpsNjJJUmZoUWFvbW1aaE1rOFJrNHNuV0x1Zndtbk9HbzJHbTJhN1hSbVRjK3pyTC83MVIxNVVXbEFDVCBNMlk5OVJaZ0dpZWdkSXdMNGJGT2hQdDBJYWExdjdpVDdrZUdnSGlmWlBrZFdXazFzSCs5QTQ2N1BMRFBOOHZOSndBWnJDdDQ1Y3VIIG8ra1NCUzVHZE5LS0NmVWJNYUgrbUV4dE1vbDdNeWJDMXhDN2liQVpDZGdsQ0hiQjhkNC9XZEZaWnJyZ0FrbzU0dFVuSGMyRE10QjggZERhYXgrUUk5MDdDNldEalQxcnkrbGh5T3NzQkJrbjAvNUV1WVdjc0x3bWQzWEE4VlFmcm5Ia3N0OHpzc1VFQU1saGFoUXhWTmNLUyBjU24rSmw2MlhoYkNNMlBKWGZzTVA2dzdIbU9sdlJPcEhhVDFKTnk0d25SRUJndkxhWlNBMHdRQnF0N0N4U3NSc09vaDNMMHNsWjh2IGM0dlh3L3BkTld6emEyRi84UU9XdXluZWJVSUFNbGluODlvUm8xRC90ZEZIQ3pUTG9RSFd5a2RZYVZHeXRNZEZ2UHJlZ1FqY2I4WlIgaXphSEkxMUc3VlV4QzA3U3RSTVFLcEYxdmNSTjVJbnZTOFJMZ3FtSHNLcDZpWi9ueHU3UHVqZTJGTEhMbjRrSFhsTkV3RmQrYllKbCBaeE9zMjRPd2JBL0JzbHQrYmZtWnhmZHBncTJnRW9BTTFzbmNtejhCdmlxam4vYWFCU1FHazM4Um5EbWZKc0ZTL0JUdTZUTVcvcTBtIGZWeHJYR2sxTWs5L2g3bm4wR2hNZkJHQURCYmpYc2R4OERYcG9XSDBCRnNDWi9GODVxcEk1SGFRaWZxUGhUOGdyUjR6VnIwMGwzYzcgMGw1OGtSVmVRU09SQU5SdGRTc3YyeXFEamdZSFhGc0J0QXBaUDVyRjhqNVA1RGJRbHR6TmlmdTB3S2NlMXQyUHN0S2VOQUlKUU4xYSB2K0FWSC9aQThGUUZicGhXZGVEcUdjejlyMFM5L3pONTdhU2pVYi9BakdLQ2V1dHFNWng1QzVqTFF5T1FBTlN0ZFNtdittcy9OTjVrIGRJVU03VW0vQmVtUHZjSUtiay9FZTUvTXZibXlTS01DRjdSZC9taDEwN3E2MlpCRUFFcFpuY3RyTGgyS2hwZU10b0MwNnlYeVV2d2QgZkUrWlBNcGd4a0ZUN1ROMklPM1ZGMWpoSlRUeUNFQWtSRS9GSHpVYS9tOWlGb0JoWjRPMENWY0gyK2F2a1RrdzBSTFVYOFlybisyRCBwbCthQVIvTnVwTEhCdjdFZXJocDFCR0FTREdkd2oxRjQrRXYzenRYREt1UUVZMEJTZGR1S2JMZGlYUW85V3hlYzhaUmFKaGw5RDBmIFNFdmdkTTlucmxvYWRRUWdVa3lNZXpQR3dWOGxkN1lxV0FtTDl0dHlaQjg1aCtYK0x4SHVkekwzdW82Rno2T0hwRnJYcThVVlhZdk0gQzJjeTk1czA0Z2hBcERhNmtaZXRkaU04M0doM1JDdlZ2QTZabDg5ZzduOG53cjNleHZkc3owYno0V2JzZHRZK293eU9oYyt5SWtZaiBqUUJFYWtlLzRCV3plaUI0aHRHVFVydmVOcVQ5NDkrczhKcDQzNmVXaU4rTS9UNmFkU1dodmdqT2pJWE1GYWFSUmdBaXRhT0xlZFdEIEE5QjR0Nm96WVltdzZlNHNYblBLQ0RUTU5UdS96d3Bralp6TjhyNm1VVVlBSW5XZ00zbnRUNDlHL2NkdEo0K1JFUG9jempSaEJRVGogY1grVHVUZm5XUGk4S3U2dmczdU9RbTRyMHA5NWlSWDhpa1lZQVlqVXlRbXFxazdZS21UOVpCYkwrNzk0M04rdGZNODJtUm5RelAwKyBpWmhpZzBRQVNsamR4WGZYcENPU3A2cFcvRTZremZ3WEt6elg3UHRTRmQvYW4rVWozNmRxYVdvQ0VFblZSSTJlQ1ZNUUk5R3FaUGovIHlIbzR6YnluaTNqMVBRTVJlTUNzZWw2YTlVTkw3Z1FnVWhkMUFhKytaVEFDZjRiQ0dNbFNaUGVjeDNKM20zRS8wM2p0ajBlaS9yOW0gdFo4R0gxcHlKd0NSRGtKbjhOcHh4NkIrcVRydkJKWU55TGo1VFpiL2hPcDdPWlY3ZW82RGY2ZitzODF5dlQ2SDAwNUw3Z1FnVWhlbCByMyt1YW9MS1BMOFBzOUlDbGZjeGlYc3pKOEpYcjdkS3pHckQ1Y2dlTVlmbHJxYlJSQUFpSFlSdTRXV2JjeEErUWxVY1NMNVpnYXhqIFpyTzhWU3IrZnBuaGNRTDhQaGxzTml2dW93VzN2MFhHWFcrdy9JZHBGQkdBU0FlcDgzajF0VWNpOEhjVmxvTUdCRlhwS0dSYTFmSHcgZXh5STVKZ0luMmdPSlZrdTVrbFdQSkpHRUFHSWRBZzZtWHVMSnNCWHJtTEpXbHVPbDlhVkxObk1tYXZSeU92Znh2ZDhuNDNtWG1ZcyB0K3Z2Ujc3L0FzNDBIcWRObGlRQ1VNcElGcXM3RnI2YU5FUnlWUnhaMEN5R3pVaC85RlZXY0ljUjE1UWxZa2FpZnFOMEhjMnlmUFF1IDVYSmtENS9EY3RmUzZDRUFrUXlRVmkzVjZCU3R1b2tiN2N2RmNPWXVZQzd2b1Z4c0V2YzZ4OEZmSVUvY20yWDU2SzJmVFVqLzNXdXMgNEg0YU5RUWdra0U2azllZWVEVHFGNnF5SnJUSld3WDdsMzlqeGVNUDlqcW5jRStQOGZEdmlsbFdwc0ZIaTQvVndyYjJDVll5bkVZTSBBWWhrb09ReTlnVDRQUkkrcWhKMmFlN2RSbVQ4OW5XVy8yQlhmLzljWG5QSlVEUzgzQUlFMDl5dWZaYjFQME9PN1dPVzAwd2poZ0JFIE1saGFuU3d6TEl2L0llT20vN0Q4SnpzTHh5TVJXT3hHNkdpOU5XV1MyOVVhRTF1TzdLUG1zTncxTkZJSVFDUUZPcDNYamg2RittVjcgNTU3eE80bjFFMW9HcFhmRGNXZEhpZXRsR3RVOGhDNldXd1IwdjJ1QlNibWM5YkNqdUE4QmlHU0M3dVI3cWpMUW5LODRnVmNyM09RdSA2UjFJKzRzUDFrOUNzSlNKRDh4TVIvT3dZb1N1S1Vid2hMWWdNTE10ZEhHcnIvN0dpc2ZSNkNBQWtSVHJJbDU5OTBBRUhvUUpaNms2IDQrckZWdVhTekxSNnBMUzRqNEJpd3hkd1puL0tjbWdRRW9CSXFqV0plN01td3VjMzA4cEFDMTFzZWpkTnM4Qk1TS1BhSVh6a2V5cXAgUXlJQW1heGY4b3E1cFFpZVlyTGJvKzlrUzd6dVhlOTZya0RXNk5rc2J3V05DQUlRdFlLSk9wbDdDeWZBVnhHUHVFdWMxZXAycmtmRyBMOTVpK2YrazBVQWlBTVZCVi9MSy94eUdwdk1VN1l4T1ZQcEVnWnNvNVlSSUJLQnVxMG5jbXowUlBwOStZcWJ5L1dweG4zSTQvdnNNIEt6cUJSZ0NKQUJSblhjeXI3aHVBeHQrbE9vQzBYZFhWc0M5L2loV1BvWjRuRVlBU1JML2h1K3Z0aUdTYVZOZ3ZicGFQVDNoZWYyWWwgZmFuSFNRU2dCTkkwWGp0aEpPb1hweUtBTlBnMHdGcTVIRm5GSGUzSUpoR0FxQlhpcUN0NDVhdUhvK25pVkFwSWEyNlgzR2k0Qk5rdSBBWjhROVRTSkFKU0FrZ25MZm9JNnVXSFFZbVlLRE5Yd2lWaytQUWcrSkFKUWdtc3k5N3FQaGE5YTc3b2s0VzNJa1JTUnJxUUh0bTlYIEkzTUl1VjBrQWxDU2FDcjNEQjBOZnpRTmFiS3RqT24vM3Qxd2ZQQWNLNXBLUFVvaUFDV1p6dUMxNDQ5Qi9aSmtncEErZWRsM1NIL3EgWlZad0kvVWtpUUNVcEpyR2E0OGZpZnJQa3NFZDA4Tm5IVEl2bmNIY3IxQVBrZ2hBeVc4SnRaWjBUbEFJdFNiQ0Q4RVNXSUdzQVhOWiA3azdxT1JJQktFVTBoWHQ2ajRWL20rYU95YjZLOTE0aExaV0hCc1NkU0p2eEwxWjRIdlVXaVFDVWdwSWxjb2FqWVpVTDRmN3krM2d1IDArdjNLUVZocVZ1TnpCK3JLZ2ROSWdDUkVrZ1g4T3JiQmlQd3FPYVNtWmxNVEg2ZS9LcFpQVnVSL3N6M2NGeEhTK3drQWxBM2tzd2ogMUErTmI1UWd5UFJlVVd6dmpaSEo1TnU5WmhrY24yeEQya1Z6V2U0ZTZnMFNBYWliYWdyM0hDR3NvUVdhVzZaemtab3NpRmdQd2pxUyBJNkM1R1phd0ZSRmIyNlgvSFVoN1pTZlNicDdQWE5YVStpUUNFQ21xVTdtbmR5bUNEeHlHcG92YnJwSzF1RTJXS0ZnMEt5Wm0wY2hBIGNnU3g3SVR5WndJNjlyYldVdzFzYTNZaDdjRnEyTitpUW9Fa0FoQ3BRNTNJNjZ3NUNCL25SdWppUElSUHlFVjRjRmV2SVlQS05iQXYgcjRUOUZROXM3eTVncmhwcVdSSUJpTlJsbmN5OVJYWkVDakxRUENRZGtSRnBhRDVNK0ZRNU5rUnlSVTgzaG1DcEZhK3FSbGcyQjJCZCBMdUR6dlhoVmMrWUtVT3VSQ0VBa0Vva0FSQ0tSU0FRZ0VvbEVBQ0tSU0NRQ0VJbEVTaG45ZnlOc0hhRXc1SlFmQUFBQUFFbEZUa1N1IFFtQ0MiIHdpZHRoPSI1NSIgaGVpZ2h0PSI1NSIgeT0iLjUiIHByZXNlcnZlQXNwZWN0UmF0aW89Im5vbmUiLz4KPC9zdmc+Cg==" alt="Anki logo">
+        <span class="anki-word">Powered by <strong>Anki</strong></span>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-nav-group">
+          <span class="sidebar-nav-label">Overview</span>
+          <a class="sidebar-nav-item active" onclick="showSection('dashboard')">
+            <span class="icon">📊</span> Dashboard
+          </a>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-nav-group">
+          <span class="sidebar-nav-label">Management</span>
+          <a class="sidebar-nav-item" onclick="showSection('decks')">
+            <span class="icon">📦</span> Decks
+          </a>
+          <a class="sidebar-nav-item" onclick="showSection('capsules')">
+            <span class="icon">🧉</span> Study Mixes
+          </a>
+          <a class="sidebar-nav-item" onclick="showSection('stats')">
+            <span class="icon">📈</span> Statistics
+          </a>
+          <a class="sidebar-nav-item" onclick="showSection('addons')">
+            <span class="icon">🧩</span> Add-ons
+          </a>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-nav-group">
+          <span class="sidebar-nav-label">System</span>
+          <a class="sidebar-nav-item" onclick="showSection('sync')">
+            <span class="icon">🔄</span> Sync Control
+          </a>
+          <a class="sidebar-nav-item" onclick="showSection('anki-ops')">
+            <span class="icon">🔧</span> Anki Operations
+          </a>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-nav-group">
+          <span class="sidebar-nav-label">Interleaved Mastery Pipeline</span>
+          <a class="sidebar-nav-item" onclick="showSection('imp')">
+            <span class="icon">🧬</span> IMP Console
+            <span style="margin-left:auto;font-size:10px;background:var(--color-accent-bg);color:var(--color-accent);padding:2px 8px;border-radius:10px">New</span>
+          </a>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-footer-line">AnkiTov Backend v0.1.0</div>
+        <div class="sidebar-footer-line" id="footer-status">Connecting…</div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT ════ -->
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="topbar-breadcrumb">
+            <span>Management</span>
+            <span>›</span>
+            <span class="current" id="breadcrumb-current">Dashboard</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="profile-switcher">
+            <select class="profile-select" id="profile-select" onchange="switchProfile()">
+              <option value="">Loading profiles…</option>
+            </select>
+          </div>
+          <div class="topbar-search">
+            <span>🔍</span>
+            <input type="text" placeholder="Search decks…" id="search-input" oninput="filterDecks()">
+          </div>
+          <div class="health-badge" id="health-badge">
+            <span class="health-badge-dot"></span>
+            <span id="health-label">Checking…</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-scroll">
+<div class="section-panel active" id="section-dashboard">
+        <!-- ════ STAT CARDS ════ -->
+        <div class="metrics-row">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-label">Decks</span>
+              <div class="stat-card-icon blue">📦</div>
+            </div>
+            <div class="stat-card-value" id="stat-decks">—</div>
+            <div class="stat-card-sub">Total decks</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-label">Notes</span>
+              <div class="stat-card-icon green">📝</div>
+            </div>
+            <div class="stat-card-value" id="stat-notes">—</div>
+            <div class="stat-card-sub">Total notes</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-label">Cards</span>
+              <div class="stat-card-icon purple">🎴</div>
+            </div>
+            <div class="stat-card-value" id="stat-cards">—</div>
+            <div class="stat-card-sub">Total cards</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-label">Reviews</span>
+              <div class="stat-card-icon amber">📖</div>
+            </div>
+            <div class="stat-card-value" id="stat-reviews">—</div>
+            <div class="stat-card-sub">Total reviews</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-label">Due Now</span>
+              <div class="stat-card-icon red">⏰</div>
+            </div>
+            <div class="stat-card-value" id="stat-due">—</div>
+            <div class="stat-card-sub">Cards waiting</div>
+          </div>
+        </div>
+
+        <!-- ════ RETENTION CHART ════ -->
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <div class="chart-card-title">Retention Trend</div>
+              <div class="chart-card-subtitle">Daily review success rate over time</div>
+            </div>
+            <div class="chart-card-filter">
+              <button class="active" onclick="loadRetentionChart(7)">7 days</button>
+              <button onclick="loadRetentionChart(14)">14 days</button>
+              <button onclick="loadRetentionChart(30)">30 days</button>
+            </div>
+          </div>
+          <div class="chart-area" id="chart-area">
+            <span>Loading retention data…</span>
+          </div>
+        </div>
+
+        <!-- ════ DECK DETAIL PANEL (hidden until deck selected) ════ -->
+        <div class="detail-panel" id="detail-panel">
+          <div class="detail-header">
+            <span class="detail-title" id="detail-title">Deck Health</span>
+            <button class="btn btn-ghost" onclick="closeDetail()">✕ Close</button>
+          </div>
+          <div class="detail-grid" id="detail-grid"></div>
+        </div>
+
+        <!-- ════ SCHOOL METRICS PANEL — always visible ════ -->
+        <div class="school-metrics-card" id="school-metrics-card">
+          <div class="school-metrics-header">
+            <div>
+              <div class="school-metrics-title">📊 Learning Insights</div>
+              <div class="school-metrics-subtitle" id="school-metrics-subtitle">Study patterns and deck quality — select a deck to begin</div>
+            </div>
+            <div class="chart-card-filter">
+              <button class="active" onclick="loadSchoolMetrics(7)">7 days</button>
+              <button onclick="loadSchoolMetrics(14)">14 days</button>
+              <button onclick="loadSchoolMetrics(30)">30 days</button>
+            </div>
+          </div>
+          <div class="school-metrics-grid" id="school-metrics-grid">
+            <div class="empty-state"><span style="font-size:28px">📊</span> Select a deck from the table below to view learning insights</div>
+          </div>
+        </div>
+
+        <!-- ════ ANKI DECKS TABLE ════ -->
+        <div class="table-card">
+          <div class="table-card-header">
+            <div>
+              <span class="table-card-title">Anki Decks</span>
+              <span style="font-size:13px;color:var(--color-text-muted);margin-left:8px" id="anki-decks-count">—</span>
+            </div>
+            <div class="table-card-actions">
+              <button class="btn btn-ghost" id="refresh-btn">↻ Refresh</button>
+              <button class="btn btn-primary" onclick="syncAnki()">🔄 Sync</button>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Deck Name</th>
+                <th>New</th>
+                <th>Learning</th>
+                <th>Review</th>
+                <th>Total</th>
+                <th>Due</th>
+                <th>Health</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="anki-decks-body">
+              <tr><td colspan="8"><div class="empty-state"><span style="font-size:24px">⏳</span> Loading decks…</div></td></tr>
+            </tbody>
+          </table>
+          <div class="table-footer">
+            <span>Auto-refresh every 30 seconds</span>
+            <span class="muted">Data from live Anki instance</span>
+          </div>
+        </div>
+
+        <!-- ════ ANKITOV DECKS TABLE (managed decks) ════ -->
+        <div class="table-card">
+          <div class="table-card-header">
+            <span class="table-card-title">Managed Decks</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Hash</th>
+                <th>Cards</th>
+                <th>Size</th>
+                <th>Created</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="managed-decks-body">
+              <tr><td colspan="6"><div class="empty-state"><span style="font-size:24px">📭</span> Loading…</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        </div><!-- /section-dashboard -->
+
+        <!-- ════ DECKS SECTION ════ -->
+        <div class="section-panel" id="section-decks">
+          <div class="table-card">
+            <div class="table-card-header">
+              <div><span class="table-card-title">All Decks</span></div>
+            </div>
+            <div class="table-body">
+              <table>
+                <thead><tr><th>Deck</th><th>New</th><th>Learn</th><th>Review</th><th>Total</th><th>Due</th><th>Health</th></tr></thead>
+                <tbody id="section-decks-body"><tr><td colspan="7"><div class="empty-state">Loading…</div></td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════ CAPSULES & MIXING SECTION ════ -->
+        <div class="section-panel" id="section-capsules">
+          <!-- Active Generation Worker Header -->
+          <div class="metrics-row" style="margin-bottom:var(--space-xl)">
+            <div class="stat-card" style="flex:1">
+              <div class="stat-card-header">
+                <span class="stat-card-label" style="font-weight:700">Study Mix Generator</span>
+                <span class="badge badge-warn" id="job-status-badge">Idle</span>
+              </div>
+              <div style="margin: 14px 0">
+                <div style="font-size:14px;color:var(--color-text-muted);display:flex;justify-content:space-between;margin-bottom:8px">
+                  <span>Batch processing progress — concurrent SQLite reads serialized safely</span>
+                  <span id="job-progress-pct" style="font-weight:bold">0%</span>
+                </div>
+                <div class="theme-progress-bar">
+                  <div class="theme-progress-bar-fill" id="job-progress-bar" style="width:0%"></div>
+                </div>
+                <div style="font-size:13px;color:var(--color-text-muted);margin-top:8px" id="job-stats-span">
+                  Processed: 0 / 0 active students
+                </div>
+              </div>
+              <button class="btn btn-ghost" id="trigger-gen-all-btn" onclick="triggerGenAll()">⚡ Trigger Batch Run Now</button>
+            </div>
+          </div>
+
+          <!-- Profile Assignments and Anomalies Row -->
+          <div class="metrics-row">
+            <!-- Profile Assignments -->
+            <div class="table-card" style="flex:1.5">
+              <div class="table-card-header" style="justify-content:space-between">
+                <div><span class="table-card-title">Profile Assignments & Overrides</span></div>
+                <div style="display:flex;gap:8px">
+                  <select id="assign-target-select" style="padding:6px 12px;border:1px solid var(--color-border);border-radius:var(--radius-sm)" onchange="loadTargetOptions()">
+                    <option value="student">Student Override</option>
+                    <option value="cohort">Class Default</option>
+                  </select>
+                  <select id="assign-id-select" style="padding:6px 12px;border:1px solid var(--color-border);border-radius:var(--radius-sm);width:180px">
+                    <option value="">— Select —</option>
+                  </select>
+                  <select id="assign-profile-select" style="padding:6px 12px;border:1px solid var(--color-border);border-radius:var(--radius-sm)">
+                    <option value="">— Select Profile —</option>
+                  </select>
+                  <button class="btn" onclick="submitAssignment()">Assign</button>
+                </div>
+              </div>
+              <div class="table-body">
+                <table>
+                  <thead><tr><th>Target Type</th><th>Target ID / Name</th><th>Assigned Track Profile</th><th>Assigned By</th><th>Assigned At</th><th>Action</th></tr></thead>
+                  <tbody id="assignments-table-body">
+                    <tr><td colspan="6"><div class="empty-state">No overrides defined — all defaulting to legacy fallback</div></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Anomalies Warnings -->
+            <div class="table-card" style="flex:1">
+              <div class="table-card-header">
+                <div><span class="table-card-title" style="color:var(--color-danger)">🚨 System Warnings & Anomalies</span></div>
+              </div>
+              <div class="table-body" style="padding:var(--space-md)" id="anomalies-log-body">
+                <div class="empty-state">No anomalies found. Everything runs clean.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════ PLACEHOLDER SECTIONS ════ -->
+        <div class="section-panel" id="section-stats">
+          <div class="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px" id="stats-overview-cards"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+            <div class="card" style="padding:16px">
+              <h3 style="margin:0 0 12px 0;font-size:15px">📋 Per-Deck Breakdown</h3>
+              <div id="stats-deck-list" style="max-height:400px;overflow-y:auto"></div>
+            </div>
+            <div class="card" style="padding:16px">
+              <h3 style="margin:0 0 12px 0;font-size:15px">📈 Retention Trend (14 days)</h3>
+              <div id="stats-trend" style="font-size:13px;color:var(--color-text-muted)">Loading...</div>
+            </div>
+          </div>
+          <div class="card" style="padding:16px;margin-top:24px">
+            <h3 style="margin:0 0 12px 0;font-size:15px;color:var(--color-danger)">🚨 Flagged Performance & Retention Exceptions</h3>
+            <div id="stats-exceptions-list" style="max-height:400px;overflow-y:auto;font-size:13px;color:var(--color-text-muted)">Loading exceptions...</div>
+          </div>
+        </div>
+        <div class="section-panel" id="section-addons"><div class="empty-state"><span style="font-size:28px">🧩</span> Addon Management — coming soon</div></div>
+        <div class="section-panel" id="section-sync"><div class="empty-state"><span style="font-size:28px">🔄</span> Sync Control — coming soon</div></div>
+        <div class="section-panel" id="section-anki-ops"><div class="empty-state"><span style="font-size:28px">⚙️</span> Anki Operations — coming soon</div></div>
+
+        <!-- ── IMP Console ── -->
+        <div class="section-panel" id="section-imp">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:var(--space-md);margin-bottom:var(--space-md)">
+            <div>
+              <h2 style="font-size:20px;font-weight:700">Interleaved Mastery Pipeline</h2>
+              <p style="font-size:13px;color:var(--color-text-secondary);margin-top:4px">
+                Capsule generation, compliance tracking, and AI-powered analytics
+              </p>
+            </div>
+          </div>
+          <div style="border:1px solid var(--color-border);border-radius:var(--radius);overflow:hidden;flex:1;min-height:600px">
+            <iframe src="/imp-console" style="width:100%;height:100%;min-height:600px;border:none" title="IMP Console"></iframe>
+          </div>
+        </div>
+
+        <!-- Info Banner (for sync notices) -->
+        <div id="info-banner" class="info-banner">
+          <span id="info-message"></span>
+        </div>
+
+        <!-- Error Banner -->
+        <div id="error-banner" class="error-banner">
+          <span id="error-message"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = '/api/v1';
+    let currentDeck = null;
+    let retentionDays = 7;
+    let metricsDays = 7;
+
+    // ═══════════════════════════════════════════════════════════
+    // Profile Switcher
+    // ═══════════════════════════════════════════════════════════
+    async function loadProfiles() {
+      try {
+        const res = await fetch(`${API}/management/anki/profiles`);
+        const data = await res.json();
+        const select = document.getElementById('profile-select');
+        select.innerHTML = '';
+
+        if (data.profiles && data.profiles.length > 0) {
+          data.profiles.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.name;
+            opt.textContent = `👤 ${p.name} (${p.collection_size_kb}KB)`;
+            if (p.name === data.active_profile) opt.selected = true;
+            select.appendChild(opt);
+          });
+        } else {
+          select.innerHTML = '<option value="">No profiles found</option>';
+        }
+      } catch (e) {
+        console.error('Profile load error:', e);
+      }
+    }
+
+    async function switchProfile() {
+      const select = document.getElementById('profile-select');
+      const profile = select.value;
+      if (!profile) return;
+
+      // Visual feedback
+      select.disabled = true;
+      document.getElementById('health-badge').className = 'health-badge';
+      document.getElementById('health-label').textContent = 'Switching…';
+
+      try {
+        const res = await fetch(`${API}/management/anki/active-profile`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ profile })
+        });
+        const data = await res.json();
+        if (data.success) {
+          loadAll();
+        } else {
+          showError(data.message || 'Failed to switch profile');
+        }
+      } catch (e) {
+        showError(`Profile switch error: ${e.message}`);
+      } finally {
+        select.disabled = false;
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Health Check
+    // ═══════════════════════════════════════════════════════════
+    async function checkHealth() {
+      const badge = document.getElementById('health-badge');
+      const dot = badge.querySelector('.health-badge-dot');
+      const label = document.getElementById('health-label');
+      try {
+        const res = await fetch(`${API}/management/anki/health`);
+        const data = await res.json();
+        if (data.success) {
+          badge.className = 'health-badge ok';
+          label.textContent = 'Anki Live';
+          document.getElementById('footer-status').textContent = '✓ Anki connected';
+        } else {
+          badge.className = 'health-badge warn';
+          label.textContent = 'Anki Off';
+          document.getElementById('footer-status').textContent = '⚠ Anki not running';
+        }
+      } catch {
+        badge.className = 'health-badge error';
+        label.textContent = 'Offline';
+        document.getElementById('footer-status').textContent = '✗ Backend offline';
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Collection Health (Forensic SQLite)
+    // ═══════════════════════════════════════════════════════════
+    async function loadCollectionHealth() {
+      try {
+        const res = await fetch(`${API}/management/anki/collection-health`);
+        const data = await res.json();
+        document.getElementById('stat-notes').textContent = data.note_count?.toLocaleString() ?? '—';
+        document.getElementById('stat-cards').textContent = data.card_count?.toLocaleString() ?? '—';
+        document.getElementById('stat-reviews').textContent = data.review_count?.toLocaleString() ?? '—';
+      } catch (e) {
+        console.error('Collection health error:', e);
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Anki Decks (Live AnkiConnect)
+    // ═══════════════════════════════════════════════════════════
+    async function loadAnkiDecks() {
+      const tbody = document.getElementById('anki-decks-body');
+      try {
+        const [decksRes, dueRes] = await Promise.all([
+          fetch(`${API}/management/anki/decks`),
+          fetch(`${API}/management/anki/due/Default`)
+        ]);
+        const decksData = await decksRes.json();
+
+        let deckNames = [];
+        if (decksData.success !== false) {
+          deckNames = decksData.decks || [];
+        }
+
+        // Fetch stats for each deck
+        const statsPromises = deckNames.map(name =>
+          fetch(`${API}/management/anki/deck-health/${encodeURIComponent(name)}`)
+            .then(r => r.json())
+            .then(d => ({ name, ...d }))
+            .catch(() => ({ name, health_score: null }))
+        );
+        const stats = await Promise.all(statsPromises);
+
+        document.getElementById('stat-decks').textContent = deckNames.length;
+        document.getElementById('anki-decks-count').textContent = `${deckNames.length} decks`;
+
+        if (deckNames.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state">⚠ No decks — Anki may be starting up</div></td></tr>';
+          document.getElementById('stat-due').textContent = '—';
+          return;
+        }
+
+        let totalDue = 0;
+        tbody.innerHTML = stats.map(s => {
+          const due = s.due_count || 0;
+          totalDue += due;
+          const score = s.health_score;
+          let badge = '<span class="badge badge-idle">—</span>';
+          if (score !== null && score !== undefined) {
+            if (score >= 70) badge = `<span class="badge badge-ok">${score}</span>`;
+            else if (score >= 40) badge = `<span class="badge badge-warn">${score}</span>`;
+            else badge = `<span class="badge badge-error">${score}</span>`;
+          }
+          const newC = s.new_count ?? 0;
+          const learnC = s.learn_count ?? 0;
+          const reviewC = s.review_count ?? 0;
+          const totalC = s.total_count ?? 0;
+          return `<tr>
+            <td style="font-weight:600">${s.name}</td>
+            <td>${newC}</td>
+            <td>${learnC}</td>
+            <td>${reviewC}</td>
+            <td>${totalC}</td>
+            <td>${due}</td>
+            <td>${badge}</td>
+            <td><button class="btn-sm btn-health" onclick="loadDeckDetail('${s.name.replace(/'/g, "\\'")}')">View Details</button></td>
+          </tr>`;
+        }).join('');
+
+        document.getElementById('stat-due').textContent = totalDue;
+
+        // Auto-select first deck if none selected — so school metrics are always visible
+        if (!currentDeck && deckNames.length > 0) {
+          loadDeckDetail(deckNames[0]);
+        }
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">⚠ ${e.message}</div></td></tr>`;
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Retention Chart
+    // ═══════════════════════════════════════════════════════════
+    async function loadRetentionChart(days) {
+      retentionDays = days;
+      // Update filter buttons — target retention chart specifically
+      const retFilters = document.querySelector('.chart-card .chart-card-filter');
+      if (retFilters) {
+        retFilters.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        const btns = retFilters.querySelectorAll('button');
+        if (days === 7) btns[0]?.classList.add('active');
+        if (days === 14) btns[1]?.classList.add('active');
+        if (days === 30) btns[2]?.classList.add('active');
+      }
+
+      const area = document.getElementById('chart-area');
+      const deckName = currentDeck || 'Default';
+      area.innerHTML = '<span>Loading…</span>';
+
+      try {
+        const res = await fetch(`${API}/management/anki/retention-curve/${encodeURIComponent(deckName)}?days=${days}`);
+        const data = await res.json();
+        const trend = data.curve || [];
+        if (trend.length === 0) {
+          area.innerHTML = '<span>No retention data for this deck yet</span>';
+          return;
+        }
+        const maxRate = Math.max(...trend.map(d => d.retention_rate), 0.1);
+        area.innerHTML = `<div class="chart-bars">${trend.map(d => {
+          const h = Math.max(4, (d.retention_rate / Math.max(maxRate, 0.01)) * 140);
+          const pct = Math.round(d.retention_rate * 100);
+          const color = pct >= 80 ? 'linear-gradient(180deg, #16a34a 0%, #22c55e 100%)' :
+                        pct >= 60 ? 'linear-gradient(180deg, #d97706 0%, #f59e0b 100%)' :
+                        'linear-gradient(180deg, #dc2626 0%, #ef4444 100%)';
+          return `<div class="chart-bar-group">
+            <div class="chart-bar" style="height:${h}px;background:${color}" title="${d.date}: ${pct}% (${d.review_count} reviews, ${d.lapse_count} lapses)"></div>
+            <div class="chart-bar-label">${d.date.slice(5)}</div>
+          </div>`;
+        }).join('')}</div>`;
+      } catch (e) {
+        area.innerHTML = `<span>⚠ ${e.message}</span>`;
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Deck Detail (Full Health Report)
+    // ═══════════════════════════════════════════════════════════
+    async function loadDeckDetail(deckName) {
+      currentDeck = deckName;
+      const panel = document.getElementById('detail-panel');
+      const title = document.getElementById('detail-title');
+      const grid = document.getElementById('detail-grid');
+      title.textContent = `Deck Health — ${deckName}`;
+      panel.classList.add('visible');
+      grid.innerHTML = '<div class="detail-item"><div class="detail-item-label">Loading…</div></div>';
+
+      // Update school metrics subtitle
+      document.getElementById('school-metrics-subtitle').textContent = `Showing insights for: ${deckName}`;
+
+      try {
+        const res = await fetch(`${API}/management/anki/full-health/${encodeURIComponent(deckName)}?days=${retentionDays}`);
+        const data = await res.json();
+
+        if (data.success === false) {
+          grid.innerHTML = `<div class="detail-item"><div class="detail-item-label">Error</div><div class="detail-item-value">${data.message || 'Failed'}</div></div>`;
+          return;
+        }
+
+        const live = data.live_stats || {};
+        const retention = data.retention_trend || [];
+        const lapse = data.lapse_stats || {};
+        const interval = data.interval_distribution || {};
+        const health = data.health_score ?? 0;
+        const warnings = data.warnings || [];
+
+        const totalReviews = retention.reduce((s, d) => s + (d.review_count || 0), 0);
+        const totalLapses = retention.reduce((s, d) => s + (d.lapse_count || 0), 0);
+        const avgRetention = totalReviews > 0
+          ? Math.round((1 - totalLapses / totalReviews) * 100)
+          : 0;
+
+        let scoreClass = 'low';
+        if (health >= 70) scoreClass = 'good';
+        else if (health >= 40) scoreClass = 'mid';
+
+        let trafficLight = 'gray';
+        if (health >= 70) trafficLight = 'green';
+        else if (health >= 40) trafficLight = 'amber';
+        else trafficLight = 'red';
+
+        grid.innerHTML = `
+          <div class="detail-item"><div class="detail-item-label">Health Score</div><div class="health-score ${scoreClass}">${health}</div><div class="traffic-light"><span class="traffic-dot ${trafficLight}"></span> ${health >= 70 ? 'Healthy' : health >= 40 ? 'Needs attention' : 'At risk'}</div></div>
+          <div class="detail-item"><div class="detail-item-label">Total Cards</div><div class="detail-item-value">${live.total_cards ?? '—'}</div></div>
+          <div class="detail-item"><div class="detail-item-label">Due Now</div><div class="detail-item-value">${data.due_now ?? 0}</div></div>
+          <div class="detail-item"><div class="detail-item-label">New Cards</div><div class="detail-item-value">${live.new_cards ?? 0}</div></div>
+          <div class="detail-item"><div class="detail-item-label">Learning</div><div class="detail-item-value">${live.learn_cards ?? 0}</div></div>
+          <div class="detail-item"><div class="detail-item-label">Review Cards</div><div class="detail-item-value">${live.review_cards ?? 0}</div></div>
+          <div class="detail-item"><div class="detail-item-label">Avg Retention</div><div class="detail-item-value">${avgRetention}%</div></div>
+          <div class="detail-item"><div class="detail-item-label">Total Reviews</div><div class="detail-item-value">${totalReviews.toLocaleString()}</div></div>
+          <div class="detail-item"><div class="detail-item-label">Lapses</div><div class="detail-item-value">${totalLapses}</div></div>
+          <div class="detail-item"><div class="detail-item-label">Lapse Rate</div><div class="detail-item-value">${lapse.lapse_rate ? (lapse.lapse_rate * 100).toFixed(1) + '%' : '—'}</div></div>
+          <div class="detail-item"><div class="detail-item-label">Avg Interval</div><div class="detail-item-value">${interval.avg_interval_days ? interval.avg_interval_days.toFixed(1) + 'd' : '—'}</div></div>
+          <div class="detail-item"><div class="detail-item-label">Interval Spread</div><div class="detail-item-value" style="font-size:16px">${interval.bucket_short_days ?? 0} short / ${interval.bucket_medium_days ?? 0} mid / ${interval.bucket_long_days ?? 0} long</div></div>
+        `;
+
+        if (warnings.length > 0) {
+          grid.innerHTML += `<div class="detail-item" style="grid-column: 1 / -1"><div class="detail-item-label">⚠ Warnings</div><div style="font-size:13px;color:var(--color-warning);margin-top:4px">${warnings.map(w => w.message || w).join('; ')}</div></div>`;
+        }
+
+        // Also reload retention chart and school metrics for this deck
+        loadRetentionChart(retentionDays);
+        loadSchoolMetrics(metricsDays);
+      } catch (e) {
+        grid.innerHTML = `<div class="detail-item"><div class="detail-item-label">Error</div><div class="detail-item-value">${e.message}</div></div>`;
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Learning Insights (School Metrics — Teacher-friendly labels)
+    // ═══════════════════════════════════════════════════════════
+    async function loadSchoolMetrics(days) {
+      metricsDays = days;
+      // Update filter buttons — target school metrics card specifically
+      const smFilters = document.querySelector('.school-metrics-card .chart-card-filter');
+      if (smFilters) {
+        smFilters.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        const btns = smFilters.querySelectorAll('button');
+        if (days === 7) btns[0]?.classList.add('active');
+        if (days === 14) btns[1]?.classList.add('active');
+        if (days === 30) btns[2]?.classList.add('active');
+      }
+
+      const grid = document.getElementById('school-metrics-grid');
+      const deckName = currentDeck;
+      if (!deckName) {
+        grid.innerHTML = '<div class="empty-state"><span style="font-size:28px">📊</span> Select a deck from the table below to view learning insights</div>';
+        return;
+      }
+
+      grid.innerHTML = '<div class="empty-state">Loading learning insights…</div>';
+
+      try {
+        const [pasRes, spiRes, gapRes, dsiRes] = await Promise.all([
+          fetch(`${API}/management/anki/adherence/${encodeURIComponent(deckName)}?days=${days}`).then(r => r.json()).catch(() => null),
+          fetch(`${API}/management/anki/sporadic/${encodeURIComponent(deckName)}?days=${days}`).then(r => r.json()).catch(() => null),
+          fetch(`${API}/management/anki/gaps/${encodeURIComponent(deckName)}?days=${days}`).then(r => r.json()).catch(() => null),
+          fetch(`${API}/management/anki/suitability/${encodeURIComponent(deckName)}?days=${days}`).then(r => r.json()).catch(() => null),
+        ]);
+
+        // Student Practice tile (was PAS)
+        let pasHtml = '<div class="metric-tile neutral"><div class="metric-tile-label">📅 Student Practice</div><div class="metric-tile-value">—</div><div class="metric-tile-sub">N/A</div></div>';
+        if (pasRes && pasRes.score !== undefined) {
+          const cls = pasRes.score >= 70 ? 'good' : pasRes.score >= 40 ? 'warn' : 'error';
+          const barCls = cls;
+          const label = pasRes.score >= 80 ? 'Excellent' : pasRes.score >= 60 ? 'Good' : pasRes.score >= 40 ? 'Fair' : 'Needs improvement';
+          pasHtml = `<div class="metric-tile ${cls}">
+            <div class="metric-tile-label">📅 Student Practice</div>
+            <div class="metric-tile-value">${pasRes.score}<span style="font-size:16px;color:var(--color-text-muted)">/100</span></div>
+            <div class="progress-bar"><div class="progress-fill ${barCls}" style="width:${pasRes.score}%"></div></div>
+            <div class="metric-tile-sub">${label} — ${pasRes.active_days} of ${pasRes.total_days} days active · ${pasRes.missed_days} missed</div>
+          </div>`;
+        }
+
+        // Consistency tile (was SPI)
+        let spiHtml = '<div class="metric-tile neutral"><div class="metric-tile-label">🔄 Consistency</div><div class="metric-tile-value">—</div><div class="metric-tile-sub">N/A</div></div>';
+        if (spiRes && spiRes.index !== undefined) {
+          const cls = spiRes.index < 0.2 ? 'good' : spiRes.index < 0.5 ? 'warn' : 'error';
+          const label = spiRes.index < 0.2 ? 'Consistent' : spiRes.index < 0.5 ? 'Variable' : spiRes.index < 0.8 ? 'Irregular' : 'Erratic';
+          const pct = Math.round((1 - spiRes.index) * 100);
+          spiHtml = `<div class="metric-tile ${cls}">
+            <div class="metric-tile-label">🔄 Consistency</div>
+            <div class="metric-tile-value">${pct}<span style="font-size:16px;color:var(--color-text-muted)">%</span></div>
+            <div class="progress-bar"><div class="progress-fill ${cls}" style="width:${pct}%"></div></div>
+            <div class="metric-tile-sub">${label} — ${spiRes.avg_reviews_per_active_day?.toFixed(0) || 0} reviews per active day</div>
+          </div>`;
+        }
+
+        // Study Gaps tile (was Gap Analysis)
+        let gapHtml = '<div class="metric-tile neutral"><div class="metric-tile-label">📅 Study Gaps</div><div class="metric-tile-value">—</div><div class="metric-tile-sub">N/A</div></div>';
+        if (gapRes && gapRes.max_gap_days !== undefined) {
+          const cls = gapRes.max_gap_days <= 2 ? 'good' : gapRes.max_gap_days <= 6 ? 'warn' : 'error';
+          const label = gapRes.max_gap_days <= 2 ? 'No significant gaps' : gapRes.max_gap_days <= 6 ? 'Minor gaps' : 'Major gaps detected';
+          gapHtml = `<div class="metric-tile ${cls}">
+            <div class="metric-tile-label">📅 Study Gaps</div>
+            <div class="metric-tile-value">${gapRes.max_gap_days}<span style="font-size:16px;color:var(--color-text-muted)"> days max</span></div>
+            <div class="metric-tile-sub">${label} — ${gapRes.gaps_over_3_days} gaps over 3 days, ${gapRes.gaps_over_7_days} gaps over 7 days · avg ${gapRes.avg_gap_days?.toFixed(1)} days</div>
+          </div>`;
+        }
+
+        // Deck Difficulty tile (was DSI)
+        let dsiHtml = '<div class="metric-tile neutral"><div class="metric-tile-label">🎯 Deck Difficulty</div><div class="metric-tile-value">—</div><div class="metric-tile-sub">N/A</div></div>';
+        if (dsiRes && dsiRes.verdict) {
+          const cls = dsiRes.verdict === 'Optimal' ? 'good' : dsiRes.verdict === 'Too Hard' ? 'error' : 'warn';
+          const badgeClass = dsiRes.verdict.replace(/\s/g, '-');
+          dsiHtml = `<div class="metric-tile ${cls}">
+            <div class="metric-tile-label">🎯 Deck Difficulty</div>
+            <div class="metric-tile-value" style="margin-top:4px"><span class="suitability-badge ${badgeClass}">${dsiRes.verdict}</span></div>
+            <div class="metric-tile-sub">Lapse rate ${(dsiRes.lapse_rate * 100).toFixed(0)}% · Ease factor ${dsiRes.ease_factor?.toFixed(2)} · ${dsiRes.avg_time_per_card_secs?.toFixed(0)}s per card</div>
+          </div>`;
+        }
+
+        grid.innerHTML = pasHtml + spiHtml + gapHtml + dsiHtml;
+      } catch (e) {
+        grid.innerHTML = `<div class="empty-state">⚠ ${e.message}</div>`;
+      }
+    }
+
+    function closeDetail() {
+      document.getElementById('detail-panel').classList.remove('visible');
+      currentDeck = null;
+      document.getElementById('school-metrics-subtitle').textContent = 'Select a deck to view learning insights';
+      loadRetentionChart(retentionDays);
+      loadSchoolMetrics(metricsDays);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Managed Decks
+    // ═══════════════════════════════════════════════════════════
+    async function loadManagedDecks() {
+      const tbody = document.getElementById('managed-decks-body');
+      try {
+        const res = await fetch(`${API}/management/decks`);
+        const data = await res.json();
+        const decks = data.decks || data || [];
+        if (decks.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">No managed decks yet</div></td></tr>';
+          return;
+        }
+        tbody.innerHTML = decks.map(d => {
+          const hash = (d.content_hash || '').slice(0, 8);
+          const status = d.distributed ? 'Distributed' : 'Idle';
+          const cls = d.distributed ? 'ok' : 'idle';
+          return `<tr>
+            <td style="font-weight:600">${d.name}</td>
+            <td class="mono">${hash}</td>
+            <td>${d.card_count ?? '—'}</td>
+            <td class="muted">${d.size_bytes ? (d.size_bytes / 1024).toFixed(0) + 'KB' : '—'}</td>
+            <td class="muted">${d.created_at ? new Date(d.created_at * 1000).toLocaleDateString() : '—'}</td>
+            <td><span class="badge badge-${cls}">${status}</span></td>
+          </tr>`;
+        }).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">⚠ ${e.message}</div></td></tr>`;
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Sync — graceful error handling
+    // ═══════════════════════════════════════════════════════════
+    async function syncAnki() {
+      const btn = event?.target;
+      if (btn) { btn.textContent = '🔄 Syncing…'; btn.disabled = true; }
+      try {
+        const res = await fetch(`${API}/management/anki/sync`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success !== false) {
+          showInfo('Sync completed successfully');
+          loadAnkiDecks();
+        } else {
+          // Use info banner for configuration messages, error banner for real errors
+          if (data.message && data.message.includes('not configured')) {
+            showInfo(data.message);
+          } else {
+            showError(data.message || 'Sync failed');
+          }
+        }
+      } catch (e) {
+        showError(`Sync error: ${e.message}`);
+      } finally {
+        if (btn) { btn.textContent = '🔄 Sync'; btn.disabled = false; }
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Search / Filter
+    // ═══════════════════════════════════════════════════════════
+    function filterDecks() {
+      const q = document.getElementById('search-input').value.toLowerCase();
+      document.querySelectorAll('#anki-decks-body tr').forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Section Navigation
+    // ═══════════════════════════════════════════════════════════
+    function showSection(section) {
+      document.querySelectorAll('.sidebar-nav-item').forEach(a => a.classList.remove('active'));
+      const target = event?.target?.closest?.('.sidebar-nav-item');
+      if (target) target.classList.add('active');
+      document.getElementById('breadcrumb-current').textContent = section.charAt(0).toUpperCase() + section.slice(1);
+
+      // Toggle section panels
+      document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+      const panel = document.getElementById('section-' + section);
+      if (panel) { panel.classList.add('active'); }
+
+      // If switching to decks, populate the decks table
+      if (section === 'decks') populateDecksSection();
+      if (section === 'capsules') populateCapsulesSection();
+      if (section === 'stats') loadStats();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Banners
+    // ═══════════════════════════════════════════════════════════
+    function showError(msg) {
+      const banner = document.getElementById('error-banner');
+      document.getElementById('error-message').textContent = msg;
+      banner.classList.add('visible');
+      setTimeout(() => banner.classList.remove('visible'), 6000);
+    }
+
+    function showInfo(msg) {
+      const banner = document.getElementById('info-banner');
+      document.getElementById('info-message').textContent = msg;
+      banner.classList.add('visible');
+      setTimeout(() => banner.classList.remove('visible'), 8000);
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // ── Statistics Tab ──────────────────────────────────────────
+    async function loadStats() {
+      const overview = document.getElementById('stats-overview-cards');
+      const deckList = document.getElementById('stats-deck-list');
+      const trendDiv = document.getElementById('stats-trend');
+      overview.innerHTML = '<div style="padding:12px;color:var(--color-text-muted)">Loading...</div>';
+      deckList.innerHTML = '';
+      trendDiv.innerHTML = 'Loading...';
+
+      try {
+        const res = await fetch('/api/v1/management/stats');
+        const data = await res.json();
+        const o = data.overview;
+
+        // Overview cards
+        const cards = [
+          { label: 'Total Decks', value: o.total_decks, icon: '📚' },
+          { label: 'Total Cards', value: o.total_cards, icon: '🃏' },
+          { label: 'Total Reviews', value: o.total_reviews?.toLocaleString() || '0', icon: '📝' },
+          { label: 'Avg Retention', value: (o.average_retention * 100).toFixed(1) + '%', icon: '🎯' },
+          { label: 'Active Profiles', value: o.active_users, icon: '👥' },
+        ];
+        overview.innerHTML = cards.map(c => 
+          `<div class="card" style="padding:16px;text-align:center">
+            <div style="font-size:28px;margin-bottom:4px">${c.icon}</div>
+            <div style="font-size:22px;font-weight:700;color:var(--color-accent)">${c.value}</div>
+            <div style="font-size:12px;color:var(--color-text-muted);margin-top:4px">${c.label}</div>
+          </div>`
+        ).join('');
+
+        // Deck breakdown table
+        const decks = data.decks || [];
+        deckList.innerHTML = decks.length === 0
+          ? '<div style="padding:12px;color:var(--color-text-muted)">No decks found</div>'
+          : `<table style="width:100%;font-size:13px;border-collapse:collapse">
+              <thead><tr style="text-align:left;border-bottom:1px solid var(--color-border)">
+                <th style="padding:6px">Deck</th>
+                <th style="padding:6px">Cards</th>
+                <th style="padding:6px">Due</th>
+                <th style="padding:6px">Health</th>
+              </tr></thead>
+              <tbody>${decks.map(d => {
+                const color = d.status === 'danger' ? 'var(--color-danger)' : d.status === 'warn' ? '#e6a817' : 'var(--color-success)';
+                return `<tr style="border-bottom:1px solid var(--color-border)">
+                  <td style="padding:6px">${escapeHtml(d.name)}</td>
+                  <td style="padding:6px">${d.total}</td>
+                  <td style="padding:6px;color:${d.due > 0 ? 'var(--color-danger)' : 'inherit'}">${d.due}</td>
+                  <td style="padding:6px;color:${color};font-weight:600">${d.health_score}%</td>
+                </tr>`;
+              }).join('')}</tbody></table>`;
+
+        // Retention trend
+        const trend = o.retention_trend || [];
+        trendDiv.innerHTML = trend.length === 0
+          ? '<div style="padding:12px;color:var(--color-text-muted)">No trend data available</div>'
+          : `<div style="display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:12px">${trend.map(p => {
+              const h = Math.round(p.retention_rate * 100);
+              return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="font-size:10px;font-weight:600;color:${h < 70 ? 'var(--color-danger)' : h < 80 ? '#e6a817' : 'var(--color-success)'}">${h}%</div>
+                <div style="width:100%;background:${h < 70 ? 'var(--color-danger)' : h < 80 ? '#e6a817' : 'var(--color-success)'};height:${h}px;border-radius:4px 4px 0 0;opacity:0.7;min-height:4px" title="${p.date}: ${h}% (${p.review_count} reviews)"></div>
+                <div style="font-size:9px;color:var(--color-text-muted);writing-mode:vertical-rl;transform:rotate(180deg)">${p.date.slice(5)}</div>
+              </div>`;
+            }).join('')}</div>`;
+
+        // Live Student Exceptions
+        const exceptions = data.exceptions || [];
+        const exceptionsList = document.getElementById('stats-exceptions-list');
+        if (exceptionsList) {
+          exceptionsList.innerHTML = exceptions.length === 0
+            ? '<div style="padding:12px;color:var(--color-text-muted)">No active retention exceptions! All students are on track. 🎉</div>'
+            : `<table style="width:100%;font-size:13px;border-collapse:collapse">
+                <thead><tr style="text-align:left;border-bottom:1px solid var(--color-border)">
+                  <th style="padding:6px">Student</th>
+                  <th style="padding:6px">Deck</th>
+                  <th style="padding:6px">Type</th>
+                  <th style="padding:6px">Retention Rate</th>
+                  <th style="padding:6px">Threshold</th>
+                  <th style="padding:6px">Detected At</th>
+                </tr></thead>
+                <tbody>${exceptions.map(e => {
+                  const daysAgo = Math.round((Date.now() / 1000 - e.detected_at) / 86400);
+                  const daysText = daysAgo === 0 ? 'Today' : `${daysAgo} day${daysAgo === 1 ? '' : 's'} ago`;
+                  return `<tr style="border-bottom:1px solid var(--color-border)">
+                    <td style="padding:6px;font-weight:600;color:var(--color-danger)">Student ${escapeHtml(e.user_id)}</td>
+                    <td style="padding:6px">${escapeHtml(e.deck_id)}</td>
+                    <td style="padding:6px"><span style="background:rgba(219,68,85,0.1);color:var(--color-danger);padding:2px 6px;border-radius:4px;font-size:11px">${escapeHtml(e.exception_type.replace('_', ' '))}</span></td>
+                    <td style="padding:6px;color:var(--color-danger);font-weight:600">${(e.retention_rate * 100).toFixed(0)}%</td>
+                    <td style="padding:6px">${(e.threshold * 100).toFixed(0)}%</td>
+                    <td style="padding:6px;color:var(--color-text-muted)">${daysText}</td>
+                  </tr>`;
+                }).join('')}</tbody></table>`;
+        }
+      } catch (err) {
+        overview.innerHTML = '<div style="padding:12px;color:var(--color-danger)">Failed to load statistics</div>';
+        console.error('Stats load error:', err);
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Study Mixes Controllers
+    // ═══════════════════════════════════════════════════════════
+    async function populateCapsulesSection() {
+      await Promise.all([
+        loadProfileAssignments(),
+        loadTargetOptions(),
+        loadProfileOptions(),
+        pollGenerationJob()
+      ]);
+    }
+
+    async function loadProfileAssignments() {
+      const tbody = document.getElementById('assignments-table-body');
+      try {
+        const res = await fetch(`${API}/management/profile-assignments`);
+        const data = await res.json();
+        
+        if (data && data.length > 0) {
+          tbody.innerHTML = data.map(a => {
+            const dateStr = new Date(a.assigned_at * 1000).toLocaleString();
+            return `
+              <tr>
+                <td style="font-weight:600">
+                  <span class="badge ${a.target_type === 'student' ? 'badge-warn' : 'badge-ok'}">${a.target_type}</span>
+                </td>
+                <td style="font-weight:600">${a.target_id}</td>
+                <td><span style="font-weight:600">${a.track_profile_id}</span></td>
+                <td>👤 ${a.assigned_by}</td>
+                <td style="color:var(--color-text-muted);font-size:13px">${dateStr}</td>
+                <td>
+                  <button class="btn btn-ghost" style="color:var(--color-danger)" onclick="deleteAssignmentOverride(${a.id})">Delete</button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        } else {
+          tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">No overrides defined — all defaulting to legacy fallback</div></td></tr>`;
+        }
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">⚠ Failed to load assignments: ${e.message}</div></td></tr>`;
+      }
+    }
+
+    // Cache for user/class lookup data
+    let _userCache = [];
+    let _cohortCache = [];
+
+    async function loadTargetOptions() {
+      const targetType = document.getElementById('assign-target-select').value;
+      const selectEl = document.getElementById('assign-id-select');
+      selectEl.innerHTML = '<option value="">Loading…</option>';
+
+      try {
+        if (targetType === 'student') {
+          if (_userCache.length === 0) {
+            const res = await fetch(`${API}/management/sync/users`);
+            _userCache = await res.json();
+          }
+          // Sort users by full_name or id for easy scanning
+          const sorted = [..._userCache].sort((a, b) => {
+            const na = (a.full_name || `User #${a.user_id}`).toLowerCase();
+            const nb = (b.full_name || `User #${b.user_id}`).toLowerCase();
+            return na.localeCompare(nb);
+          });
+          selectEl.innerHTML = '<option value="">— Choose Student —</option>' +
+            sorted.map(u => {
+              const label = u.full_name
+                ? `${u.full_name} (ID: ${u.user_id})`
+                : `User #${u.user_id}`;
+              return `<option value="${u.user_id}">${escapeHtml(label)}</option>`;
+            }).join('');
+        } else {
+          // Cohort mode — extract distinct subsection_ids from users
+          if (_userCache.length === 0) {
+            const res = await fetch(`${API}/management/sync/users`);
+            _userCache = await res.json();
+          }
+          if (_cohortCache.length === 0) {
+            const seen = new Set();
+            _cohortCache = [];
+            for (const u of _userCache) {
+              if (u.cohort_id && !seen.has(u.cohort_id)) {
+                seen.add(u.cohort_id);
+                _cohortCache.push(u.cohort_id);
+              }
+            }
+            _cohortCache.sort();
+          }
+          selectEl.innerHTML = '<option value="">— Choose Class —</option>' +
+            _cohortCache.map(c => `<option value="${c}">Class: ${escapeHtml(c)}</option>`).join('');
+        }
+      } catch (e) {
+        selectEl.innerHTML = `<option value="">⚠ Failed to load</option>`;
+        console.error('loadTargetOptions error:', e);
+      }
+    }
+
+    async function loadProfileOptions() {
+      const selectEl = document.getElementById('assign-profile-select');
+      try {
+        const res = await fetch(`${API}/management/track-profiles`);
+        const profiles = await res.json();
+        selectEl.innerHTML = '<option value="">— Select Profile —</option>' +
+          profiles.map(p => `<option value="${p.name}">${escapeHtml(p.name)}</option>`).join('');
+      } catch (e) {
+        console.error('loadProfileOptions error:', e);
+      }
+    }
+
+    async function submitAssignment() {
+      const target_type = document.getElementById('assign-target-select').value;
+      const target_id = document.getElementById('assign-id-select').value;
+      const track_profile_id = document.getElementById('assign-profile-select').value;
+
+      if (!target_id) {
+        showError('Please select a target student or class first!');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API}/management/profile-assignments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            target_type,
+            target_id,
+            track_profile_id,
+            assigned_by: 'Principal Williams'
+          })
+        });
+
+        if (res.ok) {
+          showInfo(`Successfully assigned ${track_profile_id} default override!`);
+          document.getElementById('assign-id-select').value = '';
+          loadProfileAssignments();
+        } else {
+          showError('Failed to create assignment override.');
+        }
+      } catch (e) {
+        showError(`Assignment creation err: ${e.message}`);
+      }
+    }
+
+    async function deleteAssignmentOverride(id) {
+      if (!confirm('Are you sure you want to delete this assignment override?')) return;
+      try {
+        const res = await fetch(`${API}/management/profile-assignments/${id}`, {
+          method: 'DELETE'
+        });
+
+        if (res.ok) {
+          showInfo('Assignment override deleted successfully.');
+          loadProfileAssignments();
+        } else {
+          showError('Failed to delete assignment override.');
+        }
+      } catch (e) {
+        showError(`Override delete err: ${e.message}`);
+      }
+    }
+
+    async function triggerGenAll() {
+      const btn = document.getElementById('trigger-gen-all-btn');
+      btn.disabled = true;
+      btn.innerHTML = '⚡ Processing Study Mix Queue...';
+      
+      try {
+        const res = await fetch(`${API}/management/capsule-sessions/generate-all`, {
+          method: 'POST'
+        });
+        
+        if (res.ok) {
+          showInfo('Study mix generation triggered for all students!');
+          pollGenerationJob();
+        } else {
+          showError('Batch generation trigger failed.');
+          btn.disabled = false;
+          btn.innerHTML = '⚡ Trigger Batch Run Now';
+        }
+      } catch (e) {
+        showError(`Batch generation trigger err: ${e.message}`);
+        btn.disabled = false;
+        btn.innerHTML = '⚡ Trigger Batch Run Now';
+      }
+    }
+
+    async function pollGenerationJob() {
+      const statusBadge = document.getElementById('job-status-badge');
+      const progressPct = document.getElementById('job-progress-pct');
+      const progressBar = document.getElementById('job-progress-bar');
+      const statsSpan = document.getElementById('job-stats-span');
+      const anomaliesBody = document.getElementById('anomalies-log-body');
+      const triggerBtn = document.getElementById('trigger-gen-all-btn');
+
+      try {
+        const res = await fetch(`${API}/management/generation-jobs/latest`);
+        const job = await res.json();
+
+        if (job) {
+          statusBadge.textContent = job.status.toUpperCase();
+          
+          if (job.status === 'processing' || job.status === 'pending') {
+            statusBadge.className = 'badge badge-warn';
+            triggerBtn.disabled = true;
+            triggerBtn.innerHTML = '⚡ Processing Study Mix Queue...';
+            // Schedule next poll
+            setTimeout(pollGenerationJob, 2000);
+          } else {
+            statusBadge.className = job.status === 'completed' ? 'badge badge-ok' : 'badge badge-error';
+            triggerBtn.disabled = false;
+            triggerBtn.innerHTML = '⚡ Trigger Batch Run Now';
+          }
+
+          progressPct.textContent = `${job.progress}%`;
+          progressBar.style.width = `${job.progress}%`;
+          statsSpan.innerHTML = `Processed: <strong>${job.completed_students}</strong> / <strong>${job.total_students}</strong> active students`;
+
+          // Handle anomalies rendering
+          if (job.anomalies && job.anomalies.length > 0) {
+            anomaliesBody.innerHTML = job.anomalies.map(a => `
+              <div style="background:var(--color-bg-base);border-left:4px solid var(--color-danger);padding:10px;margin-bottom:8px;border-radius:var(--radius-sm)">
+                <div style="font-weight:700;font-size:14px;color:var(--color-danger)">🚨 Anomaly detected: ${a.anomaly_type}</div>
+                <div style="font-size:13px;font-weight:600;margin:4px 0">Student: ${a.name} (ID: ${a.student_id})</div>
+                <div style="font-size:12px;color:var(--color-text-muted)">Details: ${a.msg}</div>
+                <div style="font-size:12px;color:var(--color-success);font-weight:600;margin-top:4px">Fallback: ${a.fallback_applied}</div>
+              </div>
+            `).join('');
+          } else {
+            anomaliesBody.innerHTML = '<div class="empty-state">No anomalies found. Everything runs clean.</div>';
+          }
+        } else {
+          statusBadge.textContent = 'IDLE';
+          statusBadge.className = 'badge badge-idle';
+        }
+      } catch (e) {
+        console.error('Job polling error:', e);
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Load All
+    // ═══════════════════════════════════════════════════════════
+    function loadAll() {
+      checkHealth();
+      loadProfiles();
+      loadCollectionHealth();
+      loadAnkiDecks();
+      loadRetentionChart(retentionDays);
+      loadSchoolMetrics(metricsDays);
+      loadManagedDecks();
+    }
+
+    async function populateDecksSection() {
+      const tbody = document.getElementById('section-decks-body');
+      try {
+        const res = await fetch(`${API}/management/anki/decks`);
+        const data = await res.json();
+        const deckNames = data.decks || [];
+        const stats = await Promise.all(deckNames.map(name =>
+          fetch(`${API}/management/anki/deck-health/${encodeURIComponent(name)}`)
+            .then(r => r.json()).then(d => ({ name, ...d }))
+            .catch(() => ({ name, health_score: null }))
+        ));
+        tbody.innerHTML = stats.map(s => {
+          const score = s.health_score;
+          let badge = score != null
+            ? (score >= 70 ? `<span class="badge badge-ok">${score}</span>`
+              : score >= 40 ? `<span class="badge badge-warn">${score}</span>`
+              : `<span class="badge badge-error">${score}</span>`)
+            : '<span class="badge badge-idle">—</span>';
+          return `<tr><td style="font-weight:600">${s.name}</td><td>${s.new_count ?? 0}</td><td>${s.learn_count ?? 0}</td><td>${s.review_count ?? 0}</td><td>${s.total_count ?? 0}</td><td>${s.due_count ?? 0}</td><td>${badge}</td></tr>`;
+        }).join('') || '<tr><td colspan="7"><div class="empty-state">No decks found</div></td></tr>';
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">⚠ ${e.message}</div></td></tr>`;
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Init
+    // ═══════════════════════════════════════════════════════════
+    document.getElementById('refresh-btn').addEventListener('click', loadAll);
+    loadAll();
+    setInterval(() => { checkHealth(); loadAnkiDecks(); }, 30000);
+
+    // ═══════════════════════════════════════════════════════════
+    // Rig AI Chatbox
+    // ═══════════════════════════════════════════════════════════
+    function toggleChat() {
+      const panel = document.getElementById('chat-panel');
+      const btn = document.getElementById('chat-toggle-btn');
+      panel.classList.toggle('open');
+      btn.classList.toggle('active');
+      if (panel.classList.contains('open')) {
+        document.getElementById('chat-input').focus();
+      }
+    }
+
+    function submitChatQuery() {
+      const input = document.getElementById('chat-input');
+      const query = input.value.trim();
+      if (!query) return;
+      sendChatQuery(query);
+      input.value = '';
+    }
+
+    function sendChipQuery(query) {
+      document.getElementById('chat-input').value = query;
+      sendChatQuery(query);
+    }
+
+    async function sendChatQuery(query) {
+      const body = document.getElementById('chat-body');
+      // Show user message
+      body.innerHTML += `<div class="chat-msg user">${escapeHtml(query)}</div>`;
+      // Show typing indicator
+      body.innerHTML += '<div class="chat-typing" id="chat-typing">🤔 Thinking…</div>';
+      body.scrollTop = body.scrollHeight;
+
+      try {
+        const res = await fetch(`${API}/management/ask`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query })
+        });
+        const data = await res.json();
+        // Remove typing indicator
+        document.getElementById('chat-typing')?.remove();
+
+        // Build assistant response
+        let html = `<div class="chat-msg assistant"><div class="summary">${escapeHtml(data.summary)}</div>`;
+        if (data.rows && data.rows.length > 0) {
+          html += data.rows.map(r => {
+            const statusClass = r.status || 'ok';
+            return `<div class="chat-result-row">
+              <span><strong>${escapeHtml(r.label)}</strong> ${escapeHtml(r.value)}</span>
+              <span class="chat-result-status ${statusClass}">${statusClass.toUpperCase()}</span>
+            </div>${r.detail ? `<div style="font-size:11px;color:var(--color-text-muted);margin-bottom:4px">${escapeHtml(r.detail)}</div>` : ''}`;
+          }).join('');
+        }
+        if (data.navigate_to) {
+          const sectionNames = { stats: 'Statistics', capsules: 'Study Mixes', decks: 'Decks' };
+          const name = sectionNames[data.navigate_to] || data.navigate_to;
+          html += `<div style="margin-top:8px;font-size:12px;color:var(--color-accent);cursor:pointer;text-decoration:underline" onclick="showSection('${data.navigate_to}');toggleChat();">📊 Open ${name} →</div>`;
+        }
+        html += '</div>';
+        body.innerHTML += html;
+      } catch (e) {
+        document.getElementById('chat-typing')?.remove();
+        body.innerHTML += `<div class="chat-msg assistant"><div class="summary">⚠ Could not reach the analysis engine: ${escapeHtml(e.message)}</div></div>`;
+      }
+      body.scrollTop = body.scrollHeight;
+    }
+
+    // Enter key in chat input
+    document.addEventListener('DOMContentLoaded', () => {
+      const chatInput = document.getElementById('chat-input');
+      if (chatInput) {
+        chatInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') submitChatQuery();
+        });
+      }
+    });
+  </script>
+
+  <!-- Rig AI Chatbox Panel -->
+  <div style="position:fixed;bottom:18px;right:18px;z-index:9999;display:flex;flex-direction:column;align-items:center;gap:4px">
+    <button class="chat-toggle-btn" id="chat-toggle-btn" onclick="toggleChat()" title="Ask Rig AI">🤖</button>
+    <span style="font-size:10px;color:var(--color-accent);font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,0.2)">Ask AI</span>
+  </div>
+  <div class="chat-panel" id="chat-panel">
+    <div class="chat-panel-header">
+      <span>🤖</span> Rig AI Assistant
+      <span class="rig-badge">natural language</span>
+      <span style="flex:1"></span>
+      <span style="cursor:pointer;font-size:16px" onclick="toggleChat()">✕</span>
+    </div>
+    <div class="chat-panel-body" id="chat-body">
+      <div class="chat-msg assistant">
+        <div class="summary">👋 Ask me anything about your students!</div>
+        <div style="font-size:12px;color:var(--color-text-muted)">Try one of the quick questions below.</div>
+      </div>
+      <div class="chat-chips">
+        <span class="chat-chip" onclick="sendChipQuery('Which students are having trouble?')">🚩 Who's struggling?</span>
+        <span class="chat-chip" onclick="sendChipQuery('Has anyone\'s practice of 7th Grade math dropped off over the past two weeks?')">📉 Practice drop-offs</span>
+        <span class="chat-chip" onclick="sendChipQuery('How are my decks doing?')">🩺 Deck health check</span>
+        <span class="chat-chip" onclick="sendChipQuery('Show me recent exceptions')">⚠ Recent alerts</span>
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Ask about student performance…" />
+      <button onclick="submitChatQuery()">Ask</button>
+    </div>
+  </div>
+
+</body>
+</html>
