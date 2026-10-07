@@ -39,5 +39,5 @@ cargo check
 cargo nextest run
 ```
 
-See [`workspace/Tooling_AnkiTov.md`](../../workspace/Tooling_AnkiTov.md) for the
-authoritative boundary and review-wrapper setup.
+The authoritative boundary and review-wrapper setup live in the private
+development repository (not part of this public export).
