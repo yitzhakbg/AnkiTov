@@ -45,7 +45,7 @@ calendar, video scripts, internal specs/knowledge, ops runbooks, student data, t
 | `specs/` | All specs OSS | **Curated subset only** (§2.2) | Most specs are internal reasoning/roadmap |
 | Seed deck license | `TBC-OWNER-DECISION` | **CC0-1.0** | Owner decision; `content/seed/manifest.json` must be updated |
 | Session Driver addon | OSS | OSS (unchanged) | no encryption/paywall inside |
-| Selkies streaming | KILL from mainline (key-decisions 2026-08-02) | **OSS at launch** (owner, 2026-10-01) | Ship streamed Anki so students install nothing; `stream/selkies-anki/` is exportable. Closed pillars (locked device, school web services, DRM) are unaffected |
+| Selkies streaming | KILL from mainline (key-decisions 2026-08-02) | **Container OSS** (owner, 2026-10-01; docs re-scoped 2026-10-07) | Ship streamed Anki so students install nothing; `stream/selkies-anki/` (container + launch glue) is exportable. **2026-10-07:** the streaming/DRM *doc chapters* (`streaming-drm.md`, `system-isolation.md`) and all commercial-strategy prose are KEEP-PRIVATE; the public `architecture.md` overview ships in a public-safe form without DRM layers. Closed pillars (locked device, school web services, DRM) are unaffected |
 
 ### 2.2 EXPORT → `ankitov-core`
 
@@ -87,13 +87,21 @@ ankitov-core/
 
 **docs/ exclusion note:** export `overview.md`, `architecture.md` (system overview only),
 `contributing.md`, `development/*`, `imp/*`, `reference/*`, `custom.css`, `book.toml`,
-`SUMMARY.md` (pruned). **Do NOT export** `docs/src/architecture/strategic-blueprint.md`,
-`clearing-house.md` (go-to-market/enterprise strategy → keep private),
-nor `docs/deployment.md`, `docs/ops/*` until owner reviews them.
-**Changed 2026-10-01:** `streaming-drm.md` and the `stream/` tree are **no longer**
-excluded — streamed single-app Anki ships in the open launch (§2.1, divergence row;
-`project-knowledge/key-decisions.md` 2026-10-01). Export `stream/selkies-anki/*`
-(container, launch glue, setup guide). Any *commercial* streaming/DRM strategy prose
+`SUMMARY.md` (pruned). **Do NOT export** any `docs/src/architecture/*` chapter —
+`strategic-blueprint.md`, `system-isolation.md`, `streaming-drm.md`,
+`clearing-house.md`, `vision.md` (go-to-market/enterprise strategy and
+closed-pillar architecture prose → keep private) — nor `docs/deployment.md`,
+`docs/ops/*` until owner reviews them.
+**Changed 2026-10-01, re-scoped 2026-10-07 (owner):** the `stream/selkies-anki/`
+CONTAINER (Dockerfile, launch glue, compose, setup guide) ships; third-party
+`addons21/` (PassFail2 has no license; Hide Menu Bar is third-party AGPL) and
+`__pycache__/` never ship. The streaming/DRM **doc chapters** stay private:
+`streaming-drm.md` and `system-isolation.md` were briefly exported (2026-10-01
+→ 2026-10-07) and are KEEP-PRIVATE again; the new `architecture/vision.md`
+carries the Two-Tier/5-layer/DRM prose moved out of the public `architecture.md`
+overview. The export's SUMMARY prune drops these entries automatically;
+`architecture.md` ships as a public-safe system overview with no
+DRM/streaming/clearing-house prose. Any *commercial* streaming/DRM strategy
 beyond the open pipe stays private and must not be copied into `stream/`.
 
 **Root-level questions flagged for owner (default = exclude):** `inject_db.py`,
@@ -223,7 +231,7 @@ new, monorepo-side) that:
 
 Phase 0 — owner confirmations (blockers):
 - [ ] Confirm `tools/translate_ux_keys.py` export eligibility (check for embedded API endpoints/keys).
-- [ ] Confirm docs pruned-SUMMARY set (strategic-blueprint/clearing-house excluded; **streaming now INCLUDED** — `streaming-drm.md` + `stream/` ship, see §2.1).
+- [ ] Confirm docs pruned-SUMMARY set (strategic-blueprint/clearing-house/streaming-drm/system-isolation/vision excluded; **stream container ships, DRM chapters do not** — `stream/selkies-anki/` + public-safe `architecture.md`, see §2.1/§2.2, owner 2026-10-07).
 - [ ] Confirm default-exclude of `seed_users.py`/`seed_data.py`/`inject_db.py`.
 - [ ] Confirm `specs/audits/*.txt` invariants may ship publicly.
 

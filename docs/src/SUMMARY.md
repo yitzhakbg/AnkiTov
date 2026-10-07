@@ -1,10 +1,16 @@
 # Summary
 
+
 [Overview](overview.md)
-[Architecture Overview](architecture.md)
+
 [Contributing](contributing.md)
 
+
 ---
+
+# Architecture
+
+- [Architecture Overview](architecture.md)
 
 # Development
 

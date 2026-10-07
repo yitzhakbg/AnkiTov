@@ -1,7 +1,7 @@
 # SYNC-MANIFEST
 
-- monorepo ref: qrqltntlvxrt
-- exported at: 2026-10-07T12:11:19Z
+- monorepo ref: tnopwvskutus
+- exported at: 2026-10-07T13:19:59Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
@@ -186,8 +186,8 @@ bdb4bc9f33b431f367ef4a890611ecbe842db34eb81662cd80672179ae0ac8e7  content/seed/s
 5350cbe2885c31c99c619528eaf61ad2420005bb08b8f39f1f81130ed6db7de6  content/seed/tools/import_check.sh
 e50b02757f6736230d78fe831faede6a0508348e36fe9b57960d016cdbbfa8a0  docker-compose.yml
 a1c1b1cd95626a7696511800a32b3a10f60d3e968e05034c5da3ea0c4dfc781d  docs/book.toml
-4abd18ca14563fb766d8a01b44d688e214f4ab8ae7748b6087944613e99a2d91  docs/src/SUMMARY.md
-d0a924d4150a9ac7a361e4160e9e253fd69ca5fb3af715cdf0f9679472b0f6e5  docs/src/architecture.md
+cd857a4b274fa106dc0503a9863ba65d2af634dbc227fca764c66529daa36468  docs/src/SUMMARY.md
+e32bc2928fb2bf378d8983a6f008d9ec2a2b337a8ef82199d6db35bd039f0aac  docs/src/architecture.md
 f5eb3039ab11a540ad85967378667642bf6839f26fea05f2e7c53a534c4964e5  docs/src/contributing.md
 e9c065cc0d1408c4aa1c0fb358df562e926788a7f26a7b0962f83e77d7ba7d00  docs/src/custom.css
 ff5664dd5c9e3f93fdf7f2ab48fdcd842c91a24304cb8589d625c5cf8049c93d  docs/src/development/getting-started.md
@@ -218,11 +218,11 @@ f501a681b0b4399d06acab7e8406f1c07c9ce775712b2fa64dddc22d13486324  session-driver
 2b95f55903425b24f57944ac7c1d56dec423c9354b9a89779a5d5dc54259bd51  specs/audits/fsrs-sort-invariants.txt
 e8a12dcaf4e5f47b0c7bee578a3cac9e1c9d410e39309843dd3029c0b5c98d73  specs/audits/generator-invariants.txt
 a254b24243d1c87d00669fa723deed57376fd1a7581bcf350903534bf6260991  specs/design/2026-07-01-interleaved-mastery-pipeline.md
-5da44be8da53c134e112d8178b4ecc6c714ae50f752e625bec63ad071c9522b4  specs/oss/2026-09-03-ankitov-core-boundary-map.md
+add27fd38c2c1723df4cbaa1d1f231bbe9a6eb2aa9121b2bb7b2c22b3c79644b  specs/oss/2026-09-03-ankitov-core-boundary-map.md
 44771a24b8452ef9baf71476258ba7d1bccfd65252a58e3b362e55ac19084a0e  stream/selkies-anki/Dockerfile.anki-base
-ca83c89cc15cc95a19088f877285caec766836cb12b3c174762f11914ae2ce27  stream/selkies-anki/README.md
+f0c2a6f3fc247e54b29a72143833a9c54cd02e2056d3333aaaf6c957c8423056  stream/selkies-anki/README.md
 0f6a2d40712446c5ce6dc5ff51a0420076f328133e388b4e839e736f7317c228  stream/selkies-anki/boot.py
-b7903e3d7408fd6529ed30f6fe1f68340504a378809542127f7aba736b1f73eb  stream/selkies-anki/docker-compose.anki.yml
+a69b3e31aa439dc490940778179d912fd5d585e1f46821d1ca9b74c3af91bcf5  stream/selkies-anki/docker-compose.anki.yml
 1c7f4a590ff24454f01a7d26ed54ee43c4fc774b50022fbedaf5f86fdd4ec947  stream/selkies-anki/launch_anki.sh
 881e0256af12e7038095bfe31e4bfa45a56f2c0e8ca505a8d0ab8d386142ad3b  stream/selkies-anki/sitecustomize.py
 b63cc75d32ed161e38e284a36166a51df9f07be3116ab8b789ff95388f3a2a81  stream/selkies-anki/svc/anki/run

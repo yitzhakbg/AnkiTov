@@ -25,11 +25,12 @@ path, no terminal. The student sees only Anki's pixels.
 ## 2. Run it
 
 ```bash
+export PASSWD='choose-a-real-password'   # compose refuses to start without it
 docker build -t ankitov-anki-base:1 -f Dockerfile.anki-base .
 docker compose -f docker-compose.anki.yml up -d
 ```
 
-Open `https://<host>:8091` — user **`ubuntu`**, password = `PASSWD` (self-signed
+Open `https://<host>:8091` — user **`ubuntu`**, password = the `PASSWD` value you exported (self-signed
 cert; accept the warning). The stream opens **directly in the review session** on
 `AnkiTov Pilot — English Vocabulary`.
 
