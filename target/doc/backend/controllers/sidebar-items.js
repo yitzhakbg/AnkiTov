@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["auth","dashboard","display","health","locale","management","student","sync","telemetry"]};

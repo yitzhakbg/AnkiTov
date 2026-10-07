@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["my_board","my_stats","patch_identity","routes"],"struct":["IdentityPatch","IdentityResult","StudentBoardQuery","StudentStatsQuery"]};

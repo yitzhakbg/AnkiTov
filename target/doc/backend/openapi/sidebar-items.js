@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["openapi_json","scalar_ui"],"struct":["ApiDoc","PublicOpenApi"]};

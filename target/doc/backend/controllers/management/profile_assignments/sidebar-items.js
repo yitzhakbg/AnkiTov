@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["create_assignment","delete_assignment","generate_all_sessions","latest_generation_job","list_assignments","routes"],"struct":["AssignmentResponse","CreateAssignmentRequest","GenerationJobResponse"]};

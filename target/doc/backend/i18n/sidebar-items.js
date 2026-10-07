@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["SUPPORTED_LOCALES"],"fn":["current_locale","is_rtl","set_locale","t","t_for","t_optional","t_with"]};

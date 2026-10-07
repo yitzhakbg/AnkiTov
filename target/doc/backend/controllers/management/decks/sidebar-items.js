@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["bind_deck_track","delete_deck","distribute_deck","estimate_card_count","get_deck","list_decks","routes","unbind_deck_track","upload_deck"]};

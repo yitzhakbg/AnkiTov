@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["create_producer","list_producer_decks","list_producers","routes","upload_producer_deck"],"struct":["CreateProducerRequest","ProducerCatalogEntry","ProducerCatalogResponse","ProducerResponse","UploadProducerDeckResponse"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["STATUS_DELISTED","STATUS_PENDING","STATUS_PUBLISHED","STATUS_REJECTED","STATUS_VERIFIED"],"enum":["Column","PrimaryKey","Relation"],"struct":["ActiveModel","ColumnIter","Entity","Model","PrimaryKeyIter","RelationIter"]};

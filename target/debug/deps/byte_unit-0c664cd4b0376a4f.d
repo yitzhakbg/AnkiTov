@@ -1,0 +1,12 @@
+/Volumes/YBG1TB4Mac/AnkiTov/target/debug/deps/byte_unit-0c664cd4b0376a4f.d: /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/lib.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/u128/mod.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/u128/constants.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/macros.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/adjusted_byte.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/byte.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/byte_error.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/byte_unit.rs
+
+/Volumes/YBG1TB4Mac/AnkiTov/target/debug/deps/libbyte_unit-0c664cd4b0376a4f.rmeta: /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/lib.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/u128/mod.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/u128/constants.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/macros.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/adjusted_byte.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/byte.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/byte_error.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/byte_unit.rs
+
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/lib.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/u128/mod.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/u128/constants.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/macros.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/adjusted_byte.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/byte.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/byte_error.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/byte-unit-4.0.19/src/byte_unit.rs:

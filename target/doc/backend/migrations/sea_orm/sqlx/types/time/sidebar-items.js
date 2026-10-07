@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["Date","OffsetDateTime","Time","UtcOffset"],"type":["PrimitiveDateTime"]};

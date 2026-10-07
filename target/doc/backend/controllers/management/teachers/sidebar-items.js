@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["create","first_login","first_login_status","get_detail","list","resend","routes"],"struct":["AuditSummary","EnrollTeacherResponse","FirstLoginRequest","InviteSummary","RegisterTeacherRequest","UserSummary"]};

@@ -1,0 +1,13 @@
+/Volumes/YBG1TB4Mac/AnkiTov/target/debug/deps/ignore-5dcfc46bfd661a6a.d: /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/lib.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/default_types.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/dir.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/gitignore.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/incremental.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/overrides.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/pathutil.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/types.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/walk.rs
+
+/Volumes/YBG1TB4Mac/AnkiTov/target/debug/deps/libignore-5dcfc46bfd661a6a.rmeta: /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/lib.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/default_types.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/dir.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/gitignore.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/incremental.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/overrides.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/pathutil.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/types.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/walk.rs
+
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/lib.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/default_types.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/dir.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/gitignore.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/incremental.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/overrides.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/pathutil.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/types.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ignore-0.4.33/src/walk.rs:

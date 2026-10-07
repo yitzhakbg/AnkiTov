@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["addon","addon_distribution","audit_log","capsule_session","class","class_display_board","class_enrollment","deck","deck_distribution","generation_job","producer","producer_deck","profile_assignment","retention_exception","retention_log","sync_status","teacher_invite","track","track_profile","track_profile_track","user"]};

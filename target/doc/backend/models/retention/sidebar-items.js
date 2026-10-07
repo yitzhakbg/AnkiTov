@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["calculate_retention_leakage"],"struct":["CardStateFrame"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["create","delete_class","enroll_by_code","enroll_students","generate_sessions","list","list_students","lookup_by_code","routes","transfer_student","update"],"struct":["ClassQuery","ClassSummary","CreateClassRequest","EnrollByCodeRequest","EnrollStudentsRequest","GenerateForClassRequest"]};

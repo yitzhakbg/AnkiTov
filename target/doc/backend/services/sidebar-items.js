@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["anki_connect","anki_launcher","audit_logger","auth","capsule_delivery","capsule_generator","capsule_generator_job","capsule_slicer","deck_health","deck_verification","forensic_reader","fsrs_sort","jev_translator","leaderboard","leaderboard_aggregate","password_policy","rig_nlu","student_import","sync_user","telemetry_ingestor","track_health"]};

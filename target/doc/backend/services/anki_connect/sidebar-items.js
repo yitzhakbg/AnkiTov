@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["AnkiConnectError"],"struct":["AnkiConnectClient","AnkiConnectResponse","CardsInfoParams","DeckNamesParams","ExportPackageParams","FindCardsParams","GetDeckStatsParams","ImportPackageParams","ReflectParams","SetDueDateParams","SuspendCardsParams","SyncParams","UnsuspendCardsParams"]};

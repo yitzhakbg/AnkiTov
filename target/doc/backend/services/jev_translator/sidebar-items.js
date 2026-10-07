@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["JEV_ENDPOINT","JEV_MODEL"],"enum":["JevQuestionType"],"fn":["build_request","translate_human_to_jev","translate_jev_to_human"],"struct":["HumanToJev","JevAnswer","JevQuestion","JevRequest","JevResponse"]};

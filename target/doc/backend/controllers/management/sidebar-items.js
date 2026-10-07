@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["addons","anki_ops","ask","capsule_sessions","classes","compliance","decks","jev","leaderboard","probe","producers","profile_assignments","stats","students","sync","teachers","track_profiles","tracks"],"struct":["ManagementOpenApi"]};

@@ -1,0 +1,11 @@
+/Volumes/YBG1TB4Mac/AnkiTov/target/debug/deps/pest_generator-bd76592d238c0299.d: /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/lib.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/macros.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/docs.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/generator.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/parse_derive.rs
+
+/Volumes/YBG1TB4Mac/AnkiTov/target/debug/deps/libpest_generator-bd76592d238c0299.rlib: /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/lib.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/macros.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/docs.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/generator.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/parse_derive.rs
+
+/Volumes/YBG1TB4Mac/AnkiTov/target/debug/deps/libpest_generator-bd76592d238c0299.rmeta: /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/lib.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/macros.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/docs.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/generator.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/parse_derive.rs
+
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/lib.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/macros.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/docs.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/generator.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pest_generator-2.9.2/src/parse_derive.rs:

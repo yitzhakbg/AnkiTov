@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["get_locale","get_locale_info","list_locales","routes","set_locale"],"struct":["LocaleEntry","LocaleInfo","LocaleMap","SetLocaleRequest"]};

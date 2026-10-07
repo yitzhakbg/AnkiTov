@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["COLD_START_SECONDS_PER_CARD","DEFAULT_HARD_CAP","DEFAULT_N_VALUE","DEFAULT_SESSION_DURATION_MINUTES"],"fn":["compute_capsule_size","slice_capsule"],"struct":["SliceResult"],"type":["TrackCounts"]};

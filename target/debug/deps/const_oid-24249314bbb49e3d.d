@@ -1,0 +1,13 @@
+/Volumes/YBG1TB4Mac/AnkiTov/target/debug/deps/const_oid-24249314bbb49e3d.d: /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/lib.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/checked.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/arcs.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/buffer.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/encoder.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/error.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/parser.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/traits.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/../README.md
+
+/Volumes/YBG1TB4Mac/AnkiTov/target/debug/deps/libconst_oid-24249314bbb49e3d.rmeta: /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/lib.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/checked.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/arcs.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/buffer.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/encoder.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/error.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/parser.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/traits.rs /Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/../README.md
+
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/lib.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/checked.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/arcs.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/buffer.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/encoder.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/error.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/parser.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/traits.rs:
+/Users/ybg/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/const-oid-0.10.2/src/../README.md:

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["distribute_addon","get_addon_config","install_addon","list_addons","routes","update_addon_config"]};

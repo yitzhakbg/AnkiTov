@@ -30,7 +30,7 @@ for the full cross-platform portability audit.
 ```sh
 git clone https://github.com/yitzhakbg/AnkiTov-Goose.git ~/ankitov-goose
 cd ~/ankitov-goose
-ANKITOV_REPO=/path/to/AnkiTov-C ./bootstrap.sh   # links config, recipes, agents, apps
+ANKITOV_REPO=/path/to/AnkiTov ./bootstrap.sh   # links config, recipes, agents, apps
 cd "$ANKITOV_REPO" && cargo check && goose session -r
 ```
 
