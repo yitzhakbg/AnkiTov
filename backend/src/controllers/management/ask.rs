@@ -58,6 +58,7 @@ pub async fn ask(
         "deck_health" => deck_health(&ctx).await?,
         "recent_exceptions" => recent_exceptions(&ctx).await?,
         "count_question" => count_question(&ctx, &q_lower).await?,
+        "decks" => unknown_intent(&payload.query),
         _ => unknown_intent(&payload.query),
     };
 
@@ -487,20 +488,59 @@ async fn count_question(ctx: &AppContext, q: &str) -> Result<AskResponse> {
     })
 }
 
-/// Fallback when intent can't be determined.
+/// Fallback when the NLU couldn't classify the query's **intent**.
+///
+/// We deliberately do *not* scan the raw query for broad words like "class"/
+/// "practice"/"study" to decide navigation — that would misroute almost any
+/// ordinary sentence (e.g. "order pizza for the class party" → Classes screen).
+///
+/// We *do* navigate to the Decks screen, but only for a narrow, high-precision
+/// signal: the query mentions a deck **and** an action verb (upload / import /
+/// distribute). Deck/upload is an explicit "I want to do X" intent, unlike
+/// "class health" (a question) which must stay a query.
+///
+/// Otherwise we stay put and return a helpful "I'm best at: …" suggestion list
+/// rather than a bare "Sorry, I could not answer that."
+/// (Frontend command chips that navigate do so via `Router.navigate`, not here,
+/// so they are unaffected by this logic.)
 fn unknown_intent(q: &str) -> AskResponse {
-    AskResponse {
-        summary: format!(
-            "I'm not sure what you're asking about. Try:\n\
+    // Deck/upload action → route to the Decks screen.
+    // The NLU only returns this intent when the query clearly asks to
+    // upload / import / distribute a deck, so navigating is correct.
+    let ql = q.to_lowercase();
+    let navigate_to: Option<String> = if ql.contains("deck")
+        && (ql.contains("upload") || ql.contains("import") || ql.contains("distribut"))
+    {
+        Some("decks".into())
+    } else {
+        None
+    };
+
+    let summary = if navigate_to.is_some() {
+        format!(
+            "Sure — that lives on the {} screen. I've taken you there.",
+            match navigate_to.as_deref() {
+                Some("decks") => "Decks",
+                _ => "",
+            }
+        )
+    } else {
+        format!(
+            "I'm not sure what you're asking about. I'm best at:\n\
              • \"Which students are having trouble?\"\n\
-             • \"Has anyone's practice dropped off lately?\"\n\
+             • \"Who hasn't practiced in the past two weeks?\"\n\
              • \"How are my decks doing?\"\n\
+             • \"How many students / classes / decks do I have?\"\n\
              • \"Show me recent exceptions\"\n\n\
              You asked: \"{}\"",
             q
-        ),
+        )
+    };
+
+    AskResponse {
+        summary,
         intent: "unknown".into(),
-        navigate_to: None,
+        navigate_to,
         rows: vec![],
     }
 }

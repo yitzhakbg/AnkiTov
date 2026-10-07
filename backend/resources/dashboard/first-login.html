@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AnkiTov — First Login</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card: #1a1d27;
+      --border: #2d3140;
+      --text: #e8eaf0;
+      --muted: #8b90a0;
+      --accent: #4f8cff;
+      --accent-hover: #3a7af5;
+      --danger: #ff5c5c;
+      --ok: #4caf50;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 420px;
+    }
+    h1 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+    .field {
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      font-size: 0.8125rem;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }
+    input[type="password"],
+    select {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.9375rem;
+    }
+    input[type="password"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .consent {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .consent input[type="checkbox"] {
+      margin-top: 0.2rem;
+      width: 1rem;
+      height: 1rem;
+      accent-color: var(--accent);
+    }
+    .consent label {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      margin: 0;
+    }
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: var(--accent-hover); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .error {
+      color: var(--danger);
+      font-size: 0.8125rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    .summary {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.8125rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .summary strong { color: var(--text); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Complete Your Enrollment</h1>
+    <p class="subtitle">You've been invited to join AnkiTov. Set your password to activate your account.</p>
+
+    <div id="summary" class="summary" hidden>
+      <div><strong>Name:</strong> <span id="s-name">—</span></div>
+      <div><strong>School:</strong> <span id="s-school">—</span></div>
+      <div><strong>Email:</strong> <span id="s-email">—</span></div>
+    </div>
+
+    <form id="wizard">
+      <div class="field">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+          minlength="8"
+          autocomplete="new-password"
+          placeholder="Min 8 chars, at least 1 digit"
+        >
+      </div>
+
+      <div class="field">
+        <label for="locale">Display Language</label>
+        <select id="locale" name="locale">
+          <option value="en-US">English (US)</option>
+          <option value="he">עברית</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+          <option value="es">Español</option>
+          <option value="it">Italiano</option>
+          <option value="zh">中文</option>
+          <option value="ja">日本語</option>
+          <option value="ko">한국어</option>
+          <option value="ru">Русский</option>
+          <option value="pt">Português</option>
+          <option value="hi">हिन्दी</option>
+          <option value="ar">العربية</option>
+        </select>
+      </div>
+
+      <div class="consent">
+        <input type="checkbox" id="consent" name="consent" required>
+        <label for="consent">
+          I consent to the processing of my personal data as described in the
+          AnkiTov privacy policy.
+        </label>
+      </div>
+
+      <button type="submit" id="submit-btn">Activate Account</button>
+      <div class="error" id="error"></div>
+    </form>
+  </div>
+
+  <script>
+    (function () {
+      // Parse invite_id and token from /d/{invite_id}/{token}
+      const path = window.location.pathname;
+      const parts = path.split("/").filter(Boolean);
+      // e.g. ["d", "abc-123", "token-hex"]
+      const inviteId = parts[1] || "";
+      const token    = parts[2] || "";
+
+      if (!inviteId || !token) {
+        document.getElementById("error").textContent =
+          "Invalid invite URL.";
+        document.getElementById("error").style.display = "block";
+        document.getElementById("submit-btn").disabled = true;
+        return;
+      }
+
+      // Pre-populate the summary from the public first-login-status endpoint
+      // (verified by invite_id + token; no JWT required). Best-effort: on any
+      // error we show the fallback "(pending activation)" and the user can
+      // continue to the password form.
+      document.getElementById("summary").hidden = false;
+      fetch(
+        `/d/teachers/first-login-status/${inviteId}/${token}`
+      )
+        .then((r) => r.ok ? r.json() : Promise.reject(new Error("status " + r.status)))
+        .then((data) => {
+          document.getElementById("s-name").textContent =
+            data.user?.full_name || data.user?.username || "(pending activation)";
+          document.getElementById("s-school").textContent = data.school || "—";
+          document.getElementById("s-email").textContent = data.user?.email || "—";
+        })
+        .catch(() => {
+          document.getElementById("s-name").textContent = "(pending activation)";
+          document.getElementById("s-school").textContent = "—";
+          document.getElementById("s-email").textContent = "—";
+        });
+
+      const form = document.getElementById("wizard");
+      const btn  = document.getElementById("submit-btn");
+      const err  = document.getElementById("error");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        err.style.display = "none";
+        btn.disabled = true;
+        btn.textContent = "Activating…";
+
+        const payload = {
+          password: document.getElementById("password").value,
+          locale: document.getElementById("locale").value,
+          consent: document.getElementById("consent").checked,
+        };
+
+        try {
+          // The first-login endpoint is public (no JWT) and keyed on the invite
+          // id + token pair, which we read from the URL. It verifies the pair
+          // server-side before setting the password (see teachers.rs).
+          const resp = await fetch(
+            `/d/teachers/first-login/${inviteId}/${token}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            }
+          );
+
+          const body = await resp.json().catch(() => ({}));
+
+          if (resp.ok) {
+            // Store JWT and redirect to the dashboard SPA
+            if (body.token) {
+              localStorage.setItem("ankitov_token", body.token);
+            }
+            window.location.replace("/#/");
+          } else {
+            const msg =
+              body && body.error
+                ? body.error
+                : (resp.status === 410
+                  ? "This invite has expired. Please ask your admin to resend it."
+                  : resp.status === 422
+                    ? body.description || "Password does not meet the policy requirements."
+                    : "Something went wrong. Please try again.");
+            err.textContent = msg;
+            err.style.display = "block";
+            btn.disabled = false;
+            btn.textContent = "Activate Account";
+          }
+        } catch (networkErr) {
+          err.textContent = "Network error. Please check your connection and try again.";
+          err.style.display = "block";
+          btn.disabled = false;
+          btn.textContent = "Activate Account";
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

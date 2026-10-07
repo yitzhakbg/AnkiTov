@@ -1,8 +1,3 @@
----
-type: note
-title: AnkiTov
----
-
 # AnkiTov
 
 AnkiTov is the product being developed: institutional spaced-repetition
@@ -31,6 +26,4 @@ Rig belongs to AnkiTov, not Goose:
 - `backend/src/services/rig_nlu.rs` is the optional backend NLU path.
 - `toolchains/factory-harness/` is the auxiliary factory-harness Rig component.
 
-These are separate AnkiTov code paths. See
-[`development/tooling.md`](development/tooling.md) for the authoritative
-boundary.
+These are separate AnkiTov code paths. See [`development/tooling.md`](development/tooling.md) for the authoritative boundary.

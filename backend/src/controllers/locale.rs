@@ -40,7 +40,7 @@ pub struct SetLocaleRequest {
 /// GET /api/v1/locale — full translation map for the current locale.
 #[utoipa::path(
     get,
-    path = "/api/v1/locale",
+    path = "/locale",
     tag = "Locale",
     responses((status = 200, body = LocaleMap))
 )]
@@ -86,7 +86,7 @@ pub async fn get_locale() -> Json<LocaleMap> {
 /// GET /api/v1/locale/info — metadata for the current locale.
 #[utoipa::path(
     get,
-    path = "/api/v1/locale/info",
+    path = "/locale/info",
     tag = "Locale",
     responses((status = 200, body = LocaleInfo))
 )]
@@ -119,7 +119,7 @@ pub struct LocaleEntry {
 
 #[utoipa::path(
     get,
-    path = "/api/v1/locale/list",
+    path = "/locale/list",
     tag = "Locale",
     responses((status = 200, body = Vec<LocaleEntry>))
 )]
@@ -145,7 +145,7 @@ pub async fn list_locales() -> Json<Vec<LocaleEntry>> {
 /// POST /api/v1/locale/set — override locale for current session.
 #[utoipa::path(
     post,
-    path = "/api/v1/locale/set",
+    path = "/locale/set",
     tag = "Locale",
     responses((status = 200, body = LocaleInfo))
 )]

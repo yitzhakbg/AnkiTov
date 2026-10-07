@@ -78,3 +78,24 @@ notify-practice-complete = Practice sessions ready for { $count } students
 
 # Health status (for notification badge)
 notify-health-attention = { $count } classes need attention
+
+# ── Teacher enrollment (Prong 8) ──
+teacher-enroll-title            = Register a teacher
+teacher-enroll-description     = Enroll a new teacher into AnkiTov. You will receive an invite link to share.
+teacher-enroll-field-name      = Full name
+teacher-enroll-field-email     = Email (login)
+teacher-enroll-field-school    = School / community
+teacher-enroll-field-role      = Role or class
+teacher-enroll-field-locale    = Language
+teacher-enroll-err-dupe-email  = A teacher with that email is already enrolled
+teacher-enroll-err-dupe-name   = A teacher with that name is already enrolled
+teacher-enroll-err-locale      = Unsupported locale "{ $locale }"
+teacher-enroll-ok              = { $name } registered. Share this invite link: { $url }
+teacher-invite-expired         = This invite link has expired. Ask your administrator for a new one.
+teacher-invite-revoked         = This invite link was revoked.
+teacher-firstlogin-title       = Set your AnkiTov password
+teacher-firstlogin-consent     = I confirm I am a teacher at { $school } and I consent to AnkiTov processing my teaching data (see privacy notice).
+teacher-firstlogin-err-policy  = Password must be at least 8 characters and contain a digit.
+
+# ── i18n test probe (present ONLY in en-US — exercises the fallback chain) ──
+i18n-test-probe = AnkiTov fallback probe

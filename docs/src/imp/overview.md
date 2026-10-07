@@ -1,13 +1,8 @@
----
-type: note
-title: Interleaved Mastery Pipeline — Design Overview
----
-
 # Interleaved Mastery Pipeline — Design Overview
 
 The Interleaved Mastery Pipeline is the foundational requirement for Prong 1 (Management Console). Every student receives a single, server-side generated **Remediation Capsule** composed of dynamically mixed prerequisite tracks from a centralized track library.
 
-_The full design spec lives in the private development repository (not part of this public export)._
+_See the full spec at [`specs/design/2026-07-01-interleaved-mastery-pipeline.md`](https://github.com/yitzhakbg/AnkiTov/blob/main/specs/design/2026-07-01-interleaved-mastery-pipeline.md)._
 
 ## Core Concepts
 

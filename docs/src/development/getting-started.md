@@ -1,8 +1,3 @@
----
-type: note
-title: Getting Started
----
-
 # Getting Started
 
 ## Prerequisites
@@ -16,7 +11,7 @@ title: Getting Started
 
 ```bash
 # Clone the repo
-git clone https://github.com/yitzhakbg/AnkiTov
+git clone https://github.com/yitzhakbg/AnkiTov-C.git
 cd AnkiTov
 
 # Check the backend

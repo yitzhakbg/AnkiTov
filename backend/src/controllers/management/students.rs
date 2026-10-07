@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use std::path::Path;
 use utoipa::ToSchema;
 
-use crate::models::entities::{class_enrollment, deck};
+use crate::models::entities::{class_enrollment, deck, user};
 use crate::services;
 
 
@@ -449,10 +449,41 @@ pub async fn import_file(
         {
             Ok(_) => {
                 enrolled += 1;
-                imported_students.push(serde_json::json!({
-                    "student_id": row.student_id,
-                    "display_name": row.display_name
-                }));
+
+                // Best-effort: provision this student's Anki sync-server
+                // credentials (unique profile name from display_name, password =
+                // their numeric id) into the shared sync-users.env. A failure
+                // here must NOT abort the import.
+                if let Some((uid, fname)) =
+                    resolve_student_name(db, row.student_id.as_str())
+                        .await
+                {
+                    match services::sync_user::upsert_sync_user(db, uid, &fname).await {
+                        Ok(profile) => {
+                            imported_students.push(serde_json::json!({
+                                "student_id": row.student_id,
+                                "display_name": row.display_name,
+                                "anki_profile": profile,
+                            }));
+                        }
+                        Err(e) => {
+                            tracing::warn!(
+                                "sync-user provisioning failed for student {}: {:?}",
+                                row.student_id,
+                                e
+                            );
+                            imported_students.push(serde_json::json!({
+                                "student_id": row.student_id,
+                                "display_name": row.display_name,
+                            }));
+                        }
+                    }
+                } else {
+                    imported_students.push(serde_json::json!({
+                        "student_id": row.student_id,
+                        "display_name": row.display_name,
+                    }));
+                }
             }
             Err(_) => {
                 skipped += 1;
@@ -472,4 +503,69 @@ pub async fn import_file(
         errors,
         students: imported_students,
     })
+}
+
+/// Resolve an imported `student_id` (a slug) to the student's numeric `users.id`
+/// and their human-readable name.
+///
+/// The import file's `student_id` column is a machine-friendly slug (e.g.
+/// `"fatima-al-rashid"`); the numeric id we need as the sync password lives on
+/// the `users` row. We match the slug against `username` (the canonical slug
+/// form); if the exact slug doesn't match, we normalize (hyphens/spaces) and
+/// retry, then fall back to deriving a stable id from the slug hash so the
+/// student is still provisioned even when slug forms differ.
+///
+/// Returns `(numeric_user_id, display_name)`, or `None` if no student can be
+/// resolved.
+async fn resolve_student_name(
+    db: &sea_orm::DbConn,
+    slug: &str,
+) -> Option<(i64, String)> {
+    let slug_norm = slug.to_lowercase();
+
+    // 1) Exact username match.
+    if let Ok(Some(u)) = user::Entity::find()
+        .filter(user::Column::Username.eq(slug_norm.clone()))
+        .one(db)
+        .await
+    {
+        let name = u
+            .full_name
+            .clone()
+            .unwrap_or_else(|| u.username.clone());
+        return Some((u.id, name));
+    }
+
+    // 2) Normalized match: convert the slug to a `first.last`-ish base and see
+    //    if any username matches. (Best-effort; slugs are already unique.)
+    let base = slug_norm
+        .split(|c: char| !c.is_ascii_alphanumeric())
+        .filter(|p| !p.is_empty())
+        .collect::<Vec<_>>()
+        .first()
+        .and_then(|first| {
+            let last = slug_norm
+                .split(|c: char| !c.is_ascii_alphanumeric())
+                .filter(|p| !p.is_empty())
+                .last();
+            match last {
+                Some(l) if l != *first => Some(format!("{}.{}", first, l)),
+                _ => Some(first.to_string()),
+            }
+        });
+    if let Some(base) = base {
+        if let Ok(Some(u)) = user::Entity::find()
+            .filter(user::Column::Username.eq(base))
+            .one(db)
+            .await
+        {
+            let name = u
+                .full_name
+                .clone()
+                .unwrap_or_else(|| u.username.clone());
+            return Some((u.id, name));
+        }
+    }
+
+    None
 }

@@ -19,14 +19,17 @@ pub mod capsule_sessions;
 pub mod classes;
 pub mod compliance;
 pub mod decks;
+pub mod leaderboard;
 pub mod probe;
 pub mod producers;
+pub mod jev;
 pub mod stats;
 pub mod students;
 pub mod sync;
 pub mod track_profiles;
 pub mod tracks;
 pub mod profile_assignments;
+pub mod teachers;
 
 use utoipa::OpenApi;
 
@@ -39,6 +42,10 @@ const TAG: &str = "Management Console";
     paths(
         // Profile Assignments & Generation jobs
         ask::ask,
+        // Jev Prompt Translator
+        jev::human_to_jev,
+        jev::jev_to_human,
+        jev::evaluate,
         profile_assignments::create_assignment,
         profile_assignments::delete_assignment,
         profile_assignments::generate_all_sessions,
@@ -63,6 +70,13 @@ const TAG: &str = "Management Console";
         classes::enroll_students,
         classes::transfer_student,
         classes::generate_sessions,
+        // Teachers (Prong 8 — teacher registration + first-login wizard)
+        teachers::list,
+        teachers::create,
+        teachers::get_detail,
+        teachers::resend,
+        teachers::first_login_status,
+        teachers::first_login,
         // Stats
         stats::stats,
         stats::exceptions,
@@ -118,6 +132,12 @@ const TAG: &str = "Management Console";
         // Interleaved Mastery Pipeline — Compliance (Phase 4)
         compliance::weekly_compliance,
         compliance::student_compliance,
+        // Leaderboard (chunk 2 — spec 2026-10-06-leaderboard §8.3)
+        leaderboard::board,
+        leaderboard::classes,
+        leaderboard::student_drilldown,
+        leaderboard::display,
+        leaderboard::moderate_identity,
     ),
     components(
         schemas(
@@ -182,8 +202,28 @@ const TAG: &str = "Management Console";
             crate::controllers::management::producers::ProducerCatalogEntry,
             crate::controllers::management::producers::ProducerCatalogResponse,
             crate::controllers::management::producers::UploadProducerDeckResponse,
+            // Leaderboard (chunk 2 — spec 2026-10-06-leaderboard §8.5)
+            crate::services::leaderboard_aggregate::LeaderboardResponse,
+            crate::services::leaderboard_aggregate::Scope,
+            crate::services::leaderboard::Entry,
+            crate::services::leaderboard::Unranked,
+            crate::services::leaderboard::Identity,
+            crate::services::leaderboard::Inputs,
+            crate::controllers::management::leaderboard::BoardQuery,
+            crate::controllers::management::leaderboard::ClassRow,
+            crate::controllers::management::leaderboard::DrillQuery,
+            crate::controllers::management::leaderboard::DisplayMint,
+            crate::controllers::management::leaderboard::DisplayResult,
+            crate::controllers::management::leaderboard::IdentityModeration,
+            crate::controllers::management::leaderboard::ModerationResult,
             crate::services::deck_verification::CardTypeCensus,
             crate::services::deck_verification::MediaIntegrity,
+            // Jev Prompt Translator
+            crate::controllers::management::jev::HumanToJevRequest,
+            crate::controllers::management::jev::HumanToJevResponse,
+            crate::controllers::management::jev::JevToHumanRequest,
+            crate::controllers::management::jev::JevToHumanResponse,
+            crate::controllers::management::jev::EvaluateRequest,
         ),
     ),
     tags((name = TAG, description = "Management Console — deck, addon, sync, and Anki operations"))

@@ -159,6 +159,89 @@ pub fn t_with(message_id: &str, args: &[(&str, &str)]) -> String {
 mod tests {
     use super::*;
 
+    /// Every locale directory shipped in `backend/i18n/`. Kept as an explicit
+    /// list (rather than globbed at runtime) so the test fails to *compile*
+    /// when a locale is added or renamed — a silently-skipped locale is worse
+    /// than a broken build.
+    const BUNDLES: &[(&str, &str)] = &[
+        ("ar", include_str!("../i18n/ar/main.ftl")),
+        ("de", include_str!("../i18n/de/main.ftl")),
+        ("en-US", include_str!("../i18n/en-US/main.ftl")),
+        ("es", include_str!("../i18n/es/main.ftl")),
+        ("fr", include_str!("../i18n/fr/main.ftl")),
+        ("he", include_str!("../i18n/he/main.ftl")),
+        ("hi", include_str!("../i18n/hi/main.ftl")),
+        ("it", include_str!("../i18n/it/main.ftl")),
+        ("ja", include_str!("../i18n/ja/main.ftl")),
+        ("ko", include_str!("../i18n/ko/main.ftl")),
+        ("pt", include_str!("../i18n/pt/main.ftl")),
+        ("ru", include_str!("../i18n/ru/main.ftl")),
+        ("zh", include_str!("../i18n/zh/main.ftl")),
+    ];
+
+    /// A Fluent message ID is `[A-Za-z][A-Za-z0-9_-]*` — dots are NOT legal.
+    /// A dotted ID makes the parser read the ID up to the dot and then demand
+    /// `=` where it finds `.`, which aborts the whole bundle. That once shipped
+    /// 16 such IDs in `en-US` and turned 7 i18n tests red; the symptom was a
+    /// poisoned `Lazy` ("Lazy instance has previously been poisoned"), which
+    /// points at the *first* failure and hides the real cause. This test
+    /// reports the file, the byte offset and the offending line instead.
+    #[test]
+    fn every_locale_bundle_parses() {
+        let mut problems: Vec<String> = Vec::new();
+
+        for (locale, source) in BUNDLES.iter().copied() {
+            if let Err((_, errors)) = fluent_syntax::parser::parse(source) {
+                for error in errors {
+                    let pos = error.pos.start;
+                    let line_no = source[..pos].lines().count();
+                    let line = source.lines().nth(line_no.saturating_sub(1)).unwrap_or("").trim();
+                    problems.push(format!(
+                        "{locale}/main.ftl:{}: {:?} (byte {}) -> `{line}`",
+                        line_no, error.kind, pos
+                    ));
+                }
+            }
+        }
+
+        assert!(
+            problems.is_empty(),
+            "{} Fluent parse error(s). A message ID may only contain \
+             [A-Za-z0-9_-]; a '.' is illegal and breaks the entire bundle:\n  {}",
+            problems.len(),
+            problems.join("\n  ")
+        );
+    }
+
+    /// Companion to the above: assert the dotted IDs that caused the incident
+    /// are actually gone, so a future editor cannot reintroduce the shape even
+    /// if the parser ever grows to tolerate it.
+    #[test]
+    fn no_message_id_contains_a_dot() {
+        for (locale, source) in BUNDLES.iter().copied() {
+            for (i, line) in source.lines().enumerate() {
+                let trimmed = line.trim_start();
+                if trimmed.is_empty() || trimmed.starts_with('#') {
+                    continue;
+                }
+                // A message or term entry starts with `[ -]identifier =`.
+                let Some((id, tail)) = trimmed.split_once('=') else {
+                    continue;
+                };
+                if tail.starts_with('=') {
+                    continue; // a literal `==`, not an entry
+                }
+                let id = id.trim().strip_prefix('-').unwrap_or(id.trim());
+                assert!(
+                    !id.contains('.'),
+                    "{locale}/main.ftl:{}: illegal id `{id}` — dots are not legal in \
+                     Fluent identifiers (use `-`)",
+                    i + 1
+                );
+            }
+        }
+    }
+
     #[test]
     fn test_en_us_fallback() {
         let msg = t_for("en-US", "app-name");
@@ -200,5 +283,48 @@ mod tests {
         let msg = t_optional("error-not-found");
         assert!(msg.is_some());
         assert!(!msg.unwrap().is_empty());
+    }
+
+    /// Real, non-English direct lookup: proves the compiled Fluent bundle
+    /// returns the actual native-script string for a given locale (not a
+    /// fallback). Hebrew and Arabic are both in the static loader; their
+    /// `app-name` values are transliterations of "AnkiTov".
+    #[test]
+    fn test_t_for_native_locale_app_name() {
+        // he/app-name in i18n/he/main.ftl is the Hebrew transliteration.
+        assert_eq!(t_for("he", "app-name"), "אנקיטוב");
+        // ar/app-name in i18n/ar/main.ftl is the Arabic transliteration.
+        assert_eq!(t_for("ar", "app-name"), "أنكيتوف");
+    }
+
+    /// Fallback-chain proof: a message ID absent from a non-fallback locale
+    /// must resolve to the `en-US` value. We add a probe key to en-US that no
+    /// other locale carries, then assert a lookup in `he` falls back to it.
+    #[test]
+    fn test_fallback_to_english_when_key_missing() {
+        // `i18n-test-probe` exists ONLY in i18n/en-US/main.ftl.
+        assert_eq!(
+            t_for("en-US", "i18n-test-probe"),
+            "AnkiTov fallback probe"
+        );
+        // Hebrew has no such key, so the fluent-templates fallback chain must
+        // return the en-US string.
+        assert_eq!(
+            t_for("he", "i18n-test-probe"),
+            "AnkiTov fallback probe"
+        );
+    }
+
+    /// `is_rtl()` tracks the runtime locale override set by `set_locale`.
+    /// Tests run in-process, so we assert the transition in both directions
+    /// and restore a sane default (en-US, LTR) before returning.
+    #[test]
+    fn test_is_rtl_follows_set_locale() {
+        set_locale("he");
+        assert!(is_rtl(), "Hebrew must be RTL");
+        set_locale("ar");
+        assert!(is_rtl(), "Arabic must be RTL");
+        set_locale("en-US");
+        assert!(!is_rtl(), "en-US must be LTR");
     }
 }

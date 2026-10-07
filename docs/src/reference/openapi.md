@@ -1,17 +1,22 @@
----
-type: note
-title: OpenAPI Specification
----
-
 # OpenAPI Specification
 
-The backend generates an OpenAPI 3.0 spec automatically from `#[utoipa::path]` annotations on every controller route.
+The backend generates an OpenAPI 3.0 spec automatically from `#[utoipa::path]` annotations on every controller route. The annotations are aggregated in `backend/src/openapi.rs` and **served live by the backend** — the spec is regenerated from the compiled route table on every request, so it can never drift from the running server.
 
 ## Live Endpoint
 
 ```http
 GET http://localhost:5150/api/v1/openapi.json
 ```
+
+## Interactive UI
+
+The backend serves a ready-made [Scalar](https://scalar.com) reference at:
+
+```http
+GET http://localhost:5150/scalar
+```
+
+The page embeds the live spec above (Scalar itself loads from CDN).
 
 ## Use with Scalar
 

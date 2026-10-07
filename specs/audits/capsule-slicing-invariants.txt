@@ -5,7 +5,7 @@ INVARIANT A — Size formula: pool=90, N=3, hard_cap=25, 10min, 25s/card, 3 trac
 INVARIANT B — Zero-pool: pool_size==0 OR n_value<=0 → return 0. No div by zero, no underflow.
 INVARIANT C — Pool clamping: returned capsule_size NEVER exceeds pool_size on any code path.
 INVARIANT D — Per-track minimum: capsule_size >= min(num_tracks, ceil(capsule_size*0.20)).
-INVARIANT E — Time-bound: capsule_size <= floor(session_duration_minutes*60 / per_card_time).
+INVARIANT E — Time-bound: capsule_size <= floor(session_duration_minutes*60 / per_card_time). AMENDED 2026-10-04: as originally written this is FALSE and cannot hold. `compute_capsule_size` applies `.max(track_floor)` AFTER the time bound, so a wide cohort overrides the clock. compute_capsule_size(90,3,hard_cap=25,10min,25s/card,num_tracks=30) returns 30 — above the hard cap of 25 AND above the time bound of 24. This is deliberate: a student must never get a capsule that starves one of their tracks, and dropping a track is a worse failure than running long. The executable contract is therefore: capsule_size <= max(floor(session_minutes*60/per_card_time), min(num_tracks, pool_size)). Encoded as `respects_time_bound_or_track_floor` in backend/tests/property_capsule_slicer_test.rs.
 INVARIANT F — slice_capsule completeness: selected.len() + remaining.len() == ranked.len().
 INVARIANT G — Per-track presence: >=1 card per track in slice, unless track has zero due cards.
 INVARIANT H — slice_capsule size bound: actual_size <= target_size.

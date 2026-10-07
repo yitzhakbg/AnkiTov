@@ -2,30 +2,34 @@
 # Database URL set via DATABASE_URL environment variable
 
 logger:
-  level: info
+  enable: true
+  level: {{ get_env(name="RUST_LOG", default="info") }}
   format: compact
   rotation: daily
   dir: ./logs
   filename_prefix: ankitov
 
 server:
-  port: 3000
+  # Loco 0.11: `binding` is the TCP listen address (host part; the port is
+  # appended automatically). Defaults to "localhost" if omitted, which binds
+  # 127.0.0.1 only — correct for a bare host but *wrong* inside a container,
+  # where Docker's published port forwards to the container's bridge IP.
+  # Bind all interfaces so the container's published 5150 is reachable.
+  binding: 0.0.0.0
+  port: {{ get_env(name="ANKITOV_PORT", default="5150") }}
   host: 0.0.0.0
 
 database:
-  # Override via: DATABASE_URL=libsql://your-turso-db.turso.io?authToken=...
+  # Override via: DATABASE_URL=sqlite://data/ankitov.db?mode=rwc or libsql://...
   uri: {{ get_env(name="DATABASE_URL", default="sqlite://data/ankitov.db?mode=rwc") }}
   enable_logging: false
-  connect_timeout: 2000
-  idle_timeout: 2000
+  connect_timeout: 10000
+  idle_timeout: 10000
   min_connections: 4
   max_connections: 16
   auto_migrate: true
   dangerously_truncate: false
   dangerously_recreate: false
 
-queue:
-  uri: {{ get_env(name="REDIS_URL", default="memory://") }}
-
 workers:
-  enable: true
+  mode: BackgroundAsync

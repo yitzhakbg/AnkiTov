@@ -1,13 +1,8 @@
----
-type: note
-title: Anki Operations Access
----
-
 # Anki Operations Access
 
 _Operational guide for Anki operations via the Management Console._
 
-Anki operations are performed through the Management Console's Anki Operations panel — read-only access via `anki-mcp-server`. Destructive operations (card creation, note editing) are deactivated.
+Anki operations are performed through the Management Console's Anki Operations panel, backed by the backend's AnkiConnect integration (`backend/src/services/anki_connect.rs`). Destructive operations (card creation, note editing) are deactivated.
 
 ## Available Operations
 

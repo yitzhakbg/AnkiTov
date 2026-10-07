@@ -60,8 +60,9 @@ DECKS = {
         "title": {
             "en": "AnkiTov Pilot — Math Definitions",
             "he": "AnkiTov Pilot — הגדרות מתמטיקה",
+            "fr": "AnkiTov Pilot — Définitions de maths",
         },
-        "deck_id": {"en": 1699412247001, "he": 1699412247002},
+        "deck_id": {"en": 1699412247001, "he": 1699412247002, "fr": 1699412247012},
         "description": _desc(
             "Grades 7-9 math definitions that run at their own pace, beside "
             "teaching, not inside it. Practice previously taught material to "
@@ -69,6 +70,10 @@ DECKS = {
             he="גדרות מתמטיקה לכיתות ז-ט שרצות בקצב עצמאי, לצד ההוראה ולא בתוכה. "
                "תרגול של חומר שהונהג קודם לכן כדי לסגור פערים. SRS works. "
                "פיוט פאזה 0 שנכתב על ידנו; טקסט בלבד.",
+            fr="Définitions mathématiques pour les classes 7-9 qui suivent leur propre "
+               "rythme, à côté de l'enseignement, pas dedans. Revoyez les concepts "
+               "appris auparavant pour combler les lacunes. SRS works. Graine Phase 0 "
+               "auto-écrite ; texte uniquement.",
         ),
         "expected_census": {"basic": 47, "cloze": 47, "type_in": 11},
     },
@@ -148,6 +153,7 @@ DECKS = {
 MODEL_IDS = {
     "en": {"basic": 1607392318001, "cloze": 1607392318002, "type_in": 1607392318003},
     "he": {"basic": 1607392318101, "cloze": 1607392318102, "type_in": 1607392318103},
+    "fr": {"basic": 1607392318201, "cloze": 1607392318202, "type_in": 1607392318203},
 }
 NOTE_TYPE_NAMES = {"basic": "AnkiTovBasic", "cloze": "AnkiTovCloze", "type_in": "AnkiTovTypeIn"}
 
@@ -262,8 +268,8 @@ def validate_row(row: dict, seen: set, locale: str, directions: bool = False) ->
         val = row[key]
         if "\n" in val or "\r" in val:
             raise SourceError(f"{concept}: newline in {key} (one-line rule)")
-        if locale in ("en", "fr") and not val.isascii():
-            raise SourceError(f"{concept}: non-ASCII in {key} ({locale} deck — type é/à directly, no entities)")
+        if locale == "en" and not val.isascii():
+            raise SourceError(f"{concept}: non-ASCII in {key} (en-US deck)")
         if "{{" in val and not (nt == "cloze" and key == "front"):
             raise SourceError(f"{concept}: template markup outside cloze Text field")
 
@@ -347,9 +353,10 @@ def verify_apkg(path: Path, expected_cards: int, expected_models: list, locale: 
     tmp.unlink()
     if model_names != sorted(expected_models):
         raise RuntimeError(f"{path.name}: models in apkg are {model_names}, expected {expected_models}")
-    expected_typein = _wrap("{{Front}}<br>{{type:Back}}", locale)
-    if typein_qfmt != expected_typein:
-        raise RuntimeError(f"{path.name}: AnkiTovTypeIn qfmt is {typein_qfmt!r}, expected {expected_typein!r} (plan sections 3.8/3.6)")
+    if NOTE_TYPE_NAMES["type_in"] in expected_models:
+        expected_typein = _wrap("{{Front}}<br>{{type:Back}}", locale)
+        if typein_qfmt != expected_typein:
+            raise RuntimeError(f"{path.name}: AnkiTovTypeIn qfmt is {typein_qfmt!r}, expected {expected_typein!r} (plan sections 3.8/3.6)")
     if locale == "he":
         for m in models_iter:
             if '<div dir="rtl" class="ankitov-he">' not in m["tmpls"][0]["qfmt"]:
@@ -435,7 +442,8 @@ def main() -> int:
         out.parent.mkdir(parents=True, exist_ok=True)
         genanki.Package(deck).write_to_file(str(out))
 
-        v = verify_apkg(out, len(rows), list(NOTE_TYPE_NAMES.values()), locale)
+        expected_models = [NOTE_TYPE_NAMES[nt] for nt, count in actual.items() if count > 0]
+        v = verify_apkg(out, len(rows), expected_models, locale)
         sha = hashlib.sha256(out.read_bytes()).hexdigest()
         entry = {
             "locale": locale,

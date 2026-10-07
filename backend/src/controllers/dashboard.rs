@@ -14,8 +14,30 @@ pub async fn index() -> Result<Response> {
 }
 
 /// Serves the IMP Console (Interleaved Mastery Pipeline UI).
+/// Sends no-cache headers so Cloudflare edge always fetches fresh content.
 pub async fn imp_console() -> Result<Response> {
-    format::html(include_str!("../../resources/dashboard/imp-console.html"))
+    let mut resp: Response = format::html(include_str!("../../resources/dashboard/imp-console.html"))?;
+    resp.headers_mut().insert(
+        header::CACHE_CONTROL,
+        header::HeaderValue::from_static("no-store, no-cache, must-revalidate, max-age=0"),
+    );
+    Ok(resp)
+}
+
+/// Serves the public projector wall for a class display board.
+///
+/// The `<token>` embedded in the URL (e.g. `/b/<token>`) is the credential —
+/// this page performs **no authentication** and polls the public
+/// `GET /api/v1/display/class/<token>?format=wall` endpoint client-side
+/// (spec §8.1). 404 handling (unknown/rotated token) happens client-side so
+/// the wall can keep its last state and show a friendly screen.
+pub async fn imp_wall() -> Result<Response> {
+    let mut resp: Response = format::html(include_str!("../../resources/dashboard/imp-wall.html"))?;
+    resp.headers_mut().insert(
+        header::CACHE_CONTROL,
+        header::HeaderValue::from_static("no-store, no-cache, must-revalidate, max-age=0"),
+    );
+    Ok(resp)
 }
 
 /// Health check endpoint for the dashboard.
@@ -135,6 +157,22 @@ pub async fn driver_js() -> Result<Response> {
     Ok(([(header::CONTENT_TYPE, "application/javascript; charset=utf-8")],
         include_str!("../../resources/dashboard/vendor/driver.min.js"))
         .into_response())
+}
+
+/// Serves the Prong 8 first-login wizard (public, token-secured).
+///
+/// The path params (`:invite_id`, `:token`) are read client-side from the URL
+/// and POSTed to `/api/v1/management/teachers/{user_id}/first-login`. This
+/// handler only serves the HTML shell; the actual state mutation happens in
+/// the (auth-gated) management endpoint.
+pub async fn first_login() -> Result<Response> {
+    let mut resp: Response =
+        format::html(include_str!("../../resources/dashboard/first-login.html"))?;
+    resp.headers_mut().insert(
+        header::CACHE_CONTROL,
+        header::HeaderValue::from_static("no-store, no-cache, must-revalidate, max-age=0"),
+    );
+    Ok(resp)
 }
 
 /// Registers dashboard routes including static assets.

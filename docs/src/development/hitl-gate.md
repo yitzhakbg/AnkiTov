@@ -1,8 +1,3 @@
----
-type: note
-title: HITL Gate Protocol (Human-in-the-Loop)
----
-
 # HITL Gate Protocol (Human-in-the-Loop)
 
 The approval gate belongs to Goose's **development environment**. It protects

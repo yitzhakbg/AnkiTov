@@ -10,7 +10,7 @@ error-not-found = المورد غير موجود
 error-unauthorized = غير مصرح — يرجى تسجيل الدخول
 error-internal = خطأ داخلي في الخادم — يرجى المحاولة مرة أخرى
 error-validation = خطأ في التحقق: { $detail }
-error-rate-limit = طلبات كثيرة جدًا — يرجى الانتظار والمحاولة مرة أخرى
+error-rate-limit = طلبات كثيرة جدًّا — يرجى الانتظار والمحاولة مرة أخرى
 error-class-not-found = الفصل "{ $id }" غير موجود
 error-student-not-found = الطالب "{ $id }" غير موجود
 error-track-not-found = المسار "{ $id }" غير موجود
@@ -18,8 +18,8 @@ error-profile-not-found = خطة التدريب "{ $id }" غير موجودة
 error-deck-not-found = المجموعة غير موجودة
 error-upload-failed = فشل الرفع: { $reason }
 error-sync-failed = فشلت عملية المزامنة: { $reason }
-error-enroll-failed = فشل تسجيل الطالب: { $reason }
-error-transfer-failed = فشل نقل الطالب: { $reason }
+error-enroll-failed = تعذّر تسجيل الطالب: { $reason }
+error-transfer-failed = تعذّر نقل الطالب: { $reason }
 error-capsule-generation-failed = فشل إنشاء جلسة الدراسة: { $reason }
 
 # ── Success ──
@@ -36,14 +36,14 @@ success-sync-started = بدأت المزامنة الكاملة — قد تست�
 # ── Notifications ──
 notify-health-ok = 🟢 النظام يعمل
 notify-health-unreachable = 🔴 لا يمكن الوصول
-notify-syncing = جاري المزامنة…
-notify-loading = جاري التحميل…
+notify-syncing = جارٍ المزامنة…
+notify-loading = جارٍ التحميل…
 
 # ── Audit log messages ──
 audit-capsule-generated = تم إنشاء جلسة مراجعة لـ { $student }
-audit-n-value-changed = تم تغيير قيمة N من { $old } إلى { $new } لـ { $target }
-audit-profile-assigned = تم تعيين خطة التدريب "{ $profile }" لـ { $student }
-audit-profile-revoked = تم إلغاء خطة التدريب "{ $profile }" من { $student }
+audit-n-value-changed = قيمة N تغيّرت من { $old } إلى { $new } لـ { $target }
+audit-profile-assigned = كُيّفت خطة التدريب "{ $profile }" على { $student }
+audit-profile-revoked = أُسبِت خطة التدريب "{ $profile }" عن { $student }
 audit-class-created = تم إنشاء الفصل "{ $name }"
 audit-class-deleted = تم حذف الفصل "{ $name }"
 audit-deck-uploaded = تم رفع المجموعة "{ $name }" ({ $size } بايت)
@@ -59,11 +59,11 @@ import-file-class = الفصل المستهدف
 import-file-submit = استيراد الطلاب
 import-file-success = تم استيراد { $count } طالب(ة) بنجاح
 import-file-skipped = { $count } تم تخطيهم (مسجلون بالفعل)
-import-file-errors = { $count } صف(وف) بها أخطاء
+import-file-errors = { $count } صف(وف) يحتوي(ان) على أخطاء
 import-file-missing-column = العمود المطلوب مفقود: { $column }
 import-file-empty-file = الملف فارغ
 import-file-invalid-format = صيغة ملف غير مدعومة. استخدم CSV أو TSV أو .xlsx
-import-file-parse-error = تعذرت قراءة الملف: { $reason }
+import-file-parse-error = تعذّرت قراءة الملف: { $reason }
 import-file-preview = معاينة ({ $count } صف)
 import-file-download-template = تنزيل النموذج
 

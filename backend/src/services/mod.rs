@@ -46,6 +46,12 @@ pub mod anki_launcher;
 pub mod forensic_reader;
 pub mod deck_health;
 
+// Leaderboard — shared scoring rule for the class display, student view, and
+// staff console (`specs/2026-10-06-leaderboard.md`).
+pub mod leaderboard;
+// Leaderboard — DB-backed aggregation (capsule_sessions + class_enrollments).
+pub mod leaderboard_aggregate;
+
 // Interleaved Mastery Pipeline — Phase 3 (Capsule Generation Engine)
 pub mod capsule_slicer;
 pub mod fsrs_sort;
@@ -59,9 +65,16 @@ pub mod track_health;
 pub mod audit_logger;
 pub mod rig_nlu;
 pub mod student_import;
+pub mod sync_user;
 
 // Deck verification — P1 producer intake (env-selectable Verifier)
 pub mod deck_verification;
 
 // Authentication
 pub mod auth;
+
+// Prong 8 (Teacher Registration) — password policy
+pub mod password_policy;
+
+// TypeSafe System One (Jev) prompt translator
+pub mod jev_translator;

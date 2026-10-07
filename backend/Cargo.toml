@@ -3,6 +3,7 @@ name = "backend"
 version = "1.0.0"
 edition = "2021"
 license = "AGPL-3.0-only"
+publish = false
 
 
 
@@ -48,7 +49,18 @@ dotenvy = "0.15"
 rig = "0.38"
 
 [dev-dependencies]
+# axum-test is NOT used directly — it is pulled in by loco-rs 0.11's `testing`
+# feature (resolves 16.4.1), which backs loco_rs::testing. Pinned explicitly so
+# loco's harness cannot silently drift; do NOT move to 22.x (breaking major,
+# still a release candidate) — see specs/harness/2026-10-04-test-gates.md §10.
 axum-test = "16"
 serial_test = "3"
 tempfile = "3"
 wiremock = "0.6"
+# Property tests encoding specs/audits/*-invatives.txt (INVARIANT A—W).
+# Counterexample persistence is built into proptest (writes a
+# tests/property_*.regressions file per suite — commit those files).
+proptest = "1.11"
+# Pinned to the exact version fluent-templates 0.9 already resolves, so the
+# .ftl parse test in src/i18n.rs shares one parser instead of adding a second.
+fluent-syntax = "0.11.1"

@@ -1,9 +1,9 @@
----
-type: note
-title: AnkiTov Architecture
----
-
 # AnkiTov Architecture
+
+> **Status note (2026-10):** The Two-Tier Ecosystem, streaming/DRM, and Clearing
+> House sections below describe the long-term *vision*. The implemented core
+> today is the backend + IMP pipeline — `project-knowledge/prong-progress.md`
+> is the re-baselined source of truth.
 
 ## Two-Tier Ecosystem
 

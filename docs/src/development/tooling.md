@@ -1,8 +1,3 @@
----
-type: note
-title: Development Tooling and Product Boundary
----
-
 # Development Tooling and Product Boundary
 
 The tools used by Goose to develop AnkiTov are distinct from AnkiTov's own
@@ -39,5 +34,5 @@ cargo check
 cargo nextest run
 ```
 
-The authoritative boundary and review-wrapper setup live in the private
-development repository (not part of this public export).
+The authoritative boundary and review-wrapper setup live in the development
+workspace (internal; not part of the public export).

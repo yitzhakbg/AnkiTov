@@ -1,22 +1,59 @@
-# Caddy reverse proxy configuration for AnkiTov.
+# Caddy reverse proxy configuration for AnkiTov
 #
 # Caddy handles:
-#   - Automatic HTTPS (Let's Encrypt in production, self-signed in dev)
-#   - Reverse proxy to backend API and dashboard
-#   - WebSocket upgrade for streaming (future Selkies)
+#   - Automatic HTTPS via Let's Encrypt / ZeroSSL for app.ankitov.com
+#   - Reverse proxying to backend API, Management Console, and PWA
+#   - WebSocket support for real-time telemetry / streaming
 #
-# Domains are set via ANKITOV_DOMAIN env var (default: localhost).
+# Domain defaults to app.ankitov.com (can be overridden via ANKITOV_DOMAIN env var)
 
-{$ANKITOV_DOMAIN:localhost} {
-    # ── Backend API ──
-    handle /api/* {
-        reverse_proxy backend:5150
+{$ANKITOV_DOMAIN:app.ankitov.com} {
+    # TLS: Caddy's default ACME config already uses the PRODUCTION Let's
+    # Encrypt CA (https://acme-v02.api.letsencrypt.org/directory) with the
+    # http-01 challenge, which is what we want for a plain A-record pointing
+    # at this box. No explicit tls{} block needed.
+
+    # ── Security Headers ──
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        X-XSS-Protection "1; mode=block"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
     }
+
+    # ── Gzip / Zstandard Compression ──
+    encode zstd gzip
+
+    # ── Health Probes ──
     handle /health {
         reverse_proxy backend:5150
     }
 
-    # ── Dashboard & PWA ──
+    # ── Management API rewrites (proxy /management/* to /api/v1/management/*) ──
+    handle /management/* {
+        rewrite * /api/v1{uri}
+        reverse_proxy backend:5150
+    }
+
+    # ── Anki sync server (raw TCP `cmd:`/`body:` protocol, not HTTP) ──
+    # Students point Anki's "server address" at https://app.ankitov.com/sync/
+    # (Anki 26 accepts a full base URL). Caddy terminates TLS + rewrites the
+    # path back to the root and opens a direct TCP stream to the internal-only
+    # sync-server container (expose 8080, no public port) — no second
+    # FRITZ!Box port needed. Anki issues no sub-path of its own, so the
+    # rewrite to / is transparent to the protocol handshake.
+    handle /sync/* {
+        rewrite * /
+        reverse_proxy sync-server:8080
+    }
+
+    # ── API endpoints ──
+    handle /api/* {
+        reverse_proxy backend:5150
+    }
+
+    # ── Management Console & PWA Routes ──
     handle /dashboard/* {
         reverse_proxy backend:5150
     }
@@ -26,25 +63,24 @@
     handle /locales/* {
         reverse_proxy backend:5150
     }
+    handle /vendor/* {
+        reverse_proxy backend:5150
+    }
+    handle /i18n.js {
+        reverse_proxy backend:5150
+    }
+    handle /rtl.css {
+        reverse_proxy backend:5150
+    }
 
-    # ── Default: dashboard ──
+    # ── Default Fallback: Route to Loco.rs App ──
     handle {
         reverse_proxy backend:5150
     }
 
-    # ── Logging ──
+    # ── Structured JSON Access Logging ──
     log {
         output stdout
         format json
-    }
-
-    # ── Headers ──
-    header {
-        # Security headers
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "DENY"
-        Referrer-Policy "strict-origin-when-cross-origin"
-        # Enable for production:
-        # Strict-Transport-Security "max-age=31536000; includeSubDomains"
     }
 }

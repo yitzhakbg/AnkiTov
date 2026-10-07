@@ -1,46 +1,58 @@
-# AnkiTov Backend — Multi-stage Docker build
-#
-# Stage 1: Build the Rust binary (cached dependencies)
-# Stage 2: Minimal runtime image
+# AnkiTov Loco.rs Backend Container
+# Multi-stage build for minimal production image
 
-# ── Stage 1: Builder ──
-FROM rust:1.85-slim-bookworm AS builder
+# ── Build Stage ──
+FROM rust:bookworm AS builder
 
+WORKDIR /build
+
+# Install build dependencies (OpenSSL, SQLite, build tools)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    pkg-config libssl-dev \
+    pkg-config libssl-dev libsqlite3-dev ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-
-# Cache dependencies first (layer caching)
-COPY Cargo.toml Cargo.lock ./
-RUN mkdir src && echo 'fn main() {}' > src/main.rs
-RUN cargo build --release 2>/dev/null || true
-RUN rm -rf src
-
-# Copy actual source
-COPY src/ src/
-COPY resources/ resources/
-COPY i18n/ i18n/
+# Copy backend source
+COPY backend/Cargo.toml backend/Cargo.lock ./
+COPY backend/src ./src
+COPY backend/config ./config
+COPY backend/resources ./resources
+COPY backend/i18n ./i18n
 
 # Build release binary
-RUN cargo build --release
+RUN cargo build --release --locked
 
-# ── Stage 2: Runtime ──
-FROM debian:bookworm-slim
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+# ── Runtime Stage ──
+FROM debian:trixie-slim
 
 WORKDIR /app
 
-COPY --from=builder /app/target/release/backend /app/backend
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libssl3 libsqlite3-0 ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN groupadd -g 1000 ankitov && \
+    useradd -u 1000 -g ankitov -d /app -s /bin/bash ankitov
+
+# Copy binary & assets from builder
+COPY --from=builder /build/target/release/backend /app/ankitov-backend
+COPY backend/config /app/config
+COPY backend/resources /app/resources
+COPY backend/i18n /app/i18n
+
+# Create directories for logs and data
+RUN mkdir -p /app/logs /app/data /etc/ankitov && \
+    chown -R ankitov:ankitov /app /etc/ankitov
+
+USER ankitov
+
+ENV LOCO_ENV=production
+ENV RUST_LOG=info
 
 EXPOSE 5150
-EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:5150/health || exit 1
 
-ENTRYPOINT ["/app/backend"]
+CMD ["/app/ankitov-backend", "start"]

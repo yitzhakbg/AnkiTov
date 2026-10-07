@@ -15,7 +15,21 @@
         "cloze": 21,
         "type_in": 26
       },
-      "sha256": "eb2e8efc6c3c67450f8dbdfe65da7cf35f4469e48afd4c9285fca8b4c25ea009",
+      "sha256": "8baf09ceb280a9bce0e916e0008813999df5c873c2c4b0a5345fee531dbd42c6",
+      "rtl": false
+    },
+    {
+      "locale": "en",
+      "slug": "history-dates-figures",
+      "file": "packages/history-dates-figures-en.apkg",
+      "title": "AnkiTov Pilot — History: Dates & Figures",
+      "card_count": 105,
+      "note_type_census": {
+        "basic": 79,
+        "cloze": 26,
+        "type_in": 0
+      },
+      "sha256": "00e78229af591bc87c1ae5719c4a373b8753d9ed2158c1deb3e27ab0804a41b3",
       "rtl": false
     },
     {
@@ -29,7 +43,35 @@
         "cloze": 47,
         "type_in": 11
       },
-      "sha256": "a791dc87efe3449e693ad8dbc85cbb3013a8518e7c613ad6a83734904e624446",
+      "sha256": "d5991fc3958e55e2e7350272870ba8674bff673c6414a2cddc3f6ae74b8392e9",
+      "rtl": false
+    },
+    {
+      "locale": "en",
+      "slug": "science-terms",
+      "file": "packages/science-terms-en.apkg",
+      "title": "AnkiTov Pilot — Science Terms",
+      "card_count": 105,
+      "note_type_census": {
+        "basic": 63,
+        "cloze": 32,
+        "type_in": 10
+      },
+      "sha256": "6aa95cf084387dd6088298ce0aa20752e30f3977c30683fe2f911e442072b028",
+      "rtl": false
+    },
+    {
+      "locale": "fr",
+      "slug": "history-dates-figures",
+      "file": "packages/history-dates-figures-fr.apkg",
+      "title": "AnkiTov Pilot — Histoire : dates et figures",
+      "card_count": 105,
+      "note_type_census": {
+        "basic": 79,
+        "cloze": 26,
+        "type_in": 0
+      },
+      "sha256": "915d6ca91c4167a2afc4300b61bb5ade32dda1c099bf3884258260737db4aadc",
       "rtl": false
     },
     {
@@ -43,9 +85,23 @@
         "cloze": 47,
         "type_in": 11
       },
-      "sha256": "d7f03251f5e00a4b8b6c4c50fe91098ae329a776d3fb327e058004b2d0ff66e1",
+      "sha256": "2877e293930563cdbb53ff5a462b1b645ae54b376dd8219dd1ee790e43fdd1f8",
+      "rtl": true
+    },
+    {
+      "locale": "he",
+      "slug": "science-terms",
+      "file": "packages/science-terms-he.apkg",
+      "title": "AnkiTov Pilot — מונחים במדעים",
+      "card_count": 105,
+      "note_type_census": {
+        "basic": 63,
+        "cloze": 32,
+        "type_in": 10
+      },
+      "sha256": "5896c29b7ef61e941f17b972d4a54457dae3dfeae44cd755b93468b115c9f6a3",
       "rtl": true
     }
   ],
-  "generated_at": "2026-09-09T17:24:53Z"
+  "generated_at": "2026-09-10T03:46:18Z"
 }

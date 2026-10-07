@@ -39,6 +39,13 @@ fn teacher_token() -> String {
         .expect("minting teacher token for endpoint coverage test must succeed")
 }
 
+/// Mint a valid `admin` JWT — the Prong-8 teacher-management routes
+/// (list / create / get_detail / resend) are admin-gated.
+fn admin_token() -> String {
+    backend::services::auth::encode_token(998, "admin", "admin@endpoint-coverage.example.edu", 86400)
+        .expect("minting admin token for endpoint coverage test must succeed")
+}
+
 /// Build a multipart body for `/management/students/import-file` with a
 /// `class_id` field plus a CSV `file` field (or without `class_id` to test
 /// the BadRequest path).
@@ -457,6 +464,139 @@ async fn test_students_bulk_enroll_populate_decks_and_import_file() {
             cleanup.status_code() == 200 || cleanup.status_code() == 204,
             "class cleanup must succeed, got {}",
             cleanup.status_code()
+        );
+    })
+    .await;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 7. teachers (Prong 8) — list / create / get_detail / resend
+//    All four are ADMIN-gated; a plain `teacher` token must be rejected with 403.
+// ─────────────────────────────────────────────────────────────────────────────
+
+#[tokio::test]
+async fn test_teachers_management_surface() {
+    testing::request::<backend::App, _, _>(|server, _ctx| async move {
+        let admin = format!("Bearer {}", admin_token());
+        let teacher = format!("Bearer {}", teacher_token());
+
+        // ── 1. Role gate: a non-admin teacher token must be 403 on every
+        //      admin-gated route (proves the authz boundary, not just 5xx).
+        let gate_list = server
+            .get("/api/v1/management/teachers")
+            .add_header("Authorization", teacher.clone())
+            .await;
+        assert_eq!(gate_list.status_code(), 403, "list as teacher must be 403");
+
+        let gate_create = server
+            .post("/api/v1/management/teachers")
+            .add_header("Authorization", teacher.clone())
+            .json(&json!({
+                "full_name": "Gate Probe",
+                "email": "gate-probe@endpoint-coverage.example.edu",
+                "school": "Gate School",
+                "locale": "en-US"
+            }))
+            .await;
+        assert_eq!(gate_create.status_code(), 403, "create as teacher must be 403");
+
+        // ── 2. list (admin) → 200 + JSON array (may be empty before create).
+        let list = server
+            .get("/api/v1/management/teachers")
+            .add_header("Authorization", admin.clone())
+            .await;
+        assert_eq!(list.status_code(), 200, "list as admin must be 200");
+        let list_body = json_body(&list.text());
+        assert!(
+            list_body.is_array(),
+            "list must return a JSON array, got: {list_body:?}"
+        );
+
+        // ── 3. create (admin) → 200/201 + user + invite(token, invite_url) + audit.
+        //      A fresh unique email avoids the 409 duplicate-email / active-invite paths.
+        let created_email = "coverage-teacher-1@endpoint-coverage.example.edu";
+        let create = server
+            .post("/api/v1/management/teachers")
+            .add_header("Authorization", admin.clone())
+            .json(&json!({
+                "full_name": "Coverage Teacher One",
+                "email": created_email,
+                "school": "Coverage High School",
+                "community": "pilot",
+                "role": "teacher",
+                "locale": "en-US"
+            }))
+            .await;
+        assert!(
+            create.status_code() == 200 || create.status_code() == 201,
+            "create as admin must be 2xx, got {}",
+            create.status_code()
+        );
+        let created = json_body(&create.text());
+        assert!(
+            created["user"]["id"].is_i64(),
+            "create must return user.id (i64): {created:?}"
+        );
+        assert_eq!(created["user"]["role"], "teacher");
+        assert_eq!(created["user"]["email"], created_email);
+        assert_eq!(created["user"]["locale"], "en-US");
+        // The invite must carry a 256-bit hex token (64 hex chars) and a relative /d/ URL.
+        assert_eq!(
+            created["invite"]["token"].as_str().map(|t| t.len()),
+            Some(64),
+            "invite.token must be a 256-bit (64-char) hex string: {created:?}"
+        );
+        let invite_url = created["invite"]["invite_url"].as_str().unwrap_or("");
+        assert!(
+            invite_url.starts_with("/d/"),
+            "invite_url must be a relative /d/ link, got: {invite_url:?}"
+        );
+        assert_eq!(created["audit"]["event_type"], "teacher_enrolled");
+
+        let new_user_id = created["user"]["id"].as_i64().expect("user.id must be i64");
+
+        // ── 4. get_detail (admin) → 200 + user + invite; a bogus id → 404.
+        let detail = server
+            .get(&format!("/api/v1/management/teachers/{new_user_id}"))
+            .add_header("Authorization", admin.clone())
+            .await;
+        assert_eq!(detail.status_code(), 200, "get_detail as admin must be 200");
+        let detail_body = json_body(&detail.text());
+        assert_eq!(
+            detail_body["user"]["id"],
+            serde_json::json!(new_user_id),
+            "detail.user.id must match the created id: {detail_body:?}"
+        );
+        assert_eq!(detail_body["user"]["password_hash_set"], false, "fresh teacher has no password yet");
+        assert!(
+            detail_body["invite"].is_object(),
+            "detail.invite must be an object (a live invite exists): {detail_body:?}"
+        );
+
+        // Bogus id → graceful 404 (never 5xx) for an admin.
+        let detail_missing = server
+            .get("/api/v1/management/teachers/99999999999")
+            .add_header("Authorization", admin.clone())
+            .await;
+        assert_eq!(detail_missing.status_code(), 404, "unknown user_id must be 404");
+
+        // ── 5. resend (admin) → 200 + a ROTATED token that differs from the original.
+        let resend = server
+            .post(&format!("/api/v1/management/teachers/{new_user_id}/resend"))
+            .add_header("Authorization", admin)
+            .await;
+        assert_eq!(resend.status_code(), 200, "resend as admin must be 200");
+        let resent = json_body(&resend.text());
+        let original = created["invite"]["token"].as_str().unwrap_or("");
+        let rotated = resent["token"].as_str().expect("resend must return a token");
+        assert_eq!(rotated.len(), 64, "rotated token must be 256-bit hex: {rotated:?}");
+        assert_ne!(
+            rotated, original,
+            "resend must rotate the invite token (old: {original}, new: {rotated})"
+        );
+        assert!(
+            ["pending", "active"].contains(&resent["status"].as_str().unwrap_or("")),
+            "resent invite status must be pending/active, got: {resent:?}"
         );
     })
     .await;

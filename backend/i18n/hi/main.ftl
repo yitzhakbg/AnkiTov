@@ -16,8 +16,8 @@ error-student-not-found = छात्र "{ $id }" नहीं मिला
 error-track-not-found = ट्रैक "{ $id }" नहीं मिला
 error-profile-not-found = अभ्यास योजना "{ $id }" नहीं मिली
 error-deck-not-found = डेक नहीं मिला
-error-upload-failed = अपलोड विफल: { $reason }
-error-sync-failed = सिंक कार्य विफल: { $reason }
+error-upload-failed = Upload failed: { $reason }
+error-sync-failed = Sync operation failed: { $reason }
 error-enroll-failed = छात्र नामांकन विफल: { $reason }
 error-transfer-failed = छात्र स्थानांतरण विफल: { $reason }
 error-capsule-generation-failed = कैप्सूल निर्माण विफल: { $reason }
@@ -41,20 +41,20 @@ notify-loading = लोड हो रहा है…
 
 # ── Audit log messages ──
 audit-capsule-generated = { $student } के लिए कैप्सूल सत्र तैयार हुआ
-audit-n-value-changed = { $target } के लिए N-मान { $old } से { $new } में बदला गया
-audit-profile-assigned = अभ्यास योजना "{ $profile }" { $student } को निर्दिष्ट की गई
-audit-profile-revoked = अभ्यास योजना "{ $profile }" { $student } से वापस ली गई
-audit-class-created = कक्षा "{ $name }" बनाई गई
-audit-class-deleted = कक्षा "{ $name }" हटाई गई
-audit-deck-uploaded = डेक "{ $name }" अपलोड हुआ ({ $size } बाइट्स)
-audit-deck-distributed = डेक "{ $name }" { $target_type } "{ $target }" को वितरित किया गया
+audit-n-value-changed = N-मूल्य { $old } से { $new } में बदला, { $target } के लिये
+audit-profile-assigned = Practice Plan "{ $profile }" assigned to { $student }
+audit-profile-revoked = Practice Plan "{ $profile }" revoked from { $student }
+audit-class-created = Class "{ $name }" created
+audit-class-deleted = Class "{ $name }" deleted
+audit-deck-uploaded = Deck "{ $name }" uploaded ({ $size } bytes)
+audit-deck-distributed = Deck "{ $name }" distributed to { $target_type } "{ $target }"
 
 
 # ── Student Import from File ──
 import-file-title = फ़ाइल से छात्र आयात करें
 import-file-description = छात्र रोस्टर के साथ CSV, TSV या Excel फ़ाइल अपलोड करें
 import-file-dropzone = फ़ाइल यहाँ छोड़ें या ब्राउज़ करने के लिए क्लिक करें
-import-file-accepted = स्वीकृत प्रारूप: CSV, TSV, Excel (.xlsx)
+import-file-accepted = Accepted formats: CSV, TSV, Excel (.xlsx)
 import-file-class = लक्ष्य कक्षा
 import-file-submit = छात्र आयात करें
 import-file-success = { $count } छात्र सफलतापूर्वक आयात हुए

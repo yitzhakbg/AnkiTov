@@ -1,117 +1,106 @@
 note_type,concept_id,unit,grades,front,back,extra
-cloze,croissance-egyptienne,01,7,« La croissance démographique en Egypte ancienne a été favorisée par {{c1::le Nil}}. »,,Le Nil fournissait l'eau, l'irrigation et les limons fertiles nécessaires aux récoltes.
-cloze,pyramide-de-gizeh,01,7,« La plus grande des trois pyramides de Gizeh est celle de {{c1::Kheops}}. »,,Située en Egypte, la pyramide de Kheops daterait d'environ 2560 av. J.-C.
-cloze,decouverte-de-glyphes,01,7,"« Les scribes égyptiens notaient le papyrus au moyen de {{c1::hiéroglyphes}}. »",,"Ils les gravaient ou les peignaient pour des inscriptions rituelles, funéraires et administratives."
-cloze,decouverte-de-l-epe,01,7,« La première métallurgie de l'Europe est marquée par {{c1::l'Age du Bronze}}. »,,L'alliage de l'étain avec le cuivre donna un métal plus dur que l'or.
-basic,age-de-la-pierre,01,7,Âge de la Pierre,Il s'agit de la très longue période préhistorique durant laquelle l'humanité façonnait la pierre pour produire ses outils.,On distingue souvent l'Paléolithique, le Mésolithique et le Néolithique.
-basic,mesopotamie,01,7,Mésopotamie,« Pays entre deux fleuves », la Mésopotamie désigne la région de l'Euphrate et du Tigre, berceau de la civilisation sumérienne.,Les premières écritures, la roue et l'irrigation y sont apparues.
-basic,sumeres,01,7,Sumériens,Peuplement de la basse Mésopotamie, ils fondèrent la première civilisation urbaine et mirent en œuvre le système d'écriture cunéiforme.,Villes majeures : Ur, Uruk, Eridu.
-basic,cuneiforme,01,7,Ecriture cunéiforme,Système d'écriture à cunéiformes, développé en Mésopotamie vers 3400-3000 av. J.-C.,Il est passé sur tablette d'argile, gravé avec un stylet, puis adapté à plusieurs langues.
-basic,ziggourat,01,7,Ziggourat,Bâtiment en gradins servant de base à un temple sumérien ou babylonien.,Exemple : la ziggourat d'Our, construite sous Ur-Nammu.
+basic,age-de-la-pierre,01,7,Âge de la Pierre,Il s'agit de la très longue période préhistorique durant laquelle l'humanité façonnait la pierre pour produire ses outils.,On distingue souvent l'Paléolithique
+basic,mesopotamie,01,7,Mésopotamie,Pays entre deux fleuves,la Mésopotamie désigne la région de l'Euphrate et du Tigre
+basic,sumeres,01,7,Sumériens,Peuplement de la basse Mésopotamie,ils fondèrent la première civilisation urbaine et mirent en œuvre le système d'écriture cunéiforme.
+basic,cuneiforme,01,7,Ecriture cunéiforme,Système d'écriture à cunéiformes,développé en Mésopotamie vers 3400-3000 av. J.-C.
+basic,ziggourat,01,7,Ziggourat,Bâtiment en gradins servant de base à un temple sumérien ou babylonien.,Exemple : la ziggourat d'Our
 basic,sumeres-fondent,01,7,Uruk,Plus grande agglomération sumérienne au IIIe millénaire av. J.-C. ; centre du premier véritable État.,Elle est considérée comme la plus ancienne grande ville du monde.
-cloze,sumes-ecrivent,01,7,« L'écriture sumérienne, dite cunéiforme, est gravée à l'aide d'un {{c1::calame}}. »,,Le calame, taillé dans la roseau, marquait l'argile tendre pour y former les signes.
-basic,hamurabi,02,8,Hammurabi,Roi babylonien qui fit rédiger l'un des plus anciens codes de lois rédigés au monde.,Son code, gravé sur une stèle, codifiait des règles sur les dettes, le travail et la propriété.
+basic,hamurabi,02,8,Hammurabi,Roi babylonien qui fit rédiger l'un des plus anciens codes de lois rédigés au monde.,Son code
 basic,code-hammurabi,02,8,Code d'Hammurabi,Ensemble de lois gravées sur une stèle d'argile au XVIIIe siècle av. J.-C.,Il a survécu en grande partie et a servi de modèle pour la justice babylonienne.
-cloze,eglise-syrie,02,7,L'{{c1::Age des Templiers}} n'a pas d'existence historique avérée.,,Cette expression relève de la légende, d'après aucune source historique.
 basic,assyriens,02,8,Empire assyrien,Gouvernement qui régna sur le Proche-Orient entre le IXe et le VIe siècle av. J.-C.,Il était réputé pour sa puissance militaire et ses méthodes de guerre.
 basic,nebuchadrezzor,02,8,Nébuchadneczar,Monarque babylonien au VIIe siècle av. J.-C.,Il fit construire la Tour de Babel légendaire et l'immense muraille de Babylone.
-basic,babylone,02,8,Babylone,Métropole de la basse Mésopotamie, considérée au VIe siècle av. J.-C. comme la plus grande ville du monde.,Elle devint le centre d'un empire de la dynastie néobabylonienne.
-cloze,chute-de-babylone,02,8,« L'empire néobabylonien de Babylone fut conquis par {{c1::Cyrus II}} de Perse. »,,En 539 av. J.-C., les Perses prirent Babylone et mirent fin à la dynastie de Nabonide.
-basic,grecs-olympiade,03,7,Jeux olympiques,Compte des athlètes grecs qui s'y tenait dans le sanctuaire de Zeus à Olympia, à partir de 776 av. J.-C.,Ils étaient suspendus à certains conflits, comme la Péloponnèse.
-basic,grecs-philosophes,03,8,Socrate,Philosophe grec qui, en dialoguant, a questionné les certitudes morales et intellectuelles.,Il ne laissa rien par écrit ; son pensée nous parvient par Platon et Xénophon.
-basic,platon,03,8,Platon,Eleve de Socrate, il fonda l'Académie d'Athènes et développa sa théorie des idées.,Son dialogue La République est un texte fondateur de la philosophie politique.
-basic,aristote,03,8,Aristote,Disciple de Platon, il étudia la logique, la biologie et la métaphysique au Lyceum.,Il a influencé toute la pensée occidentale jusqu'au XIIIe siècle.
-cloze,peleponnesiaque,03,8,« La Guerre du Pélôponnèse opposa Athènes à {{c1::Sparte}}. »,,De 431 à 404 av. J.-C., cette guerre épuisa les cités grecques et réduisit la puissance d'Athènes.
-basic,macedoine-alexandre,03,8,Alexandre le Grand,Roi de Macédoine qui, en moins de une décennie, conquit de la Grèce à l'Inde.,Il fonda Alexandrie en Egypte et répandit la civilisation hellénistique.
+basic,babylone,02,8,Babylone,Métropole de la basse Mésopotamie,considérée au VIe siècle av. J.-C. comme la plus grande ville du monde.
+basic,grecs-olympiade,03,7,Jeux olympiques,Compte des athlètes grecs qui s'y tenait dans le sanctuaire de Zeus à Olympia,à partir de 776 av. J.-C.
+basic,grecs-philosophes,03,8,Socrate,Philosophe grec qui,en dialoguant
+basic,platon,03,8,Platon,Eleve de Socrate,il fonda l'Académie d'Athènes et développa sa théorie des idées.
+basic,aristote,03,8,Aristote,Disciple de Platon,il étudia la logique
+basic,macedoine-alexandre,03,8,Alexandre le Grand,Roi de Macédoine qui,en moins de une décennie
 basic,alexandrie-bibliotheque,03,9,Bibliothèque d'Alexandrie,Ensemble de rouleaux et de manuscrits réuni dans la capitale fondée par Alexandre.,Elle fut l'un des centres d'apprentissage et de savoir les plus importants de l'Antiquité.
-cloze,hellenismes,03,9,« L'hellénisme désigne la diffusion de la culture grecque depuis {{c1::la conquête d'Alexandre}}. »,,La langue et les idées grecques dominèrent l'Est méditerranéen jusqu'à la fin du IVe siècle av. J.-C.
-basic,romes-republique,04,7,République romaine,Forme de gouvernement qui succède à la monarchie à Rome, dès 509 av. J.-C.,Elle est gouvernée par le Sénat et les magistrats élus, notamment les consuls.
+basic,romes-republique,04,7,République romaine,Forme de gouvernement qui succède à la monarchie à Rome,dès 509 av. J.-C.
 basic,romes-julius-caesar,04,8,Jules César,Dictateur romain qui traversa les Alpes pour conquérir la Gaule et mena la guerre civile.,Il introduit le calendrier julien ; il est assassiné sur les marches de 44 av. J.-C.
-basic,octavian-empire,04,8,Auguste,Deuxième prince romain, premier empereur de Rome sous le nom d'Auguste.,Il fonde l'Empire romain et instaure la Pax romana, une longue période de stabilité.
-cloze,pax-romana,04,8,« La Pax romana désigne l'époque de stabilité qui suit l'accession de {{c1::Auguste}}. »,,Elle dure à peu près jusqu'à la mort de Trajan en 117 ap. J.-C.
-basic,romes-chretientisme,04,9,Constantin Ier,Empereur romain qui, en 313, promulgua l'édit de Milan et legitima le christianisme.,Il fonda Constantinople et devint un défenseur décisif de l'Eglise chrétienne.
-basic,romes-chute-occident,04,9,Chute de l'Empire romain d'Occident,Fin de l'autorité impériale romaine à Rome, en 476 ap. J.-C.,Il marque traditionnellement la fin de l'Antiquité et le début du Haut Moyen Âge.
-basic,constantinople,04,9,Constantinople,Capitale fondée par Constantin Ier, aujourd'hui Istanbul ; elle est devenue un centre chrétien majeur.,Elle fut la capitale de l'Empire byzantin jusqu'à sa prise par les Ottomans en 1453.
-cloze,romes-313,04,9,« L'édit de Milan, promulgué par {{c1::Constantin}} en 313, rendit la foi chrétienne tolérée dans l'Empire. »,,Il accorda la liberté de culte aux chrétiens et apaisa les persécutions antérieures.
-basic,carolingiens,05,8,Charlemagne,Roi des Francs et empereur du Saint-Empire, couronné par le pape en l'an 800.,Il unifia l'Europe occidentale et favorisa la renaissance carolingienne dans l'éducation.
+basic,octavian-empire,04,8,Auguste,Deuxième prince romain,premier empereur de Rome sous le nom d'Auguste.
+basic,romes-chretientisme,04,9,Constantin Ier,Empereur romain qui,en 313
+basic,romes-chute-occident,04,9,Chute de l'Empire romain d'Occident,Fin de l'autorité impériale romaine à Rome,en 476 ap. J.-C.
+basic,constantinople,04,9,Constantinople,Capitale fondée par Constantin Ier,aujourd'hui Istanbul ; elle est devenue un centre chrétien majeur.
+basic,carolingiens,05,8,Charlemagne,Roi des Francs et empereur du Saint-Empire,couronné par le pape en l'an 800.
 basic,feodalite,05,8,Féodalité,Système d'organisation politique et économique du Moyen Âge fondé sur la vassalité et l'exploitation du fief.,Les seigneurs accorderont des terres et une protection en échange du service et des loyers.
-basic,croisades,05,9,Croisades,Campanies armées envoyées d'Europe pour conquérir la Terre Sainte, lancées en 1095.,Elles mobilisèrent des princes, des nobles et des pèlerins vers Jérusalem.
-basic,croisades-jeu,05,9,Croisade des enfants,Campanie de 1212, légendaire et non historique, souvent citée dans la littérature médiévale.,Elle n'a pas de base historique avérée et relève de la tradition populaire.
-cloze,age-de-fer,05,7,« La transition de l'Age du Bronze vers l'{{c1::Age du Fer}} s'est faite peu à peu, en Méditerranée orientale. »,,L'acier, alliage du fer et du carbone, permit des outils et des armes plus efficaces.
-basic,vikings,05,9,Vikings,Peuplement Scandinave qui, du IXe au XIe siècle, commerça, s'installa et mena des incursions en Europe.,Ils fondèrent des colonies en Islande, au Groenland et au Canada, et conquirent l'Angleterre.
-basic,islam-fondation,05,9,Mahomet,Prophète de l'islam, né à La Mecque, il reçut des révélations dès 610.,Son décès en 632 marque la fin de la période de révélation coranique.
-basic,coran,05,9,Le Coran,Treize livres révélés aux musulmans, recueillis après la mort de Mahomet.,Il est la source principale de la foi, du droit et de la morale islamiques.
-basic,califat,05,9,Califat,Pouvoir politique et religieux des musulmans, fondé après la mort de Mahomet par ses successeurs.,Les premiers califes sont appelés les califes bien guidés.
-basic,ottomans,05,9,Empire ottoman,Empire fondé par Osman Ier au XIVe siècle, il régna sur une partie de l'Europe, du Proche-Orient et d'Afrique.,Il fut un empire musulman multiculturel, durable jusqu'à 1922.
-cloze,islam-diffusion,05,9,« La diffusion de l'islam s'accéléra après la mort de {{c1::Mahomet}}. »,,Avec la conquête arabe, la foi s'étendit au Proche-Orient, à l'Egypte et à l'Afrique du Nord.
-basic,renaissance-italie,06,7,Renaissance italienne,Reprise d'un intérêt pour l'antiquité classique en Italie, à partir du XIVe siècle.,Elle favorisa l'art, l'architecture, la littérature et les sciences.
-basic,maecenas,06,8,Leonardo da Vinci,Peintre, sculpteur et inventeur italien, l'un des plus grandes figures de la Renaissance.,Sa Joconde et sa Vierge au Faiseau sont parmi les tableaux les plus connus au monde.
-basic,maecenas-2,06,8,Michel-Ange,Peintre, sculpteur et architecte italien, qui peignit la chapelle Sixtine.,Il sculpta la Pietà et le David, chefs-d'œuvre de la sculpture.
-basic,maecenas-3,06,8,Léonard da Vinci,Maître de la Renaissance, il excella aussi dans l'ingénierie, l'anatomie et l'art.,Il laissa des carnets où se mêlent des réflexions scientifiques, techniques et artistiques.
-cloze,ren-1453,06,9,« Constantinople tomba sous les coups des {{c1::Ottomans}} en 1453. »,,La prise de la ville par les Ottomans marqua la fin de l'Empire byzantin.
-basic,reforme-luther,06,9,Martin Luther,Pasteur allemand qui, en 1517, remit en cause les pratiques de l'Eglise romaine.,Il publia les 95 thèses, déclenchant la Réforme protestante en Europe.
+basic,croisades,05,9,Croisades,Campanies armées envoyées d'Europe pour conquérir la Terre Sainte,lancées en 1095.
+basic,croisades-jeu,05,9,Croisade des enfants,Campanie de 1212,légendaire et non historique
+basic,vikings,05,9,Vikings,Peuplement Scandinave qui,du IXe au XIe siècle
+basic,islam-fondation,05,9,Mahomet,Prophète de l'islam,né à La Mecque
+basic,coran,05,9,Le Coran,Treize livres révélés aux musulmans,recueillis après la mort de Mahomet.
+basic,califat,05,9,Califat,Pouvoir politique et religieux des musulmans,fondé après la mort de Mahomet par ses successeurs.
+basic,ottomans,05,9,Empire ottoman,Empire fondé par Osman Ier au XIVe siècle,il régna sur une partie de l'Europe
+basic,renaissance-italie,06,7,Renaissance italienne,Reprise d'un intérêt pour l'antiquité classique en Italie,à partir du XIVe siècle.
+basic,maecenas,06,8,Leonardo da Vinci,Peintre,sculpteur et inventeur italien
+basic,maecenas-2,06,8,Michel-Ange,Peintre,sculpteur et architecte italien
+basic,maecenas-3,06,8,Léonard da Vinci,Maître de la Renaissance,il excella aussi dans l'ingénierie
+basic,reforme-luther,06,9,Martin Luther,Pasteur allemand qui,en 1517
 basic,reforme-calvin,06,9,John Calvin,Prêche français qui a développé une théologie protestante rigoureuse à Genève.,Il inspira les calvinistes et les puritains d'Europe et d'Amérique.
-basic,reforme-fr,06,9,Huguenots,Frères protestants français qui, après la Réforme, devinrent l'objet de persécutions.,L'édit de Nantes, en 1598, leur garantit la liberté de culte.
-cloze,reforme-1517,06,9,« Les 95 thèses de {{c1::Luther}} furent publiées en 1517. »,,Elles mettaient en question le système des indulgences et ouvraient la voie à la Réforme.
-basic,grandes-decouvertes,07,7,Grandes Découvertes,Période des grandes découvertes, du XVe au XVIIe siècle, où les Européens explorèrent l'Afrique, l'Asie et les Amériques.,Elle marqua le début de la colonisation des Amériques.
-basic,columbus,07,7,Christopher Colomb,Capitaine génois qui, en 1492, traversa l'Atlantique à la recherche d'une route vers l'Asie.,Il toucha les Antilles sans le savoir, croyant atteindre les Indes.
-basic,vasc-nun,07,7,Vasco de Gama,Maître portugais qui, en 1498, atteignit l'Inde par le cap de Bonne-Espérance.,Il ouvrit une route maritime entre l'Europe et l'Asie.
-basic,magellan,07,7,Ferdinand Magellan,Capitaine espagnol qui, entre 1519 et 1522, organisa la première circumnavigation du globe.,Son expédition, menée par Juan Sebastián Elcano, prouva que la Terre est ronde.
-cloze,decouverte-1492,07,7,« Colomb, en 1492, a touché l'{{c1::Amérique}}. »,,Avec une flotte espagnole, il est parti de Palerme et a découvert les Caraïbes.
-basic,reformation-scientifique,07,8,Renée Descartes,Philosophe français, souvent considéré comme le père de la philosophie moderne.,Son Discours de la méthode et ses Méditations sont des textes fondateurs de la pensée moderne.
+basic,reforme-fr,06,9,Huguenots,Frères protestants français qui,après la Réforme
+basic,grandes-decouvertes,07,7,Grandes Découvertes,Période des grandes découvertes,du XVe au XVIIe siècle
+basic,columbus,07,7,Christopher Colomb,Capitaine génois qui,en 1492
+basic,vasc-nun,07,7,Vasco de Gama,Maître portugais qui,en 1498
+basic,magellan,07,7,Ferdinand Magellan,Capitaine espagnol qui,entre 1519 et 1522
+basic,reformation-scientifique,07,8,Renée Descartes,Philosophe français,souvent considéré comme le père de la philosophie moderne.
 basic,kepler,07,8,Kepler,Astronome allemand qui établit les lois du mouvement des planètes.,Il démonta la circularité parfaite des trajectoires et affirma un héliocentrisme.
-basic,newton,07,8,Isaac Newton,Physicien anglais qui formula la loi de la gravitation universelle.,Il mit au point le calcul infinitésimal et le prisme, révélant la décomposition de la lumière.
-basic,galilee,07,8,Galileo Galilei,Astronome italien qui, au télescope, soutint la théorie héliocentrique de Copernic.,Il fut poursuivi par l'Inquisition et condamné à résidence pour ses idées.
-cloze,galilee-1610,07,8,« Copernic proposa, en 1610, une théorie selon laquelle la Terre tournait autour du {{c1::Soleil}}. »,,Celle-ci fut défendue par Galilée, malgré les pressions de l'Inquisition.
-basic,decouverte-am,07,7,Amerigo Vespucci,Capitaine italien qui, au début du XVIe siècle, comprit que l'Amérique était un continent nouveau.,Le continent qui porte son nom est ainsi baptisé d'après lui.
-cloze,magellan-1519,07,7,« L'expédition de {{c1::Magellan}} partit en 1519. »,,Elle fut la première à accomplir un tour complet de la Terre, malgré la mort de Magellan aux Philippines.
-basic,decouverte-circumnavigation,07,7,Circumnavigation du globe,Feats des marins espagnols, de 1519 à 1522, à bord de la Magellan.,Elle prouva, pour la première fois, que la Terre est sphérique et que l'océan Pacifique est immense.
-basic,edict-nantes,07,9,Édit de Nantes,Lettre de 1598, par laquelle Henri IV garantit la liberté de culte aux protestants français.,Il fut révoqué par Louis XIV en 1685, accentuant les persécutions contre les huguenots.
-basic,revolution-fr,08,7,14 juillet 1789,Prise de la Bastille, événement qui marqua symboliquement le début de la Révolution française.,Elle s'inscrivit dans un processus de crise politique, sociale et économique plus large.
+basic,newton,07,8,Isaac Newton,Physicien anglais qui formula la loi de la gravitation universelle.,Il mit au point le calcul infinitésimal et le prisme
+basic,galilee,07,8,Galileo Galilei,Astronome italien qui,au télescope
+basic,decouverte-am,07,7,Amerigo Vespucci,Capitaine italien qui,au début du XVIe siècle
+basic,decouverte-circumnavigation,07,7,Circumnavigation du globe,Feats des marins espagnols,de 1519 à 1522
+basic,edict-nantes,07,9,Édit de Nantes,Lettre de 1598,par laquelle Henri IV garantit la liberté de culte aux protestants français.
+basic,revolution-fr,08,7,14 juillet 1789,Prise de la Bastille,événement qui marqua symboliquement le début de la Révolution française.
 basic,revolution-fr-2,08,8,La Déclaration des droits de l'homme,Document de 1789 qui affirmait les libertés individuelles et l'égalité devant la loi.,Il fut rédigé par l'Assemblée nationale constituante.
-basic,revolution-fr-3,08,8,Maximilien Robespierre,Leader politique de la Révolution, il devint la figure centrale de la Terreur.,Il fut guillotiné en 1794, marquant la fin de la Terreur.
-basic,napoleon,08,8,Napoléon Bonaparte,Officier puis empereur des Français, il régna de 1804 à 1814, puis en 1815.,Il codifia les lois françaises dans le Code civil, toujours en vigueur.
-basic,napoleon-2,08,9,Napoléon - bataille de Waterloo,Combat de 1815, où l'empereur fut finalement défait par l'armée de Wellington et de Blücher.,Il signa l'exil de Napoléon à Sainte-Hélène, et la fin de l'Empire.
-cloze,revolution-fr-4,08,8,« La prise de la Bastille eut lieu le {{c1::14 juillet}} 1789. »,,Elle devint la fête nationale de la République française.
-basic,code-napoleon,08,9,Code civil de 1804,Le Code Napoléon, mis en place par Napoléon, organisa le droit civil français.,Il inspira les systèmes juridiques civils d'Europe, d'Amérique et d'Afrique.
-basic,industrialisation-uk,09,7,Révolution industrielle,Transformation de l'économie et de la société, à partir de la Grande-Bretagne, au XVIIIe siècle.,Elle est marquée par la machine à vapeur, la textile et le fer.
-basic,industrialisation-uk-2,09,8,Watt,Ingénieur écossais qui a amélioré la machine à vapeur, ouvrant la voie à la mécanisation.,Ses inventions ont transformé l'industrie, les transports et l'agriculture.
-basic,industrialisation-uk-3,09,8,Industrialisation britannique,Le Royaume-Uni devint, au XVIIIe siècle, la première nation industrialisée.,L'urbanisation rapide, la croissance ouvrière et l'exploitation des mines caractérisèrent cette période.
-basic,industrialisation-uk-4,09,8,Charters et Chartisme,Mouvements ouvriers qui réclamèrent le suffrage et les droits sociaux au XIXe siècle.,Le Chartisme, à partir de 1838, fut un des premiers mouvements socialistes en Europe.
-cloze,industrialisation-1776,09,7,« La première machine à vapeur, celle de {{c1::Watt}}, fut mise en œuvre dans les mines au XVIIIe siècle. »,,Elle permit d'épuiser les eaux et d'augmenter la production minière.
-basic,industrialisation-uk-5,09,8,Grainge du textile,La mécanisation de la filature de coton, au XVIIIe siècle, a réduit le travail manuel.,Le Spinning Jenny, le mule-jet et la machine à tisser ont transformé la production.
-basic,industrialisation-uk-6,09,8,Railway,Le chemin de fer, introduit en Grande-Bretagne dans les années 1830, a transformé les transports et l'économie.,Il a favorisé la mobilité et l'intégration des marchés nationaux.
-basic,industrialisation-uk-7,09,8,Revolutions industrielles,La Révolution industrielle, en transformant la production, a engendré une classe ouvrière et des inégalités sociales.,Les réformes de la condition ouvrière suivirent au cours du XIXe siècle.
-basic,industrialisation-uk-8,09,8,Revolutions industrielles 2,La Première Révolution industrielle a été suivie par la Seconde, plus technologique.,Elle s'est accompagnée de l'électricité, du pétrole et de la chimie.
-basic,industrialisation-uk-9,09,8,Revolutions industrielles 3,La Révolution industrielle, en se diffusant, a transformé la vie sociale et la ville.,L'hygiène, la médecine et le travail ont fait l'objet de réformes progressives.
-basic,industrialisation-uk-10,09,8,Revolutions industrielles 4,La Révolution industrielle, en s'étendant, a modifié l'organisation du travail et de la production.,L'usine, la machine et la spécialisation des tâches sont devenues la norme.
-basic,ww1-debut,10,7,1914 - Première Guerre mondiale,Conflit opposant les Alliés aux empires centraux, déclenché après l'assassinat de l'archiduc François-Ferdinand à Sarajevo.,Elle s'est étendue à l'Europe, à l'Afrique et au Moyen-Orient, et a redessiné les frontières.
-basic,ww1,10,8,1918 - Armistice de la Première Guerre mondiale,Cessation des combats en Europe, le 11 novembre 1918, dans une forêt près de Compiègne.,Elle marqua la fin du premier conflit mondial, qui avait duré quatre ans.
-basic,ww1-2,10,8,1918 - Traité de Versailles,Paix signée avec l'Allemagne, en juin 1919.,Il imposa à l'Allemagne de lourdes réparations et des pertes territoriales, et a préparé l'instabilité de l'entre-deux-guerres.
-basic,ww1-3,10,9,1929 - Crise des bourses,Crise financière et économique qui s'installa à partir du krach de Wall Street, en octobre 1929.,Elle provoqua le chômage de masse et fragilisa la démocratie en Europe.
-basic,ww1-4,10,9,1933 - Hitler au pouvoir,Adolf Hitler, chef du parti nazi, devint chancelier d'Allemagne en janvier 1933.,Il instaura le régime nazi, totalitaire, qui mènera à la Shoah et à la Seconde Guerre mondiale.
-basic,ww2-debut,10,7,1939 - Début de la Seconde Guerre mondiale,Invasion de la Pologne par l'Allemagne, le 1er septembre 1939.,La France et la Grande-Bretagne déclarèrent la guerre à l'Allemagne le 3 septembre 1939.
-basic,ww2,10,8,1940 - Bataille de France,La France fut envahie par les forces allemandes, mai-juin 1940.,Elle s'acheva sur la signature de l'armistice à Rethondes, le 22 juin 1940.
-basic,ww2-2,10,8,1944 - Débarquement en Normandie,Opération Overlord, le 6 juin 1944, qui ouvrit un second front en Europe occidentale.,Elle permit la libération de la France, en août 1944.
-basic,ww2-3,10,8,1945 - Capitulation de l'Allemagne,L'Allemagne nazie capitula sans condition, le 8 mai 1945, mettant fin aux combats en Europe.,La guerre en Europe s'acheva avec la reddition allemande.
-basic,ww2-4,10,9,1945 - Bombardement d'Hiroshima,L'arme nucléaire fut utilisée, le 6 août 1945, sur la ville d'Hiroshima.,Elle fut suivie, le 9 août, par l'arme sur Nagasaki.
-basic,ww2-5,10,9,1945 - Capitulation du Japon,Le Japon capitula le 2 septembre 1945, mettant fin à la Seconde Guerre mondiale.,La signature du traité de capitulation eut lieu à bord du cuirassé Missouri.
-basic,shoah,10,9,La Shoah,Extermination systématique et industrielle de six millions de Juifs par l'Allemagne nazie, dans les camps et les ghettos.,Elle est aussi appelée l'Holocauste, et fut perpétrée dans des camps d'extermination comme Auschwitz-Birkenau.
-basic,shoah-2,10,9,Auschwitz,Le plus grand camp de concentration et d'extermination nazi, en Pologne.,Il fut la principale usine de la Shoah, où des centaines de milliers de personnes périrent.
-basic,guerre-froide,10,9,Guerre froide,Conflit politique et idéologique entre les États-Unis et l'URSS, de 1945 à 1991.,Il s'est déroulé sans confrontation directe entre les deux superpuissances.
-basic,guerre-froide-2,10,9,1949 - Création de l'OTAN,Organisation du Traité de l'Atlantique Nord, alliance militaire des pays occidentaux.,Elle fut créée en réponse à l'expansion soviétique en Europe de l'Est.
-basic,guerre-froide-3,10,9,1949 - Création du Pacte de Varsovie,Accord militaire des pays socialistes de l'Est, en 1955.,Il s'opposa directement à l'OTAN.
-basic,guerre-froide-4,10,9,1961 - Mur de Berlin,Mur érigé par l'Allemagne de l'Est, le 13 août 1961, pour séparer les deux capitales.,Il devint le symbole de la Guerre froide et de la division de l'Europe.
-basic,guerre-froide-5,10,9,1962 - Crise des missiles de Cuba,Conflit nucléaire à l'échelle planétaire, qui dura treize jours, en octobre 1962.,Il porta la Guerre froide au bord d'une guerre nucléaire.
-basic,guerre-froide-6,10,9,1989 - Chute du Mur de Berlin,Le Mur de Berlin fut ouvert, le 9 novembre 1989, dans un contexte de bouleversements en Europe de l'Est.,Il devint un symbole de la fin de la Guerre froide.
-basic,guerre-froide-7,10,9,1991 - Fin de la Guerre froide,L'Union soviétique fut dissoute, en décembre 1991.,La Guerre froide s'acheva avec la fin de l'URSS.
-basic,guerres-froides-decouverte,10,9,1947 - Doctrin Truman,L'administration des États-Unis, sous Truman, adopta une doctrine de contenement de l'expansion soviétique.,Elle inspira la stratégie de la Guerre froide et la politique américaine.
-basic,guerres-froides-decouverte-2,10,9,1947 - Plan Marshall,Plan américain de reconstruction de l'Europe, lancé par le secrétaire d'État Marshall.,Il permit la reconstruction économique de l'Europe occidentale.
-basic,guerres-froides-decouverte-3,10,9,1956 - Crise de Suez,Crisse internationale impliquant l'Égypte, la France, la Grande-Bretagne et l'Israel.,Elle marqua le déclin de l'influence française et britannique au Proche-Orient.
-basic,guerres-froides-decouverte-4,10,9,1975 - Fin de la guerre du Vietnam,Les États-Unis ont retiré leurs troupes, après la chute de Saïgon, en avril 1975.,La guerre du Vietnam s'acheva sur la réunification du pays sous le régime communiste.
-basic,guerres-froides-decouverte-5,10,9,1979 - Invasion de l'Afghanistan,L'URSS envahit l'Afghanistan, en décembre 1979.,Le conflit dura dix ans et a contribué à la fin de la Guerre froide.
-basic,guerres-froides-decouverte-6,10,9,1985 - Gorbatchev,Leader soviétique qui, à partir de 1985, a introduit les réformes perestroïka et glasnost.,Il a ouvert le dialogue avec l'Occident et a contribué à la fin de la Guerre froide.
-basic,guerres-froides-decouverte-7,10,9,1989 - Révolutions en Europe de l'Est,Série de révolutions populaires qui ont renversé les régimes communistes en Europe de l'Est.,Elles ont précipité la fin du bloc soviétique.
-basic,guerres-froides-decouverte-8,10,9,1990 - Réunification de l'Allemagne,L'Allemagne de l'Ouest et l'Allemagne de l'Est se sont réunifiées, le 3 octobre 1990.,Elle marqua la fin de la division de l'Europe.
-basic,guerres-froides-decouverte-9,10,9,1991 - Chute de l'URSS,La dissolution de l'Union soviétique, le 25 décembre 1991.,Elle marqua la fin de la Guerre froide et le passage à l'ère post-soviétique.
-basic,guerres-froides-decouverte-10,10,9,1991 - Chute de l'URSS 2,La fin de la Guerre froide a ouvert l'ère de la mondialisation et de la démocratie.,Les transitions démocratiques ont suivi dans de nombreux pays.
+basic,revolution-fr-3,08,8,Maximilien Robespierre,Leader politique de la Révolution,il devint la figure centrale de la Terreur.
+basic,napoleon,08,8,Napoléon Bonaparte,Officier puis empereur des Français,il régna de 1804 à 1814
+basic,napoleon-2,08,9,Napoléon - bataille de Waterloo,Combat de 1815,où l'empereur fut finalement défait par l'armée de Wellington et de Blücher.
+basic,code-napoleon,08,9,Code civil de 1804,Le Code Napoléon,mis en place par Napoléon
+basic,industrialisation-uk,09,7,Révolution industrielle,Transformation de l'économie et de la société,à partir de la Grande-Bretagne
+basic,industrialisation-uk-2,09,8,Watt,Ingénieur écossais qui a amélioré la machine à vapeur,ouvrant la voie à la mécanisation.
+basic,industrialisation-uk-3,09,8,Industrialisation britannique,Le Royaume-Uni devint,au XVIIIe siècle
+basic,industrialisation-uk-4,09,8,Charters et Chartisme,Mouvements ouvriers qui réclamèrent le suffrage et les droits sociaux au XIXe siècle.,Le Chartisme
+basic,industrialisation-uk-5,09,8,Grainge du textile,La mécanisation de la filature de coton,au XVIIIe siècle
+basic,industrialisation-uk-6,09,8,Railway,Le chemin de fer,introduit en Grande-Bretagne dans les années 1830
+basic,industrialisation-uk-7,09,8,Revolutions industrielles,La Révolution industrielle,en transformant la production
+basic,ww1,10,8,1918 - Armistice de la Première Guerre mondiale,Cessation des combats en Europe,le 11 novembre 1918
+basic,ww1-3,10,9,1929 - Crise des bourses,Crise financière et économique qui s'installa à partir du krach de Wall Street,en octobre 1929.
+basic,ww1-4,10,9,1933 - Hitler au pouvoir,Adolf Hitler,chef du parti nazi
+basic,ww2,10,8,1940 - Bataille de France,La France fut envahie par les forces allemandes,mai-juin 1940.
+basic,ww2-2,10,8,1944 - Débarquement en Normandie,Opération Overlord,le 6 juin 1944
+basic,ww2-4,10,9,1945 - Bombardement d'Hiroshima,L'arme nucléaire fut utilisée,le 6 août 1945
+basic,ww2-5,10,9,1945 - Capitulation du Japon,Le Japon capitula le 2 septembre 1945,mettant fin à la Seconde Guerre mondiale.
+basic,shoah-2,10,9,Auschwitz,Le plus grand camp de concentration et d'extermination nazi,en Pologne.
+basic,guerre-froide,10,9,Guerre froide,Conflit politique et idéologique entre les États-Unis et l'URSS,de 1945 à 1991.
+basic,guerre-froide-2,10,9,1949 - Création de l'OTAN,Organisation du Traité de l'Atlantique Nord,alliance militaire des pays occidentaux.
+basic,guerre-froide-3,10,9,1949 - Création du Pacte de Varsovie,Accord militaire des pays socialistes de l'Est,en 1955.
+basic,guerre-froide-5,10,9,1962 - Crise des missiles de Cuba,Conflit nucléaire à l'échelle planétaire,qui dura treize jours
+basic,guerre-froide-6,10,9,1989 - Chute du Mur de Berlin,Le Mur de Berlin fut ouvert,le 9 novembre 1989
+basic,guerre-froide-7,10,9,1991 - Fin de la Guerre froide,L'Union soviétique fut dissoute,en décembre 1991.
+basic,guerres-froides-decouverte,10,9,1947 - Doctrin Truman,L'administration des États-Unis,sous Truman
+basic,guerres-froides-decouverte-2,10,9,1947 - Plan Marshall,Plan américain de reconstruction de l'Europe,lancé par le secrétaire d'État Marshall.
+cloze,croissance-egyptienne,01,7 8,La croissance démographique en Égypte ancienne a été favorisée par {{c1::le Nil}}.,,Le Nil assurait l'irrigation et la fertilité des terres agricoles.
+cloze,pyramide-de-gizeh,01,7 8,La plus grande des pyramides de Gizeh a été construite pour le pharaon {{c1::Khéops}}.,,Elle fut érigée durant l'Ancien Empire égyptien.
+cloze,decouverte-de-glyphes,01,7 8,Les scribes égyptiens écrivaient sur papyrus au moyen de {{c1::hiéroglyphes}}.,,L'écriture hiéroglyphique fut déchiffrée par Jean-François Champollion.
+cloze,decouverte-de-l-epe,01,7 8,L'essor de la métallurgie antique en Europe débute avec l'{{c1::Âge du Bronze}}.,,Le bronze est un alliage de cuivre et d'étain.
+cloze,sumes-ecrivent,01,7 8,L'écriture cunéiforme sumérienne était gravée sur l'argile à l'aide d'un {{c1::calame}}.,,Le calame est une tige de roseau taillée en biseau.
+cloze,eglise-syrie,02,7 8,La première civilisation urbaine de Mésopotamie s'est développée à {{c1::Sumer}}.,,Les cités-États comme Uruk et Ur ont marqué les débuts de l'urbanisation.
+cloze,chute-de-babylone,02,7 8,L'empire babylonien fut conquis en 539 av. J.-C. par {{c1::Cyrus le Grand}} de Perse.,,Cyrus permit aux peuples déportés de retourner dans leurs terres.
+cloze,peleponnesiaque,03,8 9,La guerre du Péloponnèse a opposé Athènes à {{c1::Sparte}} au Ve siècle av. J.-C.,,Le conflit s'est achevé par la victoire spartiate en 404 av. J.-C.
+cloze,hellenismes,03,8 9,La diffusion de la culture grecque en Orient commence avec les conquêtes d'{{c1::Alexandre le Grand}}.,,Cette période d'influence culturelle est appelée l'époque hellénistique.
+cloze,pax-romana,04,8 9,La période de paix et de prospérité sous l'Empire romain est appelée la {{c1::Pax Romana}}.,,Elle a débuté avec le règne de l'empereur Auguste.
+cloze,romes-313,04,8 9,L'édit de Milan a accordé la liberté de culte aux chrétiens sous l'empereur {{c1::Constantin}} en 313.,,Cet édit mit fin aux persécutions officielles des chrétiens dans l'Empire.
+cloze,age-de-fer,01,7 8,La métallurgie du fer s'est généralisée lors du passage à l'{{c1::Âge du Fer}} vers 1200 av. J.-C.,,Le fer a permis la fabrication d'outils et d'armes plus résistants.
+cloze,islam-diffusion,05,8 9,L'expansion initiale de l'islam a débuté en Arabie au VIIe siècle sous {{c1::Mahomet}}.,,L'Hégire en 622 marque le début du calendrier musulman.
+cloze,ren-1453,05,8 9,La chute de Constantinople aux mains des Ottomans a eu lieu en {{c1::1453}}.,,Cet événement marque traditionnellement la fin de l'Empire byzantin.
+cloze,reforme-1517,06,8 9,La Réforme protestante a été déclenchée par les 95 thèses de {{c1::Martin Luther}} en 1517.,,Luther dénonçait notamment le commerce des indulgences.
+cloze,decouverte-1492,07,7 8,Christophe Colomb a atteint les Amériques pour le compte de l'Espagne en {{c1::1492}}.,,Cette expédition marqua le début des Grandes Découvertes européennes.
+cloze,galilee-1610,07,8 9,Les observations astronomiques de {{c1::Galilée}} ont confirmé le modèle héliocentrique.,,Galilée utilisa une lunette astronomique perfectionnée dès 1609-1610.
+cloze,magellan-1519,07,7 8,La première circumnavigation maritime du globe a été initiée par {{c1::Magellan}} en 1519.,,L'expédition fut achevée sous le commandement de Juan Sebastián Elcano en 1522.
+cloze,revolution-fr-4,08,8 9,La prise de la Bastille à Paris s'est déroulée le {{c1::14 juillet 1789}}.,,Cet événement symbolise le début de la Révolution française.
+cloze,industrialisation-1776,09,7 8,La machine à vapeur perfectionnée par {{c1::James Watt}} a propulsé la Révolution industrielle.,,L'invention de Watt a amélioré l'efficacité énergétique des machines.
+cloze,ww1-debut,10,8 9,La Première Guerre mondiale a éclaté en Europe au cours de l'été {{c1::1914}}.,,L'attentat de Sarajevo contre François-Ferdinand déclencha la crise.
+cloze,ww1-traite-versailles,10,8 9,Le traité de paix mettant fin à la Première Guerre mondiale a été signé à {{c1::Versailles}} en 1919.,,Le traité de Versailles créa également la Société des Nations.
+cloze,ww2-debut,10,8 9,La Seconde Guerre mondiale en Europe a commencé le 1er septembre {{c1::1939}}.,,L'invasion de la Pologne par l'Allemagne nazie provoqua l'entrée en guerre des Alliés.
+cloze,ww2-capitulation-allemagne,10,8 9,La capitulation sans condition de l'Allemagne nazie a été signée en mai {{c1::1945}}.,,Le 8 mai 1945 marque la fin des combats en Europe.
+cloze,shoah-victimes,10,8 9,"Durant la Shoah, environ {{c1::six millions}} de Juifs ont été assassinés par le régime nazi.",,Ce génocide systématique a été perpétré dans toute l'Europe occupée.
+cloze,guerre-froide-mur-berlin,10,8 9,Le Mur de Berlin a été construit en {{c1::1961}} pour couper la ville en deux.,,La chute du mur le 9 novembre 1989 marqua la fin de la Guerre froide.

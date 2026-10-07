@@ -1,8 +1,3 @@
----
-type: note
-title: Contributing to AnkiTov
----
-
 # Contributing to AnkiTov
 
 ## Quick Start
@@ -67,9 +62,6 @@ Always run with `--list` first to preview. See `--help` for full usage.
 The DeepSeek review adapter consumes a Git-format patch; repository history
 remains in Jujutsu. The review is advisory — it does not replace human review
 or test validation.
-The DeepSeek review adapter consumes a Git-format patch; repository history
-remains in Jujutsu. The review is advisory — it does not replace human review
-or test validation.
 
 ## Build & Test
 
@@ -99,9 +91,18 @@ stack.
 
 ## Docs
 
-- **mdBook** at `docs/` — architecture, development guide, IMP reference
-- **rustdoc** — `cd backend && cargo doc --no-deps --open`
-- **OpenAPI/Scalar** — `http://localhost:5150/scalar` (dev server running)
+Documentation is **part of done** — a change that lands without its docs is incomplete.
+
+- Every new or changed public route carries a `#[utoipa::path]` annotation (aggregated in `backend/src/openapi.rs`); the API reference then stays current automatically.
+- A change that introduces a new capability adds or updates a chapter in `docs/src/` (mdBook) **in the same change**.
+- Run `scripts/check-docs.sh` before recording the commit — it fails the build if the book doesn't build or SUMMARY links are broken.
+- CI re-checks everything on push to `main` (`.github/workflows/docs.yml`, build + audit only) — so stale or broken docs turn the build red, not silent.
+
+Where things live:
+
+- **mdBook** at `docs/` — architecture, development guide, IMP reference; built + audited by CI and published to https://yitzhakbg.github.io/ankitov-docs/ from the public `ankitov-docs` repo
+- **rustdoc** — `cd backend && cargo doc --no-deps --open`; compiled by CI as part of the docs build
+- **OpenAPI/Scalar** — served live: `http://localhost:5150/scalar` and `/api/v1/openapi.json`
 
 ## PR Workflow
 
@@ -115,3 +116,24 @@ stack.
 - Coding standards: [`docs/src/development/standards.md`](./src/development/standards.md)
 - Tooling boundary: [`docs/src/development/tooling.md`](./src/development/tooling.md)
 - HITL Gate: [`docs/src/development/hitl-gate.md`](./src/development/hitl-gate.md)
+
+### Exporting all project context to Gemini Notebook (NotebookLM)
+
+When you want the *entire* AnkiTov knowledge base — strategy, key decisions,
+designs, ops, content, launch — in a form you can upload to
+**Google Gemini Notebook** (a.k.a. NotebookLM), run:
+
+```bash
+scripts/notebook/export-for-notebooklm.sh          # → ../ankitov-notebook-export/
+scripts/notebook/export-for-notebooklm.sh --dry-run # preview the plan + word counts
+```
+
+It consolidates the 300+ `.md` files into **13 themed source files** (one per
+roadmap area), each with a generated table-of-contents header and a per-section
+`_Source: [path](#)_` label so NotebookLM can cite answers back to the original.
+`Markdown` is natively accepted by NotebookLM (no PDF/DOCX conversion). The
+allowlist approach means only enumerated paths can ever be exported, and a
+**secret-scrub tripwire** aborts the run if real credentials (JWTs, private keys,
+`api_key=…` values, etc.) are found in the staged output — bare mentions of env-var
+names in prose do *not* trigger it. A `SYNC-MANIFEST.md` with SHA-256 checksums and
+the `README.md` index ship in the export folder.

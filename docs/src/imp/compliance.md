@@ -1,8 +1,3 @@
----
-type: note
-title: Compliance Tracking
----
-
 # Compliance Tracking
 
 Tracks how many study sessions each student completes per week vs. their assigned N-value target.

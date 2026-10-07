@@ -71,6 +71,11 @@ pub struct ErrorResponse {
 ///
 /// Returns a JWT token on success (auto-login after registration).
 /// Rejects duplicate emails and usernames.
+///
+/// **Role is restricted on the public endpoint:** self-registration may only
+/// create `student` or `teacher` accounts. The `admin` role is deliberately
+/// **not** assignable here — administrators are provisioned out-of-band
+/// (inserted into the database by the operator), never via this public API.
 pub async fn register(
     State(ctx): State<AppContext>,
     Json(payload): Json<RegisterRequest>,
@@ -109,7 +114,21 @@ pub async fn register(
         auth::hash_password(&payload.password).map_err(|e| loco_rs::Error::InternalServerError)?;
 
     let now = chrono::Utc::now().timestamp();
-    let role = payload.role.unwrap_or_else(|| "student".to_string());
+
+    // Public self-registration may only mint student or teacher accounts.
+    // `admin` is intentionally excluded (see the handler doc) — it must be
+    // provisioned out-of-band by the operator. Unknown roles fall back to
+    // `student` rather than being honored.
+    let role = match payload.role.as_deref() {
+        Some("student") | None => "student",
+        Some("teacher") => "teacher",
+        _ => {
+            return Err(loco_rs::Error::BadRequest(
+                "role must be \"student\" or \"teacher\" for self-registration".into(),
+            ))
+        }
+    }
+    .to_string();
 
     // Insert user
     let user_model = user::ActiveModel {

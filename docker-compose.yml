@@ -1,14 +1,18 @@
 # ─────────────────────────────────────────────────────────────────
-# AnkiTov — Production Docker Compose Stack
+# AnkiTov — Production Docker Compose Stack for app.ankitov.com
 #
 # Services:
-#   backend      — Loco.rs API server (:5150)
-#   sync-server  — Anki sync server (:8080), no AnkiWeb dependency
-#   libsql       — libSQL database (WAL mode, :8081)
+#   caddy        — Automatic HTTPS reverse proxy (:80, :443)
+#   backend      — Loco.rs API & Management Console server (:5150)
+#   sync-server  — Anki standalone sync server (:8080)
 #
 # Volumes:
-#   libsql-data  — Database persistence
-#   sync-data    — Sync server collections (one per student)
+#   caddy-data        — Persistent SSL/TLS certificates
+#   backend-data      — Loco.rs SQLite database
+#   backend-logs      — Loco.rs logs
+#   sync-data         — Anki sync server collections
+#   sync-user-config  — Shared sync-users.env (backend + sync-server)
+#   caddy-config      — Caddy runtime config
 # ─────────────────────────────────────────────────────────────────
 
 services:
@@ -20,7 +24,7 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      ANKITOV_DOMAIN: "${ANKITOV_DOMAIN:-localhost}"
+      ANKITOV_DOMAIN: "${ANKITOV_DOMAIN:-app.ankitov.com}"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
@@ -29,36 +33,27 @@ services:
     depends_on:
       - backend
 
-  # ── Backend API ──
+  # ── Backend API & Management Console ──
   backend:
     build:
-      context: ./backend
-      dockerfile: ../Dockerfile.backend
+      context: .
+      dockerfile: Dockerfile.backend
     container_name: ankitov-backend
-    # Backend ports are internal — Caddy handles external traffic
     expose:
       - "5150"
-      - "3000"
     environment:
-      # App
-      ANKITOV_JWT_SECRET: "${ANKITOV_JWT_SECRET}"
+      LOCO_ENV: "production"
+      RUST_LOG: "${RUST_LOG:-info}"
       ANKITOV_PORT: "5150"
-      ANKITOV_DASHBOARD_PORT: "3000"
-      # Database
-      DATABASE_URL: "${DATABASE_URL:-libsql://libsql:8081/ankitov?auth_token=${LIBSQL_AUTH_TOKEN:-}}"
-      # Sync server
+      ANKITOV_JWT_SECRET: "${ANKITOV_JWT_SECRET}"
+      DATABASE_URL: "${DATABASE_URL:-sqlite://data/ankitov.db?mode=rwc}"
       ANKITOV_SYNC_URL: "http://sync-server:8080"
       ANKITOV_SYNC_USER_FILE: "/etc/ankitov/sync-users.env"
-      # AnkiConnect
       ANKICONNECT_PORT: "8765"
     volumes:
-      # Shared sync-user config with sync-server
+      - backend-data:/app/data
+      - backend-logs:/app/logs
       - sync-user-config:/etc/ankitov
-    depends_on:
-      libsql:
-        condition: service_healthy
-      sync-server:
-        condition: service_started
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5150/health"]
@@ -84,40 +79,24 @@ services:
       - sync-data:/data/sync-server
       - sync-user-config:/etc/ankitov
     restart: unless-stopped
+    # The Anki sync server is not a plain HTTP server (it 404s on GET /);
+    # a TCP connect probe is the correct liveness check.
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      test: ["CMD", "bash", "-c", "timeout 3 bash -c '</dev/tcp/localhost/8080' 2>/dev/null && exit 0 || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
 
-  # ── libSQL Database ──
-  libsql:
-    image: ghcr.io/tursodatabase/libsql-server:latest
-    container_name: ankitov-libsql
-    expose:
-      - "8081"
-    environment:
-      SQLD_NODE: primary
-      SQLD_HTTP_AUTH: basic
-      SQLD_AUTH_JWT_KEY: "${LIBSQL_AUTH_TOKEN:-ankitov-dev-auth}"
-    volumes:
-      - libsql-data:/var/lib/sqld
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-      start_period: 5s
-
-# ── Volumes ──
+# ── Persistent Volumes ──
 volumes:
   caddy-data:
     driver: local
   caddy-config:
     driver: local
-  libsql-data:
+  backend-data:
+    driver: local
+  backend-logs:
     driver: local
   sync-data:
     driver: local

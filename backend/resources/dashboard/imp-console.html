@@ -214,6 +214,40 @@ a:hover { text-decoration: underline; }
 }
 .skip-link:focus { top: var(--space-2); }
 
+/* ── Toast notifications (Home._toast appends here) ── */
+#toast-container {
+  position: fixed;
+  top: var(--space-4, 16px);
+  right: var(--space-4, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+  z-index: var(--z-toast, 9999);
+  max-width: 380px;
+  pointer-events: none;
+}
+#toast-container .toast {
+  pointer-events: auto;
+  background: var(--color-bg-1, #fff);
+  color: var(--color-text-1, #111);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-left-width: 4px;
+  border-radius: var(--radius-md, 8px);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-3, 12px) var(--space-4, 16px);
+  font-size: var(--text-sm, 14px);
+  line-height: 1.4;
+  white-space: pre-line;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity var(--transition-fast, 150ms ease), transform var(--transition-fast, 150ms ease);
+}
+#toast-container .toast--visible { opacity: 1; transform: translateY(0); }
+#toast-container .toast--fade { opacity: 0; transform: translateY(-6px); }
+#toast-container .toast--info    { border-left-color: var(--color-brand-500, #4f46e5); }
+#toast-container .toast--success { border-left-color: var(--color-success-500, #22c55e); }
+#toast-container .toast--error   { border-left-color: var(--color-error-500, #ef4444); }
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1965,6 +1999,35 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
   font-size: 13px;
   text-align: center;
 }
+
+/* ═══════════════════════════════════════════════════════
+   LEADERBOARD PAGE (chunk 4)
+   ═══════════════════════════════════════════════════════ */
+.lb-scope-btns { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+#lb-table-wrap .table td, #slb-board-wrap .table td { vertical-align: middle; }
+.lb-is-me { background: rgba(45, 212, 191, 0.08); }
+.lb-medal { font-size: var(--text-lg); white-space: nowrap; }
+.lb-moderate { display: inline-flex; gap: var(--space-1); flex-wrap: wrap; }
+.lb-copy-row { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
+.lb-copy-row .form-input { flex: 1; font-family: var(--font-mono); font-size: var(--text-xs); }
+.lb-consent-label {
+  display: flex; align-items: flex-start; gap: var(--space-2);
+  font-size: var(--text-sm); color: var(--text-primary);
+  cursor: pointer; margin: var(--space-3) 0;
+}
+.lb-consent-label input { accent-color: var(--color-brand-500); margin-top: 2px; }
+#lb-display-token {
+  font-family: var(--font-mono); font-size: var(--text-xs);
+  word-break: break-all; color: var(--text-secondary);
+}
+#lb-display-result {
+  margin-top: var(--space-3); padding-top: var(--space-3);
+  border-top: 1px solid var(--border-light);
+}
+#slb-confirmed {
+  margin-top: var(--space-2); font-size: var(--text-sm);
+  color: var(--text-secondary); min-height: 1.2em;
+}
 </style>
 <!-- i18n: RTL support (disabled by default, enabled per locale) -->
 <link rel="stylesheet" href="/dashboard/rtl.css" id="rtl-css" disabled>
@@ -1976,6 +2039,8 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
 <script src="/dashboard/vendor/driver.min.js"></script>
 </head>
 <body>
+<!-- Toast notifications container (Home._toast appends here) -->
+<div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 <!-- Skip link -->
 <a href="#main-content" class="skip-link" data-i18n="app.skipToContent">Skip to main content</a>
 
@@ -2016,7 +2081,9 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
         <button class="nav-item" data-page="study-session" onclick="Router.navigate('study-session')" data-i18n="sidebar.studySession">🧠 Study Session</button>
         <button class="nav-item" data-page="class-insights" onclick="Router.navigate('class-insights')" data-i18n="sidebar.classInsights">📈 Class Insights</button>
         <button class="nav-item" data-page="compliance" onclick="Router.navigate('compliance')" data-i18n="sidebar.compliance">✅ Progress Tracker</button>
+        <button class="nav-item" data-page="leaderboard" onclick="Router.navigate('leaderboard')" data-i18n="sidebar.leaderboard">🏆 Leaderboard</button>
         <button class="nav-item" data-page="tracks-profiles" onclick="Router.navigate('tracks-profiles')" data-i18n="sidebar.tracksProfiles">🏷️ Tracks & Profiles</button>
+        <button class="nav-item" data-page="teachers" id="nav-teachers" onclick="Router.navigate('teachers')" data-i18n="sidebar.teachers" style="display:none">🧑‍🏫 Teachers</button>
         <button class="nav-item" data-page="sync-dashboard" onclick="Router.navigate('sync-dashboard')" data-i18n="sidebar.sync">🔄 Sync</button>
         <div class="sidebar-health" id="sidebar-health" title="System health status">
           <span class="health-dot" id="health-dot"></span>
@@ -2085,8 +2152,9 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
           <div class="command-bar__chips" id="cmd-chips">
             <span class="cmd-chip" data-i18n="commandbar.chip.struggling" onclick="Home.sendCmd('Who is struggling?')">🚩 Who's struggling?</span>
             <span class="cmd-chip" data-i18n="commandbar.chip.generate" onclick="Home.sendCmd('Generate practice for all classes')">⚡ Generate practice</span>
-            <span class="cmd-chip" data-i18n="commandbar.chip.upload" onclick="Home.sendCmd('Upload a deck')">📦 Upload a deck</span>
+            <span class="cmd-chip" data-i18n="commandbar.chip.upload" onclick="Router.navigate('decks')">📦 Upload a deck</span>
             <span class="cmd-chip" data-i18n="commandbar.chip.health" onclick="Home.sendCmd('Class health check')">🩺 Class health</span>
+            <span class="cmd-chip" data-i18n="commandbar.chip.classes" onclick="Router.navigate('classes')">📚 View classes</span>
           </div>
         </div>
 
@@ -2381,6 +2449,44 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
         </div>
       </section>
 
+      <!-- TEACHERS (Prong 8 — admin-gated) -->
+      <section class="page-section" id="page-teachers" aria-labelledby="teachers-heading">
+        <div class="page-header">
+          <h1 id="teachers-heading">🧑‍🏫 <span data-i18n="teachers.title">Teacher Registration</span></h1>
+          <p data-i18n="teacher-enroll-description">Enroll a new teacher into AnkiTov. You will receive an invite link to share.</p>
+        </div>
+
+        <form id="teacher-create-form" onsubmit="Teachers.create(event)" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--space-3);margin-bottom:var(--space-4)">
+          <div><label style="display:block;font-size:var(--text-sm);margin-bottom:4px" data-i18n="teachers.create.name">Full name</label>
+            <input id="tc-name" class="input" required></div>
+          <div><label style="display:block;font-size:var(--text-sm);margin-bottom:4px" data-i18n="teachers.create.email">Email (login)</label>
+            <input id="tc-email" class="input" type="email" required></div>
+          <div><label style="display:block;font-size:var(--text-sm);margin-bottom:4px" data-i18n="teachers.create.school">School / community</label>
+            <input id="tc-school" class="input" required></div>
+          <div><label style="display:block;font-size:var(--text-sm);margin-bottom:4px" data-i18n="teachers.create.role">Role or class</label>
+            <input id="tc-role" class="input"></div>
+          <div><label style="display:block;font-size:var(--text-sm);margin-bottom:4px" data-i18n="teachers.create.locale">Language</label>
+            <select id="tc-locale" class="input"></select></div>
+          <div style="display:flex;align-items:flex-end"><button type="submit" class="btn btn-primary" data-i18n="teachers.create.submit">Register teacher</button></div>
+          <div id="tc-result" style="grid-column:1/-1;color:var(--text-secondary)"></div>
+        </form>
+
+        <div id="teachers-table-container" style="overflow-x:auto">
+          <table class="table" style="width:100%">
+            <thead><tr>
+              <th data-i18n="teachers.create.name">Name</th>
+              <th data-i18n="teachers.create.email">Email</th>
+              <th data-i18n="teachers.create.school">School</th>
+              <th>Status</th>
+              <th data-i18n="table.actions">Actions</th>
+            </tr></thead>
+            <tbody id="teachers-table-body">
+              <tr><td colspan="5" style="text-align:center;padding:var(--space-8);color:var(--text-tertiary)">…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- DECKS -->
       <section class="page-section" id="page-decks" aria-labelledby="decks-heading">
         <div class="page-header">
@@ -2443,6 +2549,205 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
               <thead><tr><th data-i18n="table.student">Student</th><th data-i18n="table.practicePlan">Practice Plan</th><th data-i18n="table.assigned">Assigned</th><th data-i18n="table.actions">Actions</th></tr></thead>
               <tbody id="tp-assignments-body"><tr><td colspan="4" style="text-align:center;padding:var(--space-8);color:var(--text-tertiary)" data-i18n="status.loading">Loading…</td></tr></tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- LEADERBOARD (chunk 4) -->
+      <!-- SYNC -->
+      <section class="page-section" id="page-leaderboard" aria-labelledby="lb-heading">
+        <div class="page-header">
+          <h1 id="lb-heading">🏆 <span data-i18n="leaderboard.heading">Leaderboard</span></h1>
+          <p data-i18n="leaderboard.subtitle">Class &amp; school rankings, the public display board, and student identity moderation.</p>
+        </div>
+
+        <!-- Shown when no classes exist -->
+        <div class="no-classes-placeholder">
+          <div class="no-classes-placeholder__icon">🏆</div>
+          <div class="no-classes-placeholder__title" data-i18n="empty.noClassesTitle">No Classes Yet</div>
+          <div class="no-classes-placeholder__desc">Leaderboards appear once you have created a class and enrolled students.</div>
+          <button class="btn btn-primary" data-i18n="home.createClass" onclick="Router.navigate('classes')">+ Create a Class</button>
+        </div>
+
+        <!-- Staff panel (class-dependent) -->
+        <div class="class-dependent">
+          <!-- Filters -->
+          <div class="form-grid" style="margin-bottom:var(--space-4)">
+            <div class="form-group">
+              <label class="form-label" for="lb-class">Class</label>
+              <select class="form-select" id="lb-class">
+                <option value="" disabled selected>Loading classes…</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="lb-metric">Metric</label>
+              <select class="form-select" id="lb-metric">
+                <option value="compliance" selected>Compliance (default)</option>
+                <option value="points">Points</option>
+                <option value="volume">Volume</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="lb-window" data-i18n="leaderboard.window">Window</label>
+              <select class="form-select" id="lb-window">
+                <option value="week" selected data-i18n="leaderboard.windowWeek">This week (default)</option>
+                <option value="month" data-i18n="leaderboard.windowMonth">This month</option>
+                <option value="all" data-i18n="leaderboard.windowAll">All time</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="leaderboard.scope">Scope</label>
+              <div class="lb-scope-btns">
+                <button class="btn btn-primary btn-sm" id="lb-scope-class" onclick="Leaderboard.setScope('class')" data-i18n="leaderboard.scopeClass">🏫 Class</button>
+                <button class="btn btn-ghost btn-sm" id="lb-scope-school" onclick="Leaderboard.setScope('school')" data-i18n="leaderboard.scopeSchool">🌐 School</button>
+              </div>
+            </div>
+            <div class="form-group" style="justify-content:flex-end">
+              <label class="form-label" style="visibility:hidden">Refresh</label>
+              <button class="btn btn-secondary btn-sm" onclick="Leaderboard.load()" data-i18n="leaderboard.refresh">🔄 Refresh</button>
+            </div>
+          </div>
+
+          <!-- Below-min-cohort notice (total_ranked &lt; 3) -->
+          <div class="error-box" id="lb-min-cohort" style="display:none;margin-bottom:var(--space-4)" data-i18n="leaderboard.cohortTooSmall">
+            🤫 Cohort too small — the leaderboard appears once at least 3 students have activity in the selected window.
+          </div>
+
+          <!-- Ranked table -->
+          <div id="lb-table-wrap" style="overflow-x:auto;margin-bottom:var(--space-4)">
+            <table class="table" style="width:100%">
+              <thead><tr>
+                <th style="width:3rem" data-i18n="leaderboard.colRank">#</th>
+                <th data-i18n="leaderboard.colStudent">Student</th>
+                <th id="lb-th-score" data-i18n="leaderboard.colScore">Score</th>
+                <th data-i18n="leaderboard.colSessions">Sessions</th>
+                <th data-i18n="leaderboard.colCards">Cards</th>
+                <th data-i18n="leaderboard.colActions">Actions</th>
+              </tr></thead>
+              <tbody id="lb-table-body">
+                <tr><td colspan="6" style="text-align:center;padding:var(--space-8);color:var(--text-tertiary)" data-i18n="leaderboard.loading">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Unranked (no activity in window) -->
+          <div id="lb-unranked" class="card" style="display:none;margin-bottom:var(--space-6)">
+            <h3 style="font-size:var(--text-base);font-weight:var(--font-semibold);margin-bottom:var(--space-3)" data-i18n="leaderboard.noActivity">💤 No activity this window</h3>
+            <div id="lb-unranked-list" style="display:flex;flex-wrap:wrap;gap:var(--space-2) var(--space-4);color:var(--text-secondary);font-size:var(--text-sm)"></div>
+          </div>
+
+          <!-- Drill-down (populated by Leaderboard.drill) -->
+          <div id="lb-drilldown" class="card" style="display:none;margin-bottom:var(--space-6)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-3)">
+              <h3 style="font-size:var(--text-base);font-weight:var(--font-semibold)" id="lb-drilldown-title" data-i18n="leaderboard.drilldown">Student drill-down</h3>
+              <button class="btn btn-ghost btn-sm" onclick="document.getElementById('lb-drilldown').style.display='none'" data-i18n="leaderboard.close">✕ Close</button>
+            </div>
+            <div id="lb-drilldown-body"></div>
+          </div>
+
+          <!-- Display board panel -->
+          <div class="card" id="lb-display-panel" style="margin-bottom:var(--space-6)">
+            <h3 style="font-size:var(--text-base);font-weight:var(--font-semibold);margin-bottom:var(--space-1)" data-i18n="leaderboard.displayBoard">🖥️ Display Board</h3>
+            <p style="font-size:var(--text-sm);color:var(--text-secondary)" id="lb-display-hint" data-i18n="leaderboard.displayHint">
+              Project this class's board on a shared screen. The link is public — the token in it is the credential.
+              Rotating the token invalidates the old link.
+            </p>
+            <label class="lb-consent-label" for="lb-consent">
+              <input type="checkbox" id="lb-consent">
+              <span data-i18n="leaderboard.consent">I consent to projecting this class's leaderboard (student nicknames &amp; scores) on a public display.</span>
+            </label>
+            <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+              <button class="btn btn-primary btn-sm" id="lb-display-mint" onclick="Leaderboard.mintDisplay(false)" data-i18n="leaderboard.mint">🖥️ Mint / Enable Board</button>
+              <button class="btn btn-secondary btn-sm" id="lb-display-rotate" onclick="Leaderboard.mintDisplay(true)" data-i18n="leaderboard.rotate">🔄 Rotate Token</button>
+            </div>
+            <div id="lb-display-result" style="display:none">
+              <div style="font-size:var(--text-xs);color:var(--text-secondary);margin-bottom:var(--space-1)" data-i18n="leaderboard.token">Token</div>
+              <div id="lb-display-token">—</div>
+              <div style="font-size:var(--text-xs);color:var(--text-secondary);margin:var(--space-2) 0 var(--space-1)" data-i18n="leaderboard.projectorLink">Projector link</div>
+              <div class="lb-copy-row">
+                <input type="text" class="form-input" id="lb-display-url" readonly>
+                <button class="btn btn-secondary btn-sm" onclick="Leaderboard.copyDisplayUrl()" data-i18n="leaderboard.copy">📋 Copy</button>
+                <a class="btn btn-secondary btn-sm" id="lb-display-open" target="_blank" rel="noopener" data-i18n="leaderboard.open">↗ Open</a>
+              </div>
+            </div>
+          </div>
+        </div><!-- /class-dependent -->
+
+        <!-- Student board + identity editor (any logged-in user; 404 → join a class first) -->
+        <div class="card" id="lb-student-panel">
+          <h3 style="font-size:var(--text-base);font-weight:var(--font-semibold);margin-bottom:var(--space-1)" data-i18n="leaderboard.studentPanel">🎓 My student board &amp; identity</h3>
+          <p style="font-size:var(--text-sm);color:var(--text-secondary)" data-i18n="leaderboard.studentPanelHint">
+            How you appear on your class board, plus your on-board nickname & emoji.
+          </p>
+
+          <div class="error-box" id="slb-join-note" style="display:none;margin:var(--space-4) 0"></div>
+
+          <div id="slb-board-wrap">
+            <div class="form-grid" style="margin:var(--space-4) 0">
+              <div class="form-group">
+                <label class="form-label" for="slb-metric" data-i18n="leaderboard.metric">Metric</label>
+                <select class="form-select" id="slb-metric">
+                  <option value="points" selected data-i18n="leaderboard.metricPoints">Points (default)</option>
+                  <option value="compliance" data-i18n="leaderboard.metricCompliance">Compliance</option>
+                  <option value="volume" data-i18n="leaderboard.metricVolume">Volume</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="slb-window">Window</label>
+                <select class="form-select" id="slb-window">
+                  <option value="week" selected data-i18n="leaderboard.windowWeek">This week (default)</option>
+                  <option value="month" data-i18n="leaderboard.windowMonth">This month</option>
+                  <option value="all" data-i18n="leaderboard.windowAll">All time</option>
+                </select>
+              </div>
+              <div class="form-group" style="justify-content:flex-end">
+                <label class="form-label" style="visibility:hidden">Refresh</label>
+                <button class="btn btn-secondary btn-sm" onclick="Leaderboard.loadStudentBoard()" data-i18n="leaderboard.refresh">🔄 Refresh</button>
+              </div>
+            </div>
+
+            <div id="slb-me" style="margin-bottom:var(--space-4)"></div>
+            <div id="slb-min-note" style="font-size:var(--text-xs);color:var(--color-warning-500);margin-bottom:var(--space-2)"></div>
+
+            <div style="overflow-x:auto;margin-bottom:var(--space-4)">
+              <table class="table" style="width:100%">
+                <thead><tr>
+                  <th style="width:3rem" data-i18n="leaderboard.colRank">#</th>
+                  <th data-i18n="leaderboard.colStudent">Student</th>
+                  <th id="slb-th-score" data-i18n="leaderboard.colScore">Score</th>
+                  <th data-i18n="leaderboard.colSessions">Sessions</th>
+                  <th data-i18n="leaderboard.colCards">Cards</th>
+                </tr></thead>
+                <tbody id="slb-table-body">
+                  <tr><td colspan="5" style="text-align:center;padding:var(--space-8);color:var(--text-tertiary)" data-i18n="leaderboard.loading">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div id="slb-unranked" style="display:none;margin-bottom:var(--space-4)">
+              <div style="font-size:var(--text-xs);text-transform:uppercase;letter-spacing:0.05em;color:var(--text-tertiary);margin-bottom:var(--space-2)" data-i18n="leaderboard.noActivity">💤 No activity this window</div>
+              <div id="slb-unranked-list" style="display:flex;flex-wrap:wrap;gap:var(--space-2) var(--space-4);color:var(--text-secondary);font-size:var(--text-sm)"></div>
+            </div>
+          </div>
+
+          <!-- Identity editor -->
+          <div id="slb-identity" style="border-top:1px solid var(--border-light);padding-top:var(--space-4)">
+            <h4 style="font-size:var(--text-sm);font-weight:var(--font-semibold);margin-bottom:var(--space-3)" data-i18n="leaderboard.boardIdentity">✏️ Board identity</h4>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="slb-nickname"><span data-i18n="leaderboard.nickname">Nickname</span> <span style="font-weight:400;color:var(--text-tertiary)" data-i18n="leaderboard.nicknameHint">(≤ 40 chars)</span></label>
+                <input type="text" class="form-input" id="slb-nickname" maxlength="40" placeholder="How classmates see you" data-i18n-placeholder="leaderboard.nicknamePlaceholder" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="slb-emoji"><span data-i18n="leaderboard.emoji">Avatar emoji</span> <span style="font-weight:400;color:var(--text-tertiary)" data-i18n="leaderboard.emojiHint">(optional, ≤ 2 chars)</span></label>
+                <input type="text" class="form-input" id="slb-emoji" maxlength="4" placeholder="🦁" autocomplete="off">
+              </div>
+              <div class="form-group" style="justify-content:flex-end">
+                <label class="form-label" style="visibility:hidden">Save</label>
+                <button class="btn btn-primary btn-sm" id="slb-save-identity" data-i18n="leaderboard.saveIdentity">💾 Save identity</button>
+              </div>
+            </div>
+            <div id="slb-confirmed"></div>
           </div>
         </div>
       </section>
@@ -2563,6 +2868,9 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
   ClassInsights.init();
   Compliance.init();
 
+  // Initialize leaderboard (chunk 4)
+  Leaderboard.init();
+
   // Initialize Phase 4c screens
   ClassesGUI.init();
   TracksProfiles.init();
@@ -2595,6 +2903,12 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
   I18n.onChange(() => {
     if (Router.currentPage === 'compliance') {
       Compliance.init();
+    }
+  });
+
+  I18n.onChange(() => {
+    if (Router.currentPage === 'leaderboard' && typeof Leaderboard !== 'undefined') {
+      Leaderboard.refresh(false);
     }
   });
 
@@ -2777,6 +3091,22 @@ const Router = {
     try {
       if (page === 'class-insights' && typeof ClassInsights !== 'undefined') {
         ClassInsights.refresh(true);
+      } else if (page === 'study-session' && typeof StudySession !== 'undefined') {
+        StudySession.init();
+      } else if (page === 'decks' && typeof Decks !== 'undefined') {
+        Decks.loadDecks();
+      } else if (page === 'classes' && typeof ClassesGUI !== 'undefined') {
+        ClassesGUI.loadList();
+      } else if (page === 'teachers' && typeof Teachers !== 'undefined') {
+        Teachers.loadList();
+      } else if (page === 'compliance' && typeof Compliance !== 'undefined') {
+        Compliance.init();
+      } else if (page === 'leaderboard' && typeof Leaderboard !== 'undefined') {
+        Leaderboard.refresh(true);
+      } else if (page === 'tracks-profiles' && typeof TracksProfiles !== 'undefined') {
+        TracksProfiles.init();
+      } else if (page === 'sync' && typeof SyncController !== 'undefined') {
+        SyncController.init();
       }
     } catch (e) {}
   }
@@ -3261,6 +3591,27 @@ const SessionGate = (() => {
       if (typeof Home !== 'undefined' && Home.loadClasses) {
         try { await Home.loadClasses(); } catch (e) {}
       }
+      if (typeof StudySession !== 'undefined' && StudySession.init) {
+        try { StudySession.init(); } catch (e) {}
+      }
+      if (typeof Decks !== 'undefined' && Decks.loadDecks) {
+        try { Decks.loadDecks(); } catch (e) {}
+      }
+      if (typeof ClassesGUI !== 'undefined' && ClassesGUI.loadList) {
+        try { ClassesGUI.loadList(); } catch (e) {}
+      }
+      if (typeof TracksProfiles !== 'undefined' && TracksProfiles.init) {
+        try { TracksProfiles.init(); } catch (e) {}
+      }
+      if (typeof Compliance !== 'undefined' && Compliance.init) {
+        try { Compliance.init(); } catch (e) {}
+      }
+      if (typeof Leaderboard !== 'undefined' && Leaderboard.refresh) {
+        try { Leaderboard.refresh(true); } catch (e) {}
+      }
+      if (typeof SyncController !== 'undefined' && SyncController.init) {
+        try { SyncController.init(); } catch (e) {}
+      }
       // If the user is on a data-driven page, refresh it too (with a short
       // delay so the page's DOM has finished hydrating after the overlay
       // dismissal). Class Insights auto-selects its first class so the
@@ -3308,6 +3659,10 @@ const SessionGate = (() => {
     Session.onAuthChange(() => {
       _lastUser = Session.getUser();
       _applyOverlayState();
+      // Admin-gated nav: reveal the "Teachers" item only for admins (client-side UX;
+      // the server still enforces 403 for non-admins).
+      const tNav = document.getElementById('nav-teachers');
+      if (tNav) tNav.style.display = (_lastUser && _lastUser.role === 'admin') ? '' : 'none';
     });
   }
 
@@ -3387,9 +3742,10 @@ const Home = {
       classesEl.style.display = 'block';
       document.documentElement.setAttribute('data-class-state', 'has-classes');
 
-      // Render class cards
+      // Render class cards, then apply translations
       this._renderClassCards(classes, grid);
       this._updateBadge(classes);
+      I18n.refresh();
     } catch (err) {
       console.error('Home.loadClasses failed:', err);
       // Fallback: show empty with error
@@ -3614,18 +3970,24 @@ const Home = {
 
   _toast(message, type = 'info') {
     // Use existing toast system if available
-    const container = document.getElementById('toast-container');
+    let container = document.getElementById('toast-container');
     if (!container) {
-      console.log(`[${type}] ${message}`);
-      return;
+      // Container missing (shouldn't happen — it's in the HTML). Create it
+      // so the toast still shows instead of silently dropping into console.log.
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      document.body.appendChild(container);
     }
 
     const toast = document.createElement('div');
     toast.className = `toast toast--${type}`;
     toast.textContent = message;
     container.appendChild(toast);
+    // Trigger the entrance transition on the next frame.
+    requestAnimationFrame(() => toast.classList.add('toast--visible'));
 
     setTimeout(() => {
+      toast.classList.remove('toast--visible');
       toast.classList.add('toast--fade');
       setTimeout(() => toast.remove(), 300);
     }, 4000);
@@ -4236,6 +4598,117 @@ const Decks = {
 };
 
 /* ═══════════════════════════════════════════════════════
+   TEACHERS (Prong 8) — admin-gated teacher registration.
+   Mirrors the Decks controller: uses the shared API client
+   (GET/POST /api/v1/management/teachers…) and t() for i18n.
+   ═══════════════════════════════════════════════════════ */
+const Teachers = {
+  _locales: [
+    ['en-US', 'English'], ['ar', 'العربية'], ['de', 'Deutsch'],
+    ['es', 'Español'], ['fr', 'Français'], ['he', 'עברית'],
+    ['hi', 'हिन्दी'], ['it', 'Italiano'], ['ja', '日本語'],
+    ['ko', '한국어'], ['pt', 'Português'], ['ru', 'Русский'], ['zh', '中文'],
+  ],
+
+  init() {
+    this.populateLocaleSelect();
+    this.loadList();
+  },
+
+  populateLocaleSelect() {
+    const sel = document.getElementById('tc-locale');
+    if (!sel || sel.options.length) return;
+    this._locales.forEach(([code, label]) => {
+      const o = document.createElement('option');
+      o.value = code; o.textContent = label;
+      sel.appendChild(o);
+    });
+  },
+
+  _esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); },
+
+  async loadList() {
+    const body = document.getElementById('teachers-table-body');
+    if (!body) return;
+    body.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:var(--space-8);color:var(--text-tertiary)">…</td></tr>';
+    let rows = [];
+    try {
+      const data = await API.get('/teachers');
+      rows = Array.isArray(data) ? data : (data.invites || data.teachers || []);
+    } catch (err) {
+      const msg = err && err.status === 403 ? 'Admin access required' : API.humanizeError(err);
+      body.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:var(--space-8);color:var(--text-tertiary)">${this._esc(msg)}</td></tr>`;
+      return;
+    }
+    if (!rows.length) {
+      body.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:var(--space-8);color:var(--text-tertiary)">' + this._esc(t('teachers.status.pending')) + '</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(r => this._row(r)).join('');
+  },
+
+  _row(r) {
+    const u = r.user || {};
+    const inv = r.invite || r;
+    const status = r.status || inv.status || 'pending';
+    const name = this._esc(u.full_name || u.username || (u.email || '').split('@')[0] || '—');
+    const email = this._esc(u.email || inv.email || '—');
+    const school = this._esc(u.school || inv.school || '—');
+    const badge = status === 'active' ? '✅' : (status === 'expired' ? '⌛' : '⏳');
+    const statusLabel = this._esc(t('teachers.status.' + (status === 'active' ? 'active' : status === 'expired' ? 'expired' : 'pending')));
+    const actions = [];
+    if (r.invite || inv.invite_url) actions.push(`<button class="btn btn-ghost" style="font-size:var(--text-sm)" onclick="Teachers.copyInvite('${this._esc(inv.invite_url || inv.url || '')}')">${this._esc(t('teachers.copyLink'))}</button>`);
+    if (inv.expires_at && status !== 'active' && status !== 'expired') actions.push(`<button class="btn btn-ghost" style="font-size:var(--text-sm)" onclick="Teachers.resend(${JSON.stringify(inv.user_id != null ? inv.user_id : r.user_id).slice(1,-1)})">↻</button>`);
+    return `<tr><td>${name}</td><td>${email}</td><td>${school}</td><td>${badge} ${statusLabel}</td><td style="white-space:nowrap;gap:6px">${actions.join(' ')}</td></tr>`;
+  },
+
+  async copyInvite(url) {
+    const out = document.getElementById('tc-result');
+    if (!url) return;
+    try { await navigator.clipboard.writeText(url); if (out) out.textContent = '📋 ' + this._esc(t('teachers.copyLink')) + ': ' + this._esc(url); }
+    catch { if (out) out.textContent = this._esc(url); }
+  },
+
+  async resend(userId) {
+    const out = document.getElementById('tc-result');
+    try {
+      const res = await API.post(`/teachers/${userId}/resend`, {});
+      if (out) out.textContent = '↻ ' + this._esc(res.invite && res.invite.invite_url ? res.invite.invite_url : (res.invite_url || 'rotated'));
+      this.loadList();
+    } catch (err) { if (out) out.textContent = API.humanizeError(err); }
+  },
+
+  async create(event) {
+    event.preventDefault();
+    const out = document.getElementById('tc-result');
+    const form = {
+      full_name: document.getElementById('tc-name').value.trim(),
+      email: document.getElementById('tc-email').value.trim(),
+      school: document.getElementById('tc-school').value.trim(),
+      role: document.getElementById('tc-role').value.trim(),
+      community: null,
+      locale: document.getElementById('tc-locale').value,
+    };
+    try {
+      const res = await API.post('/teachers', form);
+      const invite = res.invite || res;
+      const url = invite.invite_url || invite.url || '';
+      out.innerHTML = `✅ ${this._esc(t('teachers.create.ok'))} <a href="${this._esc(url)}" target="_blank" rel="noopener">${this._esc(url)}</a> <button class="btn btn-ghost" style="font-size:var(--text-sm)" onclick="Teachers.copyInvite('${this._esc(url)}')">📋 ${this._esc(t('teachers.copyLink'))}</button>`;
+      document.getElementById('teacher-create-form').reset();
+      this.loadList();
+    } catch (err) {
+      const b = (err && err.body) || {};
+      const detail = b.detail || b.description || b.error || (Array.isArray(b.errors) ? b.errors.join(', ') : '');
+      const code = err && err.status;
+      const msg = (code === 409 && detail.toLowerCase().includes('email')) ? this._esc(t('teachers.create.dupeEmail'))
+        : (code === 409) ? this._esc(t('teachers.create.dupeName'))
+        : this._esc(detail || API.humanizeError(err));
+      out.textContent = '❌ ' + msg;
+    }
+  },
+};
+
+/* ═══════════════════════════════════════════════════════
    12. SYNC CONTROLLER
    ═══════════════════════════════════════════════════════ */
 
@@ -4449,6 +4922,506 @@ const ClassInsights = {
    14. COMPLIANCE CONTROLLER
    ═══════════════════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════════════════
+   LEADERBOARD VIEW CONTROLLER (chunk 4)
+   ═══════════════════════════════════════════════════════
+   Staff board   → /management/leaderboard*  (teacher|admin JWT)
+   Student board → /student/leaderboard, /student/me/identity (any JWT)
+   Display board → /management/leaderboard/:class_id/display (mint/rotate)
+   Wall page     → /b/<token> (public projector view, no auth)
+*/
+const Leaderboard = {
+  MIN_COHORT: 3, // spec §7.3 — total_ranked below this → "cohort too small"
+  scope: 'class',
+  classId: '',
+  metric: 'compliance',   // staff default (spec §5.1)
+  window: 'week',
+  _slbMetric: 'points',   // student-endpoint default
+  _slbWindow: 'week',
+  _classes: [],
+  _identityTouched: false,
+  _inited: false,
+
+  init() {
+    if (this._inited) return;
+    this._inited = true;
+    const $ = id => document.getElementById(id);
+
+    $('lb-class').addEventListener('change', e => { this.classId = e.target.value; this._syncDisplayHint(); this.load(); });
+    $('lb-metric').addEventListener('change', e => { this.metric = e.target.value; this.load(); });
+    $('lb-window').addEventListener('change', e => { this.window = e.target.value; this.load(); });
+    $('slb-metric').addEventListener('change', e => { this._slbMetric = e.target.value; this.loadStudentBoard(); });
+    $('slb-window').addEventListener('change', e => { this._slbWindow = e.target.value; this.loadStudentBoard(); });
+    $('slb-save-identity').addEventListener('click', () => this.saveIdentity());
+    $('slb-nickname').addEventListener('input', () => { this._identityTouched = true; });
+    $('slb-emoji').addEventListener('input', () => { this._identityTouched = true; });
+
+    this.loadClasses();
+  },
+
+  // ── Helpers ─────────────────────────────────────────────────
+
+  _esc(str) {
+    const d = document.createElement('div');
+    d.textContent = (str == null ? '' : String(str));
+    return d.innerHTML;
+  },
+  _escAttr(str) {
+    return this._esc(str).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+  },
+  _medal(rank) {
+    return rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '#' + rank;
+  },
+  _metricLabel(m) {
+    return ({ points: 'Points', compliance: 'Compliance', volume: 'Volume' })[m] || m;
+  },
+
+  /** PATCH is missing from the shared API client — management identity moderation. */
+  async _patch(path, body) {
+    const resp = await fetch(API.BASE + path, {
+      method: 'PATCH',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, Session.authHeaders()),
+      body: JSON.stringify(body || {}),
+      signal: AbortSignal.timeout(15000)
+    });
+    if (resp.status === 401) Session.expire();
+    if (!resp.ok) throw { status: resp.status, body: await resp.json().catch(() => ({})) };
+    return resp.json();
+  },
+
+  /** Student-scope endpoints live outside API.BASE (/api/v1/student/…). */
+  async _studentReq(path, method = 'GET', body = null) {
+    const headers = Session.authHeaders();
+    const opts = { method, headers, signal: AbortSignal.timeout(10000) };
+    if (body) {
+      opts.headers = Object.assign({ 'Content-Type': 'application/json' }, headers);
+      opts.body = JSON.stringify(body);
+    }
+    const resp = await fetch('/api/v1/student' + path, opts);
+    if (resp.status === 401) Session.expire();
+    if (!resp.ok) throw { status: resp.status, body: await resp.json().catch(() => ({})) };
+    return resp.json();
+  },
+
+  _toast(msg, type) {
+    if (typeof Home !== 'undefined' && Home._toast) Home._toast(msg, type);
+    else console.log('[toast]', type, msg);
+  },
+
+  // ── Staff: classes dropdown ─────────────────────────────────
+
+  async refresh(full) {
+    if (full) {
+      await this.loadClasses(); // reloads the board too when on this page
+    } else {
+      await this.load();
+    }
+    await this.loadStudentBoard();
+  },
+
+  async loadClasses() {
+    const sel = document.getElementById('lb-class');
+    if (!sel) return;
+    try {
+      const classes = await API.get('/leaderboard/classes');
+      this._classes = classes || [];
+      if (!this._classes.length) {
+        sel.innerHTML = '<option value="">No classes yet</option>';
+        this.classId = '';
+        return;
+      }
+      sel.innerHTML = this._classes.map(c =>
+        `<option value="${this._escAttr(c.class_id)}">${this._esc(c.name || c.class_id)} · ${c.enrolled != null ? c.enrolled : '?'} students${c.display_enabled ? ' 🖥️' : ''}</option>`
+      ).join('');
+      if (!this.classId || !this._classes.some(c => c.class_id === this.classId)) {
+        this.classId = this._classes[0].class_id;
+      }
+      sel.value = this.classId;
+      this._syncDisplayHint();
+      if (typeof Router !== 'undefined' && Router.currentPage === 'leaderboard') {
+        await this.load();
+      }
+    } catch (err) {
+      sel.innerHTML = '<option value="">Could not load classes</option>';
+    }
+  },
+
+  _syncDisplayHint() {
+    const hint = document.getElementById('lb-display-hint');
+    if (!hint) return;
+    const c = this._classes.find(x => x.class_id === this.classId);
+    hint.textContent = c && c.display_enabled
+      ? 'A display board is already enabled for this class. Rotate to mint a fresh link — the old link stops working immediately.'
+      : 'Project this class\'s board on a shared screen. The link is public — the token in it is the credential. Rotating the token invalidates the old link.';
+  },
+
+  setScope(scope) {
+    this.scope = scope;
+    const classBtn = document.getElementById('lb-scope-class');
+    const schoolBtn = document.getElementById('lb-scope-school');
+    if (classBtn) classBtn.className = scope === 'class' ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
+    if (schoolBtn) schoolBtn.className = scope === 'school' ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
+    const sel = document.getElementById('lb-class');
+    if (sel) sel.disabled = scope === 'school';
+    const panel = document.getElementById('lb-display-panel');
+    if (panel) panel.style.display = scope === 'class' ? '' : 'none';
+    this.load();
+  },
+
+  // ── Staff: ranked board ─────────────────────────────────────
+
+  async load() {
+    const tbody = document.getElementById('lb-table-body');
+    const notice = document.getElementById('lb-min-cohort');
+    const unrankedEl = document.getElementById('lb-unranked');
+    const drill = document.getElementById('lb-drilldown');
+    if (!tbody) return;
+    if (drill) drill.style.display = 'none';
+
+    const params = { metric: this.metric, window: this.window };
+    if (this.scope === 'class') {
+      if (!this.classId) return;
+      params.scope = 'class';
+      params.class_id = this.classId;
+    } else {
+      params.scope = 'school';
+    }
+
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:var(--space-8);color:var(--text-tertiary)">Loading…</td></tr>';
+    notice.style.display = 'none';
+    unrankedEl.style.display = 'none';
+
+    try {
+      const data = await API.get('/leaderboard', params);
+      this.renderBoard(data);
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="6" style="padding:var(--space-4)"><div class="error-box">${this._esc(API.humanizeError(err))} <button class="btn btn-sm btn-secondary" style="margin-left:var(--space-2)" onclick="Leaderboard.load()">${t('leaderboard.retry')}</button></div></td></tr>`;
+    }
+  },
+
+  renderBoard(data) {
+    const tbody = document.getElementById('lb-table-body');
+    const notice = document.getElementById('lb-min-cohort');
+    const tableWrap = document.getElementById('lb-table-wrap');
+    const unrankedEl = document.getElementById('lb-unranked');
+    const entries = data.entries || [];
+    const unranked = data.unranked || [];
+    const belowMin = (data.total_ranked || 0) < this.MIN_COHORT;
+
+    document.getElementById('lb-th-score').textContent = 'Score (' + this._metricLabel(data.metric || this.metric) + ')';
+    notice.style.display = belowMin ? '' : 'none';
+
+    if (belowMin) {
+      tableWrap.style.display = 'none';
+      tbody.innerHTML = '';
+    } else {
+      tableWrap.style.display = '';
+      tbody.innerHTML = entries.map(e => this._staffRowHtml(e)).join('');
+    }
+
+    if (unranked.length) {
+      document.getElementById('lb-unranked-list').innerHTML = unranked.map(u => {
+        const id = u.identity || {};
+        return `<span>${id.emoji ? this._esc(id.emoji) : '💤'} <strong>${this._esc(id.nickname || u.student_id)}</strong> <span style="color:var(--text-tertiary)">— ${this._esc(u.reason || 'no activity')}</span></span>`;
+      }).join('');
+      unrankedEl.style.display = '';
+    } else {
+      unrankedEl.style.display = 'none';
+    }
+  },
+
+  _staffRowHtml(e) {
+    const id = e.identity || {};
+    const inputs = e.inputs || {};
+    const school = this.scope === 'school';
+    const moderate = school ? '' :
+      `<span class="lb-moderate">
+         <button class="btn btn-ghost btn-sm" title="Reset nickname to the student id" onclick="Leaderboard.moderate('${this._escAttr(e.student_id)}','reset_nickname')">${t('leaderboard.resetName')}</button>
+         <button class="btn btn-ghost btn-sm" title="Strip the avatar emoji" onclick="Leaderboard.moderate('${this._escAttr(e.student_id)}','strip_emoji')">${t('leaderboard.stripEmoji')}</button>
+       </span>`;
+    return `<tr>
+      <td><span class="lb-medal">${this._medal(e.rank)}</span></td>
+      <td><strong>${id.emoji ? this._esc(id.emoji) + ' ' : ''}${this._esc(id.nickname || e.student_id)}</strong></td>
+      <td style="font-weight:var(--font-bold)">${this._esc(e.score_display != null ? e.score_display : e.score)}</td>
+      <td>${inputs.sessions_completed || 0} / ${inputs.sessions_target || 0}</td>
+      <td>${inputs.cards_reviewed || 0}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-secondary btn-sm" onclick="Leaderboard.drill('${this._escAttr(e.student_id)}')">${t('leaderboard.details')}</button>
+        ${moderate}
+      </td>
+    </tr>`;
+  },
+
+  // ── Staff: drill-down (deeper) ──────────────────────────────
+
+  async drill(studentId) {
+    const card = document.getElementById('lb-drilldown');
+    const body = document.getElementById('lb-drilldown-body');
+    if (!card || !body) return;
+    card.style.display = '';
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    body.innerHTML = '<p style="color:var(--text-tertiary);text-align:center;padding:var(--space-4)">Loading…</p>';
+
+    try {
+      const params = { metric: this.metric, window: this.window };
+      if (this.scope === 'class') params.class_id = this.classId;
+      const data = await API.get('/leaderboard/student/' + encodeURIComponent(studentId), params);
+      const deeper = data.deeper || {};
+      const id = deeper.identity || {};
+      const raw = deeper.raw || deeper.inputs || {}; // backend exposes `raw`
+      const me = data.me || {};
+      document.getElementById('lb-drilldown-title').textContent =
+        `🔍 ${id.emoji ? id.emoji + ' ' : ''}${id.nickname || studentId}`;
+
+      body.innerHTML = `
+        <div class="metrics-grid" style="margin-bottom:var(--space-3)">
+          <div class="metric-card" style="cursor:default"><div class="metric-card__value">${this._esc(me.score_display != null ? me.score_display : '—')}</div><div class="metric-card__label">Score · ${this._esc(this._metricLabel(data.metric || this.metric))}</div></div>
+          <div class="metric-card" style="cursor:default"><div class="metric-card__value">${me.rank ? '#' + me.rank : '—'} <span style="font-size:var(--text-xs);color:var(--text-secondary)">of ${data.total_ranked || 0}</span></div><div class="metric-card__label">Rank</div></div>
+          <div class="metric-card" style="cursor:default"><div class="metric-card__value">${raw.sessions_completed || 0} / ${raw.sessions_target || 0}</div><div class="metric-card__label">Sessions · ${this._esc(deeper.window || this.window)}</div></div>
+          <div class="metric-card" style="cursor:default"><div class="metric-card__value">${raw.cards_completed != null ? raw.cards_completed : (raw.cards_reviewed || 0)}</div><div class="metric-card__label">Cards reviewed</div></div>
+        </div>
+        <p style="font-size:var(--text-xs);color:var(--text-secondary)">
+          Board identity: <strong>${id.emoji ? this._esc(id.emoji) + ' ' : ''}${this._esc(id.nickname || studentId)}</strong>${raw.enrolled_at ? ' · enrolled ' + this._esc(new Date(raw.enrolled_at * 1000).toLocaleDateString()) : ''}
+        </p>`;
+    } catch (err) {
+      const extra = err.status === 404 ? ' — this student has no active enrollment.' : '';
+      body.innerHTML = `<div class="error-box">${this._esc(API.humanizeError(err))}${extra}</div>`;
+    }
+  },
+
+  // ── Staff: identity moderation ──────────────────────────────
+
+  async moderate(studentId, action) {
+    if (this.scope !== 'class' || !this.classId) return;
+    const bodyPayload = action === 'strip_emoji'
+      ? { reset_nickname: false, strip_emoji: true }
+      : { reset_nickname: true, strip_emoji: false };
+    try {
+      const res = await this._patch(
+        `/leaderboard/${encodeURIComponent(this.classId)}/identity/${encodeURIComponent(studentId)}`,
+        bodyPayload
+      );
+      const emojiPart = res.avatar_emoji ? ' ' + res.avatar_emoji : ' (emoji cleared)';
+      this._toast(action === 'strip_emoji'
+        ? `🚫 Emoji stripped → ${res.nickname}${emojiPart}`
+        : `🏷️ Nickname reset → ${res.nickname}${emojiPart}`, 'success');
+      this.load();
+    } catch (err) {
+      const extra = err.status === 404 ? ' — the student has no enrollment in this class.' : '';
+      this._toast(API.humanizeError(err) + extra, 'error');
+    }
+  },
+
+  // ── Staff: display board (mint / rotate) ────────────────────
+
+  async mintDisplay(rotate) {
+    if (this.scope !== 'class' || !this.classId) {
+      this._toast('Select a class first', 'error');
+      return;
+    }
+    const consent = !!(document.getElementById('lb-consent') || {}).checked;
+    try {
+      const res = await API.post(
+        `/leaderboard/${encodeURIComponent(this.classId)}/display`,
+        { rotate: !!rotate, consent }
+      );
+      const wallUrl = this._wallUrl(res.token);
+      document.getElementById('lb-display-result').style.display = '';
+      document.getElementById('lb-display-token').textContent = res.token;
+      const urlInput = document.getElementById('lb-display-url');
+      urlInput.value = wallUrl;
+      const open = document.getElementById('lb-display-open');
+      if (open) open.href = wallUrl;
+      this._syncDisplayHint();
+      this.loadClasses(); // refresh the 🖥️ marker on the dropdown
+      this._toast(rotate
+        ? '🔄 Token rotated — the previous link no longer works'
+        : '🖥️ Display board enabled — copy the projector link below', 'success');
+    } catch (err) {
+      if (err.status === 409) {
+        const detail = err.body && (err.body.description || err.body.error) || '';
+        this._toast('⚠️ Consent required' + (detail ? ': ' + detail : ' — tick the consent checkbox to attest you may project this class\'s board publicly.'), 'error');
+      } else {
+        this._toast(API.humanizeError(err), 'error');
+      }
+    }
+  },
+
+  _wallUrl(token) {
+    try {
+      return window.location.origin + '/b/' + token;
+    } catch (e) {
+      return '/b/' + token;
+    }
+  },
+
+  copyDisplayUrl() {
+    const input = document.getElementById('lb-display-url');
+    const val = input ? input.value : '';
+    if (!val) return;
+    const done = () => this._toast('📋 Display link copied', 'success');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(val).then(done).catch(() => this._copyFallback(val, done));
+    } else {
+      this._copyFallback(val, done);
+    }
+  },
+
+  _copyFallback(val, done) {
+    const ta = document.createElement('textarea');
+    ta.value = val;
+    ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      done();
+    } catch (e) {
+      this._toast('Copy failed — select the URL manually', 'error');
+    }
+    ta.remove();
+  },
+
+  // ── Student board + identity editor ─────────────────────────
+
+  async loadStudentBoard() {
+    const note = document.getElementById('slb-join-note');
+    const boardWrap = document.getElementById('slb-board-wrap');
+    const identityEl = document.getElementById('slb-identity');
+    if (!note || !boardWrap) return;
+
+    try {
+      const data = await this._studentReq(
+        `/leaderboard?window=${encodeURIComponent(this._slbWindow)}&metric=${encodeURIComponent(this._slbMetric)}`
+      );
+      note.style.display = 'none';
+      boardWrap.style.display = '';
+      if (identityEl) identityEl.style.display = '';
+      this._renderStudentBoard(data);
+    } catch (err) {
+      if (err.status === 401) return; // pre-auth startup — the overlay handles it
+      boardWrap.style.display = 'none';
+      if (identityEl) identityEl.style.display = 'none';
+      note.style.display = '';
+      note.textContent = err.status === 404
+        ? '👋 You haven\'t joined a class yet — join a class first to appear on its leaderboard.'
+        : API.humanizeError(err);
+    }
+  },
+
+  _renderStudentBoard(data) {
+    const entries = data.entries || [];
+    const unranked = data.unranked || [];
+    const belowMin = (data.total_ranked || 0) < this.MIN_COHORT;
+
+    document.getElementById('slb-th-score').textContent = 'Score (' + this._metricLabel(data.metric || this._slbMetric) + ')';
+    document.getElementById('slb-min-note').textContent = belowMin
+      ? '🤫 Cohort too small — ranked scores appear once at least 3 students have activity.' : '';
+
+    // `me`: ranked row when flagged; fall back to identity lookup for the
+    // unranked case (the backend currently leaves `me` null there).
+    const myId = String((typeof Session !== 'undefined' && Session.getUser() || {}).id || '');
+    const me = data.me || entries.find(e => e.is_me) || null;
+    const meUnranked = !me && myId ? unranked.find(u => u.student_id === myId) : null;
+    const meEl = document.getElementById('slb-me');
+
+    if (me) {
+      const inputs = me.inputs || {};
+      meEl.innerHTML = `
+        <div class="metrics-grid" style="margin-bottom:0">
+          <div class="metric-card" style="cursor:default"><div class="metric-card__value">${this._esc(me.score_display != null ? me.score_display : '—')}</div><div class="metric-card__label">Your score · ${this._esc(this._metricLabel(data.metric || this._slbMetric))}</div></div>
+          <div class="metric-card" style="cursor:default"><div class="metric-card__value">#${me.rank} <span style="font-size:var(--text-xs);color:var(--text-secondary)">of ${data.total_ranked || 0}</span></div><div class="metric-card__label">Your rank${data.class_name ? ' · ' + this._esc(data.class_name) : ''}</div></div>
+          <div class="metric-card" style="cursor:default"><div class="metric-card__value">${inputs.sessions_completed || 0} / ${inputs.sessions_target || 0}</div><div class="metric-card__label">Sessions this ${this._esc(this._slbWindow)}</div></div>
+          <div class="metric-card" style="cursor:default"><div class="metric-card__value">${inputs.cards_reviewed || 0}</div><div class="metric-card__label">Cards reviewed</div></div>
+        </div>`;
+    } else if (meUnranked) {
+      meEl.innerHTML = `<div class="error-box" style="border-color:var(--color-warning-500)">💤 You're enrolled but have no activity this ${this._esc(this._slbWindow)} — complete a study session to get ranked.</div>`;
+    } else {
+      meEl.innerHTML = '';
+    }
+
+    const tbody = document.getElementById('slb-table-body');
+    if (belowMin || !entries.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:var(--space-8);color:var(--text-tertiary)">${belowMin ? 'Cohort too small — no ranked entries yet.' : 'No ranked students in this window.'}</td></tr>`;
+    } else {
+      tbody.innerHTML = entries.map(e => {
+        const id = e.identity || {};
+        const inputs = e.inputs || {};
+        return `<tr${e.is_me ? ' class="lb-is-me"' : ''}>
+          <td><span class="lb-medal">${this._medal(e.rank)}</span></td>
+          <td><strong>${id.emoji ? this._esc(id.emoji) + ' ' : ''}${this._esc(id.nickname || e.student_id)}</strong>${e.is_me ? ' <span class="streak-counter">you</span>' : ''}</td>
+          <td style="font-weight:var(--font-bold)">${this._esc(e.score_display != null ? e.score_display : e.score)}</td>
+          <td>${inputs.sessions_completed || 0} / ${inputs.sessions_target || 0}</td>
+          <td>${inputs.cards_reviewed || 0}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    if (unranked.length) {
+      document.getElementById('slb-unranked-list').innerHTML = unranked.map(u => {
+        const id = u.identity || {};
+        const tag = u.student_id === myId ? ' <span class="streak-counter">you</span>' : '';
+        return `<span>${id.emoji ? this._esc(id.emoji) : '💤'} ${this._esc(id.nickname || u.student_id)}${tag} <span style="color:var(--text-tertiary)">— ${this._esc(u.reason || 'no activity')}</span></span>`;
+      }).join('');
+      document.getElementById('slb-unranked').style.display = '';
+    } else {
+      document.getElementById('slb-unranked').style.display = 'none';
+    }
+
+    // Prefill the identity editor from the board identity (until the user edits).
+    const source = (me && me.identity) || (meUnranked && meUnranked.identity) || null;
+    if (source && !this._identityTouched) {
+      const nick = document.getElementById('slb-nickname');
+      const emoji = document.getElementById('slb-emoji');
+      if (nick && !nick.value) nick.value = source.nickname || '';
+      if (emoji && !emoji.value) emoji.value = source.emoji || '';
+    }
+  },
+
+  async saveIdentity() {
+    const nickEl = document.getElementById('slb-nickname');
+    const emojiEl = document.getElementById('slb-emoji');
+    const confirmed = document.getElementById('slb-confirmed');
+    const nickname = (nickEl.value || '').trim();
+    const emojiRaw = (emojiEl.value || '').trim();
+
+    if (!nickname) {
+      this._toast('Nickname can\'t be empty', 'error');
+      return;
+    }
+    if ([...nickname].length > 40) {
+      this._toast('Nickname exceeds 40 characters', 'error');
+      return;
+    }
+
+    try {
+      // Server rules: nickname ≤ 40 codepoints (else 400); emoji > 2 codepoints
+      // or empty is silently cleared — the response carries the confirmed values.
+      const res = await this._studentReq('/me/identity', 'PATCH', {
+        nickname,
+        avatar_emoji: emojiRaw || null
+      });
+      confirmed.innerHTML = `✔ Saved — nickname: <strong>${this._esc(res.nickname)}</strong>, avatar: ${res.avatar_emoji ? this._esc(res.avatar_emoji) : '<span style="color:var(--text-tertiary)">none</span>'}`;
+      if (res.avatar_emoji !== (emojiRaw || null) && emojiRaw) {
+        this._toast('Emoji was ignored (must be ≤ 2 characters) — saved without it', 'info');
+      } else {
+        this._toast(`✅ Identity saved: ${res.nickname}`, 'success');
+      }
+      nickEl.value = res.nickname;
+      emojiEl.value = res.avatar_emoji || '';
+      this.loadStudentBoard();
+    } catch (err) {
+      if (err.status === 400) {
+        const detail = err.body && (err.body.description || err.body.error);
+        this._toast(detail || 'Nickname or emoji exceeds the length limit', 'error');
+      } else if (err.status === 404) {
+        this._toast('Join a class first — identity applies to your class board', 'error');
+      } else if (err.status !== 401) {
+        this._toast(API.humanizeError(err), 'error');
+      }
+    }
+  },
+};
 const Compliance = {
   currentTab: 'weekly',
   currentPage: 1,
@@ -5467,7 +6440,12 @@ const AIWidget = {
     try {
       const resp = await API.post('/ask', { query: q, context: { screen: Router.currentPage } });
       typing.remove();
-      msgs.innerHTML += `<div class="ai-msg ai-msg--bot">${resp.answer || resp.response || t('ai.couldNotAnswer')}</div>`;
+      let reply = resp.summary || t('ai.couldNotAnswer');
+      if (resp.navigate_to) Router.navigate(resp.navigate_to);
+      if (Array.isArray(resp.rows) && resp.rows.length) {
+        reply += '\n' + resp.rows.map(r => r.label + ': ' + r.value + (r.detail ? ' (' + r.detail + ')' : '')).join('\n');
+      }
+      msgs.innerHTML += `<div class="ai-msg ai-msg--bot">${reply.replace(/\n/g, '<br>')}</div>`;
     } catch {
       typing.remove();
       msgs.innerHTML += '<div class="ai-msg ai-msg--bot">' + t('ai.unreachable') + '</div>';

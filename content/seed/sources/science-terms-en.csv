@@ -70,7 +70,7 @@ cloze,oxygen-byproduct,02,7,{{c1::Oxygen}} is released as a waste product of pho
 cloze,mitochondria-energy,02,7,{{c1::Mitochondria}} are the organelles that produce most of a cell's energy.,,They were once free-living bacteria.
 cloze,atp-structure,02,8,{{c1::ATP}} is often called the energy currency of the cell because it carries usable energy.,,It is made of three phosphate groups.
 cloze,anaerobic,02,8,"{{c1::Anaerobic}} processes occur without oxygen, like fermentation in yeast.",,They release much less energy than aerobic respiration.
-cloze,genetics,03,8,{{c1::Genetics}} is the study of heredity and how traits are passed from parents to offspring.,,Gregor Mendel's pea plant experiments laid its foundation.
+cloze,cloze-genetics,03,8,{{c1::Genetics}} is the study of heredity and how traits are passed from parents to offspring.,,Gregor Mendel's pea plant experiments laid its foundation.
 cloze,dna-shape,03,8,DNA has a twisted ladder shape called a {{c1::double helix}}.,,Watson and Crick described it in 1953.
 cloze,meiosis-result,03,8,"Meiosis produces {{c1::four haploid gametes}}, each with half the original chromosome number.",,This halves the chromosome count before fertilization.
 cloze,homozygous-def,03,8,An organism is {{c1::homozygous}} for a trait when it carries two identical alleles for that gene.,,"For example, AA or aa are homozygous."
@@ -81,14 +81,14 @@ cloze,decomposer-role,04,7,{{c1::Decomposers}} break down dead matter and return
 cloze,producer-def,04,7,A {{c1::producer}} is an organism that makes its own food through photosynthesis and starts a food chain.,,Grass is a producer.
 cloze,food-chain-flow,04,7,Energy flows through a food chain from the {{c1::producer}} to consumers and finally to decomposers.,,Some energy is lost as heat at each step.
 cloze,adaptation-def,04,8,A {{c1::adaptation}} is a trait that helps an organism survive in its environment.,,"It can be structural, behavioral, or physiological."
-cloze,apex-predator,04,8,An {{c1::apex predator}} has no natural predators at the top of its food chain.,,Its population size influences the whole ecosystem.
+cloze,cloze-apex-predator,04,8,An {{c1::apex predator}} has no natural predators at the top of its food chain.,,Its population size influences the whole ecosystem.
 cloze,migration-def,04,8,{{c1::Migration}} is the seasonal movement of animals between different regions.,,Some whales migrate thousands of kilometers.
-cloze,periodic-table,05,8,The {{c1::periodic table}} arranges elements by atomic number and groups them by similar properties.,,It was organized by Dmitri Mendeleev.
+cloze,cloze-periodic-table,05,8,The {{c1::periodic table}} arranges elements by atomic number and groups them by similar properties.,,It was organized by Dmitri Mendeleev.
 cloze,proton-identity,05,8,The number of {{c1::protons}} in an atom's nucleus defines which element it is.,,Carbon always has 6 protons.
 cloze,electron-charge,05,7,{{c1::Electrons}} are negatively charged and orbit the nucleus in shells.,,They are transferred or shared to form bonds.
 cloze,isotope-def,05,8,Isotopes of an element have the same number of protons but different numbers of {{c1::neutrons}}.,,They have different masses.
-cloze,ionic-bond,06,8,"An {{c1::ionic bond}} forms when electrons are transferred between atoms, creating oppositely charged ions.",,It is typical in salts like table salt.
-cloze,covalent-bond,06,8,A {{c1::covalent bond}} forms when two atoms share a pair of electrons.,,Molecules like H2O are held by covalent bonds.
+cloze,cloze-ionic-bond,06,8,"An {{c1::ionic bond}} forms when electrons are transferred between atoms, creating oppositely charged ions.",,It is typical in salts like table salt.
+cloze,cloze-covalent-bond,06,8,A {{c1::covalent bond}} forms when two atoms share a pair of electrons.,,Molecules like H2O are held by covalent bonds.
 cloze,combustion-def,06,8,"{{c1::Combustion}} is a fast oxidation that releases heat and light, like a burning candle.",,"It needs fuel, oxygen, and heat to start."
 cloze,rusting-causes,06,8,{{c1::Rusting}} happens when iron reacts with oxygen and water over time.,,It weakens metal structures.
 cloze,ph-neutral,07,7,"A substance with a {{c1::pH}} of exactly 7 is neutral, like pure water.",,Lower pH means more acidic; higher means more basic.
@@ -97,8 +97,8 @@ cloze,neutralization-result,07,8,Neutralization of an acid and a base produces a
 type_in,mitosis,02,8,Type the term: cell division that produces two identical daughter cells.,mitosis,
 type_in,allele,03,8,Type the term: one of the alternative forms of a gene.,allele,
 type_in,enzyme,06,8,Type the term: a protein that speeds up a chemical reaction.,enzyme,
-type_in,catalyst,06,8,Type the term: a substance that speeds up a reaction without being consumed.,catalyst,
-type_in,oxidation,06,8,Type the term: a reaction in which a substance loses electrons.,oxidation,
+type_in,typein-catalyst,06,8,Type the term: a substance that speeds up a reaction without being consumed.,catalyst,
+type_in,typein-oxidation,06,8,Type the term: a reaction in which a substance loses electrons.,oxidation,
 type_in,friction,08,7,Type the term: the force that opposes sliding surfaces.,friction,
 type_in,inertia,08,8,Type the term: an object's resistance to changes in its motion.,inertia,
 type_in,momentum,08,8,Type the term: mass times velocity of a moving object.,momentum,

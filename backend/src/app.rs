@@ -112,20 +112,25 @@ impl Hooks for App {
             .add_route(controllers::management::sync::routes())
             .add_route(controllers::management::anki_ops::routes())
             .add_route(controllers::management::probe::routes())
+            .add_route(controllers::management::jev::routes())
             .add_route(controllers::management::tracks::routes())
             .add_route(controllers::management::track_profiles::routes())
             .add_route(controllers::management::capsule_sessions::routes())
             .add_route(controllers::management::classes::routes())
             .add_route(controllers::management::compliance::routes())
+            .add_route(controllers::management::leaderboard::routes())
             .add_route(controllers::management::profile_assignments::routes())
             .add_route(controllers::management::ask::routes())
             .add_route(controllers::management::producers::routes())
+            .add_route(controllers::management::teachers::routes())
+            .add_route(controllers::student::routes())
+            .add_route(controllers::display::routes())
             .add_route(controllers::locale::routes())
     }
 
     async fn after_routes(router: AxumRouter, ctx: &AppContext) -> Result<AxumRouter> {
         use axum::Router;
-        use axum::routing::get;
+        use axum::routing::{get, post};
         use crate::middleware::auth::require_auth_for_management;
 
         // CORS: allow the Management Console GUI loaded from file:// or local dev.
@@ -137,11 +142,19 @@ impl Hooks for App {
         // Re-register the dashboard on the (public) outer router. It was never
         // part of the `/api/v1` table, so it has no auth layer and stays public.
         let dashboard = router
+            // OpenAPI spec + Scalar API reference — public, self-documenting
+            // (docs/src/reference/openapi.md). The JSON endpoint is what the
+            // Scalar page and any external tooling consume.
+            .route("/api/v1/openapi.json", get(crate::openapi::openapi_json))
+            .route("/scalar", get(crate::openapi::scalar_ui))
             .route("/", get(controllers::dashboard::imp_console))
             .route("/health", get(controllers::dashboard::health))
             .route("/dashboard", get(controllers::dashboard::imp_console))
             .route("/dashboard/", get(controllers::dashboard::imp_console))
             .route("/imp-console", get(controllers::dashboard::imp_console))
+            // Display wall — public; the token in the path is the credential
+            // (spec §8.1). The page polls the public display API client-side.
+            .route("/b/:token", get(controllers::dashboard::imp_wall))
             .route("/dashboard/health", get(controllers::dashboard::health))
             .route("/dashboard/i18n.js", get(controllers::dashboard::i18n_js))
             .route("/dashboard/rtl.css", get(controllers::dashboard::rtl_css))
@@ -160,20 +173,40 @@ impl Hooks for App {
             .route("/dashboard/locales/hi.json", get(controllers::dashboard::locale_hi))
             .route("/dashboard/vendor/popper.min.js", get(controllers::dashboard::popper_js))
             .route("/dashboard/vendor/tippy.min.js", get(controllers::dashboard::tippy_js))
-            .route("/dashboard/vendor/driver.min.js", get(controllers::dashboard::driver_js));
+            .route("/dashboard/vendor/driver.min.js", get(controllers::dashboard::driver_js))
+            // Prong 8 — public first-login wizard (NOT auth-gated; the token in the
+            // path is the credential). Served before the require_auth_for_management layer.
+            //
+            // The two first-login *API* routes (`first-login-status` + `first-login`) are
+            // registered on the `first_login_api` sub-router below, also under the
+            // non-gated `/d/` prefix — NOT here, and NOT under `/api/v1/management/*`
+            // (that prefix is JWT-gated and the wizard holds no token yet).
+            .route("/d/:invite_id/:token", get(controllers::dashboard::first_login));
+
+        // The first-login handlers need `State<AppContext>` but the dashboard router is
+        // `Router<()>`, so we attach state to a nested sub-router. Their absolute `/d/...`
+        // paths land on the public (non-gated) branch of the outer router.
+        let first_login_api = Router::new()
+            .route(
+                "/d/teachers/first-login-status/:invite_id/:token",
+                get(controllers::management::teachers::first_login_status),
+            )
+            .route(
+                "/d/teachers/first-login/:invite_id/:token",
+                post(controllers::management::teachers::first_login),
+            )
+            .with_state(ctx.clone());
 
         // Gate `/api/v1/management/*` with the JWT middleware, applied as a
-        // `Router::layer` on the outer router. This is the pattern that works
-        // inside Loco's own middleware chain (a separate `Router::nest` does
-        // not). The middleware is path-scoped: it only enforces auth for the
-        // management prefix and lets everything else through, so the public
-        // `/api/v1/health`, `/api/v1/auth/*`, `/api/v1/telemetry/*` and the
-        // dashboard remain accessible without a token.
-        let gated = dashboard
+        // `Router::layer` on the outer router (the pattern that works inside Loco's
+        // chain). It is path-scoped: it only enforces JWT for the management prefix and
+        // lets everything else through — so the public dashboard, `/api/v1/health`,
+        // `/api/v1/auth/*`, `/api/v1/telemetry/*`, and the `/d/...` first-login routes
+        // stay accessible without a token.
+        Ok(dashboard
+            .nest("/", first_login_api)
             .layer(axum::middleware::from_fn(require_auth_for_management))
-            .layer(cors);
-
-        Ok(gated)
+            .layer(cors))
     }
 
     async fn connect_workers(_ctx: &AppContext, _queue: &Queue) -> Result<()> {

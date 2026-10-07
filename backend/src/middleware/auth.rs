@@ -108,12 +108,15 @@ pub async fn require_auth_for_management(
     mut req: Request,
     next: Next,
 ) -> Result<Response, std::convert::Infallible> {
-    let is_mgmt = req
-        .uri()
-        .path()
-        .starts_with("/api/v1/management")
-        || req.uri().path().starts_with("/management");
-    if !is_mgmt {
+    let p = req.uri().path();
+    // Gate both the staff console AND the student self-service surface.
+    // `/display/*` is intentionally NOT gated — the per-class display token is
+    // its own credential (spec §8.1).
+    let is_gated = p.starts_with("/api/v1/management")
+        || p.starts_with("/management")
+        || p.starts_with("/api/v1/student")
+        || p.starts_with("/student");
+    if !is_gated {
         // Public path — pass through without touching the auth header.
         return Ok(next.run(req).await);
     }

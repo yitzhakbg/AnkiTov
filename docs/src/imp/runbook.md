@@ -1,8 +1,3 @@
----
-type: note
-title: IMP Pipeline Runbook
----
-
 # IMP Pipeline Runbook
 
 _Operational guide for the Interleaved Mastery Pipeline (IMP)._

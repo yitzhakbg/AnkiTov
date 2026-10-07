@@ -9,6 +9,12 @@ logger:
   dir: ./logs
 
 server:
+  # Loco 0.11: `binding` is the TCP listen address (host part; port is
+  # appended automatically). Defaults to "localhost" (127.0.0.1) when omitted,
+  # which hides the server from anything that reaches it via a non-loopback
+  # address — e.g. Docker's published port forwards to the container's bridge
+  # IP, so a localhost-only bind yields an unreachable 502 at the edge.
+  binding: 0.0.0.0
   port: 5150
   host: 0.0.0.0
 

@@ -20,7 +20,7 @@ fn json_body(text: &str) -> Value {
 
 /// Mint a valid `teacher` JWT for the NL scenarios harness (management auth-gated).
 fn teacher_token() -> String {
-    backend::services::auth::encode_token(999, "teacher", "teacher-morris@example.edu", 86400)
+    backend::services::auth::encode_token(999, "teacher", "teacher-morris@school.edu", 86400)
         .expect("mint teacher token")
 }
 #[tokio::test]
@@ -129,6 +129,11 @@ async fn test_teacher_plain_language_scenarios() {
         let j5 = json_body(&resp5.text());
         assert_eq!(j5["intent"], "unknown");
         assert!(j5["summary"].as_str().unwrap().contains("I'm not sure"));
+        // Off-topic queries should still be helpful: offer concrete examples
+        // the assistant *can* answer, and never a bare "Sorry, I could not answer that."
+        assert!(j5["summary"].as_str().unwrap().contains("I'm best at"));
+        assert!(!j5["summary"].as_str().unwrap().contains("could not answer"));
     })
     .await;
 }
+

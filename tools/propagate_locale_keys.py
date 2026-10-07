@@ -112,6 +112,28 @@ NEW_KEYS = {
     "btn.generateNow": "Generate Now",
     "btn.refresh": "Refresh",
     "btn.dismiss": "Dismiss",
+
+    # ── Teacher Registration (Prong 8) ──
+    "sidebar.teachers": "Teachers",
+    "teachers.title": "Teacher Registration",
+    "teachers.create.name": "Full name",
+    "teachers.create.email": "Email (login)",
+    "teachers.create.school": "School / community",
+    "teachers.create.role": "Role or class",
+    "teachers.create.locale": "Language",
+    "teachers.create.submit": "Register teacher",
+    "teachers.create.ok": "Registered. Share this invite link:",
+    "teachers.create.dupeEmail": "A teacher with that email already exists",
+    "teachers.create.dupeName": "A teacher with that name already exists",
+    "teachers.copyLink": "Copy invite link",
+    "teachers.firstlogin.title": "Set your AnkiTov password",
+    "teachers.firstlogin.password": "New password",
+    "teachers.firstlogin.consent": "I confirm I am a teacher at {school} and consent to AnkiTov processing my teaching data.",
+    "teachers.firstlogin.submit": "Start using AnkiTov",
+    "teachers.firstlogin.policy": "At least 8 characters, include a digit",
+    "teachers.status.pending": "Awaiting first login",
+    "teachers.status.active": "Active",
+    "teachers.status.expired": "Invite expired",
 }
 
 def main():

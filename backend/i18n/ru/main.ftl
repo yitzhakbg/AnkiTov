@@ -41,20 +41,20 @@ notify-loading = Загрузка…
 
 # ── Audit log messages ──
 audit-capsule-generated = Учебная сессия создана для { $student }
-audit-n-value-changed = Значение-N изменено с { $old } на { $new } для { $target }
-audit-profile-assigned = План Практики "{ $profile }" назначен { $student }
-audit-profile-revoked = План Практики "{ $profile }" отозван у { $student }
+audit-n-value-changed = Значение N изменено с { $old } на { $new } для { $target }
+audit-profile-assigned = План практики "{ $profile }" назначен для { $student }
+audit-profile-revoked = План практики "{ $profile }" отменён для { $student }
 audit-class-created = Класс "{ $name }" создан
 audit-class-deleted = Класс "{ $name }" удалён
-audit-deck-uploaded = Колода "{ $name }" загружена ({ $size } байт)
-audit-deck-distributed = Колода "{ $name }" распространена на { $target_type } "{ $target }"
+audit-deck-uploaded = Колода "{ $name }" загружена({ $size } байт)
+audit-deck-distributed = Колода "{ $name }" распространена по { $target_type } "{ $target }"
 
 
 # ── Student Import from File ──
 import-file-title = Импорт учеников из файла
 import-file-description = Загрузите файл CSV, TSV или Excel со списками учеников
 import-file-dropzone = Перетащите файл сюда или нажмите для выбора
-import-file-accepted = Принимаемые форматы: CSV, TSV, Excel (.xlsx)
+import-file-accepted = Поддерживаемые форматы: CSV, TSV, Excel(.xlsx)
 import-file-class = Целевой класс
 import-file-submit = Импорт учеников
 import-file-success = { $count } учеников успешно импортировано

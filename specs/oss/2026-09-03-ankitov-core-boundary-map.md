@@ -1,9 +1,3 @@
----
-type: note
-title: AnkiTov `ankitov-core` OSS Boundary Map
-date: '2026-09-03'
----
-
 # AnkiTov `ankitov-core` OSS Boundary Map
 
 **Date:** 2026-09-03
@@ -51,6 +45,7 @@ calendar, video scripts, internal specs/knowledge, ops runbooks, student data, t
 | `specs/` | All specs OSS | **Curated subset only** (§2.2) | Most specs are internal reasoning/roadmap |
 | Seed deck license | `TBC-OWNER-DECISION` | **CC0-1.0** | Owner decision; `content/seed/manifest.json` must be updated |
 | Session Driver addon | OSS | OSS (unchanged) | no encryption/paywall inside |
+| Selkies streaming | KILL from mainline (key-decisions 2026-08-02) | **OSS at launch** (owner, 2026-10-01) | Ship streamed Anki so students install nothing; `stream/selkies-anki/` is exportable. Closed pillars (locked device, school web services, DRM) are unaffected |
 
 ### 2.2 EXPORT → `ankitov-core`
 
@@ -79,14 +74,27 @@ ankitov-core/
 ├── LICENSE                   # AGPL-3.0-only full text
 ├── content/seed/LICENSE      # CC0-1.0 full text (seed deck content)
 ├── TRADEMARKS.md             # §5 trademark note
-└── README.md                 # rewritten: self-host quickstart, disclaimer, no monorepo paths
+├── README.md                 # rewritten: self-host quickstart, disclaimer, no monorepo paths
+└── stream/selkies-anki/      # single-app Selkies+Anki container (AGPL-3.0-only)
+    ├── Dockerfile.anki-base  # upstream base (v2.0.0) + Qt/xcb libs + grim
+    ├── boot.py               # headless-safe Anki launch (skips first-run modal)
+    ├── launch_anki.sh        # canonical X11 launch command
+    ├── sitecustomize.py      # review-state watchdog
+    ├── svc/anki/run          # s6 service (backend-aware: X11 or Wayland)
+    ├── svc/labwc/rc.xml      # Wayland window rule (maximise Anki)
+    └── docker-compose.anki.yml, README.md
 ```
 
 **docs/ exclusion note:** export `overview.md`, `architecture.md` (system overview only),
 `contributing.md`, `development/*`, `imp/*`, `reference/*`, `custom.css`, `book.toml`,
 `SUMMARY.md` (pruned). **Do NOT export** `docs/src/architecture/strategic-blueprint.md`,
-`streaming-drm.md`, `clearing-house.md` (go-to-market/enterprise strategy → keep private),
+`clearing-house.md` (go-to-market/enterprise strategy → keep private),
 nor `docs/deployment.md`, `docs/ops/*` until owner reviews them.
+**Changed 2026-10-01:** `streaming-drm.md` and the `stream/` tree are **no longer**
+excluded — streamed single-app Anki ships in the open launch (§2.1, divergence row;
+`project-knowledge/key-decisions.md` 2026-10-01). Export `stream/selkies-anki/*`
+(container, launch glue, setup guide). Any *commercial* streaming/DRM strategy prose
+beyond the open pipe stays private and must not be copied into `stream/`.
 
 **Root-level questions flagged for owner (default = exclude):** `inject_db.py`,
 `seed_data.py`, `seed_users.py` (synthetic but PII-shaped — fake names/emails; if wanted
@@ -215,7 +223,7 @@ new, monorepo-side) that:
 
 Phase 0 — owner confirmations (blockers):
 - [ ] Confirm `tools/translate_ux_keys.py` export eligibility (check for embedded API endpoints/keys).
-- [ ] Confirm docs pruned-SUMMARY set (esp. exclusion of strategic-blueprint/streaming-drm/clearing-house).
+- [ ] Confirm docs pruned-SUMMARY set (strategic-blueprint/clearing-house excluded; **streaming now INCLUDED** — `streaming-drm.md` + `stream/` ship, see §2.1).
 - [ ] Confirm default-exclude of `seed_users.py`/`seed_data.py`/`inject_db.py`.
 - [ ] Confirm `specs/audits/*.txt` invariants may ship publicly.
 

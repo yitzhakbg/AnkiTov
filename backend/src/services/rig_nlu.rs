@@ -247,8 +247,17 @@ fn keyword_fallback(q: &str) -> NluIntent {
             || lower.contains("card") || lower.contains("module")
             || lower.contains("practice plan") || lower.contains("profile"));
 
+    // Deck / upload / distribution actions → "decks" (handled by the fallback,
+    // which routes the user to the Decks screen). Checked before the health
+    // words so "upload a deck" / "distribute the deck" don't get eaten by
+    // "status of" / "how are my decks".
+    let deck_action_words = ["upload", "distribut", "import", "add a deck", "new deck"];
+    let is_deck_action = deck_action_words.iter().any(|w| lower.contains(w));
+
     let intent = if is_count {
         "count_question"
+    } else if is_deck_action {
+        "decks"
     } else if trouble_words.iter().any(|w| lower.contains(w)) {
         "struggling_students"
     } else if missed_words.iter().any(|w| lower.contains(w)) {
