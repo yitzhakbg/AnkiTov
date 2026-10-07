@@ -19,6 +19,7 @@
 - [Tooling & Harness](development/tooling.md)
 - [Coding Standards](development/standards.md)
 - [HITL Gate Protocol](development/hitl-gate.md)
+- [Developing with Goose](development/goose.md)
 
 # Interleaved Mastery Pipeline
 
