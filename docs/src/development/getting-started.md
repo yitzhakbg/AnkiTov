@@ -11,7 +11,7 @@
 
 ```bash
 # Clone the repo
-git clone https://github.com/yitzhakbg/AnkiTov-C.git
+git clone https://github.com/yitzhakbg/AnkiTov.git
 cd AnkiTov
 
 # Check the backend
