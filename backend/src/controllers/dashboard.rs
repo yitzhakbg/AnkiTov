@@ -24,22 +24,6 @@ pub async fn imp_console() -> Result<Response> {
     Ok(resp)
 }
 
-/// Serves the public projector wall for a class display board.
-///
-/// The `<token>` embedded in the URL (e.g. `/b/<token>`) is the credential —
-/// this page performs **no authentication** and polls the public
-/// `GET /api/v1/display/class/<token>?format=wall` endpoint client-side
-/// (spec §8.1). 404 handling (unknown/rotated token) happens client-side so
-/// the wall can keep its last state and show a friendly screen.
-pub async fn imp_wall() -> Result<Response> {
-    let mut resp: Response = format::html(include_str!("../../resources/dashboard/imp-wall.html"))?;
-    resp.headers_mut().insert(
-        header::CACHE_CONTROL,
-        header::HeaderValue::from_static("no-store, no-cache, must-revalidate, max-age=0"),
-    );
-    Ok(resp)
-}
-
 /// Health check endpoint for the dashboard.
 pub async fn health() -> impl IntoResponse {
     (axum::http::StatusCode::OK, "OK")

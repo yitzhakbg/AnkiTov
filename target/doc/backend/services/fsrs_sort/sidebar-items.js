@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["FsrsSortError"],"fn":["compute_approximate_recall","fetch_and_sort"],"struct":["RankedCard","SortResult"],"type":["TrackTimeEstimates"]};

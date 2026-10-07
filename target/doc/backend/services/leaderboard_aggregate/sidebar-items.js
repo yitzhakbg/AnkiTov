@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Scope"],"fn":["aggregate_class_cohort","class_name","student_active_class"],"struct":["LeaderboardResponse"]};

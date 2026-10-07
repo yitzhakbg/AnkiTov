@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["ingest_card_answer","routes"],"struct":["CardAnswerRequest","IngestResponse","SessionProgress"]};

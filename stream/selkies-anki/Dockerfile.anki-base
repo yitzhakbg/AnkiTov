@@ -1,0 +1,13 @@
+# AnkiTov single-app stream image: upstream Selkies v2.0.0 base + Qt/xcb runtime
+# libs the base lacks + grim (Wayland screenshot for verification).
+# Pinned to upstream v2.0.0 (selkies-project/selkies, MPL-2.0).
+FROM ghcr.io/selkies-project/selkies/base:latest-ubuntu26.04
+USER root
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      libxcb-cursor0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 \
+      libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 \
+      libfontconfig1 fonts-dejavu-core \
+      grim \
+ && rm -rf /var/lib/apt/lists/*
+USER ubuntu

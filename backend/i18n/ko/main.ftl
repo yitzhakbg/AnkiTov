@@ -25,7 +25,7 @@ error-capsule-generation-failed = 학습 세세 생성 실패: { $reason }
 # ── 성공 ──
 success-created = { $entity }이(가) 성공적으로 생성되었습니다
 success-updated = { $entity }(이)가 성공적으로 업데이트되었습니다
-success-deleted = { $entity }이(가) 성공적으로 삭제되었습니다
+success-deleted = { $entity }이(가) 성공적으로 생성되었습니다
 success-enrolled = 학생이 성공적으로 등록되었습니다
 success-transferred = 학생이 성공적으로 전학 처리되었습니다
 success-capsule-generated = 학습 덱이 성공적으로 생성되었습니다

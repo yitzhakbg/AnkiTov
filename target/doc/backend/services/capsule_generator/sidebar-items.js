@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["GeneratorError"],"fn":["current_iso_week","generate_capsule","resolve_profile_for_student"],"struct":["GenerateRequest","GenerateResponse"]};

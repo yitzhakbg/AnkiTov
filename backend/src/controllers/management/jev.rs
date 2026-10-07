@@ -12,7 +12,7 @@
 //!
 //! See [`crate::services::jev_translator`] for the implementation.
 
-use axum::extract::{Extension, State};
+use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::Response as AxumResponse;
 use axum::Json;
@@ -20,7 +20,6 @@ use loco_rs::{app::AppContext, prelude::*};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::middleware::auth::{ensure_role, AuthUser};
 use crate::services::jev_translator::{self, JevRequest};
 
 const TAG: &str = "Jev Translator";
@@ -98,11 +97,9 @@ pub struct EvaluateRequest {
     tag = TAG
 )]
 async fn human_to_jev(
-    Extension(user): Extension<AuthUser>,
     _state: State<AppContext>,
     Json(req): Json<HumanToJevRequest>,
 ) -> Result<Json<HumanToJevResponse>> {
-    let _ = ensure_role(&user, &["admin"])?;
     let state = req.state.clone().unwrap_or(serde_json::Value::Null);
     let result = jev_translator::translate_human_to_jev(&req.prompt, &state).await;
     Ok(Json(HumanToJevResponse {
@@ -124,11 +121,9 @@ async fn human_to_jev(
     tag = TAG
 )]
 async fn jev_to_human(
-    Extension(user): Extension<AuthUser>,
     _state: State<AppContext>,
     Json(req): Json<JevToHumanRequest>,
 ) -> Result<Json<JevToHumanResponse>> {
-    let _ = ensure_role(&user, &["admin"])?;
     let summary = jev_translator::translate_jev_to_human(&req.request);
     Ok(Json(JevToHumanResponse { summary }))
 }
@@ -146,11 +141,9 @@ async fn jev_to_human(
     tag = TAG
 )]
 async fn evaluate(
-    Extension(user): Extension<AuthUser>,
     _state: State<AppContext>,
     Json(req): Json<EvaluateRequest>,
 ) -> Result<Json<serde_json::Value>> {
-    let _ = ensure_role(&user, &["admin"])?;
     let api_key = match std::env::var("TYPESAFE_API_KEY").or_else(|_| std::env::var("ANKITOV_TYPESAFE_API_KEY")) {
         Ok(k) => k,
         Err(_) => {

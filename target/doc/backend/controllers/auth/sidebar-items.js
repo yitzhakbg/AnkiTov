@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["change_password","login","logout","register","routes"],"struct":["AuthResponse","ChangePasswordRequest","ChangePasswordResponse","ErrorResponse","LoginRequest","LogoutResponse","RegisterRequest"]};

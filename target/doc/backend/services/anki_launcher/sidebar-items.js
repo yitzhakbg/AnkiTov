@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["LaunchResult"],"fn":["ensure_anki_running"]};

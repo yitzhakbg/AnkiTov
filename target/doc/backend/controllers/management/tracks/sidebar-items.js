@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["create_track","delete_track","get_track","list_tracks","routes","update_track"]};

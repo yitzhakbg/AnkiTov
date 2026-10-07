@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Function","PgFunction"],"struct":["Func","FuncArgMod","FunctionCall","PgFunc"]};

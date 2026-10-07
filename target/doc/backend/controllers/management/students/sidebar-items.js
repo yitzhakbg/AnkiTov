@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["bulk_enroll","create_profiles","import_file","populate_decks","routes","scan_playground"],"struct":["BulkEnrollRequest","CreateProfilesRequest","ImportError","ImportFileQuery","ImportFileResponse","ImportedStudent","PopulateDecksRequest","ScanQuery","StudentProfileEntry"]};

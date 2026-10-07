@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"constant":["DEFAULT_SYNC_USER_FILE"],"enum":["SyncUserError"],"fn":["base_profile_name","rewrite_sync_user_file","sync_user_file","unique_profile_name","upsert_sync_user"]};

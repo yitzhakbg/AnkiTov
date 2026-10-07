@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!--
+  AnkiTov session-compositor settings (labwc), bind-mounted over
+  /etc/xdg/labwc/rc.xml. Wayland backend only: Selkies' Smithay capture
+  compositor streams the root surface, and labwc nests inside it to provide
+  window management + XWayland. Anki is the only client, so it is forced
+  full-screen with a window rule instead of an external resize tool (there is
+  no xdotool/wmctrl under a Wayland session).
+-->
+<labwc_config>
+  <core>
+    <decoration>server</decoration>
+    <xwaylandPersistence>yes</xwaylandPersistence>
+  </core>
+  <theme>
+    <icon>breeze</icon>
+    <titlebar>
+      <layout>icon:iconify,max,close</layout>
+    </titlebar>
+  </theme>
+  <placement>
+    <policy>cascade</policy>
+  </placement>
+  <!-- Anki is the sole application: maximise it to fill the streamed surface.
+       Matched by app_id ("anki") and, as a fallback, by window title
+       ("<profile> - Anki"). -->
+  <windowRules>
+    <windowRule identifier="anki"><action name="Maximize" /></windowRule>
+    <windowRule identifier="org.ankiweb.anki"><action name="Maximize" /></windowRule>
+    <windowRule title="* - Anki"><action name="Maximize" /></windowRule>
+  </windowRules>
+</labwc_config>

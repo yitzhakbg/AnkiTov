@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"constant":["ENV_ANKI_PROVIDER","STUB_CARD_COUNT"],"enum":["MediaIntegrity","VerificationError"],"fn":["is_test_stub","verifier"],"struct":["AnkiVerifier","CardTypeCensus","DeckVerificationReport","StubVerifier"],"trait":["Verifier"]};

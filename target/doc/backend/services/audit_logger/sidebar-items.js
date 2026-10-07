@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["log_capsule_complete","log_capsule_generate","log_event","log_n_change","log_profile_assign","log_profile_revoke"]};

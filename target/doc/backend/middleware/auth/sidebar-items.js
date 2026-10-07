@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["ensure_role","get_auth_user","optional_auth","require_auth","require_auth_for_management"],"struct":["AuthUser"]};

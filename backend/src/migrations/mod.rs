@@ -36,9 +36,6 @@ pub use m20260903_add_deck_track_id::Migration as AddDeckTrackId;
 
 mod m20260923_create_teacher_invites;
 pub use m20260923_create_teacher_invites::Migration as CreateTeacherInvites;
-
-mod m20261006_create_class_display_boards;
-pub use m20261006_create_class_display_boards::Migration as CreateClassDisplayBoards;
 /// The Loco application migrator — lists all database migrations in time order.
 pub struct Migrator;
 #[async_trait::async_trait]
@@ -56,7 +53,6 @@ impl MigratorTrait for Migrator {
             Box::new(CreateProducerTables),
             Box::new(AddDeckTrackId),
             Box::new(CreateTeacherInvites),
-            Box::new(CreateClassDisplayBoards),
         ]
     }
 }

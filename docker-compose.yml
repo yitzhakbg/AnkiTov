@@ -5,14 +5,12 @@
 #   caddy        — Automatic HTTPS reverse proxy (:80, :443)
 #   backend      — Loco.rs API & Management Console server (:5150)
 #   sync-server  — Anki standalone sync server (:8080)
+#   libsql       — libSQL database engine (:8081)
 #
 # Volumes:
-#   caddy-data        — Persistent SSL/TLS certificates
-#   backend-data      — Loco.rs SQLite database
-#   backend-logs      — Loco.rs logs
-#   sync-data         — Anki sync server collections
-#   sync-user-config  — Shared sync-users.env (backend + sync-server)
-#   caddy-config      — Caddy runtime config
+#   caddy-data   — Persistent SSL/TLS certificates
+#   libsql-data  — Persistent database storage
+#   sync-data    — Anki sync server collections
 # ─────────────────────────────────────────────────────────────────
 
 services:

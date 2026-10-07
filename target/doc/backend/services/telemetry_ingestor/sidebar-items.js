@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["TelemetryError"],"fn":["ingest_batch","ingest_card_answer"],"struct":["CardAnswerEvent","TrackTelemetry"]};

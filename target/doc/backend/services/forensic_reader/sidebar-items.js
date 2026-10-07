@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["ForensicError"],"struct":["CollectionHealth","DeckSuitability","ForensicReader","GapEntry","GapReport","IntervalDegradation","LapseFrequency","PracticeAdherence","RetentionPoint","SporadicPractice","SuitabilityIndicators"]};

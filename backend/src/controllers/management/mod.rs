@@ -19,7 +19,6 @@ pub mod capsule_sessions;
 pub mod classes;
 pub mod compliance;
 pub mod decks;
-pub mod leaderboard;
 pub mod probe;
 pub mod producers;
 pub mod jev;
@@ -132,12 +131,6 @@ const TAG: &str = "Management Console";
         // Interleaved Mastery Pipeline — Compliance (Phase 4)
         compliance::weekly_compliance,
         compliance::student_compliance,
-        // Leaderboard (chunk 2 — spec 2026-10-06-leaderboard §8.3)
-        leaderboard::board,
-        leaderboard::classes,
-        leaderboard::student_drilldown,
-        leaderboard::display,
-        leaderboard::moderate_identity,
     ),
     components(
         schemas(
@@ -202,20 +195,6 @@ const TAG: &str = "Management Console";
             crate::controllers::management::producers::ProducerCatalogEntry,
             crate::controllers::management::producers::ProducerCatalogResponse,
             crate::controllers::management::producers::UploadProducerDeckResponse,
-            // Leaderboard (chunk 2 — spec 2026-10-06-leaderboard §8.5)
-            crate::services::leaderboard_aggregate::LeaderboardResponse,
-            crate::services::leaderboard_aggregate::Scope,
-            crate::services::leaderboard::Entry,
-            crate::services::leaderboard::Unranked,
-            crate::services::leaderboard::Identity,
-            crate::services::leaderboard::Inputs,
-            crate::controllers::management::leaderboard::BoardQuery,
-            crate::controllers::management::leaderboard::ClassRow,
-            crate::controllers::management::leaderboard::DrillQuery,
-            crate::controllers::management::leaderboard::DisplayMint,
-            crate::controllers::management::leaderboard::DisplayResult,
-            crate::controllers::management::leaderboard::IdentityModeration,
-            crate::controllers::management::leaderboard::ModerationResult,
             crate::services::deck_verification::CardTypeCensus,
             crate::services::deck_verification::MediaIntegrity,
             // Jev Prompt Translator

@@ -118,13 +118,10 @@ impl Hooks for App {
             .add_route(controllers::management::capsule_sessions::routes())
             .add_route(controllers::management::classes::routes())
             .add_route(controllers::management::compliance::routes())
-            .add_route(controllers::management::leaderboard::routes())
             .add_route(controllers::management::profile_assignments::routes())
             .add_route(controllers::management::ask::routes())
             .add_route(controllers::management::producers::routes())
             .add_route(controllers::management::teachers::routes())
-            .add_route(controllers::student::routes())
-            .add_route(controllers::display::routes())
             .add_route(controllers::locale::routes())
     }
 
@@ -142,19 +139,11 @@ impl Hooks for App {
         // Re-register the dashboard on the (public) outer router. It was never
         // part of the `/api/v1` table, so it has no auth layer and stays public.
         let dashboard = router
-            // OpenAPI spec + Scalar API reference — public, self-documenting
-            // (docs/src/reference/openapi.md). The JSON endpoint is what the
-            // Scalar page and any external tooling consume.
-            .route("/api/v1/openapi.json", get(crate::openapi::openapi_json))
-            .route("/scalar", get(crate::openapi::scalar_ui))
             .route("/", get(controllers::dashboard::imp_console))
             .route("/health", get(controllers::dashboard::health))
             .route("/dashboard", get(controllers::dashboard::imp_console))
             .route("/dashboard/", get(controllers::dashboard::imp_console))
             .route("/imp-console", get(controllers::dashboard::imp_console))
-            // Display wall — public; the token in the path is the credential
-            // (spec §8.1). The page polls the public display API client-side.
-            .route("/b/:token", get(controllers::dashboard::imp_wall))
             .route("/dashboard/health", get(controllers::dashboard::health))
             .route("/dashboard/i18n.js", get(controllers::dashboard::i18n_js))
             .route("/dashboard/rtl.css", get(controllers::dashboard::rtl_css))

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["board","classes","display","moderate_identity","routes","student_drilldown"],"struct":["BoardQuery","ClassRow","DisplayMint","DisplayResult","DrillQuery","IdentityModeration","ModerationResult"]};

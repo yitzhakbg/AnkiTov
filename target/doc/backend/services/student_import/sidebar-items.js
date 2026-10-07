@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["detect_format","generate_template","parse_text_file","validate_rows"],"struct":["ImportResult","RawRow","RowError","ValidatedRow"]};

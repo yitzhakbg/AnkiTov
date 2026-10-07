@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["display_class_board","routes"],"struct":["DisplayQuery"]};

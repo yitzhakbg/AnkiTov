@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Metric","Window"],"fn":["rank","score","score_display"],"struct":["Board","Entry","Identity","Inputs","PointsWeights","StudentAggregate","Unranked"]};

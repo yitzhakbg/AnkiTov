@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"constant":["DEV_SECRET"],"fn":["decode_token","encode_token","hash_password","is_default_secret","verify_password"],"struct":["Claims"]};

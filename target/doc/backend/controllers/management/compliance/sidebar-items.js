@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["list_students","routes","student_compliance","weekly_compliance"],"struct":["ComplianceQuery","StudentComplianceRecord","StudentSearchQuery"]};

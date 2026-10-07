@@ -46,12 +46,6 @@ pub mod anki_launcher;
 pub mod forensic_reader;
 pub mod deck_health;
 
-// Leaderboard — shared scoring rule for the class display, student view, and
-// staff console (`specs/2026-10-06-leaderboard.md`).
-pub mod leaderboard;
-// Leaderboard — DB-backed aggregation (capsule_sessions + class_enrollments).
-pub mod leaderboard_aggregate;
-
 // Interleaved Mastery Pipeline — Phase 3 (Capsule Generation Engine)
 pub mod capsule_slicer;
 pub mod fsrs_sort;

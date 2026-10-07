@@ -1,0 +1,31 @@
+# AnkiTov single-app Selkies stream — one Anki installed on the host, mounted
+# read-only; the container maps it in and runs nothing else.
+#   build:       docker compose -f docker-compose.anki.yml build
+#   run:         docker compose -f docker-compose.anki.yml up -d
+#   url:         https://<host>:8091   (user ubuntu / PASSWD, self-signed)
+services:
+  anki-stream:
+    build:
+      context: .
+      dockerfile: Dockerfile.anki-base
+    image: ankitov-anki-base:1
+    container_name: anki-stream
+    restart: unless-stopped
+    shm_size: 2g
+    ports:
+      - "8091:8080"
+    environment:
+      PASSWD: ${PASSWD:?set PASSWD}                 # web login password (user: ubuntu)
+      SELKIES_MODE: websockets
+      SELKIES_ENABLE_HTTPS: "true"
+      SELKIES_WAYLAND: "true"         # Wayland capture compositor + nested labwc
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /home/ybg/ankitov/anki-linux:/opt/anki:ro                  # the ONE Anki
+      - ./Anki2:/home/ubuntu/.local/share/Anki2                    # profile + decks
+      - ./:/stream                                                 # boot.py etc.
+      - ./svc/anki:/etc/service/anki                               # Anki s6 service
+      - ./svc/labwc:/etc/xdg/labwc:ro                              # labwc window rules

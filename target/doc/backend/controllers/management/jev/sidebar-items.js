@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["routes"],"struct":["EvaluateRequest","HumanToJevRequest","HumanToJevResponse","JevToHumanRequest","JevToHumanResponse"]};
