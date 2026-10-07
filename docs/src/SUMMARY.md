@@ -6,11 +6,6 @@
 
 ---
 
-# Architecture
-
-- [5-Layer System Isolation](architecture/system-isolation.md)
-- [Streaming & DRM](architecture/streaming-drm.md)
-
 # Development
 
 - [Getting Started](development/getting-started.md)

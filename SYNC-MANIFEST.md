@@ -1,7 +1,7 @@
 # SYNC-MANIFEST
 
-- monorepo ref: qxkyrqpzouor
-- exported at: 2026-10-07T11:41:59Z
+- monorepo ref: qrqltntlvxrt
+- exported at: 2026-10-07T12:11:19Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
@@ -186,10 +186,8 @@ bdb4bc9f33b431f367ef4a890611ecbe842db34eb81662cd80672179ae0ac8e7  content/seed/s
 5350cbe2885c31c99c619528eaf61ad2420005bb08b8f39f1f81130ed6db7de6  content/seed/tools/import_check.sh
 e50b02757f6736230d78fe831faede6a0508348e36fe9b57960d016cdbbfa8a0  docker-compose.yml
 a1c1b1cd95626a7696511800a32b3a10f60d3e968e05034c5da3ea0c4dfc781d  docs/book.toml
-31d08d1346cfd5f2c2d1d8a75fd42b15db24a21ca4f07a29f403ca8c8dc73392  docs/src/SUMMARY.md
+4abd18ca14563fb766d8a01b44d688e214f4ab8ae7748b6087944613e99a2d91  docs/src/SUMMARY.md
 d0a924d4150a9ac7a361e4160e9e253fd69ca5fb3af715cdf0f9679472b0f6e5  docs/src/architecture.md
-ebe2c5f34a2e9a53cb518943088bc7b71b280bf68eb1cdb187f238f85457e14a  docs/src/architecture/streaming-drm.md
-929557e1241f731bef261c6fff4d52d3ff460bbaf24342c76821d64b7187bb16  docs/src/architecture/system-isolation.md
 f5eb3039ab11a540ad85967378667642bf6839f26fea05f2e7c53a534c4964e5  docs/src/contributing.md
 e9c065cc0d1408c4aa1c0fb358df562e926788a7f26a7b0962f83e77d7ba7d00  docs/src/custom.css
 ff5664dd5c9e3f93fdf7f2ab48fdcd842c91a24304cb8589d625c5cf8049c93d  docs/src/development/getting-started.md
