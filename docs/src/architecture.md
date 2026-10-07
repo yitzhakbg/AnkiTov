@@ -1,3 +1,8 @@
+---
+type: note
+title: AnkiTov Architecture
+---
+
 # AnkiTov Architecture
 
 ## Two-Tier Ecosystem

@@ -1,3 +1,8 @@
+---
+type: note
+title: Track Library & Profiles
+---
+
 # Track Library & Profiles
 
 ## Track Entity

@@ -1,3 +1,8 @@
+---
+type: note
+title: Summary
+---
+
 # Summary
 
 [Overview](overview.md)
@@ -6,12 +11,6 @@
 
 ---
 
-# Architecture
-
-- [Strategic Blueprint](architecture/strategic-blueprint.md)
-- [5-Layer System Isolation](architecture/system-isolation.md)
-- [Streaming & DRM](architecture/streaming-drm.md)
-- [Clearing House Model](architecture/clearing-house.md)
 
 # Development
 

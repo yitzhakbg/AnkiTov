@@ -1,3 +1,8 @@
+---
+type: note
+title: Contributing to AnkiTov
+---
+
 # Contributing to AnkiTov
 
 ## Quick Start

@@ -1,3 +1,8 @@
+---
+type: note
+title: Capsule (Study Session) Generation
+---
+
 # Capsule (Study Session) Generation
 
 Capsules are generated server-side by the Management Console backend and tracked per-student.

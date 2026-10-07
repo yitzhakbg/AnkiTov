@@ -1,3 +1,8 @@
+---
+type: note
+title: OpenAPI Specification
+---
+
 # OpenAPI Specification
 
 The backend generates an OpenAPI 3.0 spec automatically from `#[utoipa::path]` annotations on every controller route.

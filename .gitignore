@@ -1,2 +1,6 @@
 target/
 .ankitov-core-export-marker
+.gbrain-owner.json
+.gbrain-source
+__pycache__/
+docs/book/

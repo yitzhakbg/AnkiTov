@@ -1,3 +1,8 @@
+---
+type: note
+title: Rust Code Documentation
+---
+
 # Rust Code Documentation
 
 The AnkiTov backend is thoroughly documented with Rust doc comments (`///` and `//!`).

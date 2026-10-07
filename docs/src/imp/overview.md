@@ -1,3 +1,8 @@
+---
+type: note
+title: Interleaved Mastery Pipeline — Design Overview
+---
+
 # Interleaved Mastery Pipeline — Design Overview
 
 The Interleaved Mastery Pipeline is the foundational requirement for Prong 1 (Management Console). Every student receives a single, server-side generated **Remediation Capsule** composed of dynamically mixed prerequisite tracks from a centralized track library.

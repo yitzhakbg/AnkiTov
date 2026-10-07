@@ -1,3 +1,8 @@
+---
+type: note
+title: Model Appraisal Logs
+---
+
 # Model Appraisal Logs
 
 This page distinguishes models used by Goose from AI features that may run in
