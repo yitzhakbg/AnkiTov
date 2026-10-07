@@ -27,7 +27,7 @@ The current development focus. Every student receives a single server-side
 - **N-Lever:** global control, per-cohort override
 - **Compliance:** sessions completed / N per student per week
 
-Full spec: [`specs/oss/2026-09-03-ankitov-core-boundary-map.md`](specs/oss/2026-09-03-ankitov-core-boundary-map.md)
+Full spec: [`specs/oss/2026-09-03-ankitov-core-boundary-map.md`](https://github.com/yitzhakbg/AnkiTov/blob/main/specs/oss/2026-09-03-ankitov-core-boundary-map.md)
 
 ## Key Architectural Decisions
 
