@@ -1,7 +1,7 @@
 # SYNC-MANIFEST
 
-- monorepo ref: vpnoxrolzlyn
-- exported at: 2026-10-07T15:26:51Z
+- monorepo ref: 6ed44747
+- exported at: 2026-10-12T14:38:54Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
@@ -185,7 +185,7 @@ bdb4bc9f33b431f367ef4a890611ecbe842db34eb81662cd80672179ae0ac8e7  content/seed/s
 42898a575acb5b70ba9376c1adcb749d2734ec3b0d20e9e21e1148e49bcbfc81  content/seed/tools/gen_he_csv.py
 5350cbe2885c31c99c619528eaf61ad2420005bb08b8f39f1f81130ed6db7de6  content/seed/tools/import_check.sh
 e50b02757f6736230d78fe831faede6a0508348e36fe9b57960d016cdbbfa8a0  docker-compose.yml
-a1c1b1cd95626a7696511800a32b3a10f60d3e968e05034c5da3ea0c4dfc781d  docs/book.toml
+fc3295667b37e4afb164d73d56baf14750dba7b39646e7c6f18ae9c147254caa  docs/book.toml
 cd857a4b274fa106dc0503a9863ba65d2af634dbc227fca764c66529daa36468  docs/src/SUMMARY.md
 3ddc31b995e25a484c9bad5394c5cf0a96581ef15fdb0138bdbea8bcea97351e  docs/src/architecture.md
 f5eb3039ab11a540ad85967378667642bf6839f26fea05f2e7c53a534c4964e5  docs/src/contributing.md

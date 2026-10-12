@@ -2,7 +2,7 @@
 title = "AnkiTov Documentation"
 authors = ["AnkiTov Team"]
 language = "en"
-description = "Internal architecture documentation for the AnkiTov platform"
+description = "Documentation for the AnkiTov platform — user manual, architecture, development guide, and IMP reference"
 
 [output.html]
 no-section-label = true
