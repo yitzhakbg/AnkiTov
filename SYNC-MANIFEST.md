@@ -1,7 +1,7 @@
 # SYNC-MANIFEST
 
-- monorepo ref: 6ed44747
-- exported at: 2026-10-12T14:38:54Z
+- monorepo ref: d1864290
+- exported at: 2026-10-12T15:15:41Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
@@ -120,7 +120,7 @@ cd51af3f5456f067630f9ac53e3c9f523971705369ac8f6b20d4aabb6bd810ef  backend/src/mo
 8ac58bd9fc22ef03d914775be9485ca515d05b46d361b76babde93dbd667723c  backend/src/models/management.rs
 3f3e725132c80e04a66a9721fc08e0219d37167c94ce0636132eb279bee186f1  backend/src/models/mod.rs
 4692558c311c544b1afee7dd559f4f1ab2b852159ff0b800693978b72eebb35d  backend/src/models/retention.rs
-9000bbabc656f65e57548e6a81729dbda1e96411984b5f17a59b9979ad5fc569  backend/src/openapi.rs
+ea6e3cd4a68cc34ca24690c8b07f9a4c76cb23ce8b5bf18560e055d6e1d20f2e  backend/src/openapi.rs
 a7407ba3dcb6a656777308fa5b418b02b877f74ecf03341a88bd1ab3c69df80d  backend/src/server/mod.rs
 773268cd8dfee37a29f3b9e6878518df855c88132ec7646a3224f154e7c2e2af  backend/src/server/telemetry.rs
 78397ce5526064a93a111ffefd382b3c76456da956d2e06854ca7cbe7cdb8962  backend/src/server/telemetry_gateway.rs

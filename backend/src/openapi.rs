@@ -30,16 +30,10 @@ use crate::controllers;
         controllers::locale::get_locale_info,
         controllers::locale::list_locales,
         controllers::locale::set_locale,
-        controllers::student::leaderboard::my_board,
-        controllers::student::leaderboard::my_stats,
-        controllers::student::leaderboard::patch_identity,
-        controllers::display::leaderboard::display_class_board,
     ),
     tags(
         (name = "Auth", description = "Registration, login, and session teardown"),
         (name = "Locale", description = "i18n data served to the frontend"),
-        (name = "Student", description = "JWT-gated, self-scoped student endpoints"),
-        (name = "Display", description = "Public classroom display wall (token in the path is the credential)"),
     )
 )]
 pub struct PublicOpenApi;
@@ -108,8 +102,6 @@ mod tests {
             "/api/v1/auth/logout",
             "/api/v1/locale",
             "/api/v1/locale/set",
-            "/api/v1/student/leaderboard",
-            "/api/v1/display/class/{token}",
         ] {
             assert!(
                 paths.contains_key(expected),
