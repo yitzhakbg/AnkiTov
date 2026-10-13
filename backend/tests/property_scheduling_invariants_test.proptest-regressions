@@ -1,0 +1,12 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 33a2e264296e0ba4897b9accf39381a39a4c627574c3a777be3a2f647f715cb7 # shrinks to pool = 2, n = 1, hard_cap = 1, duration = 1, per_card = 0.5, tracks = 2
+cc fd8c9619637734ac085d3398b96c98acfc651546a6991134fe7a099af490de4e # shrinks to cards = [(3994, "alpha", 0, 0, 0, 0), (3994, "alpha", 0, 0, 0, 0)]
+cc 518fe32fa64a9fbf5301a2be8c49b40792b892f2f9b45ce1c2d824799dff053c # shrinks to cards = [(4899, "alpha", 0, 0, 0, 0), (4899, "alpha", 0, 0, 0, 0)]
+cc 0e3ed1e8fd00c6101c4e3a436a6c77b62ede0e138ccb00333634f6b05e879e90 # shrinks to cards = [(7541, "alpha", 0, 0, 0, 0), (7541, "alpha", 0, 0, 0, 0)]
+cc fb163d0b843b7dcc08da86b6dff8b5a1a1816a336d4b5af0283886e383e7da25 # shrinks to cards = [(7042, "alpha", 0, 0, 0, 0), (7042, "alpha", 0, 0, 0, 0)]
+cc f2c5a4726857eda10bc25bd1e22e2765073d10a9d771588a21b5e87c1d558e86 # shrinks to cards = [(1000, "alpha", 31, 1, 0, 0), (1001, "alpha", 0, 1, 0, 0)]

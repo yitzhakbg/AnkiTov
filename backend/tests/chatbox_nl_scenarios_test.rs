@@ -95,6 +95,20 @@ async fn test_teacher_plain_language_scenarios() {
         assert_eq!(j2["intent"], "retention_drop");
         assert_eq!(j2["rows"].as_array().unwrap().len(), 4);
 
+        // Scenario 2b: the exact harness probe phrasing (scripts/harness2/run.py
+        // run_ask). Regression pin: bare "practice" in keyword_fallback's
+        // missed_words used to hijack this into missed_practice before
+        // drop_words was checked (found 2026-10-13 when the double-harness gate
+        // first ran with ANKITOV_NLU_PROVIDER=test).
+        let resp2b = server
+            .post("/api/v1/management/ask")
+            .add_header("Authorization", format!("Bearer {}", teacher_token()))
+            .json(&json!({"query": "has practice dropped off recently?"}))
+            .await;
+        assert_eq!(resp2b.status_code(), 200);
+        let j2b = json_body(&resp2b.text());
+        assert_eq!(j2b["intent"], "retention_drop");
+
         // Scenario 3: Teacher asks who hasn't practiced
         let resp3 = server
             .post("/api/v1/management/ask")

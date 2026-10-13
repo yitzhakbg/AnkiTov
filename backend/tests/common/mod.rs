@@ -418,7 +418,7 @@ pub fn playground_path() -> Option<PathBuf> {
     }
     // Fallback: relative to the AnkiTov workspace root
     let candidates = [
-        PathBuf::from("/Volumes/YBG1TB4Mac/AnkiTov/AnkiPlayGround"),
+        PathBuf::from("/Volumes/YBG1TB4Mac/AnkiTov-C/AnkiPlayGround"),
     ];
     for p in &candidates {
         if p.is_dir() {
@@ -514,5 +514,235 @@ mod harness_tests {
     fn test_temp_profile_nonexistent() {
         let result = TempAnkiProfile::from_playground("NonExistentProfile12345");
         assert!(result.is_err());
+    }
+}
+
+// ---------------------------------------------------------------------------
+// T-114 scenario-matrix fixtures — real playground collections (2026-10-13)
+// ---------------------------------------------------------------------------
+
+/// Classification of a playground collection by review-history shape.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ProfileClass {
+    /// Substantial revlog history (>= 1000 reviews).
+    Active,
+    /// Barely-used collection (< 100 reviews; fresh seed or `h2-*` clone).
+    Fresh,
+}
+
+/// Aggregate stats pulled straight from a collection's SQLite tables.
+#[derive(Debug, Clone, Copy)]
+pub struct CollectionStats {
+    pub cards: i64,
+    pub notes: i64,
+    pub decks: i64,
+    pub revlog_entries: i64,
+    /// Percentage of revlog rows with `ease >= 2` (ease 1 = lapse).
+    pub correct_pct: f64,
+    pub review_days: i64,
+}
+
+/// A WAL-checkpointed copy of a playground collection, safe for
+/// `immutable=1` readers (`ForensicReader`, `fetch_and_sort`).
+pub struct CollectionSnapshot {
+    dir: tempfile::TempDir,
+}
+
+impl CollectionSnapshot {
+    /// Path of the snapshot's `collection.anki2`.
+    pub fn anki2_path(&self) -> PathBuf {
+        self.dir.path().join("collection.anki2")
+    }
+}
+
+/// Copy a profile's `collection.anki2` (+ WAL sidecar) into a temp dir and
+/// checkpoint the WAL into the main file.
+///
+/// `ForensicReader` and `fetch_and_sort` open with `immutable=1`, which
+/// ignores `-wal` sidecars — without the checkpoint the snapshot would
+/// silently miss every review Anki has not yet checkpointed.
+pub fn snapshot_collection(profile_dir: &Path) -> Result<CollectionSnapshot, String> {
+    let src = profile_dir.join("collection.anki2");
+    if !src.exists() {
+        return Err(format!("no collection.anki2 in {}", profile_dir.display()));
+    }
+    let dir = tempfile::TempDir::new().map_err(|e| format!("tempdir: {e}"))?;
+    std::fs::copy(&src, dir.path().join("collection.anki2"))
+        .map_err(|e| format!("copy collection: {e}"))?;
+
+    let wal = profile_dir.join("collection.anki2-wal");
+    if wal.exists() {
+        std::fs::copy(&wal, dir.path().join("collection.anki2-wal"))
+            .map_err(|e| format!("copy wal: {e}"))?;
+        let conn = rusqlite::Connection::open(dir.path().join("collection.anki2"))
+            .map_err(|e| format!("open snapshot for checkpoint: {e}"))?;
+        conn.execute_batch("PRAGMA wal_checkpoint(TRUNCATE);")
+            .map_err(|e| format!("wal checkpoint: {e}"))?;
+    }
+    Ok(CollectionSnapshot { dir })
+}
+
+/// Aggregate stats for a (checkpointed) collection snapshot.
+pub fn collection_stats(anki2_path: &Path) -> Result<CollectionStats, String> {
+    let conn = rusqlite::Connection::open_with_flags(
+        anki2_path,
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY
+            | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX
+            | rusqlite::OpenFlags::SQLITE_OPEN_URI,
+    )
+    .map_err(|e| format!("open {}: {e}", anki2_path.display()))?;
+
+    conn.query_row(
+        "SELECT
+            (SELECT COUNT(*) FROM cards),
+            (SELECT COUNT(*) FROM notes),
+            (SELECT COUNT(DISTINCT did) FROM cards),
+            (SELECT COUNT(*) FROM revlog),
+            (SELECT COALESCE(ROUND(100.0*SUM(CASE WHEN ease>=2 THEN 1 ELSE 0 END)/COUNT(*),1),0)
+               FROM revlog),
+            (SELECT COUNT(DISTINCT CAST(id/86400000 AS INT)) FROM revlog)",
+        [],
+        |row| {
+            Ok(CollectionStats {
+                cards: row.get(0)?,
+                notes: row.get(1)?,
+                decks: row.get(2)?,
+                revlog_entries: row.get(3)?,
+                correct_pct: row.get(4)?,
+                review_days: row.get(5)?,
+            })
+        },
+    )
+    .map_err(|e| format!("stats query {}: {e}", anki2_path.display()))
+}
+
+/// Snapshot a collection and compute its stats in one step.
+pub fn collection_snapshot_and_stats(
+    profile_dir: &Path,
+) -> Result<(CollectionSnapshot, CollectionStats), String> {
+    let snapshot = snapshot_collection(profile_dir)?;
+    let stats = collection_stats(&snapshot.anki2_path())?;
+    Ok((snapshot, stats))
+}
+
+/// Classify a collection by review-history volume.
+pub fn classify(stats: CollectionStats) -> ProfileClass {
+    if stats.revlog_entries >= 1000 {
+        ProfileClass::Active
+    } else {
+        ProfileClass::Fresh
+    }
+}
+
+/// Deck names from the modern `decks` table, in id order.
+pub fn deck_names(anki2_path: &Path) -> Result<Vec<String>, String> {
+    let conn = rusqlite::Connection::open_with_flags(
+        anki2_path,
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY
+            | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX
+            | rusqlite::OpenFlags::SQLITE_OPEN_URI,
+    )
+    .map_err(|e| format!("open {}: {e}", anki2_path.display()))?;
+    let mut stmt = conn
+        .prepare("SELECT name FROM decks ORDER BY id")
+        .map_err(|e| format!("decks query: {e}"))?;
+    let rows = stmt
+        .query_map([], |row| row.get::<_, String>(0))
+        .map_err(|e| format!("decks map: {e}"))?;
+    Ok(rows.filter_map(|r| r.ok()).collect())
+}
+
+/// Distinct track tags appearing in `notes.tags` (whitespace-separated
+/// tokens), sorted. Empty when the collection carries no tags.
+pub fn note_tags(anki2_path: &Path) -> Result<Vec<String>, String> {
+    let conn = rusqlite::Connection::open_with_flags(
+        anki2_path,
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY
+            | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX
+            | rusqlite::OpenFlags::SQLITE_OPEN_URI,
+    )
+    .map_err(|e| format!("open {}: {e}", anki2_path.display()))?;
+    let mut stmt = conn
+        .prepare("SELECT DISTINCT tags FROM notes WHERE tags IS NOT NULL AND tags != ''")
+        .map_err(|e| format!("tags query: {e}"))?;
+    let rows = stmt
+        .query_map([], |row| row.get::<_, String>(0))
+        .map_err(|e| format!("tags map: {e}"))?;
+    let mut tags: Vec<String> = Vec::new();
+    for row in rows {
+        let tags_str = row.map_err(|e| format!("tags row: {e}"))?;
+        for token in tags_str.split_whitespace() {
+            if !tags.iter().any(|t| t == token) {
+                tags.push(token.to_string());
+            }
+        }
+    }
+    tags.sort();
+    Ok(tags)
+}
+
+/// Sample `(overdue_days, ivl)` pairs from review-state cards (`type=2`),
+/// mirroring `fetch_and_sort`'s day arithmetic against `col.crt`.
+pub fn sample_recall_pairs(
+    anki2_path: &Path,
+    max_pairs: usize,
+) -> Result<Vec<(i32, i64)>, String> {
+    let conn = rusqlite::Connection::open_with_flags(
+        anki2_path,
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY
+            | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX
+            | rusqlite::OpenFlags::SQLITE_OPEN_URI,
+    )
+    .map_err(|e| format!("open {}: {e}", anki2_path.display()))?;
+
+    let crt: i64 = conn
+        .query_row("SELECT crt FROM col LIMIT 1", [], |row| row.get(0))
+        .map_err(|e| format!("col.crt: {e}"))?;
+    let now_secs = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_err(|e| format!("clock: {e}"))?
+        .as_secs() as i64;
+    let today_day = (now_secs - crt) / 86400;
+
+    let mut stmt = conn
+        .prepare(
+            "SELECT due, ivl FROM cards WHERE type = 2 AND queue >= 0 \
+             ORDER BY id LIMIT ?1",
+        )
+        .map_err(|e| format!("cards query: {e}"))?;
+    let rows = stmt
+        .query_map([max_pairs as i64], |row| {
+            Ok((row.get::<_, i64>(0)?, row.get::<_, i64>(1)?))
+        })
+        .map_err(|e| format!("cards map: {e}"))?;
+
+    let mut pairs = Vec::new();
+    for row in rows {
+        let (due_day, ivl) = row.map_err(|e| format!("card row: {e}"))?;
+        let overdue = (today_day - due_day) as i32;
+        pairs.push((overdue, ivl));
+    }
+    Ok(pairs)
+}
+
+#[cfg(test)]
+mod scenario_fixture_tests {
+    use super::*;
+
+    #[test]
+    fn snapshot_checkpoints_wal() {
+        let base = playground_path().expect("playground must exist for fixture tests");
+        let profile = base.join("Maya Chen");
+        if !profile.is_dir() {
+            return; // playground layout changed; census test will flag it
+        }
+        let snap = snapshot_collection(&profile).expect("snapshot");
+        let stats = collection_stats(&snap.anki2_path()).expect("stats");
+        assert!(
+            stats.revlog_entries >= 1000,
+            "WAL checkpoint lost data: Maya Chen must keep its full revlog \
+             (census: ~7132 entries), got {}",
+            stats.revlog_entries
+        );
     }
 }

@@ -232,7 +232,12 @@ fn keyword_fallback(q: &str) -> NluIntent {
     let drop_words = ["dropped off", "fell off", "decline", "decreased", "getting worse", "worse over", "past two weeks", "past week", "lately"];
     let health_words = ["deck health", "how are my decks", "decks doing", "overall health", "status of"];
     let exception_words = ["exceptions", "problems", "alerts", "warnings", "flagged"];
-    let missed_words = ["miss", "practice", "haven't studied", "not studied", "studied", "absent", "consecutive", "haven't practiced", "not practiced", "lazy"];
+    // NOTE: no bare "practice" here — it would hijack trend questions like
+    // "has practice dropped off recently?" into missed_practice before the
+    // drop_words check ever ran (surfaced 2026-10-13 when the double-harness
+    // gate first ran with ANKITOV_NLU_PROVIDER=test). Absence phrasings carry
+    // their own markers ("miss", "hasn't practiced", "consecutive", ...).
+    let missed_words = ["miss", "haven't studied", "not studied", "studied", "absent", "consecutive", "haven't practiced", "not practiced", "hasn't practiced", "lazy"];
 
     // Count/enumeration questions: "how many X are there?", "total number of X",
     // "number of X", "how many X do I have?". Must be checked BEFORE the
