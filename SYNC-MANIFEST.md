@@ -1,7 +1,7 @@
 # SYNC-MANIFEST
 
 - monorepo ref: unknown (ANKITOV_MONOREPO_REF not set)
-- exported at: 2026-10-13T13:18:04Z
+- exported at: 2026-10-14T14:38:34Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
@@ -14,7 +14,7 @@ e867dffc8aad3c6bb086eeba391ac7b38db0c1cbd8d406dd007add1586a7e6bf  Dockerfile.bac
 a9c3bdfc2af6ee0ab3f633721a2f36c944829882d1c8dfe2faeed08d3661dee1  README.md
 dc960a4c4b78d06b60be888c7a738545787d43b48c74622371729bcc346f6368  TRADEMARKS.md
 398113b8b2496eca626f87824fb237da24a75c59c5980f771115a29ce7b3aa5d  backend/Cargo.lock
-0cd406a56c8b998ce541b007a36c5a648d76bf2ae6145bf49140f1e45e3c88fd  backend/Cargo.toml
+8e50282bb54f3e2e13236200974883e912b9de58d5fdd57e3af5a3e37d1f7d81  backend/Cargo.toml
 cbed09a629432790965975b123bfcb3367821dc49dec96c9712e0b39dd580f65  backend/config/development.yaml
 44abe64f434c6b94848706b5d2ed60c24486fd36ae5dad6177490f5063e4d992  backend/config/production.yaml
 2a53336d26f850aa724dd5840ad4821172638f2ad8b1c4f4f19f21e6b11e7596  backend/config/test.yaml
@@ -152,6 +152,8 @@ ff4fc8d5295c0918639a02e2edc1f43e09fb446cc659f6e274702c97d1dfef94  backend/tests/
 76d5e5aaa3085e2536d7112e74bde90452ad216d872792d47c967625592e0cef  backend/tests/common/mod.rs
 b7085da95d307846747d33b91166c1d74106f4a87163777841a81724a7f59141  backend/tests/dashboard_test.rs
 75ebb2a0422f57df425a323862c3d5c964a58392171a629b127093903facd57f  backend/tests/endpoint_coverage_test.rs
+60a7327766f591ce9e85d607d5435136707cfd1814a1afec28e0bac8e4fdf463  backend/tests/fsrs_rs_alloc_test.rs
+6d91bf4d7a6c704ddc43114806d9d89243cd350f2331c507bda14a5f3da5727c  backend/tests/fsrs_rs_gate_test.rs
 236ef825e0c834bbcf0168784430b6afa9377ff198ef6b99738ac024c270a688  backend/tests/harness_auth_test.rs
 c8418b94f23f67e5b8a98f40f986bba269416846489800101113296dbb0b81d6  backend/tests/harness_eval.rs
 7e76a02f8e32af2506688f4972f39201c63cf3956e5a1bf33a99ae0b1adc61c7  backend/tests/http_surface_gap_test.rs

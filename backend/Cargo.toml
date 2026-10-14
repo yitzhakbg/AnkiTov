@@ -64,3 +64,7 @@ proptest = "1.11"
 # Pinned to the exact version fluent-templates 0.9 already resolves, so the
 # .ftl parse test in src/i18n.rs shares one parser instead of adding a second.
 fluent-syntax = "0.11.1"
+# T-116 fsrs-rs adoption gate (specs/tasks.md): correctness + zero-alloc tests
+# for the reference FSRS implementation. Dev-only — production scheduling still
+# uses services/fsrs_sort.rs until the swap lands.
+fsrs = "6.6"
