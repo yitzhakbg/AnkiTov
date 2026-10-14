@@ -1,0 +1,292 @@
+# AnkiTov Phase-1 release pipeline (T-123): native per-OS artifacts + checksums
+# + GitHub Release. This is the machine behind the "download → run" promise:
+# every artifact is built, smoke-gated (boot cold → GET / 200 → register 200),
+# checksummed, and attached to the Release the download page links to.
+#
+# ── WHERE THIS RUNS ─────────────────────────────────────────────────────────
+# The PUBLIC MIRROR (yitzhakbg/AnkiTov) only. The private repo's Actions minutes
+# are exhausted until 2026-11-01 (every private workflow is `if: false`-paused),
+# while public repos get free standard-runner minutes. Every job therefore
+# guards on `github.repository == 'yitzhakbg/AnkiTov'` — a tag pushed on the
+# private repo is a no-op instead of a quota burn. Flow: merge to main → mirror
+# the commit → push the v* tag on the mirror.
+#
+# ── ARTIFACT MATRIX ─────────────────────────────────────────────────────────
+#   macOS   aarch64 + x86_64  → .dmg (AnkiTov.app, ad-hoc signed)   [macos-14]
+#   Windows x86_64            → .zip (backend.exe + launcher)       [windows-2022]
+#   Linux   x86_64            → .deb + .AppImage + .tar.gz          [ubuntu-24.04, musl static]
+#   Linux   aarch64           → .deb + .tar.gz                      [ubuntu-24.04-arm, musl static]
+#
+# Linux builds are static musl (the stack is rustls-only — no OpenSSL), so the
+# binaries have NO glibc floor and run on any distro; that is why the runner
+# release does not constrain compatibility.
+#
+# AppImage is x86_64-only because appimagetool is x86_64-only upstream; aarch64
+# ships .deb + .tar.gz instead (noted on the download page).
+#
+# macOS x86_64 runtime smoke runs under Rosetta when the runner has it; if not,
+# the build gate + the ub3090-style canary cover that arch (warning emitted).
+#
+# Phase 1 ships the backend only; the Anki sync-server is a documented optional
+# add-on (official Anki binary + --syncserver, verified in
+# OUTBOX/t123-packaging/syncserver-standalone-verification.md).
+
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version for artifact naming (dispatch = build + smoke only, no Release publish)'
+        required: false
+        default: '0.0.0-dispatch'
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Shared steps are inlined per job (no composite action yet — three jobs,
+  # three shapes; extract when a fourth appears).
+  # ---------------------------------------------------------------------------
+  build-macos:
+    if: github.repository == 'yitzhakbg/AnkiTov'
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: aarch64
+            target: aarch64-apple-darwin
+          - arch: x86_64
+            target: x86_64-apple-darwin
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Resolve version
+        id: ver
+        shell: bash
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build backend
+        run: cargo build --release -p backend --target ${{ matrix.target }}
+
+      - name: Smoke the binary (boot cold + GET / + register)
+        shell: bash
+        run: |
+          if [ "${{ matrix.arch }}" = "aarch64" ] || arch -x86_64 /usr/bin/true 2>/dev/null; then
+            bash packaging/smoke.sh "target/${{ matrix.target }}/release/backend"
+          else
+            echo "::warning::Rosetta unavailable on runner — x86_64 runtime smoke skipped (build gate + canary cover it)"
+          fi
+
+      - name: Assemble .app + .dmg
+        run: |
+          bash packaging/assemble.sh macos \
+            --arch ${{ matrix.arch }} \
+            --version "${{ steps.ver.outputs.version }}" \
+            --backend "target/${{ matrix.target }}/release/backend" \
+            --out dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.arch }}
+          path: dist/ankitov-*
+          if-no-files-found: error
+
+  build-windows:
+    if: github.repository == 'yitzhakbg/AnkiTov'
+    permissions:
+      contents: read
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Resolve version
+        id: ver
+        shell: bash
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build backend
+        run: cargo build --release -p backend
+
+      - name: Smoke the binary (boot cold + GET / + register)
+        shell: pwsh
+        run: ./packaging/smoke.ps1 -BinPath target/release/backend.exe
+
+      - name: Assemble .zip
+        shell: bash
+        run: |
+          bash packaging/assemble.sh windows \
+            --arch x86_64 \
+            --version "${{ steps.ver.outputs.version }}" \
+            --backend target/release/backend.exe \
+            --out dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x86_64
+          path: dist/ankitov-*
+          if-no-files-found: error
+
+  build-linux-x86_64:
+    if: github.repository == 'yitzhakbg/AnkiTov'
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install musl toolchain
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-musl
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: x86_64-unknown-linux-musl
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build backend (static musl)
+        run: cargo build --release -p backend --target x86_64-unknown-linux-musl
+
+      - name: Smoke the binary (boot cold + GET / + register)
+        run: bash packaging/smoke.sh target/x86_64-unknown-linux-musl/release/backend
+
+      - name: Install appimagetool (best effort — .AppImage is skipped if this fails)
+        run: |
+          wget -q -O /usr/local/bin/appimagetool \
+            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage \
+            && chmod +x /usr/local/bin/appimagetool \
+            || echo "::warning::appimagetool download failed — shipping .deb + .tar.gz only"
+
+      - name: Assemble .deb + .AppImage + .tar.gz
+        run: |
+          bash packaging/assemble.sh linux \
+            --arch x86_64 \
+            --version "${{ steps.ver.outputs.version }}" \
+            --backend target/x86_64-unknown-linux-musl/release/backend \
+            --out dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-x86_64
+          path: dist/ankitov-*
+          if-no-files-found: error
+
+  build-linux-aarch64:
+    if: github.repository == 'yitzhakbg/AnkiTov'
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install musl toolchain
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-unknown-linux-musl
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: aarch64-unknown-linux-musl
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build backend (static musl)
+        run: cargo build --release -p backend --target aarch64-unknown-linux-musl
+
+      - name: Smoke the binary (boot cold + GET / + register)
+        run: bash packaging/smoke.sh target/aarch64-unknown-linux-musl/release/backend
+
+      - name: Assemble .deb + .tar.gz
+        run: |
+          bash packaging/assemble.sh linux \
+            --arch aarch64 \
+            --version "${{ steps.ver.outputs.version }}" \
+            --backend target/aarch64-unknown-linux-musl/release/backend \
+            --out dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-aarch64
+          path: dist/ankitov-*
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Publish: checksums over the built artifacts (never hand-written) + Release.
+  # Only runs for tag pushes; workflow_dispatch is a build+smoke rehearsal.
+  # ---------------------------------------------------------------------------
+  release:
+    if: github.event_name == 'push' && github.repository == 'yitzhakbg/AnkiTov'
+    needs: [build-macos, build-windows, build-linux-x86_64, build-linux-aarch64]
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum ankitov-* | tee sha256sums.txt
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --title "AnkiTov $GITHUB_REF_NAME" \
+            --generate-notes
