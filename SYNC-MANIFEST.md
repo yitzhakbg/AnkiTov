@@ -1,12 +1,13 @@
 # SYNC-MANIFEST
 
 - monorepo ref: unknown (ANKITOV_MONOREPO_REF not set)
-- exported at: 2026-10-14T16:16:30Z
+- exported at: 2026-10-14T19:13:53Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
 ## sha256 checksums
 ```
+e2024017dc3f768cab20d93e27e4259f30ee9a62f443f985d0252793dd826339  .github/workflows/release.yml
 ada47362899add07df543de3051b80e6d9532fca7131b7fe5701fb754aa65ee2  Caddyfile
 e2c43209506ad84d8f2b561c3e9eb7d726eaa5408544d0f158cd7b6ea827663e  Cargo.toml
 e867dffc8aad3c6bb086eeba391ac7b38db0c1cbd8d406dd007add1586a7e6bf  Dockerfile.backend
@@ -215,6 +216,14 @@ b943b28d784bcb974a8cdced5e4973f89fef0b3d6d6c79938c1506251a83f9fc  docs/src/refer
 1d7bac45a7b3af6b1a67e4a116ffcebb554a48f0479838498d19d2ac39ec1fd1  docs/src/reference/model-appraisal.md
 1942fb490dccc7d2f5c3ba60192c27c5b2115d138c621ef7841e5dd580d11d34  docs/src/reference/openapi.md
 b6df84512a635d73d72cae6d059b9749041009b16a55d1b938741105ee697ffb  docs/src/reference/rustdoc.md
+126f9a724287f6c66c0495346f6f6ffb13d8699cec7394ce11785948296a1f20  packaging/README.md
+b5b8979a82c3792edde457eb6c0f0116a595a82aac4ed5991139c73963a5eede  packaging/assemble.sh
+d3bf04e3137850271fe817d40fee76392882a1680be511c12eb5ef39b88f0125  packaging/launch/ankitov-launch.sh
+7ad1fde9340586863737133486c59b786fadb0692948dcab0d7842521567c4cf  packaging/launch/start-ankitov.bat
+5280a42f23c24bb7f5a355814732333c202839042c3cc320b4d5be97b57ad3b4  packaging/linux/ankitov.desktop
+8bbb687d6e1c8ab55366324ac2ebc1bf10883241cd5bb8f05f1d5bdfabc62794  packaging/macos/Info.plist
+5afe3a7c4df36ed4d8cf3b0e4c0eefff39e22c31f1867b3d2f89a4e8801b365a  packaging/smoke.ps1
+009401fd5d15b3022b1e80913fdb3a1a9676cabcb70f5c139e19a934ba03cc26  packaging/smoke.sh
 728bd68c0c469729a8b3b02ddb415d3c9e608e9f89e1fb96b4aca5b7b03d8c1f  rust-toolchain.toml
 cccddeb6f31dcafbedff89ade53bd4b87fd77b10fe70d51efc05929e617ce762  session-driver/__init__.py
 30e29bc59c9b8e31488ddc00bd72be2d62d70d35e9176f234649d47bdcb82d3b  session-driver/cleanup.py
