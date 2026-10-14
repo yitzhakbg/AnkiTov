@@ -1,0 +1,15 @@
+# Build artifacts
+**/target/
+
+# T-123 packaging: local assemble output (CI builds into dist/ too)
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets / credentials
+.env
+.env.local
+*.pem
+*.key

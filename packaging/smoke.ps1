@@ -12,6 +12,11 @@ param(
 $ErrorActionPreference = 'Stop'
 if (-not (Test-Path $BinPath)) { throw "smoke: binary not found: $BinPath" }
 
+# Absolutize BEFORE any Push-Location: relative -BinPath/-ConfigPath must resolve
+# against the invocation CWD (repo root), not the smoke temp dir we cd into below.
+$BinPath = (Resolve-Path $BinPath).Path
+if ($ConfigPath) { $ConfigPath = (Resolve-Path $ConfigPath).Path }
+
 # Loco resolves config/ relative to CWD; stage it into the smoke dir. Default
 # lookup: next to the binary, then the repo layout (backend/config/).
 if (-not $ConfigPath) {
