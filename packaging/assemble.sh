@@ -162,6 +162,8 @@ EOF
     rm -rf "$APPDIR"
   elif [ "$ARCH" != "x86_64" ]; then
     note "no .AppImage for $ARCH (appimagetool is x86_64-only upstream); tarball covers it"
+  else
+    note "appimagetool not found on PATH; skipping .AppImage (tarball still produced)"
   fi
 
   # --- .tar.gz fallback (always) ---

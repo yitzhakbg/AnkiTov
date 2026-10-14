@@ -36,9 +36,15 @@ Push-Location $tmp
 $prevSecret = $env:ANKITOV_JWT_SECRET
 $prevPort = $env:ANKITOV_PORT
 $prevDb = $env:DATABASE_URL
+$prevDataDir = $env:ANKITOV_DATA_DIR
 $env:ANKITOV_JWT_SECRET = "smoke-" + [guid]::NewGuid().ToString('N')
 $env:ANKITOV_PORT = "$Port"
+# Isolation: DB resolves against $tmp (Push-Location above); data dir
+# pinned inside $tmp so no test residue can reach the user's default
+# data dir.
 $env:DATABASE_URL = "sqlite://smoke.db?mode=rwc"
+$env:ANKITOV_DATA_DIR = Join-Path $tmp 'data'
+New-Item -ItemType Directory -Path $env:ANKITOV_DATA_DIR | Out-Null
 
 $p = $null
 try {
@@ -73,4 +79,5 @@ try {
   $env:ANKITOV_JWT_SECRET = $prevSecret
   $env:ANKITOV_PORT = $prevPort
   $env:DATABASE_URL = $prevDb
+  $env:ANKITOV_DATA_DIR = $prevDataDir
 }

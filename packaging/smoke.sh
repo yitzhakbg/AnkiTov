@@ -36,11 +36,17 @@ cleanup() {
 trap cleanup EXIT
 
 SECRET="smoke-$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')"
+# Isolation: absolute DB URL + data dir pinned inside $TMP so no test
+# residue can reach the user's default data dir regardless of CWD or
+# backend data-dir defaults.
+DB_URL="sqlite://$TMP/smoke.db?mode=rwc"
+ANKITOV_DATA_DIR="$TMP/data"
+mkdir -p "$ANKITOV_DATA_DIR"
 cd "$TMP"
 mkdir -p config
 cp "$CONFIG" config/production.yaml
 ANKITOV_JWT_SECRET="$SECRET" ANKITOV_PORT="$PORT" \
-DATABASE_URL="sqlite://smoke.db?mode=rwc" \
+DATABASE_URL="$DB_URL" ANKITOV_DATA_DIR="$ANKITOV_DATA_DIR" \
   "$BIN" start -e production > server.log 2>&1 &
 PID=$!
 
