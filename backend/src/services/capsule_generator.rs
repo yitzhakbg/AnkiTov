@@ -249,8 +249,25 @@ pub async fn generate_capsule(
     let track_tags: Vec<String> = tracks.iter().map(|t| t.tag.clone()).collect();
 
     // ── Step 3: Query & sort due cards via FSRS ──────────────────────
+    // T-116 fsrs-rs production swap: fsrs-rs retrievability with persisted
+    // memory states is the default scheduler; the in-house half-life model
+    // remains available as the rollback path (ANKITOV_SCHEDULER=in-house).
     let anki2_path = Path::new(&request.anki2_path);
-    let sort_result = fsrs_sort::fetch_and_sort(anki2_path, &track_tags, 30)?;
+    let sort_result = match fsrs_sort::scheduler_mode() {
+        fsrs_sort::SchedulerMode::FsrsRs => {
+            fsrs_sort::fetch_and_sort_cached(
+                db,
+                &request.student_id,
+                anki2_path,
+                &track_tags,
+                30,
+            )
+            .await?
+        }
+        fsrs_sort::SchedulerMode::InHouse => {
+            fsrs_sort::fetch_and_sort(anki2_path, &track_tags, 30)?
+        }
+    };
 
     if sort_result.ranked.is_empty() {
         return Err(GeneratorError::NoDueCards);

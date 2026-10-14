@@ -27,6 +27,11 @@ async-trait = "0.1"
 sea-orm = { version = "1.0", features = ["runtime-tokio-rustls", "sqlx-sqlite", "macros"] }
 sea-orm-migration = "1.0"
 rusqlite = { version = "0.32", features = ["bundled", "backup"] }
+# T-116 fsrs-rs production swap: fsrs-rs is the production scheduler
+# (services/fsrs_state.rs derivation + services/fsrs_sort.rs ranking);
+# services/fsrs_sort.rs's in-house model remains as the ANKITOV_SCHEDULER
+# rollback path and the property-suite anchor.
+fsrs = "6.6"
 reqwest = { version = "0.12", features = ["json"] }
 thiserror = "1.0"
 fluent-templates = "0.9"
@@ -65,6 +70,5 @@ proptest = "1.11"
 # .ftl parse test in src/i18n.rs shares one parser instead of adding a second.
 fluent-syntax = "0.11.1"
 # T-116 fsrs-rs adoption gate (specs/tasks.md): correctness + zero-alloc tests
-# for the reference FSRS implementation. Dev-only — production scheduling still
-# uses services/fsrs_sort.rs until the swap lands.
+# for the reference FSRS implementation.
 fsrs = "6.6"

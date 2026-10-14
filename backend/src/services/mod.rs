@@ -49,6 +49,7 @@ pub mod deck_health;
 // Interleaved Mastery Pipeline — Phase 3 (Capsule Generation Engine)
 pub mod capsule_slicer;
 pub mod fsrs_sort;
+pub mod fsrs_state;
 pub mod capsule_generator;
 pub mod capsule_delivery;
 pub mod capsule_generator_job;

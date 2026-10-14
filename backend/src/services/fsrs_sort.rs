@@ -1,14 +1,28 @@
 //! FSRS Card Sort — retrieve due cards from Anki SQLite and rank by urgency.
 //!
 //! Opens the `.anki2` database read-only (immutable mode) to query overdue
-//! review and learning cards filtered by note tags. Computes an approximate
-//! probability-of-recall (retrievability) for each card using the interval
-//! and overdue duration, then sorts **most urgent first** (lowest R).
+//! review and learning cards filtered by note tags, then sorts **most urgent
+//! first** (lowest recall probability). Also queries `revlog.time` to compute
+//! per-track average seconds-per-card for the capsule slicer's time-bound
+//! calculation.
 //!
-//! Also queries `revlog.time` to compute per-track average seconds-per-card
-//! for the capsule slicer's time-bound calculation.
+//! ## Two schedulers (T-116 fsrs-rs production swap)
 //!
-//! ## Approximate Recall Model
+//! * **fsrs-rs** (production default) — ranks by FSRS-6 retrievability
+//!   `R = current_retrievability(MemoryState, elapsed_days)` with memory
+//!   states derived and persisted by [`super::fsrs_state`] (cache-aside,
+//!   keyed by `(student_id, card_id)`). Entry point:
+//!   [`fetch_and_sort_cached`].
+//! * **in-house** (rollback + property-suite anchor) — the original
+//!   half-life decay model, unchanged. Entry point: [`fetch_and_sort`].
+//!   Selected at runtime with `ANKITOV_SCHEDULER=in-house`.
+//!
+//! Both paths share the same pipeline (due-filter → per-card recall →
+//! urgency sort → per-track time estimates); only the recall function
+//! differs. New cards are scored with the same sentinel recall under both
+//! schedulers, so new-card ordering is identical.
+//!
+//! ## In-house Approximate Recall Model (fallback)
 //!
 //! For relative ordering (not exact FSRS prediction):
 //!
@@ -20,17 +34,21 @@
 //!
 //! This half-life decay model yields correct **relative** ordering:
 //! cards further past due with shorter intervals are most urgent.
-//! Exact FSRS state parsing from `cards.data` JSON is a v2 enhancement.
 
 use std::collections::HashMap;
 use std::path::Path;
 
 use rusqlite::{Connection, OpenFlags};
+use sea_orm::DatabaseConnection;
+
+use crate::services::fsrs_state::{self, DerivedState};
 
 // ---------------------------------------------------------------------------
 // Error types
 // ---------------------------------------------------------------------------
 
+/// Errors from the scheduling pipeline: `.anki2` access, query failures,
+/// missing collection metadata, and memory-state derivation/persistence.
 #[derive(Debug, thiserror::Error)]
 pub enum FsrsSortError {
     #[error("cannot open {0}: {1}")]
@@ -41,6 +59,9 @@ pub enum FsrsSortError {
 
     #[error("no collection creation time found")]
     NoCollectionCrt,
+
+    #[error("memory-state derivation/persistence failed: {0}")]
+    State(#[from] fsrs_state::FsrsStateError),
 }
 
 // ---------------------------------------------------------------------------
@@ -75,12 +96,83 @@ pub struct SortResult {
 /// Per-track time estimates from revlog history.
 pub type TrackTimeEstimates = HashMap<String, f64>;
 
+/// Per-card facts extracted from the `.anki2` cards/notes join, shared by
+/// both recall functions.
+#[derive(Debug, Clone)]
+pub(crate) struct CardFacts {
+    pub card_id: i64,
+    pub note_id: i64,
+    pub note_tags: String,
+    /// Current interval in days (review cards); not a day count for
+    /// learning cards.
+    pub ivl: i64,
+    /// Anki card type: 0 = new, 1 = learning, 2 = review.
+    pub card_type: i64,
+    /// Due marker: day number (review), Unix seconds (learning), 0 (new).
+    pub due: i64,
+    /// SM-2 ease factor in permille (Anki default 2500; 0 for new cards).
+    pub factor: i64,
+}
+
+/// Snapshot clock context for recall computation.
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct RecallCtx {
+    /// Unix seconds at query time.
+    pub now_secs: i64,
+    /// Days since collection creation (`col.crt`).
+    pub today_day: i64,
+    /// Collection creation timestamp (Unix seconds).
+    pub crt: i64,
+}
+
+/// Recall assigned to new cards (type 0). Matches the in-house model's
+/// not-yet-due tier so new-card ordering is identical under both schedulers.
+pub(crate) const NEW_CARD_SENTINEL_RECALL: f64 = 0.95;
+
+/// Recall function: maps a card's facts + snapshot clock to a probability of
+/// recall (0.0–1.0, lower = more urgent).
+type RecallFn<'a> = &'a dyn Fn(&CardFacts, &RecallCtx) -> f64;
+
 // ---------------------------------------------------------------------------
-// Public API
+// Scheduler selection
+// ---------------------------------------------------------------------------
+
+/// Which recall model the production path uses.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SchedulerMode {
+    /// fsrs-rs FSRS-6 retrievability with persisted memory states (default).
+    FsrsRs,
+    /// In-house half-life model (rollback path).
+    InHouse,
+}
+
+/// Read the scheduler selection from `ANKITOV_SCHEDULER`.
+///
+/// * `in-house` / `in_house` / `legacy` → [`SchedulerMode::InHouse`]
+/// * unset, empty, or any other value → [`SchedulerMode::FsrsRs`] (default)
+///
+/// Unknown values fall back to the default rather than erroring: a config
+/// typo must not take scheduling down, and the rollback switch only needs
+/// its explicit spellings to work.
+pub fn scheduler_mode() -> SchedulerMode {
+    match std::env::var("ANKITOV_SCHEDULER").as_deref() {
+        Ok("in-house") | Ok("in_house") | Ok("legacy") => SchedulerMode::InHouse,
+        _ => SchedulerMode::FsrsRs,
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Public API — in-house scheduler (rollback + property-suite anchor)
 // ---------------------------------------------------------------------------
 
 /// Open the `.anki2` file and retrieve all due cards matching the given
-/// tags, sorted by FSRS urgency (lowest approximate recall first).
+/// tags, sorted by urgency (lowest approximate recall first), using the
+/// **in-house** half-life recall model.
+///
+/// This is the rollback path (`ANKITOV_SCHEDULER=in-house`) and the anchor
+/// for the property suites (`property_scheduling_invariants_test`,
+/// `property_fsrs_sort_test`, `profile_scenario_matrix_test`), which pin its
+/// pipeline semantics. Production uses [`fetch_and_sort_cached`].
 ///
 /// # Arguments
 /// * `anki2_path` — Path to the `.anki2` collection file.
@@ -100,6 +192,131 @@ pub fn fetch_and_sort(
         });
     }
 
+    let (conn, ctx) = open_collection(anki2_path)?;
+    let cards = query_due_cards(&conn, tags, ctx)?;
+    let avg_seconds = compute_avg_time_per_card(&conn, tags, lookback_days)
+        .unwrap_or(crate::services::capsule_slicer::COLD_START_SECONDS_PER_CARD);
+    let recall = |facts: &CardFacts, ctx: &RecallCtx| in_house_recall(facts, ctx);
+    rank_and_sort(cards, ctx, tags, avg_seconds, &recall)
+}
+
+// ---------------------------------------------------------------------------
+// Public API — fsrs-rs scheduler (production)
+// ---------------------------------------------------------------------------
+
+/// Rank due cards with the **fsrs-rs** FSRS-6 retrievability model over an
+/// already-open snapshot, using the provided memory states.
+///
+/// Cards missing from `states` fall back to the in-house recall (defensive —
+/// [`fetch_and_sort_cached`] guarantees complete coverage for non-new cards).
+/// New cards (type 0) are scored with the new-card sentinel, matching the
+/// in-house tier.
+///
+/// Testable without a database: pass an empty map to exercise the fallback
+/// paths, or inject synthetic states to exercise the retrievability path.
+pub fn fetch_and_sort_fsrs(
+    conn: &Connection,
+    tags: &[String],
+    lookback_days: u32,
+    states: &HashMap<i64, DerivedState>,
+) -> Result<SortResult, FsrsSortError> {
+    if tags.is_empty() {
+        return Ok(SortResult {
+            ranked: Vec::new(),
+            track_counts: HashMap::new(),
+            avg_seconds_per_card: crate::services::capsule_slicer::COLD_START_SECONDS_PER_CARD,
+        });
+    }
+
+    let ctx = snapshot_ctx(conn)?;
+    let cards = query_due_cards(conn, tags, ctx)?;
+    let avg_seconds = compute_avg_time_per_card(conn, tags, lookback_days)
+        .unwrap_or(crate::services::capsule_slicer::COLD_START_SECONDS_PER_CARD);
+    let recall = |facts: &CardFacts, ctx: &RecallCtx| fsrs_recall(facts, ctx, states);
+    rank_and_sort(cards, ctx, tags, avg_seconds, &recall)
+}
+
+/// Production entry point: fsrs-rs ranking with cache-aside memory-state
+/// persistence.
+///
+/// Opens the snapshot read-only, resolves memory states for every due
+/// non-new card via [`fsrs_state::ensure_states`] (persisted rows when
+/// fresh, derivation + upsert otherwise), then ranks by FSRS-6
+/// retrievability. The in-house pipeline semantics (due-filter, tag
+/// matching, urgency sort, tie-breaks, per-track time estimates) are
+/// identical to [`fetch_and_sort`].
+///
+/// # Arguments
+/// * `db` — Backend database handle (`fsrs_memory_states` table).
+/// * `student_id` — Owning student (`users.id`); states are scoped
+///   per-student because shared decks reuse the same Anki card ids.
+/// * `anki2_path` — Path to the `.anki2` collection file.
+/// * `tags` — Track tags to filter cards by.
+/// * `lookback_days` — Revlog lookback for per-card timing estimates.
+pub async fn fetch_and_sort_cached(
+    db: &DatabaseConnection,
+    student_id: &str,
+    anki2_path: impl AsRef<Path>,
+    tags: &[String],
+    lookback_days: u32,
+) -> Result<SortResult, FsrsSortError> {
+    if tags.is_empty() {
+        return Ok(SortResult {
+            ranked: Vec::new(),
+            track_counts: HashMap::new(),
+            avg_seconds_per_card: crate::services::capsule_slicer::COLD_START_SECONDS_PER_CARD,
+        });
+    }
+
+    // ── Sync phase: every snapshot touch happens inside this block so the
+    //    rusqlite connection is never held across an `.await` (rusqlite is
+    //    !Sync; the generation future must stay Send for tokio::spawn).
+    let prepared = {
+        let (conn, ctx) = open_collection(anki2_path)?;
+        let cards = query_due_cards(&conn, tags, ctx)?;
+        // New cards are sentinel-scored; only learning/review cards need
+        // states.
+        let state_ids: Vec<i64> = cards
+            .iter()
+            .filter(|c| c.card_type != 0)
+            .map(|c| c.card_id)
+            .collect();
+        let snapshot = fsrs_state::extract_snapshot(&conn, &state_ids)?;
+        let avg_seconds = compute_avg_time_per_card(&conn, tags, lookback_days)
+            .unwrap_or(crate::services::capsule_slicer::COLD_START_SECONDS_PER_CARD);
+        PreparedSort {
+            cards,
+            ctx,
+            snapshot,
+            avg_seconds,
+        }
+    }; // connection dropped here
+
+    // ── Async phase: backend DB only (cache-aside state resolution).
+    let states = fsrs_state::ensure_states(db, student_id, &prepared.snapshot).await?;
+
+    // ── Sync phase: pure ranking + sort.
+    let recall = |facts: &CardFacts, ctx: &RecallCtx| fsrs_recall(facts, ctx, &states);
+    rank_and_sort(prepared.cards, prepared.ctx, tags, prepared.avg_seconds, &recall)
+}
+
+/// Everything extracted from the snapshot before the async phase.
+struct PreparedSort {
+    cards: Vec<CardFacts>,
+    ctx: RecallCtx,
+    snapshot: fsrs_state::SnapshotData,
+    avg_seconds: f64,
+}
+
+// ---------------------------------------------------------------------------
+// Pipeline internals (shared by both schedulers)
+// ---------------------------------------------------------------------------
+
+/// Open the `.anki2` collection read-only (immutable mode) and read the
+/// snapshot clock context.
+fn open_collection(
+    anki2_path: impl AsRef<Path>,
+) -> Result<(Connection, RecallCtx), FsrsSortError> {
     let path_str = anki2_path.as_ref().display().to_string();
     let uri = format!("file:{}?immutable=1", path_str);
     let conn = Connection::open_with_flags(
@@ -110,17 +327,40 @@ pub fn fetch_and_sort(
     )
     .map_err(|e| FsrsSortError::CannotOpen(path_str, e))?;
 
-    // ── Get collection creation timestamp ──────────────────────────────
+    let ctx = snapshot_ctx(&conn)?;
+    Ok((conn, ctx))
+}
+
+/// Read the snapshot clock context from an open collection.
+fn snapshot_ctx(conn: &Connection) -> Result<RecallCtx, FsrsSortError> {
     let crt: i64 = conn
         .query_row("SELECT crt FROM col LIMIT 1", [], |row| row.get(0))
         .map_err(|e| FsrsSortError::QueryFailed("col.crt".into(), e))?;
 
-    let now_secs = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .as_secs() as i64;
+    let now_secs = unix_now_secs();
     let today_day = (now_secs - crt) / 86400;
 
+    Ok(RecallCtx {
+        now_secs,
+        today_day,
+        crt,
+    })
+}
+
+/// Query due cards matching the given tags (active cards only), preserving
+/// the in-house due-filter semantics:
+///
+/// Anki queue semantics: -1 = suspended, -2 = user-buried, -3 = sched-buried,
+/// 0 = new, 1 = learning, 2 = review, 3 = day-learn.
+/// Only admit active cards (queue >= 0).
+/// type=2 (review): due is a day number → due if due <= today_day
+/// type=1 (learning): due is a Unix timestamp → due if due <= now_secs
+/// type=0 (new): always included
+fn query_due_cards(
+    conn: &Connection,
+    tags: &[String],
+    ctx: RecallCtx,
+) -> Result<Vec<CardFacts>, FsrsSortError> {
     // ── Build tag filter ──────────────────────────────────────────────
     // Anki stores tags space-separated in notes.tags.
     // We escape single quotes and use LIKE for substring matching.
@@ -130,15 +370,8 @@ pub fn fetch_and_sort(
         .collect();
     let tag_filter = escaped_tags.join(" OR ");
 
-    // ── Query due cards ───────────────────────────────────────────────
-    // Anki queue semantics: -1 = suspended, -2 = user-buried, -3 = sched-buried,
-    // 0 = new, 1 = learning, 2 = review, 3 = day-learn.
-    // Only admit active cards (queue >= 0).
-    // type=2 (review): due is a day number → due if due <= today_day
-    // type=1 (learning): due is a Unix timestamp → due if due <= now_secs
-    // type=0 (new): always included
     let sql = format!(
-        "SELECT c.id, c.nid, n.tags, c.ivl, c.type, c.due \
+        "SELECT c.id, c.nid, n.tags, c.ivl, c.type, c.due, c.factor \
          FROM cards c \
          JOIN notes n ON c.nid = n.id \
          WHERE c.queue >= 0 \
@@ -148,7 +381,9 @@ pub fn fetch_and_sort(
              OR (c.type = 1 AND c.due <= {now_secs}) \
              OR (c.type = 0) \
            ) \
-         ORDER BY c.id"
+         ORDER BY c.id",
+        today_day = ctx.today_day,
+        now_secs = ctx.now_secs,
     );
 
     let mut stmt = conn
@@ -158,38 +393,67 @@ pub fn fetch_and_sort(
     let rows = stmt
         .query_map([], |row| {
             Ok((
-                row.get::<_, i64>(0)?,   // c.id
-                row.get::<_, i64>(1)?,   // c.nid
+                row.get::<_, i64>(0)?,    // c.id
+                row.get::<_, i64>(1)?,    // c.nid
                 row.get::<_, String>(2)?, // n.tags
-                row.get::<_, i64>(3)?,   // c.ivl
-                row.get::<_, i64>(4)?,   // c.type
-                row.get::<_, i64>(5)?,   // c.due
+                row.get::<_, i64>(3)?,    // c.ivl
+                row.get::<_, i64>(4)?,    // c.type
+                row.get::<_, i64>(5)?,    // c.due
+                row.get::<_, i64>(6)?,    // c.factor
             ))
         })
         .map_err(|e| FsrsSortError::QueryFailed("cards query exec".into(), e))?;
 
-    // ── Compute approximate recall and assign track tags ──────────────
-    let mut track_counts: HashMap<String, usize> = HashMap::new();
-    let mut cards: Vec<RankedCard> = Vec::new();
-
+    let mut cards = Vec::new();
     for row in rows {
-        let (card_id, note_id, note_tags, ivl, card_type, due) = row
+        let (card_id, note_id, note_tags, ivl, card_type, due, factor) = row
             .map_err(|e| FsrsSortError::QueryFailed("row read".into(), e))?;
+        cards.push(CardFacts {
+            card_id,
+            note_id,
+            note_tags,
+            ivl,
+            card_type,
+            due,
+            factor,
+        });
+    }
+    Ok(cards)
+}
 
+/// Apply the recall function, assign track tags, and sort by urgency.
+/// Pure — no I/O; the per-track time estimate is passed in precomputed.
+fn rank_and_sort(
+    cards: Vec<CardFacts>,
+    ctx: RecallCtx,
+    tags: &[String],
+    avg_seconds: f64,
+    recall: RecallFn<'_>,
+) -> Result<SortResult, FsrsSortError> {
+    let mut track_counts: HashMap<String, usize> = HashMap::new();
+    let mut ranked: Vec<RankedCard> = Vec::with_capacity(cards.len());
+
+    for facts in &cards {
         // Find which of our track tags matches this note
-        let matched_tag = match find_matching_tag(&note_tags, tags) {
+        let matched_tag = match find_matching_tag(&facts.note_tags, tags) {
             Some(t) => t,
             None => continue, // shouldn't happen with our filter, but be safe
         };
 
-        let overdue_days = compute_overdue_days(card_type, due, today_day, now_secs, crt);
-        let approximate_recall = compute_approximate_recall(overdue_days, ivl);
+        let overdue_days = compute_overdue_days(
+            facts.card_type,
+            facts.due,
+            ctx.today_day,
+            ctx.now_secs,
+            ctx.crt,
+        );
+        let approximate_recall = recall(facts, &ctx);
 
         *track_counts.entry(matched_tag.clone()).or_insert(0) += 1;
 
-        cards.push(RankedCard {
-            card_id,
-            note_id,
+        ranked.push(RankedCard {
+            card_id: facts.card_id,
+            note_id: facts.note_id,
             track_tag: matched_tag,
             approximate_recall,
             overdue_days,
@@ -198,7 +462,7 @@ pub fn fetch_and_sort(
 
     // ── Sort by urgency (lowest recall first), then overdue_days desc,
     //     then card_id ascending (deterministic tie-break) ──
-    cards.sort_by(|a, b| {
+    ranked.sort_by(|a, b| {
         a.approximate_recall
             .partial_cmp(&b.approximate_recall)
             .unwrap_or(std::cmp::Ordering::Equal)
@@ -206,15 +470,81 @@ pub fn fetch_and_sort(
             .then_with(|| a.card_id.cmp(&b.card_id))
     });
 
-    // ── Compute per-track average time from revlog ────────────────────
-    let avg_seconds = compute_avg_time_per_card(&conn, tags, lookback_days)
-        .unwrap_or(crate::services::capsule_slicer::COLD_START_SECONDS_PER_CARD);
-
     Ok(SortResult {
-        ranked: cards,
+        ranked,
         track_counts,
         avg_seconds_per_card: avg_seconds,
     })
+}
+
+// ---------------------------------------------------------------------------
+// Recall functions
+// ---------------------------------------------------------------------------
+
+/// In-house half-life recall (rollback path + property-suite anchor).
+fn in_house_recall(facts: &CardFacts, ctx: &RecallCtx) -> f64 {
+    let overdue_days = compute_overdue_days(
+        facts.card_type,
+        facts.due,
+        ctx.today_day,
+        ctx.now_secs,
+        ctx.crt,
+    );
+    compute_approximate_recall(overdue_days, facts.ivl)
+}
+
+/// fsrs-rs FSRS-6 recall (production path).
+///
+/// * New cards (type 0) → sentinel recall (same tier as in-house).
+/// * Cards with a derived/persisted state → FSRS-6 retrievability with
+///   elapsed = days since last review (fractional when the review timestamp
+///   is known, day-precision otherwise).
+/// * Cards missing from `states` → in-house recall (defensive fallback).
+fn fsrs_recall(facts: &CardFacts, ctx: &RecallCtx, states: &HashMap<i64, DerivedState>) -> f64 {
+    if facts.card_type == 0 {
+        return NEW_CARD_SENTINEL_RECALL;
+    }
+
+    let Some(state) = states.get(&facts.card_id) else {
+        // Should not happen in production (ensure_states covers all non-new
+        // due cards); degrade to the in-house model rather than guessing.
+        return in_house_recall(facts, ctx);
+    };
+
+    let overdue_days = compute_overdue_days(
+        facts.card_type,
+        facts.due,
+        ctx.today_day,
+        ctx.now_secs,
+        ctx.crt,
+    );
+
+    let elapsed_days = match state.last_review_secs {
+        Some(last_review_secs) => {
+            // Fractional days since the last review — the exact quantity
+            // FSRS retrievability is defined over.
+            ((ctx.now_secs - last_review_secs) as f64 / 86_400.0).max(0.0)
+        }
+        None => match facts.card_type {
+            // Review card: due = last-review day + ivl, so
+            // elapsed = today - last_review = overdue + ivl (day precision).
+            2 => (i64::from(overdue_days.max(0)) + facts.ivl.max(0)) as f64,
+            // Learning card without a known review time: reviewed (or
+            // introduced) effectively now.
+            _ => 0.0,
+        },
+    };
+
+    let memory_state = fsrs::MemoryState {
+        stability: state.stability as f32,
+        difficulty: state.difficulty as f32,
+    };
+    let retrievability = fsrs::current_retrievability(
+        memory_state,
+        elapsed_days as f32,
+        fsrs::FSRS6_DEFAULT_DECAY,
+    );
+    (retrievability as f64).clamp(0.0, 1.0)
 }
 
 // ---------------------------------------------------------------------------
@@ -269,13 +599,9 @@ fn compute_overdue_days(
 /// This is a simplification of the FSRS retrievability formula:
 /// `R = (1 + 19 × t / S)^(-1)` where S ≈ ivl and t = elapsed_days.
 ///
-/// For relative ordering, half-life decay is sufficient. Exact FSRS state
-/// parsing (from `cards.data` JSON) is a v2 enhancement.
-/// Compute approximate probability of recall using a half-life decay model.
-///
-/// ```text
-/// R ≈ 0.90 × 0.5^(overdue_days / ivl)
-/// ```
+/// For relative ordering, half-life decay is sufficient. Used by the
+/// in-house rollback path and as the defensive fallback when a card has no
+/// usable memory state.
 pub fn compute_approximate_recall(overdue_days: i32, ivl: i64) -> f64 {
     if overdue_days <= 0 {
         // Card is not yet due — high recall
@@ -298,11 +624,7 @@ fn compute_avg_time_per_card(
     tags: &[String],
     lookback_days: u32,
 ) -> Option<f64> {
-    let cutoff_ms = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .as_millis() as i64
-        - (lookback_days as i64 * 86_400_000); // milliseconds
+    let cutoff_ms = unix_now_millis() - (lookback_days as i64 * 86_400_000); // milliseconds
 
     // Build tag filter for revlog query
     let escaped_tags: Vec<String> = tags
@@ -328,6 +650,23 @@ fn compute_avg_time_per_card(
 
     // If we have data, return it; otherwise None triggers cold-start
     result.filter(|&t| t > 0.0 && t.is_finite())
+}
+
+/// Unix seconds; 0 if the clock is somehow before the epoch (defensive —
+/// never expected).
+fn unix_now_secs() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs() as i64)
+        .unwrap_or(0)
+}
+
+/// Unix milliseconds; 0 if the clock is somehow before the epoch.
+fn unix_now_millis() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis() as i64)
+        .unwrap_or(0)
 }
 
 // ---------------------------------------------------------------------------
@@ -395,6 +734,22 @@ mod tests {
             find_matching_tag(note_tags, &track_tags),
             Some("ankitov::math::grade7".into())
         );
+    }
+
+    #[test]
+    fn test_scheduler_mode_default_and_rollback() {
+        // Default (unset/garbage) → fsrs-rs
+        std::env::remove_var("ANKITOV_SCHEDULER");
+        assert_eq!(scheduler_mode(), SchedulerMode::FsrsRs);
+        // Rollback spellings → in-house
+        std::env::set_var("ANKITOV_SCHEDULER", "in-house");
+        assert_eq!(scheduler_mode(), SchedulerMode::InHouse);
+        std::env::set_var("ANKITOV_SCHEDULER", "legacy");
+        assert_eq!(scheduler_mode(), SchedulerMode::InHouse);
+        // Unknown → default
+        std::env::set_var("ANKITOV_SCHEDULER", "wat");
+        assert_eq!(scheduler_mode(), SchedulerMode::FsrsRs);
+        std::env::remove_var("ANKITOV_SCHEDULER");
     }
 
     /// Integration test: fetch_and_sort with a real SQLite fixture.
