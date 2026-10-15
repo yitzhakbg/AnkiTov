@@ -159,6 +159,21 @@ pub async fn first_login() -> Result<Response> {
     Ok(resp)
 }
 
+/// First-run setup screen — create the school admin account.
+///
+/// Public (no JWT): by definition no admin exists yet. The page itself
+/// re-checks `/api/v1/setup/status` and bounces to the dashboard when setup
+/// is already complete, so a stale tab can't re-open the wizard.
+pub async fn setup_page() -> Result<Response> {
+    let mut resp: Response =
+        format::html(include_str!("../../resources/dashboard/setup.html"))?;
+    resp.headers_mut().insert(
+        header::CACHE_CONTROL,
+        header::HeaderValue::from_static("no-store, no-cache, must-revalidate, max-age=0"),
+    );
+    Ok(resp)
+}
+
 /// Registers dashboard routes including static assets.
 pub fn routes() -> Routes {
     Routes::new()

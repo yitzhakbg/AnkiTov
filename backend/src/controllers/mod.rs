@@ -6,6 +6,7 @@ pub mod sync;
 
 // Authentication
 pub mod auth;
+pub mod setup;
 
 // Telemetry ingestion
 pub mod telemetry;

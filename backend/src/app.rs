@@ -103,6 +103,9 @@ impl Hooks for App {
             .prefix("/api/v1")
             .add_route(controllers::health::routes())
             .add_route(controllers::auth::routes())
+            // First-run setup wizard (public by design — see setup.rs; the
+            // management auth layer is path-scoped to /api/v1/management/*).
+            .add_route(controllers::setup::routes())
             .add_route(controllers::telemetry::routes())
             .add_route(controllers::sync::routes())
             .add_route(controllers::management::decks::routes())
@@ -170,7 +173,10 @@ impl Hooks for App {
             // registered on the `first_login_api` sub-router below, also under the
             // non-gated `/d/` prefix — NOT here, and NOT under `/api/v1/management/*`
             // (that prefix is JWT-gated and the wizard holds no token yet).
-            .route("/d/:invite_id/:token", get(controllers::dashboard::first_login));
+            .route("/d/:invite_id/:token", get(controllers::dashboard::first_login))
+            // First-run setup screen (public; the dashboard redirects here
+            // while zero admin accounts exist — see controllers/setup.rs).
+            .route("/setup", get(controllers::dashboard::setup_page));
 
         // The first-login handlers need `State<AppContext>` but the dashboard router is
         // `Router<()>`, so we attach state to a nested sub-router. Their absolute `/d/...`

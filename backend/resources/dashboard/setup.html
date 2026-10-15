@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AnkiTov — Setup</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card: #1a1d27;
+      --border: #2d3140;
+      --text: #e8eaf0;
+      --muted: #8b90a0;
+      --accent: #4f8cff;
+      --accent-hover: #3a7af5;
+      --danger: #ff5c5c;
+      --ok: #4caf50;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 420px;
+    }
+    h1 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+    .field {
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      font-size: 0.8125rem;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.9375rem;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+    button:hover { background: var(--accent-hover); }
+    button:disabled {
+      background: var(--border);
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+    .error {
+      display: none;
+      background: rgba(255, 92, 92, 0.1);
+      border: 1px solid var(--danger);
+      border-radius: 6px;
+      padding: 0.625rem 0.75rem;
+      color: var(--danger);
+      font-size: 0.8125rem;
+      margin-bottom: 1rem;
+    }
+    .note {
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin-top: 1.25rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Welcome to AnkiTov</h1>
+    <p class="subtitle">Create your school admin account to finish setting up. This screen is only available until the first admin exists.</p>
+    <div class="error" id="error"></div>
+    <form id="setup-form">
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" autocomplete="email" required>
+        <div class="hint">You'll use this email to log in.</div>
+      </div>
+      <div class="field">
+        <label for="full_name">Full name <span style="opacity:0.6">(optional)</span></label>
+        <input type="text" id="full_name" name="full_name" autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" autocomplete="new-password" required>
+        <div class="hint">At least 6 characters.</div>
+      </div>
+      <div class="field">
+        <label for="confirm">Confirm password</label>
+        <input type="password" id="confirm" name="confirm" autocomplete="new-password" required>
+      </div>
+      <button type="submit" id="submit-btn">Create admin account</button>
+    </form>
+    <p class="note">Security note: complete setup before exposing AnkiTov to a network. The launcher binds to loopback (localhost only) by default.</p>
+  </div>
+
+  <script>
+    const errBox = document.getElementById('error');
+    function showError(msg) {
+      errBox.textContent = msg;
+      errBox.style.display = 'block';
+    }
+
+    // If setup is already complete (an admin exists), bounce to the dashboard
+    // so a stale tab can't re-open the wizard.
+    (async () => {
+      try {
+        const resp = await fetch('/api/v1/setup/status');
+        if (resp.ok) {
+          const body = await resp.json();
+          if (!body.setup_required) {
+            window.location.replace('/dashboard');
+          }
+        }
+      } catch (e) { /* status unreachable — leave the form visible */ }
+    })();
+
+    document.getElementById('setup-form').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      errBox.style.display = 'none';
+
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const full_name = document.getElementById('full_name').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('confirm').value;
+
+      if (!username || !email || !password) {
+        showError('Username, email, and password are required.');
+        return;
+      }
+      if (password.length < 6) {
+        showError('Password must be at least 6 characters.');
+        return;
+      }
+      if (password !== confirm) {
+        showError('Passwords do not match.');
+        return;
+      }
+
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Creating account…';
+
+      try {
+        const resp = await fetch('/api/v1/setup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username,
+            email,
+            password,
+            full_name: full_name || null
+          })
+        });
+        if (resp.ok) {
+          // Admin created — the setup endpoint is now atomically disabled.
+          // The dashboard console is loopback-local and needs no token.
+          window.location.replace('/dashboard');
+          return;
+        }
+        let msg = 'Setup failed (' + resp.status + ').';
+        try {
+          const body = await resp.json();
+          if (body && (body.description || body.error)) {
+            msg = body.description || body.error;
+          }
+        } catch (e) { /* non-JSON error body */ }
+        showError(msg);
+      } catch (e) {
+        showError('Network error: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Create admin account';
+      }
+    });
+  </script>
+</body>
+</html>
