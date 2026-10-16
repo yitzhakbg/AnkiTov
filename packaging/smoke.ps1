@@ -57,7 +57,7 @@ try {
   $ok = $false
   foreach ($i in 1..30) {
     try {
-      $r = Invoke-WebRequest -UseBasicParsing -Uri "http://localhost:$Port/" -TimeoutSec 2
+      $r = Invoke-WebRequest -UseBasicParsing -Uri "http://127.0.0.1:$Port/" -TimeoutSec 2
       if ($r.StatusCode -eq 200) { $ok = $true; break }
     } catch { Start-Sleep -Seconds 1 }
   }
@@ -78,11 +78,11 @@ try {
   $body = '{"username":"smoke-user","email":"smoke@example.test","password":"Sup3r-Secret-Passw0rd!","full_name":"Smoke Test","role":"student"}'
   # First-run setup gate: a fresh DB must report setup_required:true (the
   # empty-DB admin bootstrap wizard depends on it).
-  $setup = Invoke-RestMethod -Method Get -Uri "http://localhost:$Port/api/v1/setup/status" -TimeoutSec 5
+  $setup = Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:$Port/api/v1/setup/status" -TimeoutSec 5
   if (-not $setup.setup_required) {
     throw "SMOKE FAIL: setup status on a fresh DB must be setup_required:true (got: $($setup | ConvertTo-Json -Compress))"
   }
-  $resp = Invoke-RestMethod -Method Post -Uri "http://localhost:$Port/api/v1/auth/register" `
+  $resp = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:$Port/api/v1/auth/register" `
     -ContentType 'application/json' -Body $body
   if (-not $resp.token) { throw "SMOKE FAIL: register response missing token" }
 
