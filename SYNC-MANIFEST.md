@@ -1,14 +1,15 @@
 # SYNC-MANIFEST
 
-- monorepo ref: unknown (ANKITOV_MONOREPO_REF not set)
-- exported at: 2026-10-15T05:51:07Z
+- monorepo ref: kozttumx
+- exported at: 2026-10-16T09:55:48Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
 ## sha256 checksums
 ```
-e2024017dc3f768cab20d93e27e4259f30ee9a62f443f985d0252793dd826339  .github/workflows/release.yml
+32b9c2d284339cd2ab5bb229ec9caa20313ab5d5da0996c74536a514971ebe5b  .github/workflows/release.yml
 ada47362899add07df543de3051b80e6d9532fca7131b7fe5701fb754aa65ee2  Caddyfile
+3c49896dcb11ef377277894155b72f41d7fbc8b6ed34c66fa62baf6e7333d48b  Cargo.lock
 e2c43209506ad84d8f2b561c3e9eb7d726eaa5408544d0f158cd7b6ea827663e  Cargo.toml
 e867dffc8aad3c6bb086eeba391ac7b38db0c1cbd8d406dd007add1586a7e6bf  Dockerfile.backend
 0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0  LICENSE
@@ -55,6 +56,7 @@ ea98a6c81f7f4d9fd3beaf8111b31ca6c9a01a47e6562388039afc61c0c95090  backend/resour
 c6ade0b831c6c043daf480861208cd2fa45ea4aac581cc8bb8e234281c011ddf  backend/resources/dashboard/vendor/driver.min.js
 c212f4b505a86352aed62b24a8f16f999f821ecbe6456c7f3c8a04bc87968782  backend/resources/dashboard/vendor/popper.min.js
 3f0fe70eb26ccf28f6887a192e29d38dd7ef7c2f079a73304ad42ddc7bed37de  backend/resources/dashboard/vendor/tippy.min.js
+4fb2f10b7f84767f8ac925c74662aae08186d6ca4779a356150bd38cb9e95d65  backend/src/.DS_Store
 80da36e585342d008d47fcd833b957f18943e29015c6ff004eab5b53f6efc2b3  backend/src/app.rs
 47649f7207ef227d1bf36f8772641c8a9e7e47f5422934735385f0a06fbe38e7  backend/src/controllers/auth.rs
 801c5faa6b0839d98dfd065c28055ef201d5f2ac55ad62c938a591768e70cf39  backend/src/controllers/dashboard.rs
@@ -219,13 +221,14 @@ b943b28d784bcb974a8cdced5e4973f89fef0b3d6d6c79938c1506251a83f9fc  docs/src/refer
 1d7bac45a7b3af6b1a67e4a116ffcebb554a48f0479838498d19d2ac39ec1fd1  docs/src/reference/model-appraisal.md
 1942fb490dccc7d2f5c3ba60192c27c5b2115d138c621ef7841e5dd580d11d34  docs/src/reference/openapi.md
 b6df84512a635d73d72cae6d059b9749041009b16a55d1b938741105ee697ffb  docs/src/reference/rustdoc.md
+c34a9343072548833bf35a9dbd5bd34b3a199d71bde4b94d679e4bf92df08994  packaging/.DS_Store
 126f9a724287f6c66c0495346f6f6ffb13d8699cec7394ce11785948296a1f20  packaging/README.md
 591edf8fc1138180ec882213da0cb1b9e8ab07d6f2a23abbd87875d5406425a6  packaging/assemble.sh
 d3bf04e3137850271fe817d40fee76392882a1680be511c12eb5ef39b88f0125  packaging/launch/ankitov-launch.sh
 7ad1fde9340586863737133486c59b786fadb0692948dcab0d7842521567c4cf  packaging/launch/start-ankitov.bat
 5280a42f23c24bb7f5a355814732333c202839042c3cc320b4d5be97b57ad3b4  packaging/linux/ankitov.desktop
 8bbb687d6e1c8ab55366324ac2ebc1bf10883241cd5bb8f05f1d5bdfabc62794  packaging/macos/Info.plist
-4a39c29612ea5cdae592a4f7937ceba8218c1872f0c82d3ff8a1eae369f9662e  packaging/smoke.ps1
+812dd8059756fbc301e337bb6d86669715c2d24075db44112f0ffa95e3b79fe8  packaging/smoke.ps1
 cb1b26b92d8f1021afe0244dbb05a02201b9ed2f866fe17d4bf4c56f0e295f1c  packaging/smoke.sh
 728bd68c0c469729a8b3b02ddb415d3c9e608e9f89e1fb96b4aca5b7b03d8c1f  rust-toolchain.toml
 cccddeb6f31dcafbedff89ade53bd4b87fd77b10fe70d51efc05929e617ce762  session-driver/__init__.py

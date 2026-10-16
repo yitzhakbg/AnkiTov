@@ -43,6 +43,10 @@ services:
       LOCO_ENV: "production"
       RUST_LOG: "${RUST_LOG:-info}"
       ANKITOV_PORT: "5150"
+      # Containers must bind all interfaces — Docker's published port
+      # forwards to the bridge IP, so the production.yaml loopback default
+      # (ANKITOV_BIND=127.0.0.1) would make the service unreachable.
+      ANKITOV_BIND: "0.0.0.0"
       ANKITOV_JWT_SECRET: "${ANKITOV_JWT_SECRET}"
       DATABASE_URL: "${DATABASE_URL:-sqlite://data/ankitov.db?mode=rwc}"
       ANKITOV_SYNC_URL: "http://sync-server:8080"
