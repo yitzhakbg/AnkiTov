@@ -138,6 +138,12 @@ jobs:
           fi
 
       - name: Build backend
+        # Windows main-thread stack is 1MB (vs 8MB Unix); the Tera/pest grammar
+        # parse of production.yaml recurses deep enough to overflow it — and a
+        # Windows stack overflow kills the process with NO stderr output.
+        # Reserve 16MB to match the Unix defaults (musl/macOS smoke pass there).
+        env:
+          RUSTFLAGS: -C link-args=/STACK:16777216
         run: cargo build --release -p backend
 
       - name: Smoke the binary (boot cold + GET / + register)

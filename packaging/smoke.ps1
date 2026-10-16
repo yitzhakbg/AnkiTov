@@ -62,11 +62,26 @@ try {
     } catch { Start-Sleep -Seconds 1 }
   }
   if (-not $ok) {
+    Write-Host '--- server.err.log (tail) ---'
     Get-Content (Join-Path $tmp 'server.err.log') -Tail 30 -ErrorAction SilentlyContinue
+    # Loco/tracing logs to STDOUT — smoke.sh (bash) tails a combined server.log,
+    # so the Windows variant must dump both halves or boot errors stay invisible.
+    Write-Host '--- server.out.log (tail) ---'
+    Get-Content (Join-Path $tmp 'server.out.log') -Tail 40 -ErrorAction SilentlyContinue
+    if ($p) {
+      if ($p.HasExited) { Write-Host "server process EXITED, code: $($p.ExitCode)" }
+      else { Write-Host "server process still running (pid $($p.Id))" }
+    }
     throw "SMOKE FAIL: GET / never returned 200"
   }
 
   $body = '{"username":"smoke-user","email":"smoke@example.test","password":"Sup3r-Secret-Passw0rd!","full_name":"Smoke Test","role":"student"}'
+  # First-run setup gate: a fresh DB must report setup_required:true (the
+  # empty-DB admin bootstrap wizard depends on it).
+  $setup = Invoke-RestMethod -Method Get -Uri "http://localhost:$Port/api/v1/setup/status" -TimeoutSec 5
+  if (-not $setup.setup_required) {
+    throw "SMOKE FAIL: setup status on a fresh DB must be setup_required:true (got: $($setup | ConvertTo-Json -Compress))"
+  }
   $resp = Invoke-RestMethod -Method Post -Uri "http://localhost:$Port/api/v1/auth/register" `
     -ContentType 'application/json' -Body $body
   if (-not $resp.token) { throw "SMOKE FAIL: register response missing token" }
