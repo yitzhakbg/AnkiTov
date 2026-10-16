@@ -292,6 +292,9 @@ jobs:
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+          # This job has no checkout — gh shells out to git to detect the repo
+          # and dies with "not a git repository". Pin the repo explicitly.
+          GH_REPO: ${{ github.repository }}
         run: |
           gh release create "$GITHUB_REF_NAME" dist/* \
             --title "AnkiTov $GITHUB_REF_NAME" \
