@@ -65,6 +65,13 @@ if [ "$code" != "200" ]; then
 fi
 
 BODY='{"username":"smoke-user","email":"smoke@example.test","password":"Sup3r-Secret-Passw0rd!","full_name":"Smoke Test","role":"student"}'
+# First-run setup gate: a fresh DB must report setup_required:true (the
+# empty-DB admin bootstrap wizard depends on it).
+SETUP=$(curl -s "http://localhost:$PORT/api/v1/setup/status" 2>/dev/null || true)
+if ! printf '%s' "$SETUP" | grep -q '"setup_required":true'; then
+  echo "SMOKE FAIL: setup status on a fresh DB must be {\"setup_required\":true}: ${SETUP:-<empty>}"
+  exit 1
+fi
 RESP=$(curl -s -X POST -H 'Content-Type: application/json' -d "$BODY" \
   "http://localhost:$PORT/api/v1/auth/register" 2>/dev/null || true)
 if ! printf '%s' "$RESP" | grep -q '"token"'; then

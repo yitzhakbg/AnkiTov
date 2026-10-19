@@ -81,6 +81,14 @@ impl Hooks for App {
         create_app::<Self, Migrator>(mode, environment).await
     }
 
+    async fn before_run(app_context: &AppContext) -> Result<()> {
+        // Operator recovery path: promote users listed in ANKITOV_ADMIN_EMAILS
+        // to admin at boot (after migrations, before serving). See
+        // services::admin_bootstrap. No-op when the variable is unset.
+        crate::services::admin_bootstrap::promote_env_admins(&app_context.db).await?;
+        Ok(())
+    }
+
     fn routes(_ctx: &AppContext) -> AppRoutes {
         // Register the full `/api/v1` table on the outer router. Loco's
         // `to_router` flattens each controller `Routes` into top-level
@@ -125,6 +133,7 @@ impl Hooks for App {
             .add_route(controllers::management::ask::routes())
             .add_route(controllers::management::producers::routes())
             .add_route(controllers::management::teachers::routes())
+            .add_route(controllers::management::settings::routes())
             .add_route(controllers::locale::routes())
     }
 

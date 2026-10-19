@@ -5,6 +5,7 @@
 
 pub mod addon;
 pub mod addon_distribution;
+pub mod app_setting;
 pub mod audit_log;
 pub mod capsule_session;
 pub mod class;

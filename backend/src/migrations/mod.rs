@@ -39,6 +39,9 @@ pub use m20260923_create_teacher_invites::Migration as CreateTeacherInvites;
 
 mod m20261014_create_fsrs_memory_states;
 pub use m20261014_create_fsrs_memory_states::Migration as CreateFsrsMemoryStates;
+
+mod m20261015_create_app_settings;
+pub use m20261015_create_app_settings::Migration as CreateAppSettings;
 /// The Loco application migrator — lists all database migrations in time order.
 pub struct Migrator;
 #[async_trait::async_trait]
@@ -57,6 +60,7 @@ impl MigratorTrait for Migrator {
             Box::new(AddDeckTrackId),
             Box::new(CreateTeacherInvites),
             Box::new(CreateFsrsMemoryStates),
+            Box::new(CreateAppSettings),
         ]
     }
 }

@@ -2064,34 +2064,15 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
 
     <!-- Help and AI assistant toolbar -->
     <div class="sidebar-utilities">
+      <button class="nav-item" data-page="settings" onclick="Router.navigate('settings')" aria-label="Open settings">
+        <span class="nav-icon">⚙️</span> <span data-i18n="sidebar.settings">Settings</span>
+      </button>
       <button class="nav-item" id="nav-help" onclick="HelpCenter.open()" aria-label="Open help center">
         <span class="nav-icon">❓</span> <span data-i18n="sidebar.help">Help</span>
       </button>
     </div>
 
     <div class="sidebar-footer">
-      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-        <span class="toggle-icon" id="theme-icon">☀</span>
-        <span id="theme-label" data-i18n="theme.light">Light mode</span>
-      </button>
-      <!-- Language Switcher -->
-      <div class="locale-switcher" id="locale-switcher">
-        <select id="locale-select" aria-label="Switch language" onchange="I18n.setLocale(this.value)">
-          <option value="en-US">🇺🇸 English (US)</option>
-          <option value="ar">🇸🇦 العربية</option>
-          <option value="he">🇮🇱 עברית</option>
-          <option value="fr">🇫🇷 Français</option>
-          <option value="es">🇪🇸 Español</option>
-          <option value="de">🇩🇪 Deutsch</option>
-          <option value="it">🇮🇹 Italiano</option>
-          <option value="ru">🇷🇺 Русский</option>
-          <option value="zh">🇨🇳 简体中文</option>
-          <option value="ko">🇰🇷 한국어</option>
-          <option value="ja">🇯🇵 日本語</option>
-          <option value="pt">🇧🇷 Português (Brasil)</option>
-          <option value="hi">🇮🇳 हिन्दी</option>
-        </select>
-      </div>
       <div class="connection-status" id="connection-status" role="status" aria-live="polite">
         <span class="connection-dot" id="connection-dot"></span>
         <span id="connection-text">Checking…</span>
@@ -2208,6 +2189,88 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
                 <button class="btn btn-primary" id="wizard-next" onclick="Home.wizardNext()" data-i18n="wizard.next">Next →</button>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS (T-126) -->
+      <section class="page-section" id="page-settings" aria-labelledby="settings-heading">
+        <div class="page-header">
+          <h1 id="settings-heading">⚙️ <span data-i18n="settings.title">Settings</span></h1>
+          <p data-i18n="settings.subtitle">School configuration, appearance, language, sync and your account.</p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:var(--space-4)">
+          <!-- School -->
+          <div class="card" style="padding:var(--space-5)">
+            <h3 style="margin:0 0 var(--space-2);font-size:var(--text-lg)" data-i18n="settings.school.title">🏫 School</h3>
+            <p style="margin:0 0 var(--space-3);color:var(--text-secondary);font-size:var(--text-sm)" data-i18n="settings.school.desc">Shown across the console and reports.</p>
+            <label class="form-label" for="settings-school-name" data-i18n="settings.school.name">School name</label>
+            <input id="settings-school-name" class="form-input" maxlength="200" style="width:100%;margin-bottom:var(--space-3)">
+            <button id="settings-school-save" class="btn btn-primary" data-i18n="settings.save">Save</button>
+            <div id="settings-school-status" style="margin-top:var(--space-2);font-size:var(--text-sm);color:var(--text-secondary)" role="status"></div>
+          </div>
+
+          <!-- Language -->
+          <div class="card" style="padding:var(--space-5)">
+            <h3 style="margin:0 0 var(--space-2);font-size:var(--text-lg)" data-i18n="settings.language.title">🌐 Language</h3>
+            <p style="margin:0 0 var(--space-3);color:var(--text-secondary);font-size:var(--text-sm)" data-i18n="settings.language.desc">Applies to this browser immediately and becomes the school default for new devices.</p>
+            <select id="settings-locale-select" class="form-select" style="width:100%;margin-bottom:var(--space-3)" aria-label="School language">
+              <option value="en-US">🇺🇸 English (US)</option>
+              <option value="ar">🇸🇦 العربية</option>
+              <option value="he">🇮🇱 עברית</option>
+              <option value="fr">🇫🇷 Français</option>
+              <option value="es">🇪🇸 Español</option>
+              <option value="de">🇩🇪 Deutsch</option>
+              <option value="it">🇮🇹 Italiano</option>
+              <option value="ru">🇷🇺 Русский</option>
+              <option value="zh">🇨🇳 简体中文</option>
+              <option value="ko">🇰🇷 한국어</option>
+              <option value="ja">🇯🇵 日本語</option>
+              <option value="pt">🇧🇷 Português (Brasil)</option>
+              <option value="hi">🇮🇳 हिन्दी</option>
+            </select>
+            <button id="settings-locale-save" class="btn btn-primary" data-i18n="settings.save">Save</button>
+            <div id="settings-locale-status" style="margin-top:var(--space-2);font-size:var(--text-sm);color:var(--text-secondary)" role="status"></div>
+          </div>
+
+          <!-- Appearance -->
+          <div class="card" style="padding:var(--space-5)">
+            <h3 style="margin:0 0 var(--space-2);font-size:var(--text-lg)" data-i18n="settings.appearance.title">🎨 Appearance</h3>
+            <p style="margin:0 0 var(--space-3);color:var(--text-secondary);font-size:var(--text-sm)" data-i18n="settings.appearance.desc">Light or dark, saved per browser.</p>
+            <button id="settings-theme-toggle" class="btn" style="border:1px solid var(--border-light)">
+              <span id="settings-theme-icon">🌙</span> <span id="settings-theme-label" data-i18n="theme.dark">Dark mode</span>
+            </button>
+          </div>
+
+          <!-- Sync -->
+          <div class="card" style="padding:var(--space-5)">
+            <h3 style="margin:0 0 var(--space-2);font-size:var(--text-lg)" data-i18n="settings.sync.title">🔄 Anki sync server</h3>
+            <p style="margin:0 0 var(--space-3);color:var(--text-secondary);font-size:var(--text-sm)" data-i18n="settings.sync.desc">Optional self-hosted sync endpoint. Leave empty if students sync through AnkiWeb.</p>
+            <label class="form-label" for="settings-sync-url" data-i18n="settings.sync.url">Sync server URL</label>
+            <input id="settings-sync-url" class="form-input" placeholder="https://sync.example.com" maxlength="500" style="width:100%;margin-bottom:var(--space-3)">
+            <button id="settings-sync-save" class="btn btn-primary" data-i18n="settings.save">Save</button>
+            <button class="btn" style="border:1px solid var(--border-light);margin-left:var(--space-2)" onclick="Router.navigate('sync-dashboard')" data-i18n="settings.sync.open">Open Sync</button>
+            <div id="settings-sync-status" style="margin-top:var(--space-2);font-size:var(--text-sm);color:var(--text-secondary)" role="status"></div>
+          </div>
+
+          <!-- Account -->
+          <div class="card" style="padding:var(--space-5)">
+            <h3 style="margin:0 0 var(--space-2);font-size:var(--text-lg)" data-i18n="settings.account.title">👤 Account</h3>
+            <p id="settings-account-email" style="margin:0 0 var(--space-3);color:var(--text-secondary);font-size:var(--text-sm)"></p>
+            <label class="form-label" for="settings-pw-current" data-i18n="settings.account.current">Current password</label>
+            <input id="settings-pw-current" class="form-input" type="password" autocomplete="current-password" style="width:100%;margin-bottom:var(--space-2)">
+            <label class="form-label" for="settings-pw-new" data-i18n="settings.account.new">New password (min 6 characters)</label>
+            <input id="settings-pw-new" class="form-input" type="password" autocomplete="new-password" style="width:100%;margin-bottom:var(--space-3)">
+            <button id="settings-pw-save" class="btn btn-primary" data-i18n="settings.account.change">Change password</button>
+            <div id="settings-pw-status" style="margin-top:var(--space-2);font-size:var(--text-sm);color:var(--text-secondary)" role="status"></div>
+          </div>
+
+          <!-- About -->
+          <div class="card" style="padding:var(--space-5)">
+            <h3 style="margin:0 0 var(--space-2);font-size:var(--text-lg)" data-i18n="settings.about.title">ℹ️ About</h3>
+            <p style="margin:0;color:var(--text-secondary);font-size:var(--text-sm)">AnkiTov — <span data-i18n="settings.about.blurb">local-first classroom practice with FSRS scheduling.</span></p>
+            <p style="margin:var(--space-2) 0 0;color:var(--text-tertiary);font-size:var(--text-xs)"><span data-i18n="settings.about.docs">Documentation is included with your installation.</span> <code>docs-repository/user-docs</code></p>
           </div>
         </div>
       </section>
@@ -2609,12 +2672,25 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
 
 
   await I18n.init('/dashboard/locales');
-  // Sync locale dropdown
-  document.getElementById('locale-select').value = I18n.getLocale();
+  // (The sidebar locale switcher moved into the Settings view — T-126.
+  // The Settings module syncs its own select when the view opens.)
   // Enable RTL CSS if needed
   if (I18n.isRTL()) document.getElementById('rtl-css').disabled = false;
   // Update static i18n elements
   I18n.refresh();
+
+  // ── First-run setup gate (T-126) ────────────────────────────────
+  // If no admin account exists yet, the only meaningful destination is the
+  // setup wizard — a fresh install must never land on a login form with no
+  // account to log into. Runs before the auth overlay; a failed check
+  // (endpoint unreachable) falls through to normal login behavior.
+  try {
+    const sr = await fetch('/api/v1/setup/status');
+    if (sr.ok) {
+      const st = await sr.json();
+      if (st.setup_required) { location.replace('/setup'); return; }
+    }
+  } catch (_e) { /* fall through to normal login */ }
 
   // ── Session / Auth Overlay (runs AFTER i18n is ready) ──────────
   SessionGate.init();
@@ -2867,6 +2943,10 @@ const Router = {
         TracksProfiles.init();
       } else if (page === 'sync' && typeof SyncController !== 'undefined') {
         SyncController.init();
+      } else if (page === 'settings' && typeof Settings !== 'undefined') {
+        // Settings view (T-126) refreshes on every visit so a fresh JWT or a
+        // change made in another tab is reflected.
+        Settings.init();
       }
     } catch (e) {}
   }
@@ -2883,7 +2963,10 @@ const Theme = {
     const theme = saved || 'dark';
     this.apply(theme);
 
-    document.getElementById('theme-toggle').addEventListener('click', () => this.toggle());
+    // The sidebar footer toggle moved into the Settings view (T-126); the
+    // Settings module binds its own control to Theme.toggle().
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) themeBtn.addEventListener('click', () => this.toggle());
   },
 
   apply(theme) {
@@ -2892,13 +2975,13 @@ const Theme = {
 
     const icon = document.getElementById('theme-icon');
     const label = document.getElementById('theme-label');
-    if (theme === 'dark') {
-      icon.textContent = '☀';
-      label.textContent = t('theme.light');
-    } else {
-      icon.textContent = '🌙';
-      label.textContent = t('theme.dark');
-    }
+    if (icon) icon.textContent = theme === 'dark' ? '☀' : '🌙';
+    if (label) label.textContent = theme === 'dark' ? t('theme.light') : t('theme.dark');
+    // Settings view mirror (T-126)
+    const sIcon = document.getElementById('settings-theme-icon');
+    const sLabel = document.getElementById('settings-theme-label');
+    if (sIcon) sIcon.textContent = theme === 'dark' ? '🌙' : '☀';
+    if (sLabel) sLabel.textContent = theme === 'dark' ? t('theme.dark') : t('theme.light');
   },
 
   toggle() {
@@ -6641,6 +6724,103 @@ const GuidedWalkthrough = {
   },
 
   isComplete() { return !!localStorage.getItem(this.STORAGE_KEY); }
+};
+
+/* ═══════════════════════════════════════════════════════
+   16.5. SETTINGS VIEW (T-126) — dedicated settings behind the
+   sidebar gear. School name / locale / sync URL persist server-side
+   (app_settings via /api/v1/management/settings); theme stays
+   per-browser (localStorage via Theme); password change hits the
+   existing /api/v1/auth/change-password endpoint.
+   ═══════════════════════════════════════════════════════ */
+const Settings = {
+  _bound: false,
+  _loaded: null,
+
+  init() {
+    this._bindOnce();
+    this.load();
+  },
+
+  _bindOnce() {
+    if (this._bound) return;
+    this._bound = true;
+    const $ = (id) => document.getElementById(id);
+    $('settings-theme-toggle').addEventListener('click', () => Theme.toggle());
+    $('settings-school-save').addEventListener('click', () =>
+      this._save({ school_name: $('settings-school-name').value.trim() }, 'settings-school-status'));
+    $('settings-locale-save').addEventListener('click', () => {
+      const locale = $('settings-locale-select').value;
+      I18n.setLocale(locale); // this browser switches immediately
+      this._save({ locale }, 'settings-locale-status');
+    });
+    $('settings-sync-save').addEventListener('click', () =>
+      this._save({ sync_url: $('settings-sync-url').value.trim() }, 'settings-sync-status'));
+    $('settings-pw-save').addEventListener('click', () => this._changePassword());
+  },
+
+  async load() {
+    const $ = (id) => document.getElementById(id);
+    try {
+      const resp = await fetch('/api/v1/management/settings', { headers: Session.authHeaders() });
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const s = await resp.json();
+      this._loaded = s;
+      $('settings-school-name').value = s.school_name || '';
+      $('settings-sync-url').value = s.sync_url || '';
+      if (s.locale) $('settings-locale-select').value = s.locale;
+      const u = Session.getUser();
+      $('settings-account-email').textContent =
+        u && u.email ? u.email + (u.role ? ' · ' + u.role : '') : '';
+      $('settings-school-status').textContent = '';
+      $('settings-sync-status').textContent = '';
+    } catch (_e) {
+      // Not signed in yet (view opened pre-auth) or endpoint error — leave
+      // fields as-is; init() re-runs on every visit so the next visit loads.
+    }
+  },
+
+  async _save(patch, statusId) {
+    const el = document.getElementById(statusId);
+    el.textContent = '…';
+    try {
+      const resp = await fetch('/api/v1/management/settings', {
+        method: 'PUT',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, Session.authHeaders()),
+        body: JSON.stringify(patch),
+      });
+      const body = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(body.description || body.error || ('HTTP ' + resp.status));
+      this._loaded = body;
+      el.textContent = t('settings.saved');
+    } catch (e) {
+      el.textContent = t('settings.saveFailed') + ' ' + (e.message || e);
+    }
+  },
+
+  async _changePassword() {
+    const $ = (id) => document.getElementById(id);
+    const el = $('settings-pw-status');
+    const current = $('settings-pw-current').value;
+    const next = $('settings-pw-new').value;
+    if (!current || !next) { el.textContent = t('settings.account.fillBoth'); return; }
+    if (next.length < 6) { el.textContent = t('settings.account.pwShort'); return; }
+    el.textContent = '…';
+    try {
+      const resp = await fetch('/api/v1/auth/change-password', {
+        method: 'POST',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, Session.authHeaders()),
+        body: JSON.stringify({ current_password: current, new_password: next }),
+      });
+      const body = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(body.error || body.description || ('HTTP ' + resp.status));
+      el.textContent = t('settings.account.pwChanged');
+      $('settings-pw-current').value = '';
+      $('settings-pw-new').value = '';
+    } catch (e) {
+      el.textContent = t('settings.saveFailed') + ' ' + (e.message || e);
+    }
+  }
 };
 
 /* ═══════════════════════════════════════════════════════

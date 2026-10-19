@@ -14,10 +14,14 @@ server:
   # appended automatically). Defaults to "localhost" if omitted, which binds
   # 127.0.0.1 only — correct for a bare host but *wrong* inside a container,
   # where Docker's published port forwards to the container's bridge IP.
-  # Bind all interfaces so the container's published 5150 is reachable.
-  binding: 0.0.0.0
+  # Loopback by default: the first-run setup window (empty-DB admin
+  # bootstrap) must not be network-reachable. Set ANKITOV_BIND=0.0.0.0
+  # to expose the server (docker-compose.yml does exactly that — inside a
+  # container the published port forwards to the bridge IP, so binding
+  # loopback there would make the service unreachable).
+  binding: {{ get_env(name="ANKITOV_BIND", default="127.0.0.1") }}
   port: {{ get_env(name="ANKITOV_PORT", default="5150") }}
-  host: 0.0.0.0
+  host: {{ get_env(name="ANKITOV_BIND", default="127.0.0.1") }}
 
 database:
   # Override via: DATABASE_URL=sqlite://data/ankitov.db?mode=rwc or libsql://...

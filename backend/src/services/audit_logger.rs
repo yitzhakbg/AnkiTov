@@ -183,7 +183,7 @@ pub async fn log_capsule_complete(
 // Helpers
 // ---------------------------------------------------------------------------
 
-fn now_ts() -> i64 {
+pub(crate) fn now_ts() -> i64 {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap()

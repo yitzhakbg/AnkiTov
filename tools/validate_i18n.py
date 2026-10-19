@@ -27,7 +27,9 @@ NON_LATIN_CODES = {"ar", "he", "ru", "zh", "ko", "ja", "hi"}
 # keyboard keys, common abbreviations, or HTML markup.
 ALLOWED_ENGLISH_TOKENS = {
     # Brand / product names
-    "AnkiTov", "Anki",
+    "AnkiTov", "Anki", "AnkiWeb",
+    # Scheduling algorithm name (FSRS-6, proper noun)
+    "FSRS",
     # File extensions & format names
     "apkg", "xlsx", "csv", "tsv", "CSV", "TSV", "Excel",
     # Units
@@ -36,6 +38,8 @@ ALLOWED_ENGLISH_TOKENS = {
     "Shift", "Enter", "Ctrl", "Alt", "Tab", "Esc", "Escape",
     # Common abbreviations that appear in UI
     "ID", "AI", "URL", "FAQ",
+    # URL scheme literals (language-neutral protocol identifiers)
+    "http", "https",
     # HTML tag names (these appear as part of markup)
     "h2", "h3", "p", "ol", "li", "ul", "strong", "em", "div", "span",
     "table", "tr", "th", "td", "thead", "tbody", "br", "hr", "img", "a",
@@ -158,12 +162,18 @@ def check_html_wiring(all_keys: set[str]) -> int:
     """Check that all locale keys are referenced in the HTML."""
     print("\n─── HTML Wiring ───")
     errors = 0
-    html_path = "backend/resources/dashboard/imp-console.html"
-    with open(html_path) as f:
-        html = f.read()
-
-    html_keys = set(re.findall(r'data-i18n[-\w]*=[\'"]([^\'"]+)[\'"]', html))
-    html_keys |= set(re.findall(r"t\(['\"]([^'\"]+)['\"]\)", html))
+    html_paths = [
+        "backend/resources/dashboard/imp-console.html",
+        "backend/resources/dashboard/setup.html",
+    ]
+    html_keys = set()
+    for html_path in html_paths:
+        with open(html_path) as f:
+            html = f.read()
+        html_keys |= set(re.findall(r'data-i18n[-\w]*=[\'"]([^\'"]+)[\'"]', html))
+        html_keys |= set(re.findall(r"t\(['\"]([^'\"]+)['\"]\)", html))
+        # tr(key, fallback) helper used by standalone pages (setup.html)
+        html_keys |= set(re.findall(r"\btr\(['\"]([^'\"]+)['\"]\s*[,)]", html))
 
     unwired = all_keys - html_keys if all_keys else set()
     if unwired:

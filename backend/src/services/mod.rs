@@ -58,6 +58,8 @@ pub mod capsule_generator_job;
 pub mod telemetry_ingestor;
 pub mod track_health;
 pub mod audit_logger;
+pub mod admin_bootstrap;
+pub mod settings;
 pub mod rig_nlu;
 pub mod student_import;
 pub mod sync_user;

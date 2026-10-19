@@ -28,6 +28,7 @@ pub mod sync;
 pub mod track_profiles;
 pub mod tracks;
 pub mod profile_assignments;
+pub mod settings;
 pub mod teachers;
 
 use utoipa::OpenApi;

@@ -31,9 +31,57 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 2rem;
+      padding: 2rem 2.25rem;
       width: 100%;
-      max-width: 420px;
+      max-width: 480px;
+    }
+    /* ── Step indicator ─────────────────────────────────────────── */
+    .steps {
+      display: flex;
+      gap: 0.375rem;
+      list-style: none;
+      margin-bottom: 1.5rem;
+    }
+    .step {
+      flex: 1;
+      text-align: center;
+    }
+    .step-dot {
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.375rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .step.active .step-dot {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .step.done-step .step-dot {
+      background: var(--ok);
+      border-color: var(--ok);
+      color: #fff;
+    }
+    .step-label {
+      font-size: 0.6875rem;
+      color: var(--muted);
+      display: block;
+    }
+    .step.active .step-label { color: var(--text); }
+    /* ── Step panes ─────────────────────────────────────────────── */
+    section[hidden] { display: none; }
+    .step-pane { animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: none; }
     }
     h1 {
       font-size: 1.25rem;
@@ -43,10 +91,9 @@
       color: var(--muted);
       font-size: 0.875rem;
       margin-bottom: 1.5rem;
+      line-height: 1.5;
     }
-    .field {
-      margin-bottom: 1rem;
-    }
+    .field { margin-bottom: 1rem; }
     label {
       display: block;
       font-size: 0.8125rem;
@@ -55,7 +102,9 @@
     }
     input[type="text"],
     input[type="email"],
-    input[type="password"] {
+    input[type="password"],
+    input[type="url"],
+    select {
       width: 100%;
       padding: 0.625rem 0.75rem;
       background: var(--bg);
@@ -64,15 +113,25 @@
       color: var(--text);
       font-size: 0.9375rem;
     }
-    input:focus {
+    input:focus,
+    select:focus {
       outline: none;
       border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.15);
     }
     .hint {
       font-size: 0.75rem;
       color: var(--muted);
       margin-top: 0.25rem;
     }
+    .lang-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .lang-row label { margin: 0; white-space: nowrap; }
+    .lang-row select { flex: 1; width: auto; }
     button {
       width: 100%;
       padding: 0.75rem;
@@ -84,6 +143,7 @@
       font-weight: 600;
       cursor: pointer;
       margin-top: 0.5rem;
+      transition: background 0.15s;
     }
     button:hover { background: var(--accent-hover); }
     button:disabled {
@@ -91,6 +151,22 @@
       color: var(--muted);
       cursor: not-allowed;
     }
+    button.secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-weight: 500;
+    }
+    button.secondary:hover {
+      background: transparent;
+      border-color: var(--muted);
+      color: var(--text);
+    }
+    .row {
+      display: flex;
+      gap: 0.75rem;
+    }
+    .row button { flex: 1; }
     .error {
       display: none;
       background: rgba(255, 92, 92, 0.1);
@@ -107,121 +183,426 @@
       margin-top: 1.25rem;
       line-height: 1.5;
     }
+    /* ── Done-step pointers ─────────────────────────────────────── */
+    .pointers {
+      list-style: none;
+      margin: 0 0 0.25rem;
+      display: grid;
+      gap: 0.75rem;
+    }
+    .pointers li {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+    }
+    .pointers .icon {
+      font-size: 1.125rem;
+      line-height: 1.4;
+    }
+    .pointers strong {
+      display: block;
+      font-size: 0.875rem;
+      margin-bottom: 0.125rem;
+    }
+    .pointers .desc {
+      color: var(--muted);
+      font-size: 0.8125rem;
+      line-height: 1.45;
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Welcome to AnkiTov</h1>
-    <p class="subtitle">Create your school admin account to finish setting up. This screen is only available until the first admin exists.</p>
-    <div class="error" id="error"></div>
-    <form id="setup-form">
-      <div class="field">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" autocomplete="username" required>
+    <ol class="steps">
+      <li class="step" id="stepdot-welcome" aria-current="step">
+        <span class="step-dot" data-step-num="1">1</span>
+        <span class="step-label" data-i18n="setup.step.welcome">Welcome</span>
+      </li>
+      <li class="step" id="stepdot-admin">
+        <span class="step-dot" data-step-num="2">2</span>
+        <span class="step-label" data-i18n="setup.step.admin">Admin account</span>
+      </li>
+      <li class="step" id="stepdot-essentials">
+        <span class="step-dot" data-step-num="3">3</span>
+        <span class="step-label" data-i18n="setup.step.essentials">Essentials</span>
+      </li>
+      <li class="step" id="stepdot-done">
+        <span class="step-dot" data-step-num="4">4</span>
+        <span class="step-label" data-i18n="setup.step.done">Done</span>
+      </li>
+    </ol>
+
+    <!-- Step 1 — Welcome -->
+    <section class="step-pane" id="pane-welcome">
+      <h1 data-i18n="setup.welcome.title">Welcome to AnkiTov</h1>
+      <p class="subtitle" data-i18n="setup.welcome.blurb">Four quick steps and your school's AnkiTov server is ready: create the administrator account, choose your language, and set the essentials.</p>
+      <div class="lang-row">
+        <label for="wizard-lang" data-i18n="setup.welcome.language">Language</label>
+        <select id="wizard-lang">
+          <option value="en-US">🇺🇸 English (US)</option>
+          <option value="ar">🇸🇦 العربية</option>
+          <option value="he">🇮🇱 עברית</option>
+          <option value="fr">🇫🇷 Français</option>
+          <option value="es">🇪🇸 Español</option>
+          <option value="de">🇩🇪 Deutsch</option>
+          <option value="it">🇮🇹 Italiano</option>
+          <option value="ru">🇷🇺 Русский</option>
+          <option value="zh">🇨🇳 简体中文</option>
+          <option value="ko">🇰🇷 한국어</option>
+          <option value="ja">🇯🇵 日本語</option>
+          <option value="pt">🇧🇷 Português (Brasil)</option>
+          <option value="hi">🇮🇳 हिन्दी</option>
+        </select>
       </div>
-      <div class="field">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" autocomplete="email" required>
-        <div class="hint">You'll use this email to log in.</div>
-      </div>
-      <div class="field">
-        <label for="full_name">Full name <span style="opacity:0.6">(optional)</span></label>
-        <input type="text" id="full_name" name="full_name" autocomplete="name">
-      </div>
-      <div class="field">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" autocomplete="new-password" required>
-        <div class="hint">At least 6 characters.</div>
-      </div>
-      <div class="field">
-        <label for="confirm">Confirm password</label>
-        <input type="password" id="confirm" name="confirm" autocomplete="new-password" required>
-      </div>
-      <button type="submit" id="submit-btn">Create admin account</button>
-    </form>
-    <p class="note">Security note: complete setup before exposing AnkiTov to a network. The launcher binds to loopback (localhost only) by default.</p>
+      <button type="button" id="btn-start" data-i18n="setup.welcome.start">Get started</button>
+      <p class="note" data-i18n="setup.welcome.security">Security note: complete setup before exposing AnkiTov to a network. The launcher binds to loopback (localhost only) by default.</p>
+    </section>
+
+    <!-- Step 2 — Admin account -->
+    <section class="step-pane" id="pane-admin" hidden>
+      <h1 data-i18n="setup.admin.title">Create the administrator account</h1>
+      <p class="subtitle" data-i18n="setup.admin.blurb">This account manages teachers, students, and settings. Store the password safely — it cannot be recovered.</p>
+      <div class="error" id="admin-error" role="alert"></div>
+      <form id="admin-form">
+        <div class="field">
+          <label for="username" data-i18n="setup.admin.username">Username</label>
+          <input type="text" id="username" name="username" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="email" data-i18n="setup.admin.email">Email</label>
+          <input type="email" id="email" name="email" autocomplete="email" required>
+          <div class="hint" data-i18n="setup.admin.emailHint">You'll use this email to log in.</div>
+        </div>
+        <div class="field">
+          <label for="full_name"><span data-i18n="setup.admin.fullName">Full name (optional)</span></label>
+          <input type="text" id="full_name" name="full_name" autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="password" data-i18n="setup.admin.password">Password</label>
+          <input type="password" id="password" name="password" autocomplete="new-password" required aria-describedby="password-hint">
+          <div class="hint" id="password-hint" data-i18n="setup.admin.passwordHint">At least 6 characters.</div>
+        </div>
+        <div class="field">
+          <label for="confirm" data-i18n="setup.admin.confirm">Confirm password</label>
+          <input type="password" id="confirm" name="confirm" autocomplete="new-password" required>
+        </div>
+        <div class="row">
+          <button type="button" id="btn-back-admin" class="secondary" data-i18n="setup.admin.back">Back</button>
+          <button type="submit" id="btn-admin" data-i18n="setup.admin.create">Create account</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Step 3 — Essential settings -->
+    <section class="step-pane" id="pane-essentials" hidden>
+      <h1 data-i18n="setup.essentials.title">Essential settings</h1>
+      <p class="subtitle" data-i18n="setup.essentials.blurb">A few basics for your school. Everything here can be changed later in Settings.</p>
+      <div class="error" id="essentials-error" role="alert"></div>
+      <form id="essentials-form">
+        <div class="field">
+          <label for="school-name" data-i18n="setup.essentials.school">School name</label>
+          <input type="text" id="school-name" name="school_name" autocomplete="organization" maxlength="200">
+          <div class="hint" data-i18n="setup.essentials.schoolHint">Appears on reports and exports.</div>
+        </div>
+        <div class="field">
+          <label for="essentials-locale" data-i18n="setup.essentials.locale">Default language</label>
+          <select id="essentials-locale" name="locale">
+            <option value="en-US">🇺🇸 English (US)</option>
+            <option value="ar">🇸🇦 العربية</option>
+            <option value="he">🇮🇱 עברית</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="it">🇮🇹 Italiano</option>
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="zh">🇨🇳 简体中文</option>
+            <option value="ko">🇰🇷 한국어</option>
+            <option value="ja">🇯🇵 日本語</option>
+            <option value="pt">🇧🇷 Português (Brasil)</option>
+            <option value="hi">🇮🇳 हिन्दी</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="sync-url" data-i18n="setup.essentials.sync">Sync server URL (optional)</label>
+          <input type="text" id="sync-url" name="sync_url" maxlength="500" placeholder="https://sync.example.com" inputmode="url">
+          <div class="hint" data-i18n="setup.essentials.syncHint">Leave empty to keep all data on this server.</div>
+        </div>
+        <div class="row">
+          <button type="submit" id="btn-essentials" data-i18n="setup.essentials.save">Save & continue</button>
+          <button type="button" id="btn-skip" class="secondary" data-i18n="setup.essentials.skip">Skip for now</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Step 4 — Done -->
+    <section class="step-pane" id="pane-done" hidden>
+      <h1 data-i18n="setup.done.title">You're all set</h1>
+      <p class="subtitle" data-i18n="setup.done.blurb">Your administrator account is ready. On the next screen, sign in with the email and password you just created.</p>
+      <ul class="pointers">
+        <li>
+          <span class="icon" aria-hidden="true">📚</span>
+          <div>
+            <strong data-i18n="setup.done.deckTitle">Create your first deck</strong>
+            <span class="desc" data-i18n="setup.done.deckDesc">Import an existing deck file or build one from scratch.</span>
+          </div>
+        </li>
+        <li>
+          <span class="icon" aria-hidden="true">🏫</span>
+          <div>
+            <strong data-i18n="setup.done.classTitle">Set up a class</strong>
+            <span class="desc" data-i18n="setup.done.classDesc">Invite students and assign decks for practice.</span>
+          </div>
+        </li>
+        <li>
+          <span class="icon" aria-hidden="true">🧭</span>
+          <div>
+            <strong data-i18n="setup.done.exploreTitle">Explore the dashboard</strong>
+            <span class="desc" data-i18n="setup.done.exploreDesc">Reports, scheduling health, and settings live in the sidebar.</span>
+          </div>
+        </li>
+      </ul>
+      <button type="button" id="btn-go" data-i18n="setup.done.go">Go to dashboard</button>
+    </section>
   </div>
 
+  <script src="/dashboard/i18n.js"></script>
+  <link rel="stylesheet" href="/dashboard/rtl.css" id="rtl-css" disabled>
   <script>
-    const errBox = document.getElementById('error');
-    function showError(msg) {
-      errBox.textContent = msg;
-      errBox.style.display = 'block';
-    }
+    (function () {
+      'use strict';
 
-    // If setup is already complete (an admin exists), bounce to the dashboard
-    // so a stale tab can't re-open the wizard.
-    (async () => {
-      try {
-        const resp = await fetch('/api/v1/setup/status');
-        if (resp.ok) {
-          const body = await resp.json();
-          if (!body.setup_required) {
-            window.location.replace('/dashboard');
-          }
+      var STEPS = ['welcome', 'admin', 'essentials', 'done'];
+      // The JWT minted by POST /api/v1/setup lives in memory only (same
+      // posture as the dashboard Session module) — it authorizes the
+      // essential-settings PUT below and is dropped when the page unloads.
+      var adminToken = null;
+
+      function $(id) { return document.getElementById(id); }
+
+      // Translation with English fallback: used when i18n.js failed to load
+      // or a key is missing, so the wizard is never a wall of raw key names.
+      function tr(key, fallback) {
+        if (typeof I18n !== 'undefined') {
+          var v = I18n.t(key);
+          if (v && v !== key) return v;
         }
-      } catch (e) { /* status unreachable — leave the form visible */ }
-    })();
-
-    document.getElementById('setup-form').addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      errBox.style.display = 'none';
-
-      const username = document.getElementById('username').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const full_name = document.getElementById('full_name').value.trim();
-      const password = document.getElementById('password').value;
-      const confirm = document.getElementById('confirm').value;
-
-      if (!username || !email || !password) {
-        showError('Username, email, and password are required.');
-        return;
-      }
-      if (password.length < 6) {
-        showError('Password must be at least 6 characters.');
-        return;
-      }
-      if (password !== confirm) {
-        showError('Passwords do not match.');
-        return;
+        return fallback;
       }
 
-      const btn = document.getElementById('submit-btn');
-      btn.disabled = true;
-      btn.textContent = 'Creating account…';
+      function showError(id, msg) {
+        var el = $(id);
+        el.textContent = msg;
+        el.style.display = 'block';
+      }
+      function hideError(id) { $(id).style.display = 'none'; }
 
-      try {
-        const resp = await fetch('/api/v1/setup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username,
-            email,
-            password,
-            full_name: full_name || null
-          })
+      function showStep(name, focus) {
+        var idx = STEPS.indexOf(name);
+        STEPS.forEach(function (s, i) {
+          $('pane-' + s).hidden = s !== name;
+          var li = $('stepdot-' + s);
+          var dot = li.querySelector('.step-dot');
+          li.classList.toggle('active', s === name);
+          li.classList.toggle('done-step', i < idx);
+          dot.textContent = i < idx ? '✓' : dot.getAttribute('data-step-num');
+          if (s === name) {
+            li.setAttribute('aria-current', 'step');
+          } else {
+            li.removeAttribute('aria-current');
+          }
         });
-        if (resp.ok) {
-          // Admin created — the setup endpoint is now atomically disabled.
-          // The dashboard console is loopback-local and needs no token.
-          window.location.replace('/dashboard');
+        if (name === 'essentials') {
+          // Default language starts from the language chosen in step 1.
+          $('essentials-locale').value = (typeof I18n !== 'undefined') ? I18n.getLocale() : 'en-US';
+        }
+        if (focus !== false) {
+          var first = $('pane-' + name).querySelector('input, select, button');
+          if (first) first.focus();
+        }
+      }
+
+      // If setup is already complete (an admin exists), bounce to the
+      // dashboard so a stale tab can't re-open the wizard.
+      (async function () {
+        try {
+          var resp = await fetch('/api/v1/setup/status');
+          if (resp.ok) {
+            var body = await resp.json();
+            if (!body.setup_required) window.location.replace('/dashboard');
+          }
+        } catch (e) { /* status unreachable — leave the wizard visible */ }
+      })();
+
+      // i18n boot: detect locale, load messages, apply direction (RTL for
+      // ar/he) and translations. English fallback text stays visible until
+      // (and unless) a translation arrives.
+      (async function () {
+        if (typeof I18n === 'undefined') return;
+        try { await I18n.init(); } catch (e) { /* English fallback stays */ }
+        var sel = $('wizard-lang');
+        if (I18n.getSupportedLocales().some(function (l) { return l.code === I18n.getLocale(); })) {
+          sel.value = I18n.getLocale();
+        }
+      })();
+
+      // Step 1 language select re-localizes the whole wizard immediately.
+      $('wizard-lang').addEventListener('change', function (ev) {
+        if (typeof I18n !== 'undefined') I18n.setLocale(ev.target.value);
+      });
+
+      // Step 3 locale select is the app default — mirror it live so what you
+      // pick is what you see for the rest of the wizard.
+      $('essentials-locale').addEventListener('change', function (ev) {
+        if (typeof I18n !== 'undefined') I18n.setLocale(ev.target.value);
+      });
+
+      // Step 1 → 2
+      $('btn-start').addEventListener('click', function () { showStep('admin'); });
+
+      // Step 2 → 1 (back): correct the language choice before the account
+      // is created. Form entries persist in the DOM, nothing is lost.
+      $('btn-back-admin').addEventListener('click', function () { showStep('welcome'); });
+
+      // Step 2 — create the administrator account.
+      $('admin-form').addEventListener('submit', async function (ev) {
+        ev.preventDefault();
+        hideError('admin-error');
+
+        var username = $('username').value.trim();
+        var email = $('email').value.trim();
+        var fullName = $('full_name').value.trim();
+        var password = $('password').value;
+        var confirm = $('confirm').value;
+
+        $('password').removeAttribute('aria-invalid');
+        $('confirm').removeAttribute('aria-invalid');
+        if (password.length < 6) {
+          $('password').setAttribute('aria-invalid', 'true');
+          $('password').focus();
+          showError('admin-error', tr('setup.admin.short', 'Password must be at least 6 characters.'));
           return;
         }
-        let msg = 'Setup failed (' + resp.status + ').';
+        if (password !== confirm) {
+          $('confirm').setAttribute('aria-invalid', 'true');
+          $('confirm').focus();
+          showError('admin-error', tr('setup.admin.mismatch', 'Passwords do not match.'));
+          return;
+        }
+
+        var btn = $('btn-admin');
+        var btnLabel = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = tr('setup.admin.creating', 'Creating account…');
         try {
-          const body = await resp.json();
-          if (body && (body.description || body.error)) {
-            msg = body.description || body.error;
+          var resp = await fetch('/api/v1/setup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username: username,
+              email: email,
+              password: password,
+              full_name: fullName || null
+            })
+          });
+          if (resp.ok) {
+            var body = await resp.json().catch(function () { return {}; });
+            adminToken = body.token || null;
+            // Admin created — the setup endpoint is now atomically disabled.
+            showStep('essentials');
+            return;
           }
-        } catch (e) { /* non-JSON error body */ }
-        showError(msg);
-      } catch (e) {
-        showError('Network error: ' + e.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Create admin account';
-      }
-    });
+          if (resp.status === 409) {
+            // Someone else completed setup (or a double submit won the race).
+            showError('admin-error', tr('setup.admin.exists', 'Setup was already completed — taking you to the sign-in page.'));
+            setTimeout(function () { window.location.replace('/dashboard'); }, 2500);
+            return;
+          }
+          var msg = tr('setup.admin.failed', 'Could not create the account:');
+          try {
+            var errBody = await resp.json();
+            if (errBody && (errBody.description || errBody.error)) msg = errBody.description || errBody.error;
+          } catch (e) { /* non-JSON error body */ }
+          showError('admin-error', msg);
+        } catch (e) {
+          showError('admin-error', tr('setup.admin.errorGeneric', 'Something went wrong — check your connection and try again.'));
+        } finally {
+          btn.disabled = false;
+          btn.textContent = btnLabel;
+        }
+      });
+
+      // Step 3 — essential settings (all optional; saved with the admin JWT).
+      $('essentials-form').addEventListener('submit', async function (ev) {
+        ev.preventDefault();
+        hideError('essentials-error');
+
+        var school = $('school-name').value.trim();
+        var locale = $('essentials-locale').value;
+        var syncUrl = $('sync-url').value.trim();
+
+        $('sync-url').removeAttribute('aria-invalid');
+        if (syncUrl && !/^https?:\/\//i.test(syncUrl)) {
+          $('sync-url').setAttribute('aria-invalid', 'true');
+          $('sync-url').focus();
+          showError('essentials-error', tr('setup.essentials.syncInvalid', 'The sync URL must start with http:// or https://.'));
+          return;
+        }
+
+        var patch = { locale: locale };
+        if (school) patch.school_name = school;
+        if (syncUrl) patch.sync_url = syncUrl;
+
+        var headers = { 'Content-Type': 'application/json' };
+        if (adminToken) headers['Authorization'] = 'Bearer ' + adminToken;
+
+        var btn = $('btn-essentials');
+        var btnLabel = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = tr('setup.essentials.saving', 'Saving…');
+        try {
+          var resp = await fetch('/api/v1/management/settings', {
+            method: 'PUT',
+            headers: headers,
+            body: JSON.stringify(patch)
+          });
+          if (resp.ok) {
+            showStep('done');
+            return;
+          }
+          if (resp.status === 401) {
+            // The in-memory JWT is gone (tab slept or refreshed) — the
+            // friendly way out is Skip; settings stay editable later.
+            showError('essentials-error', tr('setup.essentials.errorGeneric', 'Something went wrong — you can skip this step and change it later in Settings.'));
+            return;
+          }
+          var msg = tr('setup.essentials.failed', 'Could not save settings:');
+          try {
+            var errBody = await resp.json();
+            if (errBody && (errBody.description || errBody.error)) msg = errBody.description || errBody.error;
+          } catch (e) { /* non-JSON error body */ }
+          showError('essentials-error', msg);
+        } catch (e) {
+          showError('essentials-error', tr('setup.essentials.errorGeneric', 'Something went wrong — you can skip this step and change it later in Settings.'));
+        } finally {
+          btn.disabled = false;
+          btn.textContent = btnLabel;
+        }
+      });
+
+      // Skipping essentials is always allowed — settings are editable later.
+      $('btn-skip').addEventListener('click', function () { showStep('done'); });
+
+      // Step 4 → dashboard. The JWT is NOT handed over (the dashboard keeps
+      // tokens in memory only), so the user signs in once with the account
+      // they just created — the done screen says exactly that.
+      $('btn-go').addEventListener('click', function () { window.location.replace('/dashboard'); });
+
+      showStep('welcome', false);
+    })();
   </script>
 </body>
 </html>
