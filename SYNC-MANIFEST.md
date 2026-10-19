@@ -1,13 +1,13 @@
 # SYNC-MANIFEST
 
-- monorepo ref: 457234b5
-- exported at: 2026-10-19T18:34:34Z
+- monorepo ref: 401a6d61
+- exported at: 2026-10-19T21:14:14Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
 ## sha256 checksums
 ```
-32b9c2d284339cd2ab5bb229ec9caa20313ab5d5da0996c74536a514971ebe5b  .github/workflows/release.yml
+197dbba9323c560fff215e784c4471595746824d4e70f29bf1a9f83f158c1486  .github/workflows/release.yml
 ada47362899add07df543de3051b80e6d9532fca7131b7fe5701fb754aa65ee2  Caddyfile
 3c49896dcb11ef377277894155b72f41d7fbc8b6ed34c66fa62baf6e7333d48b  Cargo.lock
 e2c43209506ad84d8f2b561c3e9eb7d726eaa5408544d0f158cd7b6ea827663e  Cargo.toml

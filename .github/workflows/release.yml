@@ -4,8 +4,9 @@
 # checksummed, and attached to the Release the download page links to.
 #
 # ── WHERE THIS RUNS ─────────────────────────────────────────────────────────
-# The PUBLIC MIRROR (yitzhakbg/AnkiTov) only. The private repo's Actions minutes
-# are exhausted until 2026-11-01 (every private workflow is `if: false`-paused),
+# The PUBLIC MIRROR (yitzhakbg/AnkiTov) only. The private repo's Actions quota
+# was exhausted in Oct 2026 (all private workflows were `if: false`-paused;
+# pause lifted 2026-10-20 after the billing-cycle reset prep + mirror re-export),
 # while public repos get free standard-runner minutes. Every job therefore
 # guards on `github.repository == 'yitzhakbg/AnkiTov'` — a tag pushed on the
 # private repo is a no-op instead of a quota burn. Flow: merge to main → mirror
