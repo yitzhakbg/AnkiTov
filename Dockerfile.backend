@@ -40,6 +40,9 @@ COPY --from=builder /build/target/release/backend /app/ankitov-backend
 COPY backend/config /app/config
 COPY backend/resources /app/resources
 COPY backend/i18n /app/i18n
+# Deck Library: bundled seed packages for one-click import from the dashboard
+COPY content/seed/packages /app/ankitov/content/seed/packages
+COPY content/seed/manifest.json /app/ankitov/content/seed/manifest.json
 
 # Create directories for logs and data
 RUN mkdir -p /app/logs /app/data /etc/ankitov && \

@@ -2527,6 +2527,20 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
           <p data-i18n="decks.subtitle">Upload, distribute, and manage Anki decks for your students.</p>
         </div>
 
+        <!-- Deck Library: one-click add from bundled packages -->
+        <div class="card" id="deck-library-card" style="margin-bottom:var(--space-4)">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:var(--space-3);flex-wrap:wrap">
+            <h2 style="font-size:1.05rem;margin:0">📚 Deck Library</h2>
+            <span style="opacity:.65;font-size:.85rem">Bundled AnkiTov decks — click Add to include one. No download or import needed.</span>
+          </div>
+          <div style="overflow-x:auto;margin-top:var(--space-3)">
+            <table class="table" style="width:100%">
+              <thead><tr><th>Deck</th><th>Cards</th><th>Language</th><th>Size</th><th>Status</th><th></th></tr></thead>
+              <tbody id="deck-library-body"><tr><td colspan="6" style="opacity:.65">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
         <div class="file-upload-zone" id="deck-upload-zone">
           <div class="file-upload-zone__icon">📤</div>
           <div class="file-upload-zone__text" data-i18n="decks.uploadText">Click to upload or drag &amp; drop an <code>.apkg</code> file</div>
@@ -4334,6 +4348,7 @@ const Decks = {
   },
 
   async loadDecks() {
+    this.loadLibrary();
     const container = document.getElementById('deck-list-container');
     try {
       const data = await API.get('/decks');
@@ -4370,6 +4385,51 @@ const Decks = {
         <strong>⚠️ ${API.humanizeError(err)}</strong>
         <button class="btn btn-sm btn-secondary" style="margin-left:var(--space-2)" onclick="Decks.loadDecks()">${t('btn.retry')}</button>
       </div>`;
+    }
+  },
+
+  // ── Deck Library: bundled seed decks, one-click add ──
+  async loadLibrary() {
+    const tbody = document.getElementById('deck-library-body');
+    if (!tbody) return;
+    try {
+      const decks = await API.get('/decks/available');
+      if (!decks.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="opacity:.65">No bundled decks found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = decks.map(d => {
+        const sizeMb = (d.file_size_bytes / 1048576).toFixed(1);
+        const cards = (d.card_count != null) ? d.card_count : '—';
+        const lang = d.language ? d.language : '—';
+        const status = d.imported
+          ? '<span style="color:var(--color-success-500);font-weight:600">✓ Added</span>'
+          : '<span style="opacity:.65">Not added</span>';
+        const action = d.imported
+          ? '<button class="btn btn-sm" disabled>Added</button>'
+          : `<button class="btn btn-sm btn-primary" onclick="Decks.importFromLibrary('${d.package}')">Add</button>`;
+        return `<tr><td><strong>${d.name}</strong></td><td>${cards}</td><td>${lang}</td><td>${sizeMb} MB</td><td>${status}</td><td>${action}</td></tr>`;
+      }).join('');
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="6" style="color:var(--color-error-500)">⚠ ${API.humanizeError(err)}</td></tr>`;
+    }
+  },
+
+  async importFromLibrary(packageName) {
+    const tbody = document.getElementById('deck-library-body');
+    const btn = tbody && tbody.querySelector(`button[onclick*="'${packageName}'"]`);
+    if (btn) { btn.disabled = true; btn.textContent = 'Adding…'; }
+    try {
+      const data = await API.post(`/decks/available/${encodeURIComponent(packageName)}/import`);
+      if (data && data.success === false) {
+        throw { message: data.message || 'Import failed' };
+      }
+      await this.loadLibrary();
+      await this.loadDecks();
+    } catch (err) {
+      const msg = (err && err.message && !err.status) ? err.message : API.humanizeError(err);
+      alert(`Failed to add deck: ${msg}`);
+      if (btn) { btn.disabled = false; btn.textContent = 'Add'; }
     }
   },
 

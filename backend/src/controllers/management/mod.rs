@@ -19,6 +19,7 @@ pub mod capsule_sessions;
 pub mod classes;
 pub mod compliance;
 pub mod decks;
+pub mod deck_library;
 pub mod probe;
 pub mod producers;
 pub mod jev;
@@ -56,6 +57,9 @@ const TAG: &str = "Management Console";
         decks::get_deck,
         decks::delete_deck,
         decks::distribute_deck,
+        // Deck Library (one-click import)
+        deck_library::list_available_decks,
+        deck_library::import_available_deck,
         // Producers (P1: producer upload + verification)
         producers::create_producer,
         producers::list_producers,
@@ -136,6 +140,7 @@ const TAG: &str = "Management Console";
     components(
         schemas(
             crate::models::management::DeckInfo,
+            crate::controllers::management::deck_library::AvailableDeck,
             crate::models::management::DeckDistributionResponse,
             crate::models::management::ClassOverviewStats,
             crate::models::management::DailyRetention,

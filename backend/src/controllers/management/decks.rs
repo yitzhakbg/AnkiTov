@@ -31,6 +31,9 @@ pub fn routes() -> Routes {
         // P2 minimal deck-track binding
         .add("/:deck_id/track", put(bind_deck_track))
         .add("/:deck_id/track", delete(unbind_deck_track))
+        // Deck Library — one-click import of bundled seed decks
+        .add("/available", get(super::deck_library::list_available_decks))
+        .add("/available/:name/import", post(super::deck_library::import_available_deck))
 }
 
 // ---------------------------------------------------------------------------

@@ -290,12 +290,32 @@ impl Verifier for AnkiVerifier {
         let client =
             crate::services::anki_connect::AnkiConnectClient::new(self.port, None);
 
-        // 2. Import into the dedicated verification collection (namespaced deck).
-        let verification_deck = format!("{VERIFICATION_DECK_PREFIX}::{deck_name}");
+        // 2. Import into the dedicated verification collection. AnkiConnect's
+        //    importPackage takes only the package path — the deck name comes
+        //    from inside the package, so resolve it by diffing deckNames
+        //    across the import (falls back to the namespaced prefix if the
+        //    diff is unavailable).
+        let before: std::collections::HashSet<String> = client
+            .deck_names()
+            .await
+            .map(|names| names.into_iter().collect())
+            .unwrap_or_default();
         client
-            .import_package(&apkg_path.display().to_string(), &verification_deck)
+            .import_package(&apkg_path.display().to_string())
             .await
             .map_err(|e| VerificationError::Backend(e.to_string()))?;
+        let verification_deck = match client.deck_names().await {
+            Ok(after) => {
+                let mut new_decks: Vec<String> =
+                    after.into_iter().filter(|n| !before.contains(n)).collect();
+                new_decks.sort();
+                new_decks
+                    .into_iter()
+                    .next()
+                    .unwrap_or_else(|| format!("{VERIFICATION_DECK_PREFIX}::{deck_name}"))
+            }
+            Err(_) => format!("{VERIFICATION_DECK_PREFIX}::{deck_name}"),
+        };
 
         // 3. Real card count via findCards on the verification deck.
         let query = format!("deck:\"{verification_deck}\"");

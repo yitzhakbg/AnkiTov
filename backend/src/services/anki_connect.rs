@@ -105,7 +105,6 @@ pub struct ExportPackageParams {
 #[derive(Debug, serde::Serialize)]
 pub struct ImportPackageParams {
     pub path: String,
-    pub deck: String,
 }
 
 
@@ -431,12 +430,16 @@ impl AnkiConnectClient {
     ///
     /// Anki handles schema migration, notetype resolution, and scheduling
     /// reset. This is the only safe import path.
-    pub async fn import_package(&self, path: &str, deck: &str) -> Result<bool, AnkiConnectError> {
+    ///
+    /// AnkiConnect's `importPackage` accepts only the package path — the
+    /// deck name comes from inside the package (extra params are rejected
+    /// with an "unexpected keyword argument" error). Callers that need the
+    /// imported deck's name should diff `deck_names()` across the call.
+    pub async fn import_package(&self, path: &str) -> Result<bool, AnkiConnectError> {
         self.invoke(
             "importPackage",
             ImportPackageParams {
                 path: path.to_string(),
-                deck: deck.to_string(),
             },
         )
         .await
