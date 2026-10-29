@@ -33,7 +33,7 @@ Access the management console at `http://localhost:3000` (or your configured dom
 
 New here? Start with the tour:
 
-- **Video tour:** [AnkiTov Community Tour — A Developer's Guide](https://youtu.be/dHomDENuuaU) — a guided walkthrough of the architecture, the Interleaved Mastery Pipeline, browser streaming, and self-hosting.
+- **Video tour:** [AnkiTov Community Tour — A Developer's Guide](https://youtu.be/WLB1sFv6w3M) — a guided walkthrough of the architecture, the Interleaved Mastery Pipeline, browser streaming, and self-hosting.
 - **Slideshow:** [AnkiTov Community Tour slides](https://notebooklm.link.google/1h1gvurWhbCe) — the same tour as a flip-through deck.
 
 Documentation:
