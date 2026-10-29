@@ -6,9 +6,11 @@
 
 ## 1. The AnkiTov Name and Branding
 
-The **AnkiTov** name, logos, product names, and associated branding elements are proprietary trademarks of the AnkiTov project owners. They are **not** licensed under the GNU Affero General Public License (AGPL-3.0-only) or Creative Commons (CC0-1.0).
+The **AnkiTov™** name, logos, product names, and associated branding elements are proprietary trademarks of the AnkiTov project owners. They are **not** licensed under the GNU Affero General Public License (AGPL-3.0-only) or Creative Commons (CC0-1.0).
 
 While the underlying software source code in this repository is distributed under the AGPL-3.0-only license, you are not granted trademark rights to use the name "AnkiTov" or project logos in modified distributions or commercial forks.
+
+**First public use of the AnkiTov™ mark:** October 2026 — public release v1.0.0 (2026-10-16) on GitHub; public web presence at ankitov.org from 2026-10-19. Common-law trademark rights attach to use of a mark in commerce; the ™ symbol accompanies the name on first prominent use in project materials. The ® symbol is reserved and will be used only upon federal registration.
 
 ---
 
