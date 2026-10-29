@@ -29,6 +29,22 @@ Access the management console at `http://localhost:3000` (or your configured dom
 
 ---
 
+## Project Tour & Documentation
+
+New here? Start with the tour:
+
+- **Video tour:** [AnkiTov Community Tour — A Developer's Guide](https://youtu.be/dHomDENuuaU) — a guided walkthrough of the architecture, the Interleaved Mastery Pipeline, browser streaming, and self-hosting.
+- **Slideshow:** [AnkiTov Community Tour slides](https://notebooklm.link.google/1h1gvurWhbCe) — the same tour as a flip-through deck.
+
+Documentation:
+
+- **mdBook guide (published):** [yitzhakbg.github.io/ankitov-docs](https://yitzhakbg.github.io/ankitov-docs/) — architecture, development guide, and the IMP reference.
+- **In-repo docs:** [`docs/src/`](docs/src/) — the mdBook source, including [`architecture.md`](docs/src/architecture.md) and [`contributing.md`](docs/src/contributing.md).
+- **API reference:** run the backend and open [`/scalar`](http://localhost:5150/scalar) (OpenAPI JSON at `/api/v1/openapi.json`).
+- **Docs repo:** [github.com/yitzhakbg/ankitov-docs](https://github.com/yitzhakbg/ankitov-docs).
+
+---
+
 ## Licenses
 
 - Code, documentation, and configuration files are licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0-only)**. See [LICENSE](LICENSE) for details.
