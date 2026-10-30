@@ -1,7 +1,7 @@
 # SYNC-MANIFEST
 
-- monorepo ref: 17a2359de0e6
-- exported at: 2026-10-30T08:03:35Z
+- monorepo ref: orlrmqrtonnq
+- exported at: 2026-10-30T10:35:23Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
@@ -135,7 +135,7 @@ e75948125a2643326bfaebc34eaddb1f96141d9296888382ed76f34063d435a9  backend/src/mo
 170d593b052f15a943c24d4fcf105d13c84e2599a38c2fa8165d370a9b7a03bd  backend/src/models/entities/track_profile.rs
 e165fe4e86c32745eecfffc916591c9043c75f61d3e761e4825e82e9e6f4e020  backend/src/models/entities/track_profile_track.rs
 cd51af3f5456f067630f9ac53e3c9f523971705369ac8f6b20d4aabb6bd810ef  backend/src/models/entities/user.rs
-6681be7a14ce10cdd22ad29d1336d0b68ba430b903c6846643c21085d58c010e  backend/src/models/entities/web_review_log.rs
+b9a00488cd7ef7ad8bceac25a6117fd0033753b27cfeb007e87ca607438563e1  backend/src/models/entities/web_review_log.rs
 8ac58bd9fc22ef03d914775be9485ca515d05b46d361b76babde93dbd667723c  backend/src/models/management.rs
 3f3e725132c80e04a66a9721fc08e0219d37167c94ce0636132eb279bee186f1  backend/src/models/mod.rs
 4692558c311c544b1afee7dd559f4f1ab2b852159ff0b800693978b72eebb35d  backend/src/models/retention.rs
@@ -157,8 +157,8 @@ d2785b58e70342730b2613624b5af04fd5102f99b7d22c3ffa218d19b4987ca3  backend/src/se
 896597c2a45dde7c5c38045bbdb5fd82123ef00a46bc23388262ca1e805f059d  backend/src/services/deck_health.rs
 0dc40c2e277caa04b83c50b6ef8a5359ca8dfaa1ce074d38c92d6ef91cf39f83  backend/src/services/deck_verification.rs
 63c6e247c3e49a05a7804c0195cf45d533c0ba8cd8227c56951d8d1425af6992  backend/src/services/forensic_reader.rs
-ed055f5e514b582ce18f336abbea54617252bccb025fef701145180f39f157a5  backend/src/services/fsrs_sort.rs
-a56ac5efb4bf32afa11de55feed1026b07cce7fa9363dae49c2d3ea48b7d6660  backend/src/services/fsrs_state.rs
+b9049479276292cd8fcd076aed65c748da98fcaaefbb31a96850bbc06695b655  backend/src/services/fsrs_sort.rs
+719ae980e492e7b7add76dde2cd321712c18f188d0ae2c3f001542c64934abfb  backend/src/services/fsrs_state.rs
 d028dda76742c6cb81edba0b38d361803a4b5a6a9bd1ad2ce07e825f0aad16dc  backend/src/services/jev_translator.rs
 d0306f0528b90a8598a4e7072cd144992ce3ce8b9590d77afa080326222fe27b  backend/src/services/mod.rs
 b65ac2fd74687b56d1338b165b54d25a20e1e5aee4d813a6895f99d8cd316d9d  backend/src/services/password_policy.rs
@@ -261,9 +261,9 @@ b943b28d784bcb974a8cdced5e4973f89fef0b3d6d6c79938c1506251a83f9fc  docs/src/refer
 b6df84512a635d73d72cae6d059b9749041009b16a55d1b938741105ee697ffb  docs/src/reference/rustdoc.md
 c34a9343072548833bf35a9dbd5bd34b3a199d71bde4b94d679e4bf92df08994  packaging/.DS_Store
 126f9a724287f6c66c0495346f6f6ffb13d8699cec7394ce11785948296a1f20  packaging/README.md
-591edf8fc1138180ec882213da0cb1b9e8ab07d6f2a23abbd87875d5406425a6  packaging/assemble.sh
-d3bf04e3137850271fe817d40fee76392882a1680be511c12eb5ef39b88f0125  packaging/launch/ankitov-launch.sh
-7ad1fde9340586863737133486c59b786fadb0692948dcab0d7842521567c4cf  packaging/launch/start-ankitov.bat
+876da13b3501d336b328db908ab32d1a960403d2e20c4d65e21eb066b0eda339  packaging/assemble.sh
+cce1a19b73536878bd7187289127bee97772b91b464d88b0b41b24660e3827df  packaging/launch/ankitov-launch.sh
+b8751ba2d302229ecf93a3ab8550fe0d0071e57a3a3821cea241e5e99c0dcb82  packaging/launch/start-ankitov.bat
 5280a42f23c24bb7f5a355814732333c202839042c3cc320b4d5be97b57ad3b4  packaging/linux/ankitov.desktop
 8bbb687d6e1c8ab55366324ac2ebc1bf10883241cd5bb8f05f1d5bdfabc62794  packaging/macos/Info.plist
 812dd8059756fbc301e337bb6d86669715c2d24075db44112f0ffa95e3b79fe8  packaging/smoke.ps1

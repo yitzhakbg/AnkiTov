@@ -271,7 +271,7 @@ pub async fn fetch_and_sort_cached(
     // ── Sync phase: every snapshot touch happens inside this block so the
     //    rusqlite connection is never held across an `.await` (rusqlite is
     //    !Sync; the generation future must stay Send for tokio::spawn).
-    let prepared = {
+    let mut prepared = {
         let (conn, ctx) = open_collection(anki2_path)?;
         let cards = query_due_cards(&conn, tags, ctx)?;
         // New cards are sentinel-scored; only learning/review cards need
@@ -293,7 +293,7 @@ pub async fn fetch_and_sort_cached(
     }; // connection dropped here
 
     // ── Async phase: backend DB only (cache-aside state resolution).
-    let states = fsrs_state::ensure_states(db, student_id, &prepared.snapshot).await?;
+    let states = fsrs_state::ensure_states(db, student_id, &mut prepared.snapshot).await?;
 
     // ── Sync phase: pure ranking + sort.
     let recall = |facts: &CardFacts, ctx: &RecallCtx| fsrs_recall(facts, ctx, &states);

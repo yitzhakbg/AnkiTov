@@ -53,6 +53,19 @@ mkdir -p "$OUT"
 note() { printf 'assemble: %s\n' "$1"; }
 warn() { printf 'assemble: WARNING: %s\n' "$1" >&2; }
 
+# Seed deck packs (content/seed/packages/*.apkg) ship inside every artifact so
+# the Solo Web Reviewer's import-seed endpoint works with zero external setup
+# (~1.3MB, no media). $1 = stage dir that should contain content/seed (the
+# launcher's APP_DIR).
+copy_seed_packs() {
+  if [ -d "$REPO_ROOT/content/seed/packages" ]; then
+    mkdir -p "$1/content/seed"
+    cp -R "$REPO_ROOT/content/seed/packages" "$1/content/seed/packages"
+  else
+    warn "no seed packs at $REPO_ROOT/content/seed/packages; artifact ships without them"
+  fi
+}
+
 # ---------------------------------------------------------------------------
 # macOS: AnkiTov.app + .dmg
 # ---------------------------------------------------------------------------
@@ -70,6 +83,7 @@ assemble_macos() {
   # bootstraps its config copy from this bundled one on first run.
   mkdir -p "$APP/Contents/MacOS/config"
   cp "$REPO_ROOT/backend/config/production.yaml" "$APP/Contents/MacOS/config/production.yaml"
+  copy_seed_packs "$APP/Contents/MacOS"
 
   # Phase 1 signing: ad-hoc (no Developer ID yet). Gatekeeper guidance lives in
   # the download page; Developer ID + notarytool is Phase 2.
@@ -122,6 +136,7 @@ EOF
   chmod +x "$ROOT/opt/ankitov/ankitov-launch" "$ROOT/opt/ankitov/backend"
   mkdir -p "$ROOT/opt/ankitov/config"
   cp "$REPO_ROOT/backend/config/production.yaml" "$ROOT/opt/ankitov/config/production.yaml"
+  copy_seed_packs "$ROOT/opt/ankitov"
   sed "s|@EXEC@|/opt/ankitov/ankitov-launch start|" "$PKG_DIR/linux/ankitov.desktop" \
     > "$ROOT/usr/share/applications/ankitov.desktop"
   for f in LICENSE COPYRIGHT; do
@@ -149,6 +164,7 @@ EOF
     chmod +x "$APPDIR/usr/bin/ankitov-launch" "$APPDIR/usr/bin/backend"
     mkdir -p "$APPDIR/usr/bin/config"
     cp "$REPO_ROOT/backend/config/production.yaml" "$APPDIR/usr/bin/config/production.yaml"
+    copy_seed_packs "$APPDIR/usr/bin"
     sed "s|@EXEC@|ankitov-launch start|" "$PKG_DIR/linux/ankitov.desktop" \
       > "$APPDIR/ankitov.desktop"
     printf '#!/bin/sh\nexec "$APPDIR/usr/bin/ankitov-launch" "$@"\n' > "$APPDIR/AppRun"
@@ -175,6 +191,7 @@ EOF
   chmod +x "$TARBALL_STAGE/ankitov-$VERSION/ankitov-launch" "$TARBALL_STAGE/ankitov-$VERSION/backend"
   mkdir -p "$TARBALL_STAGE/ankitov-$VERSION/config"
   cp "$REPO_ROOT/backend/config/production.yaml" "$TARBALL_STAGE/ankitov-$VERSION/config/production.yaml"
+  copy_seed_packs "$TARBALL_STAGE/ankitov-$VERSION"
   TAR="$OUT/ankitov-$VERSION-linux-$ARCH.tar.gz"
   tar -czf "$TAR" -C "$TARBALL_STAGE" "ankitov-$VERSION"
   rm -rf "$TARBALL_STAGE"
@@ -192,6 +209,7 @@ assemble_windows() {
   cp "$PKG_DIR/launch/start-ankitov.bat" "$STAGE/start-ankitov.bat"
   mkdir -p "$STAGE/config"
   cp "$REPO_ROOT/backend/config/production.yaml" "$STAGE/config/production.yaml"
+  copy_seed_packs "$STAGE"
   cat > "$STAGE/README.txt" <<EOF
 AnkiTov $VERSION (Windows)
 

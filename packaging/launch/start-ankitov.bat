@@ -72,6 +72,9 @@ cd /d "%DATA_DIR%"
 set "ANKITOV_JWT_SECRET=%SECRET%"
 set "ANKITOV_PORT=%PORT%"
 set "DATABASE_URL=sqlite://ankitov.db?mode=rwc"
+rem Seed packs ship inside the artifact; CWD is the data dir, so point the
+rem backend at the artifact-relative copy when present.
+if exist "%APP_DIR%content\seed\" set "ANKITOV_SEED_DIR=%APP_DIR%content\seed"
 
 echo AnkiTov starting at %URL% (data: %DATA_DIR%; close this window or Ctrl-C to stop)
 rem Open the browser once the server has had a moment to boot.

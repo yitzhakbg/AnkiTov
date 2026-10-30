@@ -12,6 +12,9 @@
 //!    `FSRS::memory_state` (ratings from `revlog.ease`, day gaps from
 //!    `revlog.id` timestamps; cram reviews and out-of-range ease values are
 //!    skipped, matching Anki's FSRS handling). Freshest and most faithful.
+//!    The replayed timeline merges the snapshot revlog with the student's
+//!    `web_review_log` answers (Solo Web Reviewer, spec 2026-10-25 §2.2), so
+//!    browser answers shape scheduling exactly like Anki reviews.
 //! 2. **SM-2 approximation** — for review cards with sane `cards.factor` /
 //!    `cards.ivl` but no usable revlog (e.g. imported without history):
 //!    `FSRS::memory_state_from_sm2`.
@@ -25,10 +28,13 @@
 //!
 //! ## Cache-aside refresh
 //!
-//! Each persisted row records `revlog_head` — the newest `revlog.id` (ms
-//! epoch) observed when the state was derived. A later snapshot whose revlog
-//! contains newer entries for the card (the student reviewed it in Anki and
-//! re-synced) triggers re-derivation from the full history. Rows whose
+//! Each persisted row records `revlog_head` — the newest review timestamp
+//! (ms epoch) observed when the state was derived. The head spans both
+//! history sources: `max(snapshot revlog head, newest web_review_log
+//! answer)`, so a new browser answer invalidates the cached state even
+//! though the `.anki2` file is unchanged. A later snapshot whose head is
+//! newer (the student reviewed it in Anki and re-synced, or answered in the
+//! web reviewer) triggers re-derivation from the full history. Rows whose
 //! `revlog_head` still matches the snapshot are cache hits and are not
 //! recomputed. Derivation is deterministic, so concurrent generations for the
 //! same student converge to identical rows (last write wins, same values).
@@ -51,11 +57,12 @@ use std::sync::LazyLock;
 use fsrs::{FSRS, FSRSItem, FSRSReview, MemoryState};
 use rusqlite::Connection;
 use sea_orm::{
-    ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter,
+    ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder,
     sea_query::OnConflict,
 };
 
 use crate::models::entities::fsrs_memory_state::{ActiveModel, Column, Entity};
+use crate::models::entities::web_review_log as web_revlog;
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -191,6 +198,12 @@ pub struct SnapshotData {
     pub sched_facts: HashMap<i64, CardSchedFacts>,
     /// Per-card revlog rows `(id, ease, type)` ordered by `id` ascending.
     pub revlog_rows: HashMap<i64, Vec<(i64, i64, i64)>>,
+    /// Per-card web-reviewer answers `(reviewed_at_ms, ease)` ordered by
+    /// time ascending, from the backend `web_review_log` table. Attached by
+    /// [`ensure_states`] (which loads them for the student); empty for
+    /// snapshot-only derivations and pure tests that don't exercise the
+    /// web-replay path.
+    pub web_rows: HashMap<i64, Vec<(i64, i64)>>,
 }
 
 // ---------------------------------------------------------------------------
@@ -213,6 +226,7 @@ pub fn extract_snapshot(
         revlog_heads: revlog_heads(conn, card_ids)?,
         sched_facts: card_scheduling_facts(conn, card_ids)?,
         revlog_rows: revlog_rows_for(conn, card_ids)?,
+        web_rows: HashMap::new(),
     })
 }
 
@@ -230,11 +244,13 @@ pub fn extract_snapshot(
 pub fn derive_states_from_snapshot(snapshot: &SnapshotData) -> HashMap<i64, DerivedState> {
     let mut states = HashMap::with_capacity(snapshot.card_ids.len());
     for &card_id in &snapshot.card_ids {
-        let head = snapshot.revlog_heads.get(&card_id).copied();
+        // Freshness head spans both history sources (snapshot revlog and
+        // attached web-reviewer answers).
+        let head = effective_head(snapshot, card_id);
 
-        // 1. revlog replay
-        if let Some(rows) = snapshot.revlog_rows.get(&card_id) {
-            if let Some(ms) = state_from_revlog_rows(rows) {
+        // 1. revlog replay — merged timeline: snapshot revlog + web answers
+        if let Some(rows) = merged_rows(snapshot, card_id) {
+            if let Some(ms) = state_from_revlog_rows(&rows) {
                 states.insert(
                     card_id,
                     DerivedState {
@@ -271,6 +287,43 @@ pub fn derive_states_from_snapshot(snapshot: &SnapshotData) -> HashMap<i64, Deri
         // else: omitted — caller applies its own terminal fallback.
     }
     states
+}
+
+/// Effective cache-freshness head for one card: the newest review timestamp
+/// (ms epoch) across the snapshot revlog AND any attached web-reviewer
+/// answers. Web answers extend the head so a new browser answer invalidates
+/// the cached state even though the `.anki2` revlog is unchanged.
+fn effective_head(snapshot: &SnapshotData, card_id: i64) -> Option<i64> {
+    let snap_head = snapshot.revlog_heads.get(&card_id).copied();
+    let web_head = snapshot
+        .web_rows
+        .get(&card_id)
+        .and_then(|rows| rows.last().map(|&(ms, _)| ms));
+    match (snap_head, web_head) {
+        (Some(a), Some(b)) => Some(a.max(b)),
+        (a, b) => a.or(b),
+    }
+}
+
+/// Merged review timeline for one card: snapshot revlog rows plus attached
+/// web-reviewer answers, ordered by timestamp (ms epoch). Web rows carry
+/// `type = 0` (a normal review), so [`state_from_revlog_rows`] applies the
+/// same cram/ease filters to both sources. Returns `None` when the card has
+/// no history from either source.
+fn merged_rows(snapshot: &SnapshotData, card_id: i64) -> Option<Vec<(i64, i64, i64)>> {
+    let snap = snapshot.revlog_rows.get(&card_id);
+    let web = snapshot.web_rows.get(&card_id);
+    if snap.is_none() && web.is_none() {
+        return None;
+    }
+    let mut rows: Vec<(i64, i64, i64)> = snap.cloned().unwrap_or_default();
+    if let Some(web_rows) = web {
+        // Web rows are already ms epoch (converted once in
+        // [`load_web_reviews`]), so both sources share one timeline.
+        rows.extend(web_rows.iter().map(|&(ms, ease)| (ms, ease, 0)));
+    }
+    rows.sort_by_key(|&(id, _, _)| id);
+    Some(rows)
 }
 
 /// Derive a memory state by replaying one card's revlog rows through the
@@ -373,27 +426,35 @@ fn is_usable_state(state: &MemoryState) -> bool {
 /// fresh and deriving + persisting fresh states otherwise.
 ///
 /// Takes the owned [`SnapshotData`] (never a `rusqlite` connection) so the
-/// returned future is `Send`.
+/// returned future is `Send`. Mutated in place: the student's
+/// `web_review_log` answers are attached to `snapshot.web_rows` before the
+/// freshness check.
 ///
 /// Freshness rule: a cached row is fresh iff its `revlog_head` equals the
-/// snapshot's current revlog head for that card (both `None` counts as
-/// equal — no revlog on either side). Any mismatch re-derives from the full
-/// history.
+/// card's effective head — the newest review timestamp across the snapshot
+/// revlog AND the attached web answers (`both None` counts as equal — no
+/// history on either side). Any mismatch re-derives from the full history.
 pub async fn ensure_states(
     db: &DatabaseConnection,
     student_id: &str,
-    snapshot: &SnapshotData,
+    snapshot: &mut SnapshotData,
 ) -> Result<HashMap<i64, DerivedState>, FsrsStateError> {
     if snapshot.card_ids.is_empty() {
         return Ok(HashMap::new());
     }
+
+    // Attach the student's web-reviewer answers before the freshness check:
+    // they extend each card's review history AND its freshness head, so a
+    // new browser answer invalidates the cached state (spec 2026-10-25
+    // §2.2 — one scheduling brain across Anki and web reviews).
+    snapshot.web_rows = load_web_reviews(db, student_id, &snapshot.card_ids).await?;
 
     let cached = load_cached_states(db, student_id, &snapshot.card_ids).await?;
 
     let mut states: HashMap<i64, DerivedState> = HashMap::with_capacity(snapshot.card_ids.len());
     let mut stale_ids: Vec<i64> = Vec::new();
     for &card_id in &snapshot.card_ids {
-        let head = snapshot.revlog_heads.get(&card_id).copied();
+        let head = effective_head(snapshot, card_id);
         if let Some(row) = cached.get(&card_id) {
             if row.revlog_head == head {
                 states.insert(
@@ -437,6 +498,12 @@ pub async fn ensure_states(
             .filter(|(cid, _)| stale_ids.contains(cid))
             .map(|(&cid, rows)| (cid, rows.clone()))
             .collect(),
+        web_rows: snapshot
+            .web_rows
+            .iter()
+            .filter(|(cid, _)| stale_ids.contains(cid))
+            .map(|(&cid, rows)| (cid, rows.clone()))
+            .collect(),
     };
     let derived = derive_states_from_snapshot(&sub);
     let fresh: Vec<(i64, DerivedState)> = stale_ids
@@ -449,6 +516,33 @@ pub async fn ensure_states(
         states.insert(card_id, st);
     }
     Ok(states)
+}
+
+/// Load the student's web-reviewer answers for the given cards from the
+/// backend `web_review_log` table, keyed by card id. Rows are `(ms epoch,
+/// ease)` ordered by time ascending — ms epoch so they merge onto the same
+/// timeline as snapshot revlog ids (which are also ms epoch). Cards with no
+/// web answers are absent.
+async fn load_web_reviews(
+    db: &DatabaseConnection,
+    student_id: &str,
+    card_ids: &[i64],
+) -> Result<HashMap<i64, Vec<(i64, i64)>>, sea_orm::DbErr> {
+    let mut out: HashMap<i64, Vec<(i64, i64)>> = HashMap::new();
+    for chunk in card_ids.chunks(SQL_CHUNK) {
+        let rows = web_revlog::Entity::find()
+            .filter(web_revlog::Column::StudentId.eq(student_id))
+            .filter(web_revlog::Column::CardId.is_in(chunk.to_vec()))
+            .order_by_asc(web_revlog::Column::ReviewedAt)
+            .all(db)
+            .await?;
+        for row in rows {
+            out.entry(row.card_id)
+                .or_default()
+                .push((row.reviewed_at * 1000, row.ease as i64));
+        }
+    }
+    Ok(out)
 }
 
 /// Load persisted memory-state rows for one student, keyed by card id.
@@ -629,4 +723,138 @@ fn unix_now() -> i64 {
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.as_secs() as i64)
         .unwrap_or(0)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Day 0 / day 5 / day 9 in ms epoch (fixed base so tests are
+    /// deterministic).
+    const DAY0_MS: i64 = 1_700_000_000_000;
+    const DAY_MS: i64 = 86_400_000;
+
+    fn snap(card_ids: &[i64]) -> SnapshotData {
+        SnapshotData {
+            card_ids: card_ids.to_vec(),
+            revlog_heads: HashMap::new(),
+            sched_facts: HashMap::new(),
+            revlog_rows: HashMap::new(),
+            web_rows: HashMap::new(),
+        }
+    }
+
+    #[test]
+    fn web_only_history_derives_revlog_state() {
+        // Card with NO snapshot revlog but one web answer (Good, day 0).
+        let mut s = snap(&[701]);
+        s.web_rows.insert(701, vec![(DAY0_MS, 3)]);
+        let states = derive_states_from_snapshot(&s);
+        let st = states.get(&701).expect("web-only card must derive");
+        assert_eq!(st.source, StateSource::Revlog);
+        assert_eq!(st.revlog_head, Some(DAY0_MS));
+        assert_eq!(st.last_review_secs, Some(DAY0_MS / 1000));
+        assert!(st.stability > 0.0 && st.stability.is_finite());
+        assert!(st.difficulty >= 1.0 && st.difficulty <= 10.0);
+    }
+
+    #[test]
+    fn web_answers_extend_the_state_beyond_snapshot_only() {
+        // Same two snapshot reviews, with and without a later web answer.
+        // The web answer must push stability up (a third successful review)
+        // and move the freshness head.
+        let rows = vec![(DAY0_MS, 3, 0), (DAY0_MS + 5 * DAY_MS, 3, 0)];
+
+        let mut without = snap(&[702]);
+        without.revlog_rows.insert(702, rows.clone());
+        without.revlog_heads.insert(702, DAY0_MS + 5 * DAY_MS);
+
+        let mut with = without.clone();
+        let web_secs = (DAY0_MS + 9 * DAY_MS) / 1000;
+        with.web_rows.insert(702, vec![(DAY0_MS + 9 * DAY_MS, 3)]);
+
+        let a = derive_states_from_snapshot(&without);
+        let b = derive_states_from_snapshot(&with);
+        let sa = a.get(&702).unwrap();
+        let sb = b.get(&702).unwrap();
+
+        assert_eq!(sa.source, StateSource::Revlog);
+        assert_eq!(sb.source, StateSource::Revlog);
+        // Freshness head + last-review move to the web answer.
+        assert_eq!(sb.revlog_head, Some(DAY0_MS + 9 * DAY_MS));
+        assert_eq!(sb.last_review_secs, Some(web_secs));
+        // A third Good review grows stability.
+        assert!(
+            sb.stability > sa.stability,
+            "web answer must influence the state ({} !> {})",
+            sb.stability,
+            sa.stability
+        );
+    }
+
+    #[test]
+    fn merged_timeline_sorts_web_rows_into_order() {
+        // Web answer timestamped BETWEEN the two snapshot reviews (a
+        // re-imported collection can lag web activity): the merged timeline
+        // must interleave, not append.
+        let mut s = snap(&[703]);
+        s.revlog_rows
+            .insert(703, vec![(DAY0_MS, 3, 0), (DAY0_MS + 10 * DAY_MS, 3, 0)]);
+        s.revlog_heads.insert(703, DAY0_MS + 10 * DAY_MS);
+        s.web_rows
+            .insert(703, vec![(DAY0_MS + 5 * DAY_MS, 2)]); // Hard, mid-history
+
+        let rows = merged_rows(&s, 703).expect("merged rows");
+        let ids: Vec<i64> = rows.iter().map(|&(id, _, _)| id).collect();
+        let mut sorted = ids.clone();
+        sorted.sort_unstable();
+        assert_eq!(ids, sorted, "timeline must be time-ordered");
+        assert_eq!(rows.len(), 3);
+        // Web row keeps its ease and carries type 0.
+        assert!(rows.contains(&(DAY0_MS + 5 * DAY_MS, 2, 0)));
+    }
+
+    #[test]
+    fn effective_head_spans_both_sources() {
+        let mut s = snap(&[1, 2, 3, 4]);
+        s.revlog_heads.insert(1, 1_000);
+        s.revlog_heads.insert(2, 1_000);
+        s.revlog_heads.insert(3, 5_000);
+        s.web_rows.insert(2, vec![(2_000, 3)]);
+        s.web_rows.insert(3, vec![(3_000, 3)]); // older than snapshot head
+        s.web_rows.insert(4, vec![(9_000, 4)]); // no snapshot revlog at all
+
+        assert_eq!(effective_head(&s, 1), Some(1_000)); // snapshot only
+        assert_eq!(effective_head(&s, 2), Some(2_000)); // web newer → wins
+        assert_eq!(effective_head(&s, 3), Some(5_000)); // snapshot newer → wins
+        assert_eq!(effective_head(&s, 4), Some(9_000)); // web only
+        assert_eq!(effective_head(&s, 99), None); // no history either side
+    }
+
+    #[test]
+    fn invalid_web_ease_falls_through_to_fallback() {
+        // ease 0 (out of the 1..=4 rating scale) must be ignored by the
+        // replay, same as cram rows — card falls to the first-transition
+        // fallback rather than deriving garbage.
+        let mut s = snap(&[704]);
+        s.web_rows.insert(704, vec![(DAY0_MS, 0)]);
+        let states = derive_states_from_snapshot(&s);
+        let st = states.get(&704).expect("fallback must still derive");
+        assert_eq!(st.source, StateSource::FirstTransition);
+    }
+
+    #[test]
+    fn snapshot_only_derivation_is_unchanged() {
+        // Regression guard: cards without web answers derive exactly as
+        // before the replay slice.
+        let mut s = snap(&[705]);
+        s.revlog_rows
+            .insert(705, vec![(DAY0_MS, 3, 0), (DAY0_MS + 5 * DAY_MS, 4, 0)]);
+        s.revlog_heads.insert(705, DAY0_MS + 5 * DAY_MS);
+        let states = derive_states_from_snapshot(&s);
+        let st = states.get(&705).unwrap();
+        assert_eq!(st.source, StateSource::Revlog);
+        assert_eq!(st.revlog_head, Some(DAY0_MS + 5 * DAY_MS));
+        assert_eq!(st.last_review_secs, Some((DAY0_MS + 5 * DAY_MS) / 1000));
+    }
 }

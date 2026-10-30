@@ -58,6 +58,16 @@ fi
 SECRET=$(cat "$SECRET_FILE")
 [ -n "$SECRET" ] || die "secret file $SECRET_FILE is empty"
 
+# --- Seed deck packs ----------------------------------------------------------
+# Seed packs (content/seed/packages/*.apkg) ship inside the artifact so the
+# Solo Web Reviewer's import-seed endpoint works with zero external setup.
+# The backend runs with CWD = $DATA_DIR, so its relative default cannot see
+# them — export the artifact-relative path when the packs are present.
+if [ -d "$APP_DIR/content/seed" ]; then
+  ANKITOV_SEED_DIR="$APP_DIR/content/seed"
+  export ANKITOV_SEED_DIR
+fi
+
 # --- Config bootstrap ---------------------------------------------------------
 # Loco resolves its config folder relative to the process CWD (no env override
 # in loco 0.11), and the launcher runs the server with CWD = $DATA_DIR so the

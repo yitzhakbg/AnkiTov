@@ -3,8 +3,9 @@
 //! One row per browser-reviewer answer (spec 2026-10-25 §2.1). The primary key
 //! is a client-generated UUID so flaky-mobile-network retries are idempotent.
 //! `fsrs_memory_states` derivation replays this table after the snapshot
-//! revlog (§2.2); until that replay step lands, answers are recorded but do
-//! not yet influence scheduling (documented v1 gap).
+//! revlog (§2.2) — implemented in `services/fsrs_state.rs`
+//! (`load_web_reviews` + merged-timeline replay), so web answers shape
+//! scheduling exactly like Anki reviews.
 
 use sea_orm::entity::prelude::*;
 
