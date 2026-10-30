@@ -10,7 +10,7 @@ use axum::extract::Multipart;
 use loco_rs::{app::AppContext, prelude::*};
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use utoipa::ToSchema;
 
 use crate::models::entities::{class_enrollment, deck, user};
@@ -18,6 +18,42 @@ use crate::services;
 
 
 const TAG: &str = "Management Console";
+
+/// Resolve the student-profiles root directory ("playground").
+///
+/// Order: explicit request value → `ANKITOV_PROFILES_ROOT` env var →
+/// `AnkiPlayGround` relative to the server's working directory (portable
+/// default for local `cargo run` and container deployments).
+fn resolve_profiles_root(explicit: Option<String>) -> PathBuf {
+    if let Some(p) = explicit {
+        return PathBuf::from(p);
+    }
+    if let Ok(dir) = std::env::var("ANKITOV_PROFILES_ROOT") {
+        return PathBuf::from(dir);
+    }
+    PathBuf::from("AnkiPlayGround")
+}
+
+/// Resolve the demo Anki collection used to bootstrap new student profiles.
+///
+/// Order: `ANKITOV_DEMO_COLLECTION` env var → the macOS Anki default
+/// (`$HOME/Library/Application Support/Anki2/demo/collection.anki2`).
+/// Returns `None` when no usable candidate exists; callers skip the copy.
+fn resolve_demo_collection() -> Option<PathBuf> {
+    let candidate = if let Ok(p) = std::env::var("ANKITOV_DEMO_COLLECTION") {
+        Some(PathBuf::from(p))
+    } else {
+        std::env::var("HOME").ok().map(|home| {
+            PathBuf::from(home)
+                .join("Library")
+                .join("Application Support")
+                .join("Anki2")
+                .join("demo")
+                .join("collection.anki2")
+        })
+    };
+    candidate.filter(|p| p.is_file())
+}
 
 /// Query params for scan-playground endpoint.
 #[derive(Debug, Deserialize)]
@@ -67,9 +103,8 @@ pub async fn scan_playground(
     Query(params): Query<ScanQuery>,
 ) -> Result<Response> {
     let playground_path = params.path.unwrap_or_else(|| {
-        // Prefer ANKITOV_PROFILES_ROOT env var, fall back to hardcoded default
-        std::env::var("ANKITOV_PROFILES_ROOT")
-            .unwrap_or_else(|_| "/Volumes/YBG1TB4Mac/AnkiTov/AnkiPlayGround".to_string())
+        // Prefer ANKITOV_PROFILES_ROOT env var, fall back to portable default
+        resolve_profiles_root(None).to_string_lossy().to_string()
     });
     let dir = Path::new(&playground_path);
 
@@ -224,12 +259,9 @@ pub async fn create_profiles(
     State(_ctx): State<AppContext>,
     Json(payload): Json<CreateProfilesRequest>,
 ) -> Result<Response> {
-    let base_path = payload.base_path.unwrap_or_else(|| {
-        std::env::var("ANKITOV_PROFILES_ROOT")
-            .unwrap_or_else(|_| "/Volumes/YBG1TB4Mac/AnkiTov/AnkiPlayGround".to_string())
-    });
+    let base_path = resolve_profiles_root(payload.base_path);
     let base = Path::new(&base_path);
-    let demo = Path::new("/Users/ybg/Library/Application Support/Anki2/demo/collection.anki2");
+    let demo = resolve_demo_collection();
     let copy_demo = payload.copy_demo_collection.unwrap_or(true);
 
     let mut created = 0;
@@ -258,8 +290,12 @@ pub async fn create_profiles(
             Ok(_) => {
                 // Optionally copy demo collection
                 let dest = dir.join("collection.anki2");
-                if copy_demo && demo.exists() {
-                    let _ = std::fs::copy(demo, &dest);
+                if copy_demo {
+                    if let Some(demo) = demo.as_ref() {
+                        if demo.exists() {
+                            let _ = std::fs::copy(demo, &dest);
+                        }
+                    }
                 }
                 created += 1;
                 profiles.push(serde_json::json!({
@@ -319,7 +355,8 @@ pub async fn populate_decks(
         }
     }
 
-    let base = Path::new("/Volumes/YBG1TB4Mac/AnkiTov/AnkiPlayGround");
+    let base = resolve_profiles_root(None);
+    let demo = resolve_demo_collection();
     let mut populated = 0;
 
     for enrollment in &enrollments {
@@ -330,10 +367,11 @@ pub async fn populate_decks(
         let coll = dir.join("collection.anki2");
         if !coll.exists() {
             // Copy demo collection as base
-            let demo = Path::new("/Users/ybg/Library/Application Support/Anki2/demo/collection.anki2");
-            if demo.exists() {
-                let _ = std::fs::copy(demo, &coll);
-                populated += 1;
+            if let Some(demo) = demo.as_ref() {
+                if demo.exists() {
+                    let _ = std::fs::copy(demo, &coll);
+                    populated += 1;
+                }
             }
         } else {
             populated += 1; // Already has collection
