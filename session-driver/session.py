@@ -7,6 +7,7 @@ All methods return a dict suitable for JSON serialization in the HTTP response.
 """
 
 import json
+import threading
 import time
 import urllib.request
 from typing import Any, Dict, List, Optional
@@ -29,6 +30,37 @@ TAG_PREFIX = "ankitov-capsule-"
 CALLBACK_TIMEOUT = 5
 
 
+def _post_json(path: str, payload: Dict[str, Any], log_label: str = "") -> None:
+    """POST JSON to the backend — blocking, best-effort, call off the UI thread.
+
+    T-180 helper: all outbound backend notifications funnel through here so
+    the paths live in ONE place. Callers on Anki's UI thread must wrap this
+    in a daemon thread (see SessionManager._post_card_telemetry).
+    """
+    from .server import _server
+
+    backend_url = "http://host.docker.internal:5150"
+    if _server is not None:
+        backend_url = _server.backend_url
+
+    url = f"{backend_url.rstrip('/')}{path}"
+    data = json.dumps(payload).encode("utf-8")
+    try:
+        req = urllib.request.Request(
+            url,
+            data=data,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        urllib.request.urlopen(req, timeout=CALLBACK_TIMEOUT)
+        print(f"[ankitov-session-driver] Backend notified: {path} {log_label}")
+    except Exception as e:  # noqa: BLE001 — best-effort telemetry only
+        print(
+            f"[ankitov-session-driver] Backend notification failed "
+            f"({path}): {e}"
+        )
+
+
 # ---------------------------------------------------------------------------
 # Session Manager
 # ---------------------------------------------------------------------------
@@ -45,11 +77,21 @@ class SessionManager:
         self.card_ids: List[int] = []
         self.cards_reviewed: int = 0
         self.started_at: str | None = None
+        # monotonic timestamp of the previous card answer (for time_ms telemetry)
+        self._card_started_at: float | None = None
 
     # ── Hook handlers ────────────────────────────────────────────────
 
     def on_card_answered(self, card, ease):
-        """Increment counter each time a card is answered."""
+        """Increment counter each time a card is answered.
+
+        T-180: also fires per-card telemetry to the backend's real ingestion
+        path (`POST /api/v1/telemetry/card-answer`). Previously this hook only
+        bumped a local counter and the only outbound call was a session-level
+        POST to `/session/complete` — a route the backend never had, so the
+        server's audit ledger and session-progress counters never saw this
+        addon's answers (discovered by the Testing Army fleet, Oct 2026).
+        """
         # Only count if we're in REVIEWING state and this card belongs to
         # the active session (tag check is a belts-and-suspenders guard).
         if self.state != "REVIEWING":
@@ -61,6 +103,47 @@ class SessionManager:
         tag = f"{TAG_PREFIX}{self.session_uuid}"
         if card.has_tag(tag):
             self.cards_reviewed += 1
+            self._post_card_telemetry(card, ease)
+
+    def _post_card_telemetry(self, card, ease):
+        """POST one card-answer event to /api/v1/telemetry/card-answer.
+
+        Best-effort and non-blocking: runs on a daemon thread because Anki
+        hooks fire on the UI thread — a synchronous HTTP call here would
+        freeze the review surface for up to the timeout on every answer.
+        Telemetry must NEVER break the review flow: any failure here is
+        swallowed (the local counter already advanced; the server's audit
+        ledger tolerates best-effort ingestion).
+        """
+        try:
+            now = time.monotonic()
+            started = self._card_started_at
+            self._card_started_at = now
+            time_ms = 10_000 if started is None else min(int((now - started) * 1000), 600_000)
+
+            deck_name = ""
+            col = getattr(mw, "col", None)
+            if col is not None:
+                try:
+                    deck_name = col.decks.name(card.did)
+                except Exception:  # noqa: BLE001 — deck name is best-effort metadata
+                    deck_name = ""
+
+            payload = {
+                "student_id": self.track_profile_name or "unknown",
+                "card_id": int(card.id),
+                "deck_name": deck_name,
+                "ease": int(ease),
+                "time_ms": time_ms,
+                "session_uuid": self.session_uuid,
+            }
+            threading.Thread(
+                target=_post_json,
+                args=("/api/v1/telemetry/card-answer", payload),
+                daemon=True,
+            ).start()
+        except Exception as e:  # noqa: BLE001 — telemetry is fire-and-forget
+            print(f"[ankitov-session-driver] Card telemetry skipped: {e}")
 
     def on_reviewer_end(self):
         """Called by gui_hooks.reviewer_will_end when the reviewer closes."""
@@ -240,40 +323,20 @@ class SessionManager:
         self.card_ids = []
         self.cards_reviewed = 0
         self.started_at = None
+        self._card_started_at = None
 
     def _notify_backend(self, session_uuid: str, cards_reviewed: int, status: str):
-        """POST /session/complete to the Loco.rs backend. Best-effort."""
-        # Get backend URL from the server instance
-        from .server import _server
+        """POST session-complete signal to the Loco.rs backend. Best-effort.
 
-        backend_url = "http://host.docker.internal:5150"
-        if _server is not None:
-            backend_url = _server.backend_url
-
-        url = f"{backend_url.rstrip('/')}/session/complete"
-
-        payload = json.dumps(
+        T-180: the real route is `/api/v1/telemetry/session-complete` — the
+        old `/session/complete` path never existed server-side (404).
+        """
+        _post_json(
+            "/api/v1/telemetry/session-complete",
             {
                 "session_uuid": session_uuid,
                 "cards_reviewed": cards_reviewed,
                 "status": status,
-            }
-        ).encode("utf-8")
-
-        try:
-            req = urllib.request.Request(
-                url,
-                data=payload,
-                headers={"Content-Type": "application/json"},
-                method="POST",
-            )
-            urllib.request.urlopen(req, timeout=CALLBACK_TIMEOUT)
-            print(
-                f"[ankitov-session-driver] Backend notified: "
-                f"uuid={session_uuid} status={status} reviewed={cards_reviewed}"
-            )
-        except Exception as e:
-            print(
-                f"[ankitov-session-driver] Backend notification failed "
-                f"(will retry on next status poll): {e}"
-            )
+            },
+            log_label=f"session {session_uuid} status={status} reviewed={cards_reviewed}",
+        )

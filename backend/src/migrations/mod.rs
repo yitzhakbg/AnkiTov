@@ -41,6 +41,7 @@ mod m20261014_create_fsrs_memory_states;
 pub use m20261014_create_fsrs_memory_states::Migration as CreateFsrsMemoryStates;
 
 mod m20261015_create_app_settings;
+mod m20261030_create_web_review_log;
 pub use m20261015_create_app_settings::Migration as CreateAppSettings;
 /// The Loco application migrator — lists all database migrations in time order.
 pub struct Migrator;
@@ -61,6 +62,7 @@ impl MigratorTrait for Migrator {
             Box::new(CreateTeacherInvites),
             Box::new(CreateFsrsMemoryStates),
             Box::new(CreateAppSettings),
+            Box::new(m20261030_create_web_review_log::Migration),
         ]
     }
 }

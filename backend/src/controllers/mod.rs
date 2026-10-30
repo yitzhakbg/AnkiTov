@@ -10,3 +10,4 @@ pub mod setup;
 
 // Telemetry ingestion
 pub mod telemetry;
+pub mod reviewer;

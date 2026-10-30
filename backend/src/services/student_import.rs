@@ -117,19 +117,18 @@ pub fn parse_text_file(content: &[u8], delimiter: char) -> Result<Vec<RawRow>, S
 /// Parse Excel file using calamine
 #[cfg(feature = "excel")]
 pub fn parse_xlsx(content: &[u8]) -> Result<Vec<RawRow>, String> {
-    use calamine::{Reader, Xlsx, Data};
-    
-    let mut workbook: Xlsx<_> = Xlsx::reader()
-        .open_from_memory(content)
-        .map_err(|e| e.to_string())?;
-    
-    let sheets = workbook.sheet_names().to_vec();
+    use calamine::{open_workbook_from_rs, Reader, Xlsx};
+
+    let mut workbook: Xlsx<_> = open_workbook_from_rs(std::io::Cursor::new(content))
+        .map_err(|e: calamine::XlsxError| e.to_string())?;
+
+    let sheets = workbook.sheet_names();
     if sheets.is_empty() {
         return Err("No sheets found in workbook".to_string());
     }
-    
+
     let sheet_name = &sheets[0];
-    let range = workbook.sheet_range(sheet_name)
+    let range = workbook.worksheet_range(sheet_name)
         .map_err(|e| e.to_string())?;
     
     let mut rows = Vec::new();

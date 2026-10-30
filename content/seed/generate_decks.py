@@ -61,8 +61,10 @@ DECKS = {
             "en": "AnkiTov Pilot — Math Definitions",
             "he": "AnkiTov Pilot — הגדרות מתמטיקה",
             "fr": "AnkiTov Pilot — Définitions de maths",
+            "es": "AnkiTov Pilot — Definiciones de Matemáticas",
         },
-        "deck_id": {"en": 1699412247001, "he": 1699412247002, "fr": 1699412247012},
+        "deck_id": {"en": 1699412247001, "he": 1699412247002, "fr": 1699412247012,
+                    "es": 1699412247013},
         "description": _desc(
             "Grades 7-9 math definitions that run at their own pace, beside "
             "teaching, not inside it. Practice previously taught material to "
@@ -74,18 +76,31 @@ DECKS = {
                "rythme, à côté de l'enseignement, pas dedans. Revoyez les concepts "
                "appris auparavant pour combler les lacunes. SRS works. Graine Phase 0 "
                "auto-écrite ; texte uniquement.",
+            es="Definiciones de matemáticas para los grados 7-9 que avanzan a su propio "
+               "ritmo, junto a la enseñanza, no dentro de ella. Practica el material "
+               "ya visto para cerrar brechas. SRS works. Semilla Phase 0 propia; "
+               "solo texto. (Pack fr/es generado vía NLM + compilador nlm_pack_to_csv.)",
         ),
+        # en/he = original 105-card Phase 0 sets; fr/es = 20-card NLM pilot packs
         "expected_census": {"basic": 47, "cloze": 47, "type_in": 11},
+        "expected_census_by_locale": {
+            "fr": {"basic": 12, "cloze": 8, "type_in": 0},
+            "es": {"basic": 17, "cloze": 2, "type_in": 1},
+        },
     },
     "english-vocabulary": {
         "subject_tag": "subject::english",
-        "directions": True,  # vocab deck: direction::en-he / direction::he-en tags (R4)
+        # vocab deck direction tags (R4): he = bidirectional en-he pairs;
+        # fr/es NLM packs are one-way en->target — no direction column.
+        "directions_by_locale": {"he": True},
         "title": {
             "en": "AnkiTov Pilot — English Vocabulary",
             "he": "AnkiTov Pilot — אוצר מילים באנגלית",
             "fr": "AnkiTov Pilot — Vocabulaire anglais",
+            "es": "AnkiTov Pilot — Vocabulario Inglés",
         },
-        "deck_id": {"en": 1699412247003, "he": 1699412247004, "fr": 1699412247005},
+        "deck_id": {"en": 1699412247003, "he": 1699412247004, "fr": 1699412247005,
+                    "es": 1699412247016},
         "description": _desc(
             "Grades 7-9 English vocabulary that runs at its own pace, beside "
             "teaching, not inside it. Revisit previously taught words to close "
@@ -97,8 +112,18 @@ DECKS = {
                "à côté de l'enseignement, pas dedans. Revoyez les mots appris "
                "auparavant pour combler les lacunes. SRS works. Graine Phase 0 "
                "auto-écrite ; texte uniquement.",
+            es="Vocabulario inglés para los grados 7-9 que avanza a su propio ritmo, "
+               "junto a la enseñanza, no dentro de ella. Repasa las palabras ya vistas "
+               "para cerrar brechas. SRS works. Semilla Phase 0 propia; solo texto. "
+               "(Pack es vía NLM + compilador nlm_pack_to_csv.)",
         ),
         "expected_census": {"basic": 58, "cloze": 21, "type_in": 26},
+        # he/fr/es = 20-card NLM packs (wave1b batch, 2026-10-30; he carries direction::en-he)
+        "expected_census_by_locale": {
+            "he": {"basic": 17, "cloze": 3, "type_in": 0},
+            "fr": {"basic": 17, "cloze": 3, "type_in": 0},
+            "es": {"basic": 17, "cloze": 3, "type_in": 0},
+        },
     },
     "science-terms": {
         "subject_tag": "subject::science",
@@ -106,8 +131,10 @@ DECKS = {
             "en": "AnkiTov Pilot — Science Terms",
             "he": "AnkiTov Pilot — מונחים במדעים",
             "fr": "AnkiTov Pilot — Termes scientifiques",
+            "es": "AnkiTov Pilot — Términos Científicos",
         },
-        "deck_id": {"en": 1699412247006, "he": 1699412247007, "fr": 1699412247008},
+        "deck_id": {"en": 1699412247006, "he": 1699412247007, "fr": 1699412247008,
+                    "es": 1699412247014},
         "description": _desc(
             "Grades 7-9 science terms that run at their own pace, beside "
             "teaching, not inside it. Revisit previously taught concepts to "
@@ -119,8 +146,17 @@ DECKS = {
                "rythme, à côté de l'enseignement, pas dedans. Revoyez les "
                "concepts appris auparavant pour combler les lacunes. SRS works. "
                "Graine Phase 0 auto-écrite ; texte uniquement.",
+            es="Términos científicos para los grados 7-9 que avanzan a su propio "
+               "ritmo, junto a la enseñanza, no dentro de ella. Repasa los conceptos "
+               "ya vistos para cerrar brechas. SRS works. Semilla Phase 0 propia; "
+               "solo texto. (Pack es vía NLM + compilador nlm_pack_to_csv.)",
         ),
         "expected_census": {"basic": 63, "cloze": 32, "type_in": 10},
+        # fr/es = 20-card NLM packs (wave1b batch, 2026-10-30)
+        "expected_census_by_locale": {
+            "fr": {"basic": 14, "cloze": 6, "type_in": 0},
+            "es": {"basic": 14, "cloze": 6, "type_in": 0},
+        },
     },
     "history-dates-figures": {
         "subject_tag": "subject::history",
@@ -128,8 +164,10 @@ DECKS = {
             "en": "AnkiTov Pilot — History: Dates & Figures",
             "he": "AnkiTov Pilot — היסטוריה: תאריכים ואישים",
             "fr": "AnkiTov Pilot — Histoire : dates et figures",
+            "es": "AnkiTov Pilot — Historia: Fechas y Cifras",
         },
-        "deck_id": {"en": 1699412247009, "he": 1699412247010, "fr": 1699412247011},
+        "deck_id": {"en": 1699412247009, "he": 1699412247010, "fr": 1699412247011,
+                    "es": 1699412247015},
         "description": _desc(
             "Grades 7-9 history dates and figures that run at their own pace, "
             "beside teaching, not inside it. Revisit previously taught "
@@ -142,8 +180,17 @@ DECKS = {
                "propre rythme, à côté de l'enseignement, pas dedans. Revoyez les "
                "étapes clés apprises auparavant pour combler les lacunes. SRS works. "
                "Graine Phase 0 auto-écrite ; texte uniquement.",
+            es="Fechas y cifras de historia para los grados 7-9 que avanzan a su propio "
+               "ritmo, junto a la enseñanza, no dentro de ella. Repasa los hitos ya "
+               "vistos para cerrar brechas. SRS works. Semilla Phase 0 propia; solo "
+               "texto. (Pack es vía NLM + compilador nlm_pack_to_csv.)",
         ),
         "expected_census": {"basic": 79, "cloze": 26, "type_in": 0},
+        # he/es = 20-card NLM packs (wave1b batch, 2026-10-30)
+        "expected_census_by_locale": {
+            "he": {"basic": 10, "cloze": 10, "type_in": 0},
+            "es": {"basic": 10, "cloze": 10, "type_in": 0},
+        },
     },
 }
 
@@ -154,6 +201,7 @@ MODEL_IDS = {
     "en": {"basic": 1607392318001, "cloze": 1607392318002, "type_in": 1607392318003},
     "he": {"basic": 1607392318101, "cloze": 1607392318102, "type_in": 1607392318103},
     "fr": {"basic": 1607392318201, "cloze": 1607392318202, "type_in": 1607392318203},
+    "es": {"basic": 1607392318301, "cloze": 1607392318302, "type_in": 1607392318303},
 }
 NOTE_TYPE_NAMES = {"basic": "AnkiTovBasic", "cloze": "AnkiTovCloze", "type_in": "AnkiTovTypeIn"}
 
@@ -404,7 +452,8 @@ def main() -> int:
             raise SourceError(f"no deck config for {slug}/{locale}; add it to DECKS first")
         models = build_models(locale)
 
-        rows = read_rows(csv_path, cfg.get("directions", False))
+        directions = cfg.get("directions_by_locale", {}).get(locale, cfg.get("directions", False))
+        rows = read_rows(csv_path, directions)
         seen: set = set()
         deck = genanki.Deck(
             cfg["deck_id"][locale], cfg["title"][locale], description=cfg["description"][locale]
@@ -413,8 +462,8 @@ def main() -> int:
         samples = {}
         for row in rows:
             nt = row["note_type"]
-            validate_row(row, seen, locale, cfg.get("directions", False))
-            direction = row.get("direction", "") if cfg.get("directions", False) else ""
+            validate_row(row, seen, locale, directions)
+            direction = row.get("direction", "") if directions else ""
             if direction:
                 direction = f"direction::{direction}"
             tags = build_tags(row["concept_id"], row["unit"], row["grades"].split(),
@@ -433,7 +482,9 @@ def main() -> int:
             samples.setdefault(nt, row)
 
         actual = {k: census.get(k, 0) for k in ("basic", "cloze", "type_in")}
-        if actual != cfg["expected_census"]:
+        expected = cfg.get("expected_census_by_locale", {}).get(
+            locale, cfg["expected_census"])
+        if actual != expected:
             raise SourceError(f"{slug}/{locale}: census {actual} != plan target {cfg['expected_census']}")
         if sum(actual.values()) != len(rows):
             raise SourceError(f"{slug}/{locale}: census does not sum to row count")

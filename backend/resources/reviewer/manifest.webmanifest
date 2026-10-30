@@ -1,0 +1,17 @@
+{
+  "name": "AnkiTov Practice",
+  "short_name": "AnkiTov",
+  "description": "Brief daily practice, at your own pace. SRS works.",
+  "start_url": "/reviewer",
+  "display": "standalone",
+  "background_color": "#1e2823",
+  "theme_color": "#1e2823",
+  "icons": [
+    {
+      "src": "/reviewer/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+note_type,concept_id,unit,grades,front,back,extra,direction
+basic,assignment,01,7 8 9,assignment,מטלה / משימה לימודית Please hand in your homework assignment by Friday.,מילת מפתח בשימושים בית-ספריים יומיומיים.,en-he
+basic,environment,01,7 8 9,environment,סביבה We must protect the environment for future generations.,מונח מרכזי בתוכנית הלימודים בחטיבת הביניים.,en-he
+cloze,improvement,01,7 8 9,She showed a major {{c1::improvement}} in her grades this term.,,She showed a major improvement in her grades this term.,en-he
+basic,schedule,01,7 8 9,schedule,מערכת שעות / לוח זמנים Check your daily schedule to know which classroom to go to.,מונח שימושי בניהול סדר היום הלימודי.,en-he
+basic,challenge,01,7 8 9,challenge,אתגר Learning a new language is an exciting challenge.,פועל ושם עצם שכיח בטקסטים לימודיים.,en-he
+basic,solution,01,7 8 9,solution,פתרון They worked together to find a solution to the problem.,כרטיס הקלדה (type_in) לחיזוק האיות באנגלית.,en-he
+basic,opportunity,01,7 8 9,opportunity,הזדמנות Studying abroad is a great opportunity to explore new cultures.,מילה נפוצה בקריאה והבנת הנקרא.,en-he
+basic,research,02,7 8 9,research,מחקר / לחקור Students need to conduct research before writing the report.,מונח מפתח בעבודות חקר בבית הספר.,en-he
+basic,behavior,02,7 8 9,behavior,התנהגות Good behavior in class helps everyone learn better.,תרגום מדויק לשם עצם תיאורי שכיח.,en-he
+cloze,difference,02,7 8 9,There is a clear {{c1::difference}} between the two results.,,There is a clear difference between the two results.,en-he
+basic,relationship,02,7 8 9,relationship,מערכת יחסים / קשר Communication is essential for a strong relationship.,מונח נפוץ בנושאי חברה ומשפחה.,en-he
+basic,equipment,02,7 8 9,equipment,ציוד Bring the necessary equipment for the science experiment.,שם עצם שאינו ספיר בשימוש בית-ספרי.,en-he
+basic,influence,02,7 8 9,influence,השפעה / להשפיע Books can have a positive influence on young minds.,שימושי הן כשם עצם והן כפועל.,en-he
+basic,decision,02,7 8 9,decision,החלטה Making the right decision requires careful thought.,כרטיס הקלדה לחיזוק התרגום והאיות.,en-he
+basic,community,03,7 8 9,community,קהילה Volunteers play an important role in the local community.,מונח מרכזי בנושא אזרחות וחברה.,en-he
+basic,experience,03,7 8 9,experience,ניסיון / חוויה Traveling to different places was an unforgettable experience.,מילה בעלת שני פירושים מרכזיים התואמים את התוכנית.,en-he
+basic,encourage,03,7 8 9,encourage,לעודד Teachers always encourage students to ask questions.,פועל שכיח בהנחיות ובטקסטים.,en-he
+cloze,advantage,03,7 8 9,One major {{c1::advantage}} of reading is improving vocabulary.,,One major advantage of reading is improving vocabulary.,en-he
+basic,describe,03,7 8 9,describe,לתאר Please describe the pictures in your notebook.,פועל הוראה מרכזי במבחנים ומשימות.,en-he
+basic,conclusion,03,7 8 9,conclusion,"מסקנה In conclusion, working together leads to better results.",מונח מרכזי בכתיבה טיעונית ועבודות חקר.,en-he

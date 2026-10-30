@@ -1,0 +1,21 @@
+note_type,concept_id,unit,grades,front,back,extra
+basic,school,01,7 8 9,school,école (f.) I go to school every morning at eight o'clock.,School Environment
+basic,teacher,01,7 8 9,teacher,"professeur (m./f.), enseignant(e) Our English teacher explains the lesson clearly.",School Staff
+basic,homework,01,7 8 9,homework,devoirs (m. pl.) I always do my homework before dinner.,Study Habits
+basic,book,01,7 8 9,book,livre (m.) Please open your book on page twenty.,School Supplies
+basic,friend,01,7 8 9,friend,"ami (m.), amie (f.) She plays soccer with her best friend at lunch.",Interpersonal Relationships
+basic,family,01,7 8 9,family,famille (f.) My family lives in a small house near Paris.,Family Life
+cloze,today,01,7 8 9,We have a math test {{c1::today}}.,,We have a math test today.
+basic,always,02,7 8 9,always,toujours He always arrives on time for class.,Adverbs of Frequency
+basic,learn,02,7 8 9,learn,apprendre Students learn new words every week.,Verbs of Learning
+basic,write,02,7 8 9,write,écrire Write your answers in your notebook.,Classroom Actions
+cloze,listen,02,7 8 9,{{c1::Listen}} carefully to the recording.,,Listen carefully to the recording.
+basic,question,02,7 8 9,question,"question (f.) If you do not understand, raise your hand and ask a question.",Classroom Communication
+basic,happy,02,7 8 9,happy,"heureux (m.), heureuse (f.), content(e) The students were very happy after the school holidays.",Feelings & Emotions
+basic,water,02,7 8 9,water,eau (f.) Drink some water during the sports break.,Everyday Items
+basic,house,03,7 8 9,house,maison (f.) Our house has a garden behind it.,Home Environment
+basic,city,03,7 8 9,city,ville (f.) London is a very large city.,Places & Geography
+cloze,weather,03,7 8 9,The {{c1::weather}} is warm and sunny today.,,The weather is warm and sunny today.
+basic,time,03,7 8 9,time,"heure (f.), temps (m.) What time does the lesson start?",Daily Schedule
+basic,breakfast,03,7 8 9,breakfast,petit-déjeuner (m.) I eat bread and fruit for breakfast.,Meals & Routine
+basic,understand,03,7 8 9,understand,comprendre Do you understand the exercise instructions?,Cognition & Comprehension

@@ -71,10 +71,11 @@ pub fn sync_user_file() -> std::path::PathBuf {
 ///
 /// # Examples
 /// ```
-/// assert_eq!(super::base_profile_name("Alice Smith"), "alice.smith");
-/// assert_eq!(super::base_profile_name("  Marcus  Nguyen  "), "marcus.nguyen");
-/// assert_eq!(super::base_profile_name("O'Neil"), "oneil");
-/// assert_eq!(super::base_profile_name("Solo"), "solo");
+/// use backend::services::sync_user::base_profile_name;
+/// assert_eq!(base_profile_name("Alice Smith"), "alice.smith");
+/// assert_eq!(base_profile_name("  Marcus  Nguyen  "), "marcus.nguyen");
+/// assert_eq!(base_profile_name("O'Neil"), "oneil");
+/// assert_eq!(base_profile_name("Solo"), "solo");
 /// ```
 pub fn base_profile_name(full_name: &str) -> String {
     let parts: Vec<&str> = full_name

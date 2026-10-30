@@ -6954,6 +6954,30 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('   Page:', Router.currentPage);
   console.log('   Recent students:', QuickWins.getRecent().length);
 });
+
+// ── Deck Library deep link (site storefront → console one-click import) ──
+// Accepts #deck-library?import=<package.apkg>: jumps to the Deck Library card
+// and auto-triggers the import once the library rows render. Added 2026-10-29
+// for the ankitov.org/deck-packs storefront (T-186). Package name is validated
+// server-side (strict allowlist), so the client match is cosmetic only.
+(function () {
+  const m = (location.hash || '').match(/^#deck-library(?:\?import=([A-Za-z0-9._-]+\.apkg))?$/);
+  if (!m) return;
+  const pkg = m[1];
+  const gotoLibrary = () => {
+    const card = document.getElementById('deck-library-card');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+  if (!pkg) { setTimeout(gotoLibrary, 300); return; }
+  let tries = 0;
+  const tick = () => {
+    const tbody = document.getElementById('deck-library-body');
+    const btn = tbody && tbody.querySelector('button[onclick*=\'' + pkg + '\']');
+    if (btn && !btn.disabled) { btn.click(); return; }
+    if (++tries < 40) setTimeout(tick, 500);
+  };
+  setTimeout(() => { gotoLibrary(); tick(); }, 600);
+})();
 </script>
 
 <!-- ═══════════════════════════════════════════════════════

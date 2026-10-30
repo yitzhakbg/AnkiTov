@@ -115,6 +115,7 @@ impl Hooks for App {
             // management auth layer is path-scoped to /api/v1/management/*).
             .add_route(controllers::setup::routes())
             .add_route(controllers::telemetry::routes())
+            .add_route(controllers::reviewer::routes())
             .add_route(controllers::sync::routes())
             .add_route(controllers::management::decks::routes())
             .add_route(controllers::management::stats::routes())
@@ -157,6 +158,16 @@ impl Hooks for App {
             .route("/dashboard/", get(controllers::dashboard::imp_console))
             .route("/imp-console", get(controllers::dashboard::imp_console))
             .route("/dashboard/health", get(controllers::dashboard::health))
+            // Solo Web Reviewer SPA (public shell; the API under /api/v1/reviewer
+            // is JWT-gated via require_auth_for_management's reviewer branch).
+            .route("/reviewer", get(controllers::reviewer::spa_index))
+            .route("/reviewer/", get(controllers::reviewer::spa_index))
+            .route("/reviewer/index.html", get(controllers::reviewer::spa_index))
+            .route("/reviewer/style.css", get(controllers::reviewer::spa_css))
+            .route("/reviewer/app.js", get(controllers::reviewer::spa_js))
+            .route("/reviewer/manifest.webmanifest", get(controllers::reviewer::spa_manifest))
+            .route("/reviewer/sw.js", get(controllers::reviewer::spa_sw))
+            .route("/reviewer/icon.svg", get(controllers::reviewer::spa_icon))
             .route("/dashboard/i18n.js", get(controllers::dashboard::i18n_js))
             .route("/dashboard/rtl.css", get(controllers::dashboard::rtl_css))
             .route("/dashboard/locales/en-US.json", get(controllers::dashboard::locale_en_us))

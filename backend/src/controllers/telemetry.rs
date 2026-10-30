@@ -9,6 +9,7 @@
 //! | Method | Path | Auth | Description |
 //! |--------|------|------|-------------|
 //! | POST | `/api/v1/telemetry/card-answer` | Yes | Record a card answer |
+//! | POST | `/api/v1/telemetry/session-complete` | Yes | Session-level completion signal from the session driver addon (T-180): `completed` marks the capsule session complete (idempotent-ish: takes max of reviewed counts); `aborted`/`replaced`/`cancelled` are audit-logged without mutating the session lifecycle |
 
 use axum::extract::State;
 use axum::Json;
@@ -25,6 +26,7 @@ pub fn routes() -> Routes {
     Routes::new()
         .prefix("/telemetry")
         .add("/card-answer", post(ingest_card_answer))
+        .add("/session-complete", post(session_complete))
 }
 
 // ---------------------------------------------------------------------------
@@ -127,6 +129,134 @@ pub async fn ingest_card_answer(
 }
 
 // ---------------------------------------------------------------------------
+// Session-level completion (T-180)
+// ---------------------------------------------------------------------------
+
+/// Session-level completion signal from the session driver addon.
+///
+/// The addon posts `{session_uuid, cards_reviewed, status}` when the reviewer
+/// closes: `completed` (all capsule cards reviewed), `aborted` (closed early),
+/// `replaced` (a new session took over), or `cancelled`.
+///
+/// `completed` marks the capsule session complete when the reviewed count
+/// reaches `cards_total` (and raises `cards_completed` to at least the
+/// reported count). Non-completed statuses are audit-logged only — the
+/// session lifecycle stays driven by card-answer progress.
+#[derive(Debug, Deserialize)]
+pub struct SessionCompleteRequest {
+    pub session_uuid: String,
+    #[serde(default)]
+    pub cards_reviewed: i32,
+    pub status: String,
+}
+
+#[derive(Debug, serde::Serialize)]
+pub struct SessionCompleteResponse {
+    pub status: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub session_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cards_completed: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cards_total: Option<i32>,
+}
+
+/// Handle a session-level completion signal.
+///
+/// T-180: this is the route the session driver addon's `POST
+/// /session/complete` was always meant to hit (it previously 404'd — the
+/// addon posted to a path that never existed server-side).
+pub async fn session_complete(
+    State(ctx): State<AppContext>,
+    Json(payload): Json<SessionCompleteRequest>,
+) -> Result<Response> {
+    let db = &ctx.db;
+
+    let event_data = serde_json::json!({
+        "session_id": payload.session_uuid,
+        "cards_reviewed": payload.cards_reviewed,
+        "status": payload.status,
+    })
+    .to_string();
+    audit_logger::log_event(
+        db,
+        "session_complete",
+        &event_data,
+        "system",
+        Some(&payload.session_uuid),
+    )
+    .await;
+
+    if payload.status != "completed" {
+        tracing::info!(
+            "Session signal (no mutation): session={}, status={}",
+            payload.session_uuid,
+            payload.status
+        );
+        return format::json(SessionCompleteResponse {
+            status: "logged".to_string(),
+            session_id: None,
+            cards_completed: None,
+            cards_total: None,
+        });
+    }
+
+    let session = match cs_entity::Entity::find_by_id(&payload.session_uuid).one(db).await {
+        Ok(Some(s)) => s,
+        Ok(None) => {
+            tracing::warn!("session-complete for unknown session {}", payload.session_uuid);
+            return format::json(SessionCompleteResponse {
+                status: "unknown".to_string(),
+                session_id: None,
+                cards_completed: None,
+                cards_total: None,
+            });
+        }
+        Err(e) => {
+            tracing::error!("session-complete db error for {}: {}", payload.session_uuid, e);
+            return format::json(SessionCompleteResponse {
+                status: "error".to_string(),
+                session_id: None,
+                cards_completed: None,
+                cards_total: None,
+            });
+        }
+    };
+
+    let cards_total = session.cards_total;
+    let was_completed = session.status == "completed";
+    let new_completed = session.cards_completed.max(payload.cards_reviewed);
+    let is_complete = new_completed >= cards_total;
+
+    let mut active: cs_entity::ActiveModel = session.into();
+    active.cards_completed = ActiveValue::Set(new_completed);
+    if is_complete && !was_completed {
+        active.status = ActiveValue::Set("completed".to_string());
+        active.completed_at = ActiveValue::Set(Some(now_ts()));
+        let done = serde_json::json!({
+            "session_id": payload.session_uuid,
+            "cards_total": cards_total,
+            "via": "session-complete",
+        })
+        .to_string();
+        audit_logger::log_event(db, "capsule_complete", &done, "system", Some(&payload.session_uuid)).await;
+    }
+    active.update(db).await?;
+
+    tracing::info!(
+        "Session completed via addon signal: session={}, reviewed={}",
+        payload.session_uuid,
+        payload.cards_reviewed
+    );
+    format::json(SessionCompleteResponse {
+        status: "ok".to_string(),
+        session_id: Some(payload.session_uuid),
+        cards_completed: Some(new_completed),
+        cards_total: Some(cards_total),
+    })
+}
+
+// ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
 
@@ -134,7 +264,7 @@ pub async fn ingest_card_answer(
 ///
 /// If all cards have been reviewed, marks the session as `completed`,
 /// records a `capsule_complete` audit event, and sets `completed_at`.
-async fn update_session_progress(
+pub(crate) async fn update_session_progress(
     db: &sea_orm::DatabaseConnection,
     session_uuid: &str,
 ) -> Result<SessionProgress, sea_orm::DbErr> {

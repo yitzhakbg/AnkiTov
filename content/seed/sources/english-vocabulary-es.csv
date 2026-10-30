@@ -1,0 +1,21 @@
+note_type,concept_id,unit,grades,front,back,extra
+basic,homework,01,7 8 9,homework,deberes / tareas Please finish your homework before tomorrow's class.,In Spain 'deberes' is standard for school tasks; 'tareas' is widely used across Latin America.
+basic,textbook,01,7 8 9,textbook,libro de texto Open your textbook to chapter three.,Directly aligns with textbook-bound learning materials in the factory.
+basic,classroom,01,7 8 9,classroom,aula / salón de clases Students must remain quiet inside the classroom.,'Aula' is standard in secondary school settings.
+basic,schedule,01,7 8 9,schedule,horario Check your class schedule for the new semester.,Type-in prompt tests spelling of schedule organization vocabulary.
+basic,assignment,01,7 8 9,assignment,tarea / trabajo asignado The history teacher gave us a reading assignment.,Refers to specific coursework assigned for evaluation.
+basic,teacher,01,7 8 9,teacher,profesor / profesora The math teacher explained the equation clearly.,Gendered noun in Spanish depending on the instructor.
+basic,student,01,7 8 9,student,estudiante / alumno Every student must bring a notebook to class.,'Alumno/a' is commonly used in formal academic records.
+basic,grade,02,7 8 9,grade,nota / calificación She received a good grade on her science exam.,'Nota' is common in spoken school context; 'calificación' in official transcripts.
+basic,exam,02,7 8 9,exam,examen We have a biology exam next Tuesday.,Spanish 'examen' takes an accent in plural ('exámenes').
+basic,library,02,7 8 9,library,biblioteca Students can borrow books from the school library.,"False friend: 'library' translates to 'biblioteca', not 'librería'."
+cloze,subject,02,7 8 9,English is my favorite school {{c1::subject}}.,,English is my favorite school subject.
+basic,blackboard,02,7 8 9,blackboard,pizarra / pizarrón The teacher wrote the instructions on the blackboard.,'Pizarra' is standard in Spain; 'pizarrón' in Latin America.
+basic,notebook,02,7 8 9,notebook,cuaderno Write the answers in your exercise notebook.,Essential individual supply for taking daily class notes.
+basic,dictionary,02,7 8 9,dictionary,diccionario You can look up unknown words in the dictionary.,Key reference tool for language learning.
+cloze,attendance,03,7 8 9,The teacher takes {{c1::attendance}} at the start of every lesson.,,The teacher takes attendance at the start of every lesson.
+basic,project,03,7 8 9,project,proyecto We are working on a group project for geography.,Cognate term widely used in project-based learning.
+basic,research,03,7 8 9,research,investigación Students must conduct research before writing the report.,Key academic skill term for secondary coursework.
+cloze,deadline,03,7 8 9,The {{c1::deadline}} for submitting the essay is next Monday.,,The deadline for submitting the essay is next Monday.
+basic,classmate,03,7 8 9,classmate,compañero/a de clase I studied for the test with my classmate.,Refers to peers within the classroom group.
+basic,presentation,03,7 8 9,presentation,presentación Each group will give a short oral presentation.,Academic oral expression skill term.

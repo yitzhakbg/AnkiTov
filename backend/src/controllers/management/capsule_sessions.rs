@@ -274,8 +274,9 @@ pub async fn deliver_session(
 
     let capsule_size = card_ids.len();
 
-    // Deliver to addon
-    let delivery = CapsuleDelivery::from_env();
+    // Deliver to the student's own addon endpoint (T-182 per-student registry;
+    // falls back to the legacy single co-located addon when no registry is set)
+    let delivery = CapsuleDelivery::for_student(&profile_name);
     match delivery
         .start_session(&session_id, &card_ids, capsule_size, &profile_name)
         .await

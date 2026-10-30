@@ -1,0 +1,57 @@
+/* AnkiTov Solo Web Reviewer — mobile-first, evergreen dark (matches .org). */
+:root {
+  --bg: #1e2823; --card: #263230; --ink: #d9e2db; --muted: #9db0a4;
+  --accent: #2e8b57; --accent-bright: #4fc98a; --border: #34423a;
+  --again: #b3563e; --hard: #b08a3e; --good: #2e8b57; --easy: #3e7fa8;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  min-height: 100dvh; }
+main { max-width: 34rem; margin: 0 auto; padding: 1rem;
+  padding-bottom: env(safe-area-inset-bottom); display: flex; flex-direction: column; min-height: 100dvh; }
+.view[hidden] { display: none; }
+.brand { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem; }
+.brand .accent { color: var(--accent-bright); }
+h1 { font-size: 1.6rem; margin: 0 0 .5rem; }
+h2 { font-size: 1.05rem; margin: 1.5rem 0 .5rem; }
+.sub { color: var(--muted); margin: 0 0 1.5rem; line-height: 1.5; }
+form label { display: block; margin-bottom: 1rem; font-size: .9rem; color: var(--muted); }
+form input { display: block; width: 100%; margin-top: .35rem; padding: .8rem .9rem;
+  border-radius: 10px; border: 1px solid var(--border); background: var(--card);
+  color: var(--ink); font-size: 1rem; }
+.btn { border: 0; border-radius: 12px; padding: .9rem 1.2rem; font-size: 1rem;
+  font-weight: 600; cursor: pointer; color: #fff; background: var(--card);
+  min-height: 48px; }
+.btn.primary { background: var(--accent); width: 100%; margin-top: .5rem; }
+.btn.primary:active { filter: brightness(1.15); }
+.btn.wide { width: 100%; }
+.error { color: #e08a76; font-size: .9rem; }
+/* review */
+.topbar { display: flex; justify-content: space-between; align-items: center;
+  color: var(--muted); font-size: .9rem; margin-bottom: .75rem; }
+#card-area { flex: 1; display: flex; flex-direction: column; gap: .75rem; }
+.card-face { background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.25rem; font-size: 1.15rem; line-height: 1.55;
+  min-height: 12rem; display: flex; align-items: center; justify-content: center;
+  text-align: center; overflow-wrap: break-word; }
+.card-face img { max-width: 100%; }
+.card-face .cloze { color: var(--accent-bright); font-weight: 700; }
+.card-face audio { width: 100%; margin-top: .75rem; }
+#controls { margin-top: 1rem; }
+.answer-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; }
+.answer-row .btn { padding: .9rem .2rem; font-size: .95rem; }
+.btn.again { background: var(--again); }
+.btn.hard { background: var(--hard); }
+.btn.good { background: var(--good); }
+.btn.easy { background: var(--easy); }
+.foot { display: flex; justify-content: space-between; align-items: center;
+  margin-top: 1rem; color: var(--muted); font-size: .85rem; }
+.link { background: none; border: 0; color: var(--accent-bright); cursor: pointer;
+  font-size: .85rem; padding: .5rem; }
+.seed-list { display: grid; gap: .5rem; }
+.seed-list button { text-align: start; }
+.seed-list .meta { display: block; font-size: .78rem; color: var(--muted); font-weight: 400; }
+/* RTL */
+html[dir="rtl"] .topbar, html[dir="rtl"] .foot { flex-direction: row-reverse; }

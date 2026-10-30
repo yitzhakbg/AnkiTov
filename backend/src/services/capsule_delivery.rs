@@ -17,7 +17,8 @@
 //!
 //! | Env var | Default | Description |
 //! |---------|---------|-------------|
-//! | `ANKITOV_CAPSULE_PORT` | `18765` | Addon HTTP listener port |
+//! | `ANKITOV_CAPSULE_PORT` | `18765` | Addon HTTP listener port (single co-located addon) |
+//! | `ANKITOV_CAPSULE_ENDPOINTS` | (none) | Per-student endpoint registry (T-182): comma-separated `name=url` pairs, e.g. `army-student-1=http://host.docker.internal:18701,army-student-2=http://host.docker.internal:18702`. A single bare URL is also accepted and applies to every student. Resolution order for a student: exact name match (case-insensitive) → single bare URL → legacy `ANKITOV_CAPSULE_PORT`/default. |
 
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -95,6 +96,27 @@ pub enum DeliveryError {
 }
 
 // ---------------------------------------------------------------------------
+// Endpoint registry (T-182)
+// ---------------------------------------------------------------------------
+
+/// Parse `ANKITOV_CAPSULE_ENDPOINTS` into `(name, base_url)` pairs.
+///
+/// Format: comma-separated `name=url` pairs. A value with no `=` is treated
+/// as a single bare URL mapped to the empty name (applies to every student).
+/// Empty segments are dropped; surrounding whitespace is trimmed.
+fn parse_endpoint_registry(value: Option<&str>) -> Vec<(String, String)> {
+    let Some(raw) = value else { return Vec::new() };
+    raw.split(',')
+        .map(|seg| seg.trim())
+        .filter(|seg| !seg.is_empty())
+        .map(|seg| match seg.split_once('=') {
+            Some((name, url)) => (name.trim().to_string(), url.trim().to_string()),
+            None => (String::new(), seg.to_string()),
+        })
+        .collect()
+}
+
+// ---------------------------------------------------------------------------
 // Client
 // ---------------------------------------------------------------------------
 
@@ -133,6 +155,52 @@ impl CapsuleDelivery {
             .and_then(|s| s.parse().ok())
             .unwrap_or(DEFAULT_CAPSULE_PORT);
         Self::new(port)
+    }
+
+    /// Resolve the delivery endpoint for a specific student (T-182).
+    ///
+    /// Multi-student/fleet delivery needs one addon endpoint per student;
+    /// `from_env()` hardcodes a single `127.0.0.1:$PORT` co-located addon, so
+    /// every student's capsule would land on the same container. Resolution
+    /// order (see module docs): exact name match in
+    /// `ANKITOV_CAPSULE_ENDPOINTS` → single bare URL → legacy port env/default.
+    /// Unmatched students with a populated registry are logged loudly so
+    /// operators catch missing registry entries.
+    pub fn for_student(profile_name: &str) -> Self {
+        let registry = parse_endpoint_registry(
+            std::env::var("ANKITOV_CAPSULE_ENDPOINTS").ok().as_deref(),
+        );
+        match registry.as_slice() {
+            [] => Self::from_env(),
+            [(name, url)] if name.is_empty() => Self::from_base_url(url), // bare URL: any student
+            entries => {
+                if let Some((_, url)) = entries
+                    .iter()
+                    .find(|(n, _)| n.eq_ignore_ascii_case(profile_name))
+                {
+                    Self::from_base_url(url)
+                } else {
+                    tracing::warn!(
+                        "ANKITOV_CAPSULE_ENDPOINTS has {} entries but no match for student {:?} — falling back to legacy single-addon endpoint",
+                        entries.len(),
+                        profile_name
+                    );
+                    Self::from_env()
+                }
+            }
+        }
+    }
+
+    /// Build a client against a full base URL (used by the registry path).
+    pub fn from_base_url(base_url: &str) -> Self {
+        let http = Client::builder()
+            .timeout(REQUEST_TIMEOUT)
+            .build()
+            .expect("reqwest::Client::builder should not fail");
+        Self {
+            http,
+            base_url: base_url.trim_end_matches('/').to_string(),
+        }
     }
 
     /// Deliver a capsule to the addon and start a review session.
@@ -266,6 +334,9 @@ impl CapsuleDelivery {
 mod tests {
     use super::*;
 
+    /// Registry tests mutate process-global env vars — serialize them.
+    static ENV_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
     #[test]
     fn test_client_construction() {
         let client = CapsuleDelivery::new(18765);
@@ -278,5 +349,82 @@ mod tests {
         std::env::remove_var("ANKITOV_CAPSULE_PORT");
         let client = CapsuleDelivery::from_env();
         assert!(client.base_url.contains("18765"));
+    }
+
+    // ── T-182: per-student endpoint registry ──
+
+    #[test]
+    fn test_registry_parse_pairs() {
+        let reg = parse_endpoint_registry(Some(
+            "a=http://host:18701, b=http://host:18702 ,c=http://host:18703",
+        ));
+        assert_eq!(
+            reg,
+            vec![
+                ("a".into(), "http://host:18701".into()),
+                ("b".into(), "http://host:18702".into()),
+                ("c".into(), "http://host:18703".into()),
+            ]
+        );
+    }
+
+    #[test]
+    fn test_registry_parse_bare_url() {
+        let reg = parse_endpoint_registry(Some("http://host.docker.internal:18765"));
+        assert_eq!(reg, vec![("".into(), "http://host.docker.internal:18765".into())]);
+    }
+
+    #[test]
+    fn test_registry_parse_none_and_garbage() {
+        assert!(parse_endpoint_registry(None).is_empty());
+        // empty segments are dropped
+        assert!(parse_endpoint_registry(Some(",,")).is_empty());
+    }
+
+    #[test]
+    fn test_for_student_exact_match() {
+        // env vars are process-global; serialize registry tests with a lock
+        let _g = ENV_LOCK.lock().unwrap();
+        std::env::remove_var("ANKITOV_CAPSULE_PORT");
+        std::env::set_var(
+            "ANKITOV_CAPSULE_ENDPOINTS",
+            "army-student-1=http://host.docker.internal:18701,army-student-2=http://host.docker.internal:18702",
+        );
+        let c = CapsuleDelivery::for_student("army-student-2");
+        assert_eq!(c.base_url, "http://host.docker.internal:18702");
+        // case-insensitive
+        let c = CapsuleDelivery::for_student("ARMY-STUDENT-1");
+        assert_eq!(c.base_url, "http://host.docker.internal:18701");
+        std::env::remove_var("ANKITOV_CAPSULE_ENDPOINTS");
+    }
+
+    #[test]
+    fn test_for_student_bare_url_applies_to_all() {
+        let _g = ENV_LOCK.lock().unwrap();
+        std::env::set_var("ANKITOV_CAPSULE_ENDPOINTS", "http://host.docker.internal:18765");
+        let c = CapsuleDelivery::for_student("anyone");
+        assert_eq!(c.base_url, "http://host.docker.internal:18765");
+        std::env::remove_var("ANKITOV_CAPSULE_ENDPOINTS");
+    }
+
+    #[test]
+    fn test_for_student_unmatched_falls_back_to_legacy_port() {
+        let _g = ENV_LOCK.lock().unwrap();
+        std::env::set_var("ANKITOV_CAPSULE_PORT", "18999");
+        std::env::set_var("ANKITOV_CAPSULE_ENDPOINTS", "other=http://host:18701");
+        let c = CapsuleDelivery::for_student("army-student-1");
+        assert!(c.base_url.ends_with(":18999"));
+        std::env::remove_var("ANKITOV_CAPSULE_ENDPOINTS");
+        std::env::remove_var("ANKITOV_CAPSULE_PORT");
+    }
+
+    #[test]
+    fn test_for_student_no_registry_uses_port_env() {
+        let _g = ENV_LOCK.lock().unwrap();
+        std::env::set_var("ANKITOV_CAPSULE_PORT", "18888");
+        std::env::remove_var("ANKITOV_CAPSULE_ENDPOINTS");
+        let c = CapsuleDelivery::for_student("army-student-1");
+        assert!(c.base_url.ends_with(":18888"));
+        std::env::remove_var("ANKITOV_CAPSULE_PORT");
     }
 }

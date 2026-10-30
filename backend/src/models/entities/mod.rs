@@ -47,3 +47,4 @@ pub use profile_assignment::Entity as ProfileAssignment;
 pub use generation_job::Entity as GenerationJob;
 pub use producer::Entity as Producer;
 pub use producer_deck::Entity as ProducerDeck;
+pub mod web_review_log;

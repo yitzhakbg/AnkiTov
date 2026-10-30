@@ -6,6 +6,8 @@ or with ANKIDEV=1 for the Anki dev environment).
 
 import json
 import time
+from types import SimpleNamespace
+
 import pytest
 
 
@@ -176,8 +178,11 @@ class TestStateMachineInvariants:
         session_manager.cards_reviewed = 5
         session_manager.capsule_size = 10
 
-        # Mock mw.col to avoid actual Anki operations
-        monkeypatch.setattr("aqt.mw.col", None)
+        # Mock mw.col to avoid actual Anki operations. Patch the module's mw
+        # global (session.py does `from aqt import mw`) — headless test envs
+        # have aqt.mw = None, so patching aqt.mw.col can't work (pre-existing
+        # failure, fixed 2026-10-30 as part of T-180).
+        monkeypatch.setattr("ankitov_session_driver.session.mw", SimpleNamespace(col=None))
 
         # Mock _notify_backend to avoid HTTP
         monkeypatch.setattr(
@@ -193,7 +198,7 @@ class TestStateMachineInvariants:
 
     def test_start_then_cancel_leaves_clean_state(self, session_manager, monkeypatch):
         """start → cancel should leave state clean (IDLE)."""
-        monkeypatch.setattr("aqt.mw.col", None)
+        monkeypatch.setattr("ankitov_session_driver.session.mw", SimpleNamespace(col=None))
         monkeypatch.setattr(
             session_manager, "_notify_backend", lambda *a, **kw: None
         )

@@ -7,7 +7,10 @@ Loco.rs backend.
 
 Configuration (environment variables):
     ANKITOV_CAPSULE_PORT     (default: 18765)  — HTTP listener port
-    ANKITOV_BACKEND_URL      (required)         — where to POST /session/complete
+    ANKITOV_BACKEND_URL      (required)         — backend origin; the addon posts per-card
+                                                telemetry to /api/v1/telemetry/card-answer and
+                                                session signals to /api/v1/telemetry/session-complete
+                                                (T-180: the old /session/complete path never existed)
 
 Startup: the HTTP server starts automatically when Anki loads this addon.
 It runs on Qt's event loop via QTimer — no threads, no blocking.
