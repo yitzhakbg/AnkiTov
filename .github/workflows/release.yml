@@ -290,6 +290,33 @@ jobs:
           cd dist
           sha256sum ankitov-* | tee sha256sums.txt
 
+      # T-201: stable-named alias copies of every platform asset. The site's
+      # OS-aware download CTA links `releases/latest/download/<stable-name>`,
+      # which GitHub resolves against the LATEST release — so the alias must
+      # exist on every release or the link 404s once a newer tag ships.
+      # Aliases are byte-identical copies (same sha256, appended to
+      # sha256sums.txt under their alias name); versioned assets stay untouched.
+      - name: Create stable-named aliases
+        run: |
+          cd dist
+          for f in ankitov-*; do
+            case "$f" in
+              ankitov-*-macos-aarch64.dmg)    alias="AnkiTov-macos-aarch64.dmg" ;;
+              ankitov-*-macos-x86_64.dmg)     alias="AnkiTov-macos-x86_64.dmg" ;;
+              ankitov-*-windows-x86_64.zip)   alias="AnkiTov-windows-x86_64.zip" ;;
+              ankitov-*-linux-x86_64.deb)     alias="AnkiTov-linux-x86_64.deb" ;;
+              ankitov-*-linux-aarch64.deb)    alias="AnkiTov-linux-aarch64.deb" ;;
+              ankitov-*-linux-x86_64.tar.gz)  alias="AnkiTov-linux-x86_64.tar.gz" ;;
+              ankitov-*-linux-aarch64.tar.gz) alias="AnkiTov-linux-aarch64.tar.gz" ;;
+              ankitov-*-linux-x86_64.AppImage) alias="AnkiTov-linux-x86_64.AppImage" ;;
+              *) alias="" ;;
+            esac
+            if [ -n "$alias" ]; then
+              cp "$f" "$alias"
+              echo "$(sha256sum "$f" | cut -d' ' -f1)  $alias" >> sha256sums.txt
+            fi
+          done
+
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}

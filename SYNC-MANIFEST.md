@@ -1,13 +1,13 @@
 # SYNC-MANIFEST
 
-- monorepo ref: AnkiTov-C@e7bb64b754c3
-- exported at: 2026-11-05T08:00:22Z
+- monorepo ref: unknown (ANKITOV_MONOREPO_REF not set)
+- exported at: 2026-11-08T20:23:10Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
 ## sha256 checksums
 ```
-197dbba9323c560fff215e784c4471595746824d4e70f29bf1a9f83f158c1486  .github/workflows/release.yml
+7c95bee2a1466f1e22e80f591eea28b36b650cc544b0e39be680a3304de2e4f0  .github/workflows/release.yml
 3255a61586bf5af874b423fb9ddf62d3da06bbbeb11365a5e1b4e0ce47c52406  .gitignore
 ada47362899add07df543de3051b80e6d9532fca7131b7fe5701fb754aa65ee2  Caddyfile
 4839989efa9eef4cad02e7c61db60704ed62159d0646e12def574584d6c3ff97  Cargo.lock
@@ -202,6 +202,7 @@ cf91efd832efdd2f0ef971f0afe0153e4772d77738075a6f446eb0df0d7a9a58  backend/tests/
 26d7bc7ac0b527a745d4bce326574360bcae415370fa9580a713b465274670b4  backend/tests/teacher_registration_test.rs
 31881dc3c23a575cd2100417ffabe112be781cdbb4e5a68d1f15592f1bd9acbc  backend/tests/telemetry_test.rs
 822faa61c9f449b45b3347fa27853ae639703f4fbdf45b4df9ae8cf2d72b4fee  content/seed/LICENSE
+29f62491a876b63d30d596ba579ca1ba7eb0780c21bc3cf3555aa7849a6a0042  content/seed/__pycache__/generate_decks.cpython-312.pyc
 9301cb5ecc6d9ca58e8a4c2250eb56fc0d75a3ba245b9f62da4a186f0001325f  content/seed/generate_decks.py
 9be318cf6ba11b1977e47ed3db0c2aa2756b7d6530ddce910311a0ca08e3a275  content/seed/manifest.json
 42aebbf7135e6c9e6d3076559c1d7addad9e6bddfe8756ba5710bb0af3a53f6c  content/seed/packages/english-vocabulary-en.apkg
@@ -259,6 +260,7 @@ b943b28d784bcb974a8cdced5e4973f89fef0b3d6d6c79938c1506251a83f9fc  docs/src/refer
 1d7bac45a7b3af6b1a67e4a116ffcebb554a48f0479838498d19d2ac39ec1fd1  docs/src/reference/model-appraisal.md
 1942fb490dccc7d2f5c3ba60192c27c5b2115d138c621ef7841e5dd580d11d34  docs/src/reference/openapi.md
 b6df84512a635d73d72cae6d059b9749041009b16a55d1b938741105ee697ffb  docs/src/reference/rustdoc.md
+e31be0c3c277137c185648654a7fdcdb7a941d895875b34f390d73ea32ee2cea  packaging/.DS_Store
 126f9a724287f6c66c0495346f6f6ffb13d8699cec7394ce11785948296a1f20  packaging/README.md
 876da13b3501d336b328db908ab32d1a960403d2e20c4d65e21eb066b0eda339  packaging/assemble.sh
 cce1a19b73536878bd7187289127bee97772b91b464d88b0b41b24660e3827df  packaging/launch/ankitov-launch.sh
@@ -268,11 +270,22 @@ b8751ba2d302229ecf93a3ab8550fe0d0071e57a3a3821cea241e5e99c0dcb82  packaging/laun
 812dd8059756fbc301e337bb6d86669715c2d24075db44112f0ffa95e3b79fe8  packaging/smoke.ps1
 14ed5b59b57fa2cdccdf77fb98a4a90434659ed6f8ca473835008e1b935eb1f4  packaging/smoke.sh
 728bd68c0c469729a8b3b02ddb415d3c9e608e9f89e1fb96b4aca5b7b03d8c1f  rust-toolchain.toml
+3ed731b65d06150c138e2dadb0be0697550888a6b47eb8c45ecc9adba8b8e9bd  session-driver/.pytest_cache/.gitignore
+37dc88ef9a0abeddbe81053a6dd8fdfb13afb613045ea1eb4a5c815a74a3bde4  session-driver/.pytest_cache/CACHEDIR.TAG
+73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad  session-driver/.pytest_cache/README.md
+44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a  session-driver/.pytest_cache/v/cache/lastfailed
+6625209526c9537dabc20fae8a2df859b07d097bb236cda0d6abfdbc7638e90f  session-driver/.pytest_cache/v/cache/nodeids
 7ef71cd81268b932d9525d200ff54f541b7ebf64469a9efe1d3ccc66be0c8cf8  session-driver/__init__.py
+77703be003c04829480ec8c42fd08c15c60b3d16a97fd29f4787d479fea1b2ee  session-driver/__pycache__/__init__.cpython-313.pyc
+1c746361d4563c9c458c5e5968803b80d65a834b22314d761fee9d3bc1a895df  session-driver/__pycache__/cleanup.cpython-313.pyc
+e2be025040701a91138048469040f8d48a644c133547e805336fe046737dfbfd  session-driver/__pycache__/server.cpython-313.pyc
+67b2f8ba171b536e9a215dcd76a0da73ab4af55204ec9e9965415f2e6982c49b  session-driver/__pycache__/session.cpython-313.pyc
 30e29bc59c9b8e31488ddc00bd72be2d62d70d35e9176f234649d47bdcb82d3b  session-driver/cleanup.py
 3f02188fcd2e9cf4941bdac355d50dfa98f9a0802c0061113e7734edb696d82c  session-driver/manifest.json
 1a8725ab8aa6ceaf9a1feb5b33f49939e431c0b486a0ccf33a6c992aee440dc5  session-driver/server.py
 1a66760eb5034085b063f13dfc2df040793b24ce2abb4fd265e37a46aaffb89b  session-driver/session.py
+710359db685ed4d85eb45dfccadb1c2e7f9f646abc5fac0f0f3b77d1f37b0db6  session-driver/tests/__pycache__/test_cleanup.cpython-313-pytest-9.2.0.pyc
+e9b234751c02b8d978620f5e54abd26c7e2f28ddd47c899a54e76b5c114de426  session-driver/tests/__pycache__/test_session.cpython-313-pytest-9.2.0.pyc
 18a6c9882f3b22a6c866b82bad87bea04253dd930c69ebc3f0de068fc1591593  session-driver/tests/test_cleanup.py
 0754a85e79ae2c6ed73268628dc9eb64523d4e4ee9426d48b6c4950db13afabc  session-driver/tests/test_session.py
 8eac6ad624b721d60dee21ec937c3634b0696a04279a1b5aa4d3c31c2b44cb04  specs/audits/audit-trail-invariants.txt
