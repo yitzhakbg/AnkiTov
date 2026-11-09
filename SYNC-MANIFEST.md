@@ -1,7 +1,7 @@
 # SYNC-MANIFEST
 
-- monorepo ref: unknown (ANKITOV_MONOREPO_REF not set)
-- exported at: 2026-11-08T20:23:10Z
+- monorepo ref: rtnxznvusw (ef49c566ae)
+- exported at: 2026-11-09T10:19:06Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
@@ -10,14 +10,14 @@
 7c95bee2a1466f1e22e80f591eea28b36b650cc544b0e39be680a3304de2e4f0  .github/workflows/release.yml
 3255a61586bf5af874b423fb9ddf62d3da06bbbeb11365a5e1b4e0ce47c52406  .gitignore
 ada47362899add07df543de3051b80e6d9532fca7131b7fe5701fb754aa65ee2  Caddyfile
-4839989efa9eef4cad02e7c61db60704ed62159d0646e12def574584d6c3ff97  Cargo.lock
+20cb530ea08f56436ef2c1697d5c966498ba0020083024c7f60363dc47150bbc  Cargo.lock
 e2c43209506ad84d8f2b561c3e9eb7d726eaa5408544d0f158cd7b6ea827663e  Cargo.toml
 d82b5029d202b7358385e7268a010b64f5b0d6ac5861bfd091734ff12b13680d  Dockerfile.backend
 0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0  LICENSE
 3461c9caaef7207878962f1060a62d8f75d3497c9670955bf517d60bdb70e256  README.md
 872e35b7547e48903461a2203444e2cbacf40610779db1a9a99afe8226a384e7  TRADEMARKS.md
 398113b8b2496eca626f87824fb237da24a75c59c5980f771115a29ce7b3aa5d  backend/Cargo.lock
-b8714e037e9a1bf999d4bb5365b21914f76f690fe14f99b5f7864c9b35b31338  backend/Cargo.toml
+ad50b6d886151c7d6888331662dc403177bbaaa8f42e05e7eb5d40165a149977  backend/Cargo.toml
 cbed09a629432790965975b123bfcb3367821dc49dec96c9712e0b39dd580f65  backend/config/development.yaml
 011a7237475ea91e493f6272117e94f85e35b9ef38c73147c8e8340cd45b87ed  backend/config/production.yaml
 2a53336d26f850aa724dd5840ad4821172638f2ad8b1c4f4f19f21e6b11e7596  backend/config/test.yaml
@@ -181,7 +181,7 @@ b7085da95d307846747d33b91166c1d74106f4a87163777841a81724a7f59141  backend/tests/
 75ebb2a0422f57df425a323862c3d5c964a58392171a629b127093903facd57f  backend/tests/endpoint_coverage_test.rs
 60a7327766f591ce9e85d607d5435136707cfd1814a1afec28e0bac8e4fdf463  backend/tests/fsrs_rs_alloc_test.rs
 6d91bf4d7a6c704ddc43114806d9d89243cd350f2331c507bda14a5f3da5727c  backend/tests/fsrs_rs_gate_test.rs
-2f35eb113ca22f788effd878db2f0e0c7d3fc0459ec291e7d4c2ee81a85d7363  backend/tests/fsrs_state_persistence_test.rs
+d78536b6dd59765fe6ef8235894b2ad1840795bb41483b30fe1206c1dd2522fa  backend/tests/fsrs_state_persistence_test.rs
 236ef825e0c834bbcf0168784430b6afa9377ff198ef6b99738ac024c270a688  backend/tests/harness_auth_test.rs
 c8418b94f23f67e5b8a98f40f986bba269416846489800101113296dbb0b81d6  backend/tests/harness_eval.rs
 7e76a02f8e32af2506688f4972f39201c63cf3956e5a1bf33a99ae0b1adc61c7  backend/tests/http_surface_gap_test.rs

@@ -47,6 +47,7 @@ fn review_ms(days_ago: i64) -> i64 {
 fn snapshot_with_revlog(card_id: i64, rows: &[(i64, i64, i64)]) -> SnapshotData {
     let head = rows.iter().map(|r| r.0).max();
     SnapshotData {
+        web_rows: Default::default(),
         card_ids: vec![card_id],
         revlog_heads: head.map(|h| HashMap::from([(card_id, h)])).unwrap_or_default(),
         sched_facts: HashMap::from([(
@@ -131,6 +132,7 @@ fn cram_rows_and_out_of_range_ease_are_skipped() {
 fn sm2_fallback_uses_review_card_facts() {
     // Review card, no revlog: ivl=10 days, factor 2500 → SM-2 derivation.
     let snapshot = SnapshotData {
+        web_rows: Default::default(),
         card_ids: vec![42],
         revlog_heads: HashMap::new(),
         sched_facts: HashMap::from([(
@@ -152,6 +154,7 @@ fn sm2_fallback_rejects_out_of_range_factors() {
     // factor 100 (permille) is outside the sane window → not SM-2-derivable
     // → first-transition fallback.
     let snapshot = SnapshotData {
+        web_rows: Default::default(),
         card_ids: vec![43],
         revlog_heads: HashMap::new(),
         sched_facts: HashMap::from([(
@@ -170,6 +173,7 @@ fn sm2_fallback_rejects_out_of_range_factors() {
 #[test]
 fn first_transition_for_learning_cards() {
     let snapshot = SnapshotData {
+        web_rows: Default::default(),
         card_ids: vec![44],
         revlog_heads: HashMap::new(),
         sched_facts: HashMap::from([(
@@ -222,14 +226,14 @@ async fn row_for(
 async fn ensure_states_reuses_fresh_cache_without_rewrite() {
     let db = fresh_db().await;
     let head = review_ms(5);
-    let snapshot = snapshot_with_revlog(101, &[(review_ms(30), 3, 0), (head, 3, 0)]);
+    let mut snapshot = snapshot_with_revlog(101, &[(review_ms(30), 3, 0), (head, 3, 0)]);
 
     // Pre-seed a row that is already fresh (revlog_head matches the
     // snapshot). ensure_states must serve it from cache and NOT rewrite it
     // (sentinel updated_at survives).
     seed_row(&db, "alice", 101, Some(head)).await;
 
-    let states = ensure_states(&db, "alice", &snapshot).await.expect("ensure");
+    let states = ensure_states(&db, "alice", &mut snapshot).await.expect("ensure");
     let state = states.get(&101).expect("cached state served");
     assert_eq!(state.stability, 3.25);
     assert_eq!(state.difficulty, 5.5);
@@ -243,12 +247,12 @@ async fn ensure_states_reuses_fresh_cache_without_rewrite() {
 async fn ensure_states_refreshes_stale_rows() {
     let db = fresh_db().await;
     let head = review_ms(5);
-    let snapshot = snapshot_with_revlog(101, &[(review_ms(30), 3, 0), (head, 3, 0)]);
+    let mut snapshot = snapshot_with_revlog(101, &[(review_ms(30), 3, 0), (head, 3, 0)]);
 
     // Stale: persisted head is one review behind the snapshot.
     seed_row(&db, "alice", 101, Some(head - DAY_MS)).await;
 
-    let states = ensure_states(&db, "alice", &snapshot).await.expect("ensure");
+    let states = ensure_states(&db, "alice", &mut snapshot).await.expect("ensure");
     let state = states.get(&101).expect("refreshed state");
     assert_eq!(state.revlog_head, Some(head), "stale row must re-derive");
     assert_eq!(state.source, StateSource::Revlog);
@@ -263,12 +267,12 @@ async fn ensure_states_refreshes_stale_rows() {
 async fn ensure_states_isolates_students() {
     let db = fresh_db().await;
     let head = review_ms(5);
-    let snapshot = snapshot_with_revlog(101, &[(review_ms(30), 3, 0), (head, 3, 0)]);
+    let mut snapshot = snapshot_with_revlog(101, &[(review_ms(30), 3, 0), (head, 3, 0)]);
 
     // Student A has a fresh cached row; student B has nothing.
     seed_row(&db, "alice", 101, Some(head)).await;
 
-    let states_b = ensure_states(&db, "bob", &snapshot).await.expect("ensure B");
+    let states_b = ensure_states(&db, "bob", &mut snapshot).await.expect("ensure B");
     let state_b = states_b.get(&101).expect("B state derived fresh");
     assert_eq!(state_b.source, StateSource::Revlog);
     assert_ne!(
@@ -290,9 +294,9 @@ async fn ensure_states_isolates_students() {
 async fn ensure_states_derives_and_persists_missing_cards() {
     let db = fresh_db().await;
     let head = review_ms(5);
-    let snapshot = snapshot_with_revlog(101, &[(review_ms(30), 3, 0), (head, 3, 0)]);
+    let mut snapshot = snapshot_with_revlog(101, &[(review_ms(30), 3, 0), (head, 3, 0)]);
 
-    let states = ensure_states(&db, "alice", &snapshot).await.expect("ensure");
+    let states = ensure_states(&db, "alice", &mut snapshot).await.expect("ensure");
     let state = states.get(&101).expect("derived state");
     assert_eq!(state.source, StateSource::Revlog);
     assert_eq!(state.revlog_head, Some(head));
