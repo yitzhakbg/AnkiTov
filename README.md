@@ -1,5 +1,7 @@
 # AnkiTov Core (`ankitov-core`)
 
+> **Official site:** [ankitov.com](https://ankitov.com) · **Community:** [ankitov.org](https://ankitov.org)
+
 AnkiTov™ Core is an open-source spaced repetition engine, retention management system, and Anki addon bridge designed for schools, educators, and independent learners.
 
 > **Disclaimer:** AnkiTov is an independent project and is **not affiliated with, endorsed by, or connected to Anki, AnkiMobile, AnkiDesktop, or AnkiWeb**. "Anki" is a registered trademark of Damien Elmes. AnkiTov is built to interoperate with the open Anki ecosystem.
