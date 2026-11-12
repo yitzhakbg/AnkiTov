@@ -50,6 +50,11 @@ form input { display: block; width: 100%; margin-top: .35rem; padding: .8rem .9r
   margin-top: 1rem; color: var(--muted); font-size: .85rem; }
 .link { background: none; border: 0; color: var(--accent-bright); cursor: pointer;
   font-size: .85rem; padding: .5rem; }
+.seed-filters { display: flex; gap: .5rem; align-items: center; margin-bottom: .75rem; flex-wrap: wrap; }
+.seed-filters input, .seed-filters select { padding: .55rem .7rem; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--card); color: var(--ink); font: inherit; font-size: .85rem; }
+.seed-filters input { flex: 1; min-width: 140px; }
+.seed-count { color: var(--muted); font-size: .78rem; white-space: nowrap; }
 .seed-list { display: grid; gap: .5rem; }
 .seed-list button { text-align: start; }
 .seed-list .meta { display: block; font-size: .78rem; color: var(--muted); font-weight: 400; }

@@ -6,6 +6,7 @@
 //! | GET  | `/api/v1/reviewer/session/cards`   | JWT (student) | Rendered cards for the active session |
 //! | POST | `/api/v1/reviewer/answer`          | JWT (student) | Ingest one answer (ledger + audit + progress) |
 //! | POST | `/api/v1/reviewer/import-seed`     | JWT (student) | Import a seed `.apkg` into the student's server-side collection |
+//! | GET  | `/api/v1/reviewer/seed-packs`      | JWT (student) | Bundled starter packs for the empty state (T-204) |
 //! | GET  | `/api/v1/reviewer/media/{file}`    | JWT (student) | Serve a media file from the student's collection |
 //!
 //! Static SPA: `/reviewer` (+ assets) served from `resources/reviewer/` via
@@ -37,6 +38,7 @@ pub fn routes() -> Routes {
         .add("/session/cards", get(session_cards))
         .add("/answer", post(answer))
         .add("/import-seed", post(import_seed))
+        .add("/seed-packs", get(seed_packs))
         .add("/media/{file}", get(media))
 }
 
@@ -152,6 +154,10 @@ async fn answer(
     Extension(user): Extension<AuthUser>,
     Json(payload): Json<ReviewAnswer>,
 ) -> Result<Response> {
+    // Trial read-only flip (class-trial spec §5): no new answers after day 90.
+    if crate::services::settings::trial_readonly(&ctx.db).await.unwrap_or(false) {
+        return format::json(serde_json::json!({"status": "trial_ended", "message": "This class trial has ended. Your progress is saved and exportable."}));
+    }
     match review_ingest::ingest_answer(&ctx.db, user.id, &user.email, &payload).await {
         Ok(result) => format::json(result),
         Err(review_ingest::IngestError::BadEase(e)) => {
@@ -167,12 +173,32 @@ async fn answer(
     }
 }
 
+/// GET /seed-packs — bundled starter packs for the student empty state.
+///
+/// Any authenticated user (students included) — read-only listing with no
+/// role gate, unlike the teacher/admin console route it shares logic with.
+/// Fixes T-204: the reviewer SPA previously fetched a nonexistent
+/// `/api/v1/decks/available` and silently rendered zero packs.
+async fn seed_packs(
+    State(ctx): State<AppContext>,
+    Extension(user): Extension<AuthUser>,
+) -> Result<Response> {
+    let _ = user; // auth-only gate; students may list the public seed library
+    let decks =
+        crate::controllers::management::deck_library::available_decks(&ctx).await?;
+    format::json(decks)
+}
+
 /// POST /import-seed — import a seed `.apkg` into the student's collection.
 async fn import_seed(
     State(ctx): State<AppContext>,
     Extension(user): Extension<AuthUser>,
     Json(payload): Json<serde_json::Value>,
 ) -> Result<Response> {
+    // Trial read-only flip: no new imports after day 90 either.
+    if crate::services::settings::trial_readonly(&ctx.db).await.unwrap_or(false) {
+        return format::json(serde_json::json!({"status": "trial_ended", "message": "This class trial has ended."}));
+    }
     let Some(package) = payload.get("package").and_then(|v| v.as_str()) else {
         return format::json(serde_json::json!({"status": "error", "message": "missing package"}));
     };

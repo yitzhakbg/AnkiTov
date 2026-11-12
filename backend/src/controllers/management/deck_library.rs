@@ -33,7 +33,7 @@
 use crate::middleware::auth::{ensure_role, AuthUser};
 use crate::models::entities::deck as deck_entity;
 use crate::models::management::{ApiResponse, DeckInfo};
-use crate::services::anki_connect::AnkiConnectClient;
+use crate::services::anki_connect::{AnkiConnectClient, AnkiConnectError};
 use axum::extract::{Path, State};
 use axum::Extension;
 use loco_rs::prelude::*;
@@ -188,7 +188,14 @@ pub async fn list_available_decks(
     State(ctx): State<AppContext>,
 ) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
+    let entries = available_decks(&ctx).await?;
+    format::json(entries)
+}
 
+/// Core listing shared by the teacher/admin console route and the student
+/// reviewer endpoint (`GET /reviewer/seed-packs`, T-204): every `.apkg` in
+/// the seed-packages directory with manifest metadata and import status.
+pub(crate) async fn available_decks(ctx: &AppContext) -> Result<Vec<AvailableDeck>> {
     let dir = seed_packages_dir();
     let mut entries: Vec<AvailableDeck> = Vec::new();
     let read_dir = match std::fs::read_dir(&dir) {
@@ -261,7 +268,7 @@ pub async fn list_available_decks(
         });
     }
 
-    format::json(entries)
+    Ok(entries)
 }
 
 /// Import a deck from the library with one click.
@@ -362,6 +369,21 @@ pub async fn import_available_deck(
         .await
         .map_err(|e| {
             tracing::error!("deck library import {name} failed: {:?}", e);
+            // AnkiConnect unreachable (no Anki running — common in local
+            // deploys where the backend container has no Anki binary):
+            // return a clear, actionable message instead of a raw 500 that
+            // the console renders as an opaque "server error".
+            if matches!(e, AnkiConnectError::Unreachable(_)) {
+                return loco_rs::Error::CustomError(
+                    axum::http::StatusCode::SERVICE_UNAVAILABLE,
+                    loco_rs::controller::ErrorDetail::new(
+                        "anki_unreachable",
+                        "Deck import needs Anki running with the AnkiConnect \
+                         add-on, but it could not be reached. Start Anki (or \
+                         click Refresh to auto-launch it) and try again.",
+                    ),
+                );
+            }
             loco_rs::Error::InternalServerError
         })?;
     if !imported {
@@ -448,8 +470,10 @@ pub async fn import_available_deck(
 }
 
 /// Construct a Zone 2 AnkiConnect client from environment config
-/// (same resolution as `management::anki_ops`).
-fn anki_client() -> AnkiConnectClient {
+/// (same resolution as `management::anki_ops`). Shared with the manual
+/// deck upload path (`management::decks::upload_deck`), which routes
+/// through the same Zone 2 import machinery.
+pub(crate) fn anki_client() -> AnkiConnectClient {
     let port: u16 = std::env::var("ANKICONNECT_PORT")
         .unwrap_or_else(|_| "8765".to_string())
         .parse()

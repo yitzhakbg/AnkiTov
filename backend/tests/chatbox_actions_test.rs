@@ -125,8 +125,69 @@ async fn test_create_class_and_enroll_students() {
 // 2. DECK UPLOAD & DISTRIBUTION HARNESS
 // ─────────────────────────────────────────────────────────────────────────────
 
+/// Minimal AnkiConnect wiremock for upload seeding: deckNames before
+/// (single shot, mounted first) → importPackage → findCards → deckNames
+/// after (unlimited). Mirrors the helper in management_decks_test.rs —
+/// upload now routes through Zone 2 (AnkiConnect), so seeding uploads need
+/// a mock. ANKICONNECT_PORT is process-global: safe under nextest's
+/// one-process-per-test isolation only.
+async fn start_anki_mock(new_deck: String) -> wiremock::MockServer {
+    let server = wiremock::MockServer::start().await;
+    wiremock::Mock::given(wiremock::matchers::body_partial_json(
+        serde_json::json!({"action": "deckNames"}),
+    ))
+    .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
+        serde_json::json!({"result": ["Default"], "error": null}),
+    ))
+    .up_to_n_times(1)
+    .mount(&server)
+    .await;
+    wiremock::Mock::given(wiremock::matchers::body_partial_json(
+        serde_json::json!({"action": "importPackage"}),
+    ))
+    .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
+        serde_json::json!({"result": true, "error": null}),
+    ))
+    .mount(&server)
+    .await;
+    wiremock::Mock::given(wiremock::matchers::body_partial_json(
+        serde_json::json!({"action": "findCards"}),
+    ))
+    .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
+        serde_json::json!({"result": [201, 202], "error": null}),
+    ))
+    .mount(&server)
+    .await;
+    wiremock::Mock::given(wiremock::matchers::body_partial_json(
+        serde_json::json!({"action": "deckNames"}),
+    ))
+    .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
+        serde_json::json!({"result": ["Default", new_deck], "error": null}),
+    ))
+    .mount(&server)
+    .await;
+    server
+}
+
+fn set_anki_port(server: &wiremock::MockServer) {
+    let uri = server.uri();
+    let port: u16 = uri.rsplit(':').next().unwrap().parse().expect("mock port");
+    std::env::set_var("ANKICONNECT_PORT", port.to_string());
+}
+
+/// Redirect persisted uploads to a unique temp dir (see
+/// management_decks_test.rs::set_unique_upload_dir).
+fn set_unique_upload_dir() {
+    let dir = std::env::temp_dir().join(format!("ankitov-chatbox-upload-test-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::env::set_var("ANKITOV_UPLOAD_DIR", dir);
+}
+
 #[tokio::test]
 async fn test_upload_deck_and_distribute() {
+    let mock = start_anki_mock("Biology-Grade7-Photosynthesis".to_string()).await;
+    set_anki_port(&mock);
+    set_unique_upload_dir();
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         // Step 1: Upload a Deck package (.apkg)
         let dummy_apkg_bytes: Vec<u8> = (0u8..32).cycle().take(1024).collect();

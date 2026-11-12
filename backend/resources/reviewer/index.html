@@ -59,6 +59,11 @@
       <div id="seed-import">
         <h2 data-i18n="empty.import_title">Try a starter pack</h2>
         <p class="sub" data-i18n="empty.import_sub">Free CC0 packs — imported straight into your practice space.</p>
+        <div class="seed-filters">
+          <input type="search" id="seed-search" placeholder="Search packs…" autocomplete="off" aria-label="Search packs">
+          <select id="seed-locale" aria-label="Filter by language"><option value="">All languages</option></select>
+          <span id="seed-count" class="seed-count"></span>
+        </div>
         <div id="seed-list" class="seed-list"></div>
       </div>
       <button id="btn-logout2" class="link" data-i18n="review.logout">Log out</button>

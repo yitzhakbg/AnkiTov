@@ -16,7 +16,8 @@
       "empty.title": "Nothing due right now", "empty.default": "No active practice session.",
       "empty.import_title": "Try a starter pack", "empty.import_sub": "Free CC0 packs — imported straight into your practice space.",
       "err.login": "Login failed — check email and password.", "err.load": "Could not load your session.",
-      "err.import": "Import failed.", "importing": "Importing…"
+      "err.import": "Import failed.", "importing": "Importing…",
+      "empty.no_match": "No packs match your search."
     },
     he: {
       "login.title": "תרגול", "login.subtitle": "תרגול יומי קצר, בקצב שלכם. SRS works.",
@@ -27,7 +28,8 @@
       "empty.title": "אין כרטיסים לתרגול כרגע", "empty.default": "אין מפגש תרגול פעיל.",
       "empty.import_title": "נסו חבילת התחלה", "empty.import_sub": "חבילות CC0 חינמיות — מיובאות ישירות למרחב התרגול שלכם.",
       "err.login": "ההתחברות נכשלה — בדקו אימייל וסיסמה.", "err.load": "טעינת המפגש נכשלה.",
-      "err.import": "הייבוא נכשל.", "importing": "מייבא…"
+      "err.import": "הייבוא נכשל.", "importing": "מייבא…",
+      "empty.no_match": "אין חבילות שתואמות לחיפוש."
     }
   };
   var locale = (navigator.language || "en").slice(0, 2) === "he" ? "he" : "en";
@@ -118,26 +120,71 @@
   }
 
   // ── seed packs (empty state) ──
+  // T-204: fetch the real student endpoint (the old code hit a nonexistent
+  // /api/v1/decks/available with a raw fetch — no JWT, silent 404, zero
+  // packs). Full list, client-side search + language filter like the
+  // management console; no slice cap.
+  var seedPacks = [];
   function loadSeedPacks() {
-    fetch("/api/v1/decks/available").then(function (r) { return r.json(); }).catch(function () { return []; })
-      .then(function (packs) {
-        if (!Array.isArray(packs)) return;
-        var list = document.getElementById("seed-list");
-        list.innerHTML = "";
-        packs.slice(0, 8).forEach(function (p) {
-          var b = document.createElement("button");
-          b.className = "btn";
-          b.innerHTML = p.name + '<span class="meta">' + (p.card_count || "?") + " · " + (p.language || "?") + "</span>";
-          b.addEventListener("click", function () {
-            b.disabled = true;
-            b.innerHTML = t("importing");
-            api("/api/v1/reviewer/import-seed", { method: "POST", body: JSON.stringify({ package: p.package }) })
-              .then(function () { loadSession(); })
-              .catch(function () { b.innerHTML = t("err.import"); b.disabled = false; });
-          });
-          list.appendChild(b);
-        });
+    api("/api/v1/reviewer/seed-packs").then(function (packs) {
+      seedPacks = Array.isArray(packs) ? packs : [];
+      populateSeedLocaleFilter();
+      renderSeedPacks();
+    }).catch(function () { /* unauthorized already logged out; else stay quiet */ });
+  }
+
+  function populateSeedLocaleFilter() {
+    var sel = document.getElementById("seed-locale");
+    if (!sel) return;
+    var locales = [];
+    seedPacks.forEach(function (p) {
+      if (p.language && locales.indexOf(p.language) === -1) locales.push(p.language);
+    });
+    locales.sort();
+    var current = sel.value;
+    sel.innerHTML = '<option value="">All languages</option>' +
+      locales.map(function (l) { return '<option value="' + l + '">' + l + "</option>"; }).join("");
+    if (locales.indexOf(current) !== -1) sel.value = current;
+  }
+
+  function renderSeedPacks() {
+    var list = document.getElementById("seed-list");
+    if (!list) return;
+    var search = document.getElementById("seed-search");
+    var locSel = document.getElementById("seed-locale");
+    var q = ((search || {}).value || "").trim().toLowerCase();
+    var loc = (locSel || {}).value || "";
+    var filtered = seedPacks.filter(function (p) {
+      if (loc && p.language !== loc) return false;
+      if (q && ((p.name || "") + " " + (p.package || "")).toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+    var count = document.getElementById("seed-count");
+    if (count) {
+      count.textContent = !seedPacks.length ? "" :
+        (filtered.length === seedPacks.length ? seedPacks.length + " packs" : filtered.length + " of " + seedPacks.length + " packs");
+    }
+    list.innerHTML = "";
+    if (!filtered.length && seedPacks.length) {
+      var none = document.createElement("p");
+      none.className = "sub";
+      none.textContent = t("empty.no_match");
+      list.appendChild(none);
+      return;
+    }
+    filtered.forEach(function (p) {
+      var b = document.createElement("button");
+      b.className = "btn";
+      b.innerHTML = p.name + '<span class="meta">' + (p.card_count || "?") + " · " + (p.language || "?") + "</span>";
+      b.addEventListener("click", function () {
+        b.disabled = true;
+        b.innerHTML = t("importing");
+        api("/api/v1/reviewer/import-seed", { method: "POST", body: JSON.stringify({ package: p.package }) })
+          .then(function () { loadSession(); })
+          .catch(function () { b.innerHTML = t("err.import"); b.disabled = false; });
       });
+      list.appendChild(b);
+    });
   }
 
   // ── card rendering ──
@@ -198,6 +245,10 @@
   });
 
   // ── boot ──
+  var seedSearch = document.getElementById("seed-search");
+  var seedLocale = document.getElementById("seed-locale");
+  if (seedSearch) seedSearch.addEventListener("input", renderSeedPacks);
+  if (seedLocale) seedLocale.addEventListener("change", renderSeedPacks);
   applyI18n();
   if (state.token) { loadSession(); } else { show("view-login"); }
   if ("serviceWorker" in navigator) {

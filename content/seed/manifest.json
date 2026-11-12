@@ -6,6 +6,34 @@
   "decks": [
     {
       "locale": "en",
+      "slug": "ela-content-words",
+      "file": "packages/ela-content-words-en.apkg",
+      "title": "AnkiTov — Content Words (Grades 7-12)",
+      "card_count": 20,
+      "note_type_census": {
+        "basic": 11,
+        "cloze": 9,
+        "type_in": 0
+      },
+      "sha256": "6d5b720f7271920e4732b54682dfea4456134bc1412803787a00151e4d86616a",
+      "rtl": false
+    },
+    {
+      "locale": "en",
+      "slug": "ela-high-frequency",
+      "file": "packages/ela-high-frequency-en.apkg",
+      "title": "AnkiTov — High-Frequency Words (Grades 7-12 Intervention)",
+      "card_count": 20,
+      "note_type_census": {
+        "basic": 7,
+        "cloze": 7,
+        "type_in": 6
+      },
+      "sha256": "610ddddc83e635d24ddfa004aad05e27a67db092959312c033f60aba14f84067",
+      "rtl": false
+    },
+    {
+      "locale": "en",
       "slug": "english-vocabulary",
       "file": "packages/english-vocabulary-en.apkg",
       "title": "AnkiTov Pilot — English Vocabulary",
@@ -15,7 +43,7 @@
         "cloze": 21,
         "type_in": 26
       },
-      "sha256": "42aebbf7135e6c9e6d3076559c1d7addad9e6bddfe8756ba5710bb0af3a53f6c",
+      "sha256": "3c90921c63e2b850283b6072b675e871a44da88aeb7cd95919f0b6cc1e9fb941",
       "rtl": false
     },
     {
@@ -29,7 +57,7 @@
         "cloze": 26,
         "type_in": 0
       },
-      "sha256": "8ad34e1025e08d041e145cbd9b814e4da2fb2c2c9bd9ea0520a25ebdb05f8908",
+      "sha256": "38ff742efa87078a9071148a8d14f4ea4fad364caf392afb468ab3db6d4caa41",
       "rtl": false
     },
     {
@@ -43,7 +71,7 @@
         "cloze": 47,
         "type_in": 11
       },
-      "sha256": "d4aeee5ba4d89fdfe85fcf19708b1751cfe3b30cc51fefa4902e5ee05bd45a61",
+      "sha256": "56ef6fbd138f7f5535bbeaedd9f485870d3ce99f01df019e3d12c12a833146bd",
       "rtl": false
     },
     {
@@ -57,7 +85,7 @@
         "cloze": 32,
         "type_in": 10
       },
-      "sha256": "f396053b3029e7c1f33bf6051651e5481575de2045a6ee1583446f9bea7a1473",
+      "sha256": "f45de1a22918500ce8fd08d52f778de601e875a60950d9e43223c19cbbf6ff19",
       "rtl": false
     },
     {
@@ -71,7 +99,7 @@
         "cloze": 3,
         "type_in": 0
       },
-      "sha256": "3e89be74d4132559486074f4e635cb41c0df7940b2048f8c7e711f2f297e116a",
+      "sha256": "5b5fb4ef6c0ecd1d6960e8d975734f1548c3d337ea307534b159bf1971dbd259",
       "rtl": false
     },
     {
@@ -85,7 +113,7 @@
         "cloze": 10,
         "type_in": 0
       },
-      "sha256": "30b70f2656e1ce6b43e0c0b612fb02fd243699b64cf34025ce1085e3c02a9be1",
+      "sha256": "8d73d3aae63e6dafe55076358a0b308e03acf554fbcd35a31b24867f48d99604",
       "rtl": false
     },
     {
@@ -99,7 +127,7 @@
         "cloze": 2,
         "type_in": 1
       },
-      "sha256": "4359117f37d96494d4cf20ca0f0f18ec093733d0e03df86a34269c43abb973a9",
+      "sha256": "4e7b40eb36380d2503ae1a197b3763fda9f096a969e85acbf4d1c1b27f379c65",
       "rtl": false
     },
     {
@@ -113,7 +141,7 @@
         "cloze": 6,
         "type_in": 0
       },
-      "sha256": "27cb0c3a738c1be15305a06b62e9ec9e13fe841d639e8335346107be340c2799",
+      "sha256": "f87214e04c612f19cff1b2718d9f283a282185378dafa51b4b323dd742ecc98d",
       "rtl": false
     },
     {
@@ -127,7 +155,7 @@
         "cloze": 3,
         "type_in": 0
       },
-      "sha256": "c184d0b13ffb49a32764f14cfbd42e855867e3f77099734ed762132466fed9db",
+      "sha256": "94bb4f3f704fa2aecf8a0b1c03aaf4874d46a4b382b88009e97fef43adfd7248",
       "rtl": false
     },
     {
@@ -141,7 +169,7 @@
         "cloze": 26,
         "type_in": 0
       },
-      "sha256": "089b596983e86b8af3f299096742ddb86356b1ec4098889e15baf936c19e61d5",
+      "sha256": "76cd917fb598e44c13ff90c285221fa06e05e8867645e44b9bcd7c8425518ee5",
       "rtl": false
     },
     {
@@ -155,7 +183,7 @@
         "cloze": 8,
         "type_in": 0
       },
-      "sha256": "fe9987f5cdce2c766fa5f93f695e253b32a921454f037d803df8d9e198ac7ce4",
+      "sha256": "461a11ef043137be2572dea6134109acd810ab5929eb62cb986af35a9b38fc33",
       "rtl": false
     },
     {
@@ -169,7 +197,7 @@
         "cloze": 6,
         "type_in": 0
       },
-      "sha256": "7b9611118b601e0d57389776f58e401a6c158ba197401f0e5782b38378f075dd",
+      "sha256": "7468026d4e87939692a1188475658584b048fb127b796098cc90aefbdb703726",
       "rtl": false
     },
     {
@@ -183,7 +211,7 @@
         "cloze": 3,
         "type_in": 0
       },
-      "sha256": "30a6456c32ba994374a17f6a5eb3b0ffaf6fd9a69b67096acb8f59e0240413c2",
+      "sha256": "bc9b0b52331251bed7763036d8ffa7c4b4217248df6a49f8fbb4c2674347260f",
       "rtl": true
     },
     {
@@ -197,7 +225,7 @@
         "cloze": 10,
         "type_in": 0
       },
-      "sha256": "768844a2f3e72a392bf26e939a67ee11ae464d221ff28c44206fac94c39484f8",
+      "sha256": "757948b1fbc4c32b8e7fe8524994b93243b09dd9b794d9c541c490ced19cb700",
       "rtl": true
     },
     {
@@ -211,7 +239,7 @@
         "cloze": 47,
         "type_in": 11
       },
-      "sha256": "dece27366d12158912f4a2a811a7adf25cdef5886d38c4ae7384f6d9277639c9",
+      "sha256": "f5602b6e8da71fc999d0fb3fdba43151e60f89f0ed8a8f3a451be2a15512a53c",
       "rtl": true
     },
     {
@@ -225,9 +253,9 @@
         "cloze": 32,
         "type_in": 10
       },
-      "sha256": "6516cbff41d71743429fe68e861b641282599980b68835e99ff1be9b4d9d8e0a",
+      "sha256": "96e243a9125555cd4c1c10fda0b9f2e8aeddf8eb13fd495c63b03bd33009d269",
       "rtl": true
     }
   ],
-  "generated_at": "2026-10-29T22:46:48Z"
+  "generated_at": "2026-11-12T05:43:31Z"
 }

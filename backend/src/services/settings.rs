@@ -21,6 +21,14 @@ pub const KEY_SCHOOL_NAME: &str = "school_name";
 pub const KEY_LOCALE: &str = "locale";
 /// `app_settings` key holding the optional Anki sync-server base URL.
 pub const KEY_SYNC_URL: &str = "sync_url";
+/// `app_settings` key: "1" flips the instance into trial read-only mode
+/// (class-trial spec §5). Written by the trial supervisor at day 90; the
+/// reviewer write endpoints gate on it so a supervisor outage cannot
+/// silently extend a trial (the flag lives in the instance's own SQLite).
+pub const KEY_TRIAL_READONLY: &str = "trial_readonly";
+/// `app_settings` key: RFC 3339 expiry timestamp written by the trial
+/// supervisor at provisioning; the dashboard reads it for days-remaining.
+pub const KEY_TRIAL_EXPIRES_AT: &str = "trial_expires_at";
 
 /// All setting keys this service manages, for iteration and audit summaries.
 pub const ALL_KEYS: &[&str] = &[KEY_SCHOOL_NAME, KEY_LOCALE, KEY_SYNC_URL];
@@ -42,6 +50,12 @@ pub struct SchoolSettings {
 pub async fn get(db: &DatabaseConnection, key: &str) -> Result<Option<String>, sea_orm::DbErr> {
     let row = app_setting::Entity::find_by_id(key.to_string()).one(db).await?;
     Ok(row.map(|m| m.value))
+}
+
+/// Trial read-only flip (class-trial spec §5): true when `trial_readonly`
+/// is set to "1" in `app_settings`. Checked by the reviewer write endpoints.
+pub async fn trial_readonly(db: &DatabaseConnection) -> Result<bool, sea_orm::DbErr> {
+    Ok(get(db, KEY_TRIAL_READONLY).await?.as_deref() == Some("1"))
 }
 
 /// Read every known key in one query and project onto [`SchoolSettings`].

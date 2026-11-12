@@ -2533,6 +2533,13 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
             <h2 style="font-size:1.05rem;margin:0">📚 Deck Library</h2>
             <span style="opacity:.65;font-size:.85rem">Bundled AnkiTov decks — click Add to include one. No download or import needed.</span>
           </div>
+          <div style="display:flex;gap:var(--space-2);margin-top:var(--space-3);flex-wrap:wrap;align-items:center">
+            <input type="search" id="deck-library-search" class="form-input" placeholder="Search decks…" style="flex:1;min-width:180px" autocomplete="off" oninput="Decks.renderLibrary()">
+            <select id="deck-library-locale" class="form-select" style="width:auto" aria-label="Filter by language" onchange="Decks.renderLibrary()">
+              <option value="">All languages</option>
+            </select>
+            <span id="deck-library-count" style="opacity:.65;font-size:.85rem;white-space:nowrap"></span>
+          </div>
           <div style="overflow-x:auto;margin-top:var(--space-3)">
             <table class="table" style="width:100%">
               <thead><tr><th>Deck</th><th>Cards</th><th>Language</th><th>Size</th><th>Status</th><th></th></tr></thead>
@@ -3250,6 +3257,13 @@ const API = {
     if (err.name === 'TimeoutError' || err.name === 'AbortError') {
       return t('error.requestTimeout');
     }
+    // Prefer a server-provided message (e.g. "Deck import needs Anki
+    // running…") over a generic status-code string — the backend sends
+    // actionable text for known failure modes.
+    const bodyMsg = err && err.body && (err.body.message || err.body.description || err.body.error);
+    if (bodyMsg && typeof bodyMsg === 'string' && bodyMsg.length < 300) {
+      return bodyMsg;
+    }
     if (err.status === 400) return t('error.badRequest');
     if (err.status === 404) return t('error.notFound');
     if (err.status === 500) return t('error.serverError');
@@ -3958,8 +3972,8 @@ const Home = {
       try {
         await API.post('/classes', {
           name: nameInput.value.trim(),
-          subject: document.getElementById('wizard-class-subject')?.value?.trim() || '',
-          period: document.getElementById('wizard-class-period')?.value?.trim() || '',
+          subject_area: document.getElementById('wizard-class-subject')?.value?.trim() || null,
+          period: document.getElementById('wizard-class-period')?.value?.trim() || null,
         });
 
         // Import students if entered
@@ -3971,7 +3985,10 @@ const Home = {
           }
         }
       } catch (e) {
+        // Surface the failure — a silent console.error left the teacher with
+        // an empty dashboard and no idea the class was never created.
         console.error('Wizard creation failed:', e);
+        this._toast(t('error.unknown') + API.humanizeError(e), 'error');
       }
     }
 
@@ -4389,30 +4406,68 @@ const Decks = {
   },
 
   // ── Deck Library: bundled seed decks, one-click add ──
+  // Client-side search + language filter (scales to hundreds of packs —
+  // the full list is fetched once and filtered in the browser; move to
+  // server-side pagination only past ~500 packs).
   async loadLibrary() {
     const tbody = document.getElementById('deck-library-body');
     if (!tbody) return;
     try {
       const decks = await API.get('/decks/available');
-      if (!decks.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="opacity:.65">No bundled decks found</td></tr>';
-        return;
-      }
-      tbody.innerHTML = decks.map(d => {
-        const sizeMb = (d.file_size_bytes / 1048576).toFixed(1);
-        const cards = (d.card_count != null) ? d.card_count : '—';
-        const lang = d.language ? d.language : '—';
-        const status = d.imported
-          ? '<span style="color:var(--color-success-500);font-weight:600">✓ Added</span>'
-          : '<span style="opacity:.65">Not added</span>';
-        const action = d.imported
-          ? '<button class="btn btn-sm" disabled>Added</button>'
-          : `<button class="btn btn-sm btn-primary" onclick="Decks.importFromLibrary('${d.package}')">Add</button>`;
-        return `<tr><td><strong>${d.name}</strong></td><td>${cards}</td><td>${lang}</td><td>${sizeMb} MB</td><td>${status}</td><td>${action}</td></tr>`;
-      }).join('');
+      this._libraryDecks = Array.isArray(decks) ? decks : [];
+      this._populateLibraryLocaleFilter();
+      this.renderLibrary();
     } catch (err) {
       tbody.innerHTML = `<tr><td colspan="6" style="color:var(--color-error-500)">⚠ ${API.humanizeError(err)}</td></tr>`;
     }
+  },
+
+  _populateLibraryLocaleFilter() {
+    const sel = document.getElementById('deck-library-locale');
+    if (!sel) return;
+    const locales = [...new Set((this._libraryDecks || []).map(d => d.language).filter(Boolean))].sort();
+    const current = sel.value;
+    sel.innerHTML = '<option value="">All languages</option>' +
+      locales.map(l => `<option value="${l}">${l}</option>`).join('');
+    if (locales.includes(current)) sel.value = current;
+  },
+
+  renderLibrary() {
+    const tbody = document.getElementById('deck-library-body');
+    if (!tbody) return;
+    const decks = this._libraryDecks || [];
+    const count = document.getElementById('deck-library-count');
+    if (!decks.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="opacity:.65">No bundled decks found</td></tr>';
+      if (count) count.textContent = '';
+      return;
+    }
+    const q = ((document.getElementById('deck-library-search') || {}).value || '').trim().toLowerCase();
+    const loc = (document.getElementById('deck-library-locale') || {}).value || '';
+    const filtered = decks.filter(d => {
+      if (loc && d.language !== loc) return false;
+      if (q && !(`${d.name || ''} ${d.package || ''}`.toLowerCase().includes(q))) return false;
+      return true;
+    });
+    if (count) count.textContent = (filtered.length === decks.length)
+      ? `${decks.length} decks`
+      : `${filtered.length} of ${decks.length} decks`;
+    if (!filtered.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="opacity:.65">No decks match your search</td></tr>';
+      return;
+    }
+    tbody.innerHTML = filtered.map(d => {
+      const sizeMb = (d.file_size_bytes / 1048576).toFixed(1);
+      const cards = (d.card_count != null) ? d.card_count : '—';
+      const lang = d.language ? d.language : '—';
+      const status = d.imported
+        ? '<span style="color:var(--color-success-500);font-weight:600">✓ Added</span>'
+        : '<span style="opacity:.65">Not added</span>';
+      const action = d.imported
+        ? '<button class="btn btn-sm" disabled>Added</button>'
+        : `<button class="btn btn-sm btn-primary" onclick="Decks.importFromLibrary('${d.package}')">Add</button>`;
+      return `<tr><td><strong>${d.name}</strong></td><td>${cards}</td><td>${lang}</td><td>${sizeMb} MB</td><td>${status}</td><td>${action}</td></tr>`;
+    }).join('');
   },
 
   async importFromLibrary(packageName) {

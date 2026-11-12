@@ -34,7 +34,10 @@ pub struct ClassQuery {
 pub struct CreateClassRequest {
     pub name: String,
     pub subject_area: Option<String>,
-    pub teacher_id: String,
+    /// Optional — defaults to the authenticated user (the teacher creating
+    /// the class). The first-run wizard does not know its numeric id.
+    #[serde(default)]
+    pub teacher_id: Option<String>,
     pub period: Option<String>,
     pub academic_year: Option<String>,
 }
@@ -176,7 +179,9 @@ pub async fn create(
 
     // Clone fields before moving into ActiveModel
     let name = payload.name.clone();
-    let teacher_id = payload.teacher_id.clone();
+    // Default the owning teacher to the authenticated user — the first-run
+    // wizard creates classes without knowing its numeric teacher id.
+    let teacher_id = payload.teacher_id.unwrap_or_else(|| user.id.to_string());
     let subject_area = payload.subject_area.clone();
     let period = payload.period.clone();
     let academic_year = payload.academic_year.clone();
@@ -186,7 +191,7 @@ pub async fn create(
         name: sea_orm::ActiveValue::Set(payload.name),
         class_code: sea_orm::ActiveValue::Set(Some(class_code.clone())),
         subject_area: sea_orm::ActiveValue::Set(payload.subject_area),
-        teacher_id: sea_orm::ActiveValue::Set(payload.teacher_id),
+        teacher_id: sea_orm::ActiveValue::Set(teacher_id.clone()),
         period: sea_orm::ActiveValue::Set(payload.period),
         academic_year: sea_orm::ActiveValue::Set(payload.academic_year),
         created_at: sea_orm::ActiveValue::Set(now),
@@ -243,7 +248,10 @@ pub async fn update(
 
     active.name = sea_orm::ActiveValue::Set(payload.name);
     active.subject_area = sea_orm::ActiveValue::Set(payload.subject_area);
-    active.teacher_id = sea_orm::ActiveValue::Set(payload.teacher_id);
+    // Only reassign the teacher when the payload names one explicitly.
+    if let Some(teacher) = payload.teacher_id {
+        active.teacher_id = sea_orm::ActiveValue::Set(teacher);
+    }
     active.period = sea_orm::ActiveValue::Set(payload.period);
     active.academic_year = sea_orm::ActiveValue::Set(payload.academic_year);
     active.updated_at = sea_orm::ActiveValue::Set(now);

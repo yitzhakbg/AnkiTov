@@ -192,6 +192,31 @@ DECKS = {
             "es": {"basic": 10, "cloze": 10, "type_in": 0},
         },
     },
+    "ela-high-frequency": {
+        "subject_tag": "subject::english",
+        "title": {"en": "AnkiTov — High-Frequency Words (Grades 7-12 Intervention)"},
+        "deck_id": {"en": 1699412247020},
+        "description": {"en": "High-frequency words for grades 7-12 readers working below "
+                              "grade level, running at their own pace beside teaching, not inside "
+                              "it. Practice material already taught to close gaps. SRS works. "
+                              "Phase A family 1 (public-domain word lists) — the recorded K-2 "
+                              "exception to the 7-12 default; NLM-generated, text only."},
+        "expected_census": {"basic": 7, "cloze": 7, "type_in": 6},
+    },
+    "ela-content-words": {
+        "subject_tag": "subject::english",
+        "title": {"en": "AnkiTov — Content Words (Grades 7-12)"},
+        "deck_id": {"en": 1699412247021},
+        "description": {"en": "Content words (nouns, verbs, adjectives) from ranks 150-1200 of a "
+                              "public-domain frequency corpus, for grades 7-12 readers working below "
+                              "grade level. Practice material already taught to close gaps, running at "
+                              "the student's own pace beside teaching, not inside it. SRS works. "
+                              "Phase A family 1, pack #2 — grounded on the derived frequency list for "
+                              "word selection; definitions are WordNet-grounded from pack #3 onward. "
+                              "NLM-generated, text only."},
+        "expected_census": {"basic": 11, "cloze": 9, "type_in": 0},
+    },
+
 }
 
 # Fixed IDs so rebuilds are stable (plan section 5: deterministic, re-runnable).
@@ -287,6 +312,9 @@ def build_models(locale: str) -> dict:
 # Validation (plan sections 3.3-3.5, 3.8; R4, R5, R7). Fail loudly, never warn.
 # ---------------------------------------------------------------------------
 CONCEPT_RE = re.compile(r"^[a-z][a-z0-9-]*$")
+# Phase A grade band (spec 2026-11-08 §9 Q3, owner correction 2026-11-11): 7-12 default.
+# K-2 kept as the recorded exception for public-domain sight-word lists (Dolch/Fry).
+ALLOWED_GRADES = {str(g) for g in range(7, 13)} | {"K", "1", "2"}
 CLOZE_TAG_RE = re.compile(r"\{\{c(\d+)::")
 
 
@@ -309,8 +337,11 @@ def validate_row(row: dict, seen: set, locale: str, directions: bool = False) ->
     seen.add(concept)
     if not re.match(r"^\d{2}$", unit):
         raise SourceError(f"{concept}: unit must be two digits, got {unit!r}")
-    if not grades or any(g not in ("7", "8", "9") for g in grades):
-        raise SourceError(f"{concept}: grades must be 7/8/9, got {grades!r}")
+    # Grade band per spec 2026-11-08 §9 Q3 (owner correction 2026-11-11): the default is
+    # the junior-high/high-school / bagrut-matriculation band, grades 7-12. K-2 is allowed
+    # only as the recorded exception for public-domain sight-word lists (Dolch/Fry).
+    if not grades or any(g not in ALLOWED_GRADES for g in grades):
+        raise SourceError(f"{concept}: grades must be in {sorted(ALLOWED_GRADES)}, got {grades!r}")
 
     for key in ("front", "back", "extra"):
         val = row[key]

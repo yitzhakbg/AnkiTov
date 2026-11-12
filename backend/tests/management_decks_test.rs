@@ -40,6 +40,107 @@ fn teacher_token() -> String {
 }
 
 // ---------------------------------------------------------------------------
+// AnkiConnect mock (Zone 2 import path)
+// ---------------------------------------------------------------------------
+
+/// Mock AnkiConnect JSON-RPC server for upload tests.
+///
+/// Simulates the sequence `upload_deck` drives against a real Anki:
+/// 1. `deckNames` → `["Default"]` (before-import snapshot)
+/// 2. `importPackage` → `true`
+/// 3. `deckNames` → `["Default", "Test Deck"]` (diff resolves the name)
+/// 4. `findCards` → 3 card ids (real card count)
+///
+/// wiremock matches the FIRST-mounted matching mock, so the before-snapshot
+/// is mounted first with `up_to_n_times(1)` — the first `deckNames` call
+/// consumes it and every later call falls through to the after-snapshot.
+///
+/// NOTE: `ANKICONNECT_PORT` is process-global. These tests rely on
+/// cargo-nextest's one-process-per-test isolation; do not run them under
+/// plain `cargo test` with default threading.
+async fn start_anki_mock() -> wiremock::MockServer {
+    let server = wiremock::MockServer::start().await;
+
+    // before-import deckNames (single shot — mounted first, matched first)
+    wiremock::Mock::given(wiremock::matchers::body_partial_json(
+        serde_json::json!({"action": "deckNames"}),
+    ))
+    .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
+        serde_json::json!({"result": ["Default"], "error": null}),
+    ))
+    .up_to_n_times(1)
+    .mount(&server)
+    .await;
+
+    // importPackage
+    wiremock::Mock::given(wiremock::matchers::body_partial_json(
+        serde_json::json!({"action": "importPackage"}),
+    ))
+    .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
+        serde_json::json!({"result": true, "error": null}),
+    ))
+    .mount(&server)
+    .await;
+
+    // findCards → 3 cards
+    wiremock::Mock::given(wiremock::matchers::body_partial_json(
+        serde_json::json!({"action": "findCards"}),
+    ))
+    .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
+        serde_json::json!({"result": [101, 102, 103], "error": null}),
+    ))
+    .mount(&server)
+    .await;
+
+    // after-import deckNames (unlimited — matched after the single-shot
+    // before-snapshot is exhausted)
+    wiremock::Mock::given(wiremock::matchers::body_partial_json(
+        serde_json::json!({"action": "deckNames"}),
+    ))
+    .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
+        serde_json::json!({"result": ["Default", "Test Deck"], "error": null}),
+    ))
+    .mount(&server)
+    .await;
+
+    server
+}
+
+/// Point the backend's Zone 2 AnkiConnect client at the mock server.
+fn set_anki_port(server: &wiremock::MockServer) {
+    let uri = server.uri(); // http://127.0.0.1:<port>
+    let port: u16 = uri.rsplit(':').next().unwrap().parse().expect("mock port");
+    std::env::set_var("ANKICONNECT_PORT", port.to_string());
+}
+
+/// Redirect persisted uploads to a unique temp dir so tests don't litter
+/// `backend/uploads/decks/`. Safe under nextest (one process per test);
+/// do NOT run this suite under plain `cargo test` with default threading.
+fn set_unique_upload_dir() {
+    let dir = std::env::temp_dir().join(format!(
+        "ankitov-upload-test-{}",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::env::set_var("ANKITOV_UPLOAD_DIR", dir);
+}
+
+/// POST a multipart .apkg upload to the decks endpoint.
+async fn post_upload(
+    server: &loco_rs::TestServer,
+    filename: &str,
+    data: &[u8],
+) -> axum_test::TestResponse {
+    let (content_type, body_bytes) = multipart_upload_body(filename, data);
+    server
+        .post("/api/v1/management/decks")
+        .add_header("Authorization", format!("Bearer {}", teacher_token()))
+        .content_type(&content_type)
+        .bytes(axum::body::Bytes::from(body_bytes))
+        .await
+}
+
+// ---------------------------------------------------------------------------
 // list_decks tests
 // ---------------------------------------------------------------------------
 
@@ -94,38 +195,42 @@ async fn list_decks_filter_by_nonexistent_target() {
 // upload_deck tests
 // ---------------------------------------------------------------------------
 
-/// Valid binary payload returns HTTP 200 with DeckInfo containing an id.
+/// Valid .apkg upload routes through the Zone 2 import path: the deck name
+/// comes from the deckNames diff and the card count is the real collection
+/// count returned by the (mocked) AnkiConnect.
 #[tokio::test]
 async fn upload_deck_accepts_valid_payload() {
+    let mock = start_anki_mock().await;
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
+        set_anki_port(&mock);
+        set_unique_upload_dir();
         let payload: Vec<u8> = (0u8..64).cycle().take(2048).collect();
-        let (content_type, body_bytes) = multipart_upload_body("test-deck.apkg", &payload);
-        let resp = server
-            .post("/api/v1/management/decks")
-            .add_header("Authorization", format!("Bearer {}", teacher_token()))
-            .content_type(&content_type)
-            .bytes(axum::body::Bytes::from(body_bytes))
-            .await;
+        let resp = post_upload(&server, "test-deck.apkg", &payload).await;
 
-        eprintln!("[DEBUG] status={:?} body={}", resp.status_code(), resp.text());
         let status = resp.status_code();
         let body = resp.text();
-        if status != axum::http::StatusCode::OK && status != axum::http::StatusCode::CREATED {
-            eprintln!("[DEBUG] upload failed — got {}, body: {}", status, body);
-        }
-        assert!(
-            status == axum::http::StatusCode::OK
-                || status == axum::http::StatusCode::CREATED,
-            "upload should return 200 or 201, got {:?}: {}",
+        assert_eq!(
             status,
-            body
+            axum::http::StatusCode::OK,
+            "upload should return 200, got {status}: {body}"
         );
         let j = json(&body);
         assert!(
             j.get("id").is_some() && !j["id"].as_str().unwrap().is_empty(),
             "response should contain non-empty id: {j}"
         );
-        assert!(j.get("card_count").is_some(), "response should contain card_count: {j}");
+        // Real deck name from the deckNames diff (not the filename stem).
+        assert_eq!(
+            j["name"].as_str(),
+            Some("Test Deck"),
+            "deck name should come from the import diff: {j}"
+        );
+        // Real card count from findCards after import (not a size estimate).
+        assert_eq!(
+            j["card_count"].as_u64(),
+            Some(3),
+            "card_count should be the real collection count: {j}"
+        );
     })
     .await;
 }
@@ -148,6 +253,115 @@ async fn upload_deck_rejects_empty_payload() {
             j.get("success").and_then(|v| v.as_bool()),
             Some(false),
             "success should be false: {j}"
+        );
+    })
+    .await;
+}
+
+/// Non-.apkg filenames are rejected up front — the Zone 2 import path only
+/// accepts Anki package archives (.zip was accepted by the old stub but
+/// never actually imported).
+#[tokio::test]
+async fn upload_deck_rejects_non_apkg() {
+    testing::request::<backend::App, _, _>(|server, _ctx| async move {
+        let payload: Vec<u8> = vec![7u8; 256];
+        let resp = post_upload(&server, "test-deck.zip", &payload).await;
+        assert_eq!(resp.status_code(), axum::http::StatusCode::OK);
+        let j = json(&resp.text());
+        assert_eq!(
+            j.get("success").and_then(|v| v.as_bool()),
+            Some(false),
+            ".zip upload should be rejected: {j}"
+        );
+        assert!(
+            j["message"].as_str().unwrap().contains(".apkg"),
+            "rejection should mention .apkg: {j}"
+        );
+    })
+    .await;
+}
+
+/// Oversized uploads are rejected by the handler cap
+/// (`ANKITOV_UPLOAD_MAX_BYTES` override keeps the test payload small).
+#[tokio::test]
+async fn upload_deck_rejects_oversized() {
+    testing::request::<backend::App, _, _>(|server, _ctx| async move {
+        std::env::set_var("ANKITOV_UPLOAD_MAX_BYTES", "1024");
+        let payload: Vec<u8> = vec![9u8; 2048];
+        let resp = post_upload(&server, "big-deck.apkg", &payload).await;
+        std::env::remove_var("ANKITOV_UPLOAD_MAX_BYTES");
+        assert_eq!(resp.status_code(), axum::http::StatusCode::OK);
+        let j = json(&resp.text());
+        assert_eq!(
+            j.get("success").and_then(|v| v.as_bool()),
+            Some(false),
+            "oversized upload should be rejected: {j}"
+        );
+        assert!(
+            j["message"].as_str().unwrap().contains("too large"),
+            "rejection should mention the size cap: {j}"
+        );
+    })
+    .await;
+}
+
+/// Duplicate upload (same bytes → same SHA-256) is idempotent: the second
+/// upload returns the existing deck record and never re-imports.
+#[tokio::test]
+async fn upload_deck_duplicate_is_idempotent() {
+    // Arc so the server survives the `async move` closure and can be
+    // verified afterwards.
+    let mock = std::sync::Arc::new(start_anki_mock().await);
+    let mock_for_verify = mock.clone();
+    testing::request::<backend::App, _, _>(|server, _ctx| async move {
+        set_anki_port(&mock);
+        set_unique_upload_dir();
+        let payload: Vec<u8> = vec![5u8; 512];
+
+        let first = post_upload(&server, "dup-deck.apkg", &payload).await;
+        assert_eq!(first.status_code(), axum::http::StatusCode::OK);
+        let first_j = json(&first.text());
+        let deck_id = first_j["id"].as_str().unwrap().to_string();
+
+        let second = post_upload(&server, "dup-deck.apkg", &payload).await;
+        assert_eq!(second.status_code(), axum::http::StatusCode::OK);
+        let second_j = json(&second.text());
+        assert_eq!(
+            second_j["id"].as_str(),
+            Some(deck_id.as_str()),
+            "duplicate upload should return the existing deck id: {second_j}"
+        );
+    })
+    .await;
+    // Exactly one importPackage call reached AnkiConnect across both uploads.
+    mock_for_verify.verify().await;
+}
+
+/// When Anki is unreachable the upload fails with a 503 carrying the
+/// actionable `anki_unreachable` error — not an opaque 500.
+#[tokio::test]
+async fn upload_deck_anki_unreachable_returns_503() {
+    // Bind-and-drop a listener to claim a port with nothing behind it.
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("bind probe");
+    let dead_port = listener.local_addr().unwrap().port();
+    drop(listener);
+    std::env::set_var("ANKICONNECT_PORT", dead_port.to_string());
+    set_unique_upload_dir();
+
+    testing::request::<backend::App, _, _>(|server, _ctx| async move {
+        let payload: Vec<u8> = vec![1u8; 256];
+        let resp = post_upload(&server, "no-anki-deck.apkg", &payload).await;
+        assert_eq!(
+            resp.status_code(),
+            axum::http::StatusCode::SERVICE_UNAVAILABLE,
+            "unreachable AnkiConnect should yield 503, got {}: {}",
+            resp.status_code(),
+            resp.text()
+        );
+        let j = json(&resp.text());
+        assert!(
+            j.to_string().contains("anki_unreachable"),
+            "503 body should carry the anki_unreachable error code: {j}"
         );
     })
     .await;
@@ -194,16 +408,13 @@ async fn get_deck_rejects_invalid_uuid() {
 /// After upload, get_deck returns matching metadata.
 #[tokio::test]
 async fn get_deck_returns_uploaded_deck() {
+    let mock = start_anki_mock().await;
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
+        set_anki_port(&mock);
+        set_unique_upload_dir();
         // Upload
         let payload: Vec<u8> = (0u8..16).cycle().take(1024).collect();
-        let (content_type, body_bytes) = multipart_upload_body("test-deck.apkg", &payload);
-        let upload_resp = server
-            .post("/api/v1/management/decks")
-            .add_header("Authorization", format!("Bearer {}", teacher_token()))
-            .content_type(&content_type)
-            .bytes(axum::body::Bytes::from(body_bytes))
-            .await;
+        let upload_resp = post_upload(&server, "test-deck.apkg", &payload).await;
         assert_eq!(upload_resp.status_code(), axum::http::StatusCode::OK);
 
         let upload_text = upload_resp.text();
@@ -252,16 +463,13 @@ async fn delete_deck_returns_error_for_missing() {
 /// Deleting a deck with no distributions succeeds and the deck is gone.
 #[tokio::test]
 async fn delete_deck_succeeds_without_distributions() {
+    let mock = start_anki_mock().await;
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
+        set_anki_port(&mock);
+        set_unique_upload_dir();
         // Upload
         let payload: Vec<u8> = vec![42u8; 512];
-        let (content_type, body_bytes) = multipart_upload_body("test-deck.apkg", &payload);
-        let upload_resp = server
-            .post("/api/v1/management/decks")
-            .add_header("Authorization", format!("Bearer {}", teacher_token()))
-            .content_type(&content_type)
-            .bytes(axum::body::Bytes::from(body_bytes))
-            .await;
+        let upload_resp = post_upload(&server, "test-deck.apkg", &payload).await;
         let deck_id = json(&upload_resp.text())["id"].as_str().unwrap().to_string();
 
         // Delete
@@ -296,16 +504,13 @@ async fn delete_deck_succeeds_without_distributions() {
 /// Deleting a deck with active distributions fails with failure ApiResponse.
 #[tokio::test]
 async fn delete_deck_fails_with_active_distributions() {
+    let mock = start_anki_mock().await;
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
+        set_anki_port(&mock);
+        set_unique_upload_dir();
         // Upload
         let payload: Vec<u8> = vec![99u8; 512];
-        let (content_type, body_bytes) = multipart_upload_body("test-deck.apkg", &payload);
-        let upload_resp = server
-            .post("/api/v1/management/decks")
-            .add_header("Authorization", format!("Bearer {}", teacher_token()))
-            .content_type(&content_type)
-            .bytes(axum::body::Bytes::from(body_bytes))
-            .await;
+        let upload_resp = post_upload(&server, "test-deck.apkg", &payload).await;
         let deck_id = json(&upload_resp.text())["id"].as_str().unwrap().to_string();
 
         // Distribute
@@ -347,16 +552,13 @@ async fn delete_deck_fails_with_active_distributions() {
 /// Valid distribution to a user target succeeds.
 #[tokio::test]
 async fn distribute_deck_to_user_succeeds() {
+    let mock = start_anki_mock().await;
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
+        set_anki_port(&mock);
+        set_unique_upload_dir();
         // Upload
         let payload: Vec<u8> = vec![1u8; 1024];
-        let (content_type, body_bytes) = multipart_upload_body("test-deck.apkg", &payload);
-        let upload_resp = server
-            .post("/api/v1/management/decks")
-            .add_header("Authorization", format!("Bearer {}", teacher_token()))
-            .content_type(&content_type)
-            .bytes(axum::body::Bytes::from(body_bytes))
-            .await;
+        let upload_resp = post_upload(&server, "test-deck.apkg", &payload).await;
         let deck_id = json(&upload_resp.text())["id"].as_str().unwrap().to_string();
 
         // Distribute
@@ -384,15 +586,12 @@ async fn distribute_deck_to_user_succeeds() {
 /// Invalid target_type (not user/group/class) returns failure ApiResponse.
 #[tokio::test]
 async fn distribute_deck_rejects_invalid_target_type() {
+    let mock = start_anki_mock().await;
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
+        set_anki_port(&mock);
+        set_unique_upload_dir();
         let payload: Vec<u8> = vec![2u8; 512];
-        let (content_type, body_bytes) = multipart_upload_body("test-deck.apkg", &payload);
-        let upload_resp = server
-            .post("/api/v1/management/decks")
-            .add_header("Authorization", format!("Bearer {}", teacher_token()))
-            .content_type(&content_type)
-            .bytes(axum::body::Bytes::from(body_bytes))
-            .await;
+        let upload_resp = post_upload(&server, "test-deck.apkg", &payload).await;
         let deck_id = json(&upload_resp.text())["id"].as_str().unwrap().to_string();
 
         let dist_payload = serde_json::json!({
@@ -442,15 +641,12 @@ async fn distribute_deck_returns_error_for_missing_deck() {
 /// Distribution with invalid target_id UUID returns error response.
 #[tokio::test]
 async fn distribute_deck_returns_error_for_invalid_target_id() {
+    let mock = start_anki_mock().await;
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
+        set_anki_port(&mock);
+        set_unique_upload_dir();
         let payload: Vec<u8> = vec![3u8; 512];
-        let (content_type, body_bytes) = multipart_upload_body("test-deck.apkg", &payload);
-        let upload_resp = server
-            .post("/api/v1/management/decks")
-            .add_header("Authorization", format!("Bearer {}", teacher_token()))
-            .content_type(&content_type)
-            .bytes(axum::body::Bytes::from(body_bytes))
-            .await;
+        let upload_resp = post_upload(&server, "test-deck.apkg", &payload).await;
         let deck_id = json(&upload_resp.text())["id"].as_str().unwrap().to_string();
 
         let dist_payload = serde_json::json!({
