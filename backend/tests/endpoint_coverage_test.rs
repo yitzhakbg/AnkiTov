@@ -74,25 +74,8 @@ fn multipart_import_body(class_id: Option<&str>, csv: &str) -> (String, Vec<u8>)
 // 1. anki_ops — full 17-route surface
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Point the backend's Zone 2 AnkiConnect client at a dead port so tests
-/// never touch a real, running Anki. AnkiConnect's `getDeckStats` CREATES
-/// any deck name it is asked about (`collection.decks.id(d)` side effect),
-/// so a test backend that can reach live Anki on :8765 litters the desktop
-/// collection with zero-card `EndpointCoverageProbe` decks (2026-11-12
-/// incident). Bind-and-drop claims a port with nothing behind it; handlers
-/// then degrade to `success:false`, which is exactly what these tests
-/// assert. Safe under nextest (one process per test); do NOT run this
-/// suite under plain `cargo test` with default threading.
-fn isolate_anki() {
-    let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("bind probe");
-    let dead_port = listener.local_addr().unwrap().port();
-    drop(listener);
-    std::env::set_var("ANKICONNECT_PORT", dead_port.to_string());
-}
-
 #[tokio::test]
 async fn test_anki_ops_full_endpoint_surface() {
-    isolate_anki();
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let auth = format!("Bearer {}", teacher_token());
 
@@ -152,7 +135,6 @@ async fn test_anki_ops_full_endpoint_surface() {
 
 #[tokio::test]
 async fn test_probe_deck_insert_endpoints() {
-    isolate_anki();
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let auth = format!("Bearer {}", teacher_token());
 
@@ -214,7 +196,6 @@ async fn test_probe_deck_insert_endpoints() {
 
 #[tokio::test]
 async fn test_sync_endpoint_surface() {
-    isolate_anki();
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let auth = format!("Bearer {}", teacher_token());
 
@@ -267,7 +248,6 @@ async fn test_sync_endpoint_surface() {
 
 #[tokio::test]
 async fn test_locale_endpoint_surface() {
-    isolate_anki();
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         // Full translation map for the current locale
         let map = server.get("/api/v1/locale").await;
@@ -316,7 +296,6 @@ async fn test_locale_endpoint_surface() {
 
 #[tokio::test]
 async fn test_capsule_sessions_inspect_deliver_and_generation_jobs() {
-    isolate_anki();
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let auth = format!("Bearer {}", teacher_token());
 
@@ -399,7 +378,6 @@ async fn test_capsule_sessions_inspect_deliver_and_generation_jobs() {
 
 #[tokio::test]
 async fn test_students_bulk_enroll_populate_decks_and_import_file() {
-    isolate_anki();
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let auth = format!("Bearer {}", teacher_token());
 
@@ -498,7 +476,6 @@ async fn test_students_bulk_enroll_populate_decks_and_import_file() {
 
 #[tokio::test]
 async fn test_teachers_management_surface() {
-    isolate_anki();
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let admin = format!("Bearer {}", admin_token());
         let teacher = format!("Bearer {}", teacher_token());
