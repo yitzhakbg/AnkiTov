@@ -120,7 +120,8 @@ fi
 # Environment guard, not a manifest guard: a missing runtime means the runner
 # could not fetch it (no network / no user namespaces), which should warn rather
 # than fail the release. A manifest error still fails loudly.
-if ! flatpak list --runtime 2>/dev/null | grep -q 'org.freedesktop.Platform//'; then
+if ! flatpak list --runtime 2>/dev/null | grep -q 'org.freedesktop.Platform//' &&
+   ! flatpak list --user --runtime 2>/dev/null | grep -q 'org.freedesktop.Platform//'; then
   warn "runtime org.freedesktop.Platform not installed on this host; bundle skipped"
   exit 0
 fi
@@ -131,7 +132,7 @@ rm -rf "$BUILD_DIR"
 # Sources are relative to the manifest dir, so the stage tarball goes there.
 tar -czf "$PKG_DIR/ankitov-stage.tar.gz" -C "$FLAT_STAGE" .
 
-flatpak-builder --force-clean --no-cache "$BUILD_DIR" "$PKG_DIR/$APP_ID.json" >/dev/null
+flatpak-builder --user --force-clean --no-cache "$BUILD_DIR" "$PKG_DIR/$APP_ID.json" >/dev/null
 
 BUNDLE="$OUT/ankitov-$VERSION-linux-$ARCH.flatpak"
 flatpak build-bundle "$BUILD_DIR" "$BUNDLE" "$APP_ID" >/dev/null

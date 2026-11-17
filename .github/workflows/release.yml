@@ -324,8 +324,12 @@ jobs:
       - name: Install the Flatpak runtime (flatpak-builder builds inside a sandbox)
         continue-on-error: true
         run: |
-          flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-          flatpak install -y org.freedesktop.Platform//24.04 org.freedesktop.Sdk//24.04 \
+          # The runner's SYSTEM flatpak instance refuses ConfigureRemote
+          # ("not allowed for user") — verified on run 44125642996. Everything
+          # must go through the user instance, and flatpak-builder must be told
+          # --user to match (build-flatpak.sh passes it).
+          flatpak --user remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak --user install -y org.freedesktop.Platform//24.04 org.freedesktop.Sdk//24.04 \
             || echo "::warning::runtime fetch failed — bundle will be skipped"
 
       - name: Build .flatpak bundle
@@ -342,7 +346,7 @@ jobs:
         continue-on-error: true
         run: |
           bundle=$(ls dist/ankitov-*-linux-${{ matrix.arch }}.flatpak 2>/dev/null) || exit 0
-          flatpak install -y "$bundle" || { echo "::warning::bundle install failed (runner may lack user namespaces) — shipping unverified"; exit 0; }
+          flatpak --user install -y "$bundle" || { echo "::warning::bundle install failed (runner may lack user namespaces) — shipping unverified"; exit 0; }
           ANKITOV_NO_BROWSER=1 flatpak run --command=ankitov-launch org.ankitov.AnkiTov run >/tmp/flatpak-smoke.log 2>&1 &
           pid=$!
           code=0
