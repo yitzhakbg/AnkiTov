@@ -1,0 +1,11 @@
+#!/bin/sh
+# AnkiTov Flatpak entry point (the flatpak `command`).
+#
+# AnkiTov is a server, so inside the sandbox the flatpak process IS the server:
+# run in the foreground so the sandbox lifetime matches the server lifetime.
+# A backgrounded `ankitov-launch start` would exit, and bubblewrap tears the
+# sandbox down with its main process — the server would die immediately.
+#
+# The launcher resolves its own APP_DIR (dirname $0 = /app/bin), so config/ and
+# content/seed must sit next to it in the Flatpak tree.
+exec ankitov-launch run

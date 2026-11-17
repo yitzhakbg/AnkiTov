@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=AnkiTov
+GenericName=Spaced repetition learning
+Comment=Classroom spaced-repetition practice (local AnkiTov server)
+Exec=org.ankitov.AnkiTov
+Icon=org.ankitov.AnkiTov
+Terminal=false
+Categories=Education;
+Keywords=anki;spaced repetition;flashcards;classroom;

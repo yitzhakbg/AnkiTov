@@ -1,0 +1,24 @@
+{
+  "app-id": "org.ankitov.AnkiTov",
+  "runtime": "org.freedesktop.Platform",
+  "runtime-version": "24.04",
+  "sdk": "org.freedesktop.Sdk",
+  "command": "ankitov-run",
+  "finish-args": [
+    "--share=network",
+    "--socket=session-bus"
+  ],
+  "modules": [
+    {
+      "name": "ankitov",
+      "buildtype": "custom",
+      "sources": [
+        { "type": "file", "path": "ankitov-stage.tar.gz" }
+      ],
+      "build-commands": [
+        "tar -xzf ankitov-stage.tar.gz -C /app",
+        "chmod +x /app/bin/backend /app/bin/ankitov-launch /app/bin/ankitov-run"
+      ]
+    }
+  ]
+}

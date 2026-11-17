@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.ankitov.AnkiTov</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>AGPL-3.0-only</project_license>
+  <name>AnkiTov</name>
+  <summary>Classroom spaced-repetition practice on your own server</summary>
+  <description>
+    <p>
+      AnkiTov is a local spaced-repetition server for classrooms and self-study:
+      a dashboard, an API, and a browser reviewer over an Anki-compatible
+      (FSRS) schedule. It runs on your machine with a single SQLite file —
+      no analytics, no third-party services, no accounts on someone else's
+      infrastructure.
+    </p>
+    <p>
+      Start it, open http://localhost:5150, claim the teacher account on first
+      run, and import the bundled CC0 deck packs.
+    </p>
+  </description>
+  <categories>
+    <category>Education</category>
+  </categories>
+  <keywords>
+    <keyword>anki</keyword>
+    <keyword>spaced repetition</keyword>
+    <keyword>flashcards</keyword>
+    <keyword>FSRS</keyword>
+    <keyword>classroom</keyword>
+  </keywords>
+  <url type="homepage">https://ankitov.org</url>
+  <url type="bugtracker">https://github.com/yitzhakbg/AnkiTov/issues</url>
+  <launchable type="desktop-id">org.ankitov.AnkiTov.desktop</launchable>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <!-- build-flatpak.sh substitutes @VERSION@ / @DATE@ from the release tag. -->
+    <release version="@VERSION@" date="@DATE@"/>
+  </releases>
+</component>
