@@ -334,16 +334,21 @@ jobs:
 
       # GitHub-hosted runners cannot fetch the flathub runtime summary: three
       # dispatch runs failed with "Nothing matches org.freedesktop.Platform in
-      # remote flathub" even though dl.flathub.org answers HTTP 200. flathub-infra's
+      # remote flathub" even though dl.flathub.org answers HTTP 200. flatpak's own
       # builder action owns runtime installation and is the standard path. If it
       # also cannot fetch the runtime, the bundle cannot be built on hosted runners
       # at all — it would need a self-hosted runner with flatpak or Flathub's own CI.
-      - uses: flathub-infra/flatpak-github-action/flatpak-builder@master
+      # (Repo is flatpak/flatpak-github-actions, plural; the input is manifest-path.)
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@master
         continue-on-error: true
         with:
           bundle: dist/ankitov-${{ steps.ver.outputs.version }}-linux-${{ matrix.arch }}.flatpak
-          manifest: packaging/flatpak/org.ankitov.AnkiTov.json
+          manifest-path: packaging/flatpak/org.ankitov.AnkiTov.json
+          arch: ${{ matrix.arch }}
           cache: false
+          # upload-artifact defaults to true; we upload ourselves so the artifact
+          # name matches what the release alias loop expects.
+          upload-artifact: false
 
       - name: Smoke the bundle (install, boot from the sandbox, GET /)
         continue-on-error: true
