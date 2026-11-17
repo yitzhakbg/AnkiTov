@@ -329,7 +329,10 @@ jobs:
           # must go through the user instance, and flatpak-builder must be told
           # --user to match (build-flatpak.sh passes it).
           flatpak --user remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-          flatpak --user install -y org.freedesktop.Platform//24.04 org.freedesktop.Sdk//24.04 \
+          # remote-add does not fetch the remote summary, so install sees
+          # "No remote refs found" until an update runs (run 44130671707).
+          flatpak --user update >/dev/null 2>&1 || true
+          flatpak --user install -y flathub org.freedesktop.Platform//24.04 flathub org.freedesktop.Sdk//24.04 \
             || echo "::warning::runtime fetch failed — bundle will be skipped"
 
       - name: Build .flatpak bundle
