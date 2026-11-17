@@ -329,9 +329,12 @@ jobs:
           # must go through the user instance, and flatpak-builder must be told
           # --user to match (build-flatpak.sh passes it).
           flatpak --user remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-          # remote-add does not fetch the remote summary, so install sees
-          # "No remote refs found" until an update runs (run 44130671707).
-          flatpak --user update >/dev/null 2>&1 || true
+          # Diagnostics kept visible: run 44130671707 failed with
+          # "Nothing matches org.freedesktop.Platform in remote flathub", which
+          # means the remote summary was never fetched. Show whether the remote
+          # is reachable at all before concluding.
+          curl -sI --max-time 20 https://dl.flathub.org/repo/flathub.flatpakrepo | head -1
+          flatpak --user remote-ls flathub 2>&1 | head -5 || echo "remote-ls: no summary"
           flatpak --user install -y flathub org.freedesktop.Platform//24.04 flathub org.freedesktop.Sdk//24.04 \
             || echo "::warning::runtime fetch failed — bundle will be skipped"
 
