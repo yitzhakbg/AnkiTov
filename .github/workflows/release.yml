@@ -321,24 +321,7 @@ jobs:
           name: linux-${{ matrix.arch }}
           path: artifact
 
-      - name: Install the Flatpak runtime (flatpak-builder builds inside a sandbox)
-        continue-on-error: true
-        run: |
-          # The runner's SYSTEM flatpak instance refuses ConfigureRemote
-          # ("not allowed for user") — verified on run 44125642996. Everything
-          # must go through the user instance, and flatpak-builder must be told
-          # --user to match (build-flatpak.sh passes it).
-          flatpak --user remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-          # Diagnostics kept visible: run 44130671707 failed with
-          # "Nothing matches org.freedesktop.Platform in remote flathub", which
-          # means the remote summary was never fetched. Show whether the remote
-          # is reachable at all before concluding.
-          curl -sI --max-time 20 https://dl.flathub.org/repo/flathub.flatpakrepo | head -1
-          flatpak --user remote-ls flathub 2>&1 | head -5 || echo "remote-ls: no summary"
-          flatpak --user install -y flathub org.freedesktop.Platform//24.04 flathub org.freedesktop.Sdk//24.04 \
-            || echo "::warning::runtime fetch failed — bundle will be skipped"
-
-      - name: Build .flatpak bundle
+      - name: Stage the /app tree + source tarball (the manifest copies files, it does not compile)
         run: |
           mkdir -p stage dist
           tar -xzf artifact/ankitov-*-linux-${{ matrix.arch }}.tar.gz -C stage --strip-components=1
@@ -346,7 +329,21 @@ jobs:
             --arch "${{ matrix.arch }}" \
             --version "${{ steps.ver.outputs.version }}" \
             --stage stage \
-            --out dist
+            --out dist \
+            --stage-only
+
+      # GitHub-hosted runners cannot fetch the flathub runtime summary: three
+      # dispatch runs failed with "Nothing matches org.freedesktop.Platform in
+      # remote flathub" even though dl.flathub.org answers HTTP 200. flathub-infra's
+      # builder action owns runtime installation and is the standard path. If it
+      # also cannot fetch the runtime, the bundle cannot be built on hosted runners
+      # at all — it would need a self-hosted runner with flatpak or Flathub's own CI.
+      - uses: flathub-infra/flatpak-github-action/flatpak-builder@master
+        continue-on-error: true
+        with:
+          bundle: dist/ankitov-${{ steps.ver.outputs.version }}-linux-${{ matrix.arch }}.flatpak
+          manifest: packaging/flatpak/org.ankitov.AnkiTov.json
+          cache: false
 
       - name: Smoke the bundle (install, boot from the sandbox, GET /)
         continue-on-error: true

@@ -38,13 +38,14 @@ usage() {
   exit 1
 }
 
-ARCH="" VERSION="" STAGE="" OUT=""
+ARCH="" VERSION="" STAGE="" OUT="" STAGE_ONLY=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --arch)    ARCH=${2:?}; shift 2 ;;
     --version) VERSION=${2:?}; shift 2 ;;
     --stage)   STAGE=${2:?}; shift 2 ;;
     --out)     OUT=${2:?}; shift 2 ;;
+    --stage-only) STAGE_ONLY=1; shift ;;
     *) usage ;;
   esac
 done
@@ -131,6 +132,11 @@ rm -rf "$BUILD_DIR"
 
 # Sources are relative to the manifest dir, so the stage tarball goes there.
 tar -czf "$PKG_DIR/ankitov-stage.tar.gz" -C "$FLAT_STAGE" .
+
+if [ "$STAGE_ONLY" = 1 ]; then
+  note "staged tree + $PKG_DIR/ankitov-stage.tar.gz written; build left to the caller"
+  exit 0
+fi
 
 flatpak-builder --user --force-clean --no-cache "$BUILD_DIR" "$PKG_DIR/$APP_ID.json" >/dev/null
 

@@ -1,13 +1,13 @@
 # SYNC-MANIFEST
 
 - monorepo ref: unknown (ANKITOV_MONOREPO_REF not set)
-- exported at: 2026-11-17T17:05:50Z
+- exported at: 2026-11-17T17:13:16Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
 ## sha256 checksums
 ```
-6c555b2b9337a3075fa9e7d3049602f7599836dec479694227ab511444f9eb8c  .github/workflows/release.yml
+7ee27eb956a01b66e3e226aa570ba3619decce58c927ee414d01b17adafac344  .github/workflows/release.yml
 3255a61586bf5af874b423fb9ddf62d3da06bbbeb11365a5e1b4e0ce47c52406  .gitignore
 ada47362899add07df543de3051b80e6d9532fca7131b7fe5701fb754aa65ee2  Caddyfile
 20cb530ea08f56436ef2c1697d5c966498ba0020083024c7f60363dc47150bbc  Cargo.lock
@@ -267,7 +267,7 @@ b6df84512a635d73d72cae6d059b9749041009b16a55d1b938741105ee697ffb  docs/src/refer
 80ce08725036c03b7068c110add1ce549e62258f80319d6d1146298b25ade225  packaging/README.md
 876da13b3501d336b328db908ab32d1a960403d2e20c4d65e21eb066b0eda339  packaging/assemble.sh
 355f53c6344e307b182976d88629b373caad403b6de9c491b38c2a10aa7ac7e3  packaging/flatpak/ankitov-run
-79dbc854b5665791e46dbf45b77eeebd417a5711605cc0a50a632cf756141320  packaging/flatpak/build-flatpak.sh
+8c5c394db194ed7af16b3187e9a4f87e7b84739340c4d65c9396cf01ebddb889  packaging/flatpak/build-flatpak.sh
 62df77c7e1d8e4682ebe20cf782a38c803f85a7dfadcca73e154e2b3a92d04a2  packaging/flatpak/org.ankitov.AnkiTov.appdata.xml
 83a85bdee694f54f4ced8e358ff34b50d4f51b041827c0ad6d525b29b315ff4b  packaging/flatpak/org.ankitov.AnkiTov.desktop
 6687ae94ec06fdd504928d08d53b1136a65d2825dc6d2f50350092004a987f04  packaging/flatpak/org.ankitov.AnkiTov.json
