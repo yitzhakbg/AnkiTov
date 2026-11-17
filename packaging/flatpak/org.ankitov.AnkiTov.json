@@ -1,7 +1,7 @@
 {
   "app-id": "org.ankitov.AnkiTov",
   "runtime": "org.freedesktop.Platform",
-  "runtime-version": "24.04",
+  "runtime-version": "25.08",
   "sdk": "org.freedesktop.Sdk",
   "command": "ankitov-run",
   "finish-args": [
@@ -11,7 +11,7 @@
   "modules": [
     {
       "name": "ankitov",
-      "buildtype": "custom",
+      "buildsystem": "simple",
       "sources": [
         { "type": "file", "path": "ankitov-stage.tar.gz" }
       ],

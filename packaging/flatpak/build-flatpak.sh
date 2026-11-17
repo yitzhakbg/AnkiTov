@@ -121,8 +121,11 @@ fi
 # Environment guard, not a manifest guard: a missing runtime means the runner
 # could not fetch it (no network / no user namespaces), which should warn rather
 # than fail the release. A manifest error still fails loudly.
-if ! flatpak list --runtime 2>/dev/null | grep -q 'org.freedesktop.Platform//' &&
-   ! flatpak list --user --runtime 2>/dev/null | grep -q 'org.freedesktop.Platform//'; then
+# `flatpak list` prints tab-separated columns (name, ref, commit, branch, instance),
+# not the `ref//branch` form — grepping for '//' never matches and the guard skipped
+# builds on hosts where the runtime WAS installed. Match the ref column instead.
+if ! flatpak list --runtime 2>/dev/null | grep -q 'org.freedesktop.Platform' &&
+   ! flatpak list --user --runtime 2>/dev/null | grep -q 'org.freedesktop.Platform'; then
   warn "runtime org.freedesktop.Platform not installed on this host; bundle skipped"
   exit 0
 fi
@@ -138,10 +141,15 @@ if [ "$STAGE_ONLY" = 1 ]; then
   exit 0
 fi
 
-flatpak-builder --user --force-clean --no-cache "$BUILD_DIR" "$PKG_DIR/$APP_ID.json" >/dev/null
+# flatpak-builder needs an explicit ostree repo (--repo); without it the build dir
+# is a plain checkout tree and `flatpak build-bundle` refuses it with
+# "'<dir>' is not a valid repository". `--no-cache` is not an option either
+# (the spelling is --disable-cache) — leave the cache on, CI controls it.
+REPO_DIR="$OUT/flatpak-repo-$ARCH"
+flatpak-builder --user --force-clean --repo="$REPO_DIR" "$BUILD_DIR" "$PKG_DIR/$APP_ID.json" >/dev/null
 
 BUNDLE="$OUT/ankitov-$VERSION-linux-$ARCH.flatpak"
-flatpak build-bundle "$BUILD_DIR" "$BUNDLE" "$APP_ID" >/dev/null
+flatpak build-bundle "$REPO_DIR" "$BUNDLE" "$APP_ID" >/dev/null
 
-rm -rf "$BUILD_DIR" "$FLAT_STAGE" "$PKG_DIR/ankitov-stage.tar.gz"
+rm -rf "$BUILD_DIR" "$REPO_DIR" "$FLAT_STAGE" "$PKG_DIR/ankitov-stage.tar.gz"
 note "built $BUNDLE"
