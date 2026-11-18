@@ -8,12 +8,12 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
-    pub target_type: String,        // "student" or "cohort"
-    pub target_id: String,          // user.id or subsection_id
+    pub target_type: String, // "student" or "cohort"
+    pub target_id: String,   // user.id or subsection_id
     pub track_profile_id: String,
-    pub priority: i32,              // lower = higher priority (default: 1 student, 10 cohort)
+    pub priority: i32, // lower = higher priority (default: 1 student, 10 cohort)
     pub assigned_by: String,
-    pub assigned_at: i64,           // UNIX timestamp
+    pub assigned_at: i64, // UNIX timestamp
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

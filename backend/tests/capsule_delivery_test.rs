@@ -61,11 +61,19 @@ async fn deliver_capsule_and_verify_addon_state() {
     let capsule_size = due.len().min(25);
 
     let response = delivery
-        .start_session(&session_uuid, &due[..capsule_size], capsule_size, "Test Profile")
+        .start_session(
+            &session_uuid,
+            &due[..capsule_size],
+            capsule_size,
+            "Test Profile",
+        )
         .await
         .expect("deliver capsule");
 
-    eprintln!("Delivery: status={}, cards={}", response.status, response.card_count);
+    eprintln!(
+        "Delivery: status={}, cards={}",
+        response.status, response.card_count
+    );
     assert!(matches!(response.status.as_str(), "started" | "replaced"));
     assert_eq!(response.session_uuid, session_uuid);
 

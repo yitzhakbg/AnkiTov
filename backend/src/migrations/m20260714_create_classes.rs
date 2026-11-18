@@ -84,11 +84,7 @@ impl MigrationTrait for Migration {
                     .col(string(ClassEnrollments::ClassId).not_null())
                     .col(string(ClassEnrollments::StudentId).not_null())
                     .col(big_integer(ClassEnrollments::EnrolledAt).not_null())
-                    .col(
-                        boolean(ClassEnrollments::Active)
-                            .not_null()
-                            .default(true),
-                    )
+                    .col(boolean(ClassEnrollments::Active).not_null().default(true))
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk-class-enrollments-class")

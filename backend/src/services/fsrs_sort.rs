@@ -297,7 +297,13 @@ pub async fn fetch_and_sort_cached(
 
     // ── Sync phase: pure ranking + sort.
     let recall = |facts: &CardFacts, ctx: &RecallCtx| fsrs_recall(facts, ctx, &states);
-    rank_and_sort(prepared.cards, prepared.ctx, tags, prepared.avg_seconds, &recall)
+    rank_and_sort(
+        prepared.cards,
+        prepared.ctx,
+        tags,
+        prepared.avg_seconds,
+        &recall,
+    )
 }
 
 /// Everything extracted from the snapshot before the async phase.
@@ -314,9 +320,7 @@ struct PreparedSort {
 
 /// Open the `.anki2` collection read-only (immutable mode) and read the
 /// snapshot clock context.
-fn open_collection(
-    anki2_path: impl AsRef<Path>,
-) -> Result<(Connection, RecallCtx), FsrsSortError> {
+fn open_collection(anki2_path: impl AsRef<Path>) -> Result<(Connection, RecallCtx), FsrsSortError> {
     let path_str = anki2_path.as_ref().display().to_string();
     let uri = format!("file:{}?immutable=1", path_str);
     let conn = Connection::open_with_flags(
@@ -406,8 +410,8 @@ fn query_due_cards(
 
     let mut cards = Vec::new();
     for row in rows {
-        let (card_id, note_id, note_tags, ivl, card_type, due, factor) = row
-            .map_err(|e| FsrsSortError::QueryFailed("row read".into(), e))?;
+        let (card_id, note_id, note_tags, ivl, card_type, due, factor) =
+            row.map_err(|e| FsrsSortError::QueryFailed("row read".into(), e))?;
         cards.push(CardFacts {
             card_id,
             note_id,
@@ -539,11 +543,8 @@ fn fsrs_recall(facts: &CardFacts, ctx: &RecallCtx, states: &HashMap<i64, Derived
         stability: state.stability as f32,
         difficulty: state.difficulty as f32,
     };
-    let retrievability = fsrs::current_retrievability(
-        memory_state,
-        elapsed_days as f32,
-        fsrs::FSRS6_DEFAULT_DECAY,
-    );
+    let retrievability =
+        fsrs::current_retrievability(memory_state, elapsed_days as f32, fsrs::FSRS6_DEFAULT_DECAY);
     (retrievability as f64).clamp(0.0, 1.0)
 }
 
@@ -554,8 +555,7 @@ fn fsrs_recall(facts: &CardFacts, ctx: &RecallCtx, states: &HashMap<i64, Derived
 /// Find the first track tag that appears in the note's space-separated tags.
 fn find_matching_tag(note_tags: &str, track_tags: &[String]) -> Option<String> {
     // Anki tags are space-separated. Split and check for membership.
-    let note_tag_set: std::collections::HashSet<&str> =
-        note_tags.split_whitespace().collect();
+    let note_tag_set: std::collections::HashSet<&str> = note_tags.split_whitespace().collect();
 
     for tag in track_tags {
         if note_tag_set.contains(tag.as_str()) {
@@ -566,13 +566,7 @@ fn find_matching_tag(note_tags: &str, track_tags: &[String]) -> Option<String> {
 }
 
 /// Compute days overdue relative to the due date.
-fn compute_overdue_days(
-    card_type: i64,
-    due: i64,
-    today_day: i64,
-    now_secs: i64,
-    _crt: i64,
-) -> i32 {
+fn compute_overdue_days(card_type: i64, due: i64, today_day: i64, now_secs: i64, _crt: i64) -> i32 {
     match card_type {
         2 => {
             // Review card: `due` is a day number
@@ -643,10 +637,7 @@ fn compute_avg_time_per_card(
            AND r.time > 0"
     );
 
-    let result: Option<f64> = conn
-        .query_row(&sql, [], |row| row.get(0))
-        .ok()
-        .flatten();
+    let result: Option<f64> = conn.query_row(&sql, [], |row| row.get(0)).ok().flatten();
 
     // If we have data, return it; otherwise None triggers cold-start
     result.filter(|&t| t > 0.0 && t.is_finite())
@@ -703,7 +694,7 @@ mod tests {
     #[test]
     fn test_compute_approximate_recall_ordering() {
         // More overdue + shorter interval = more urgent (lower R)
-        let r1 = compute_approximate_recall(5, 5);  // overdue 5, ivl 5
+        let r1 = compute_approximate_recall(5, 5); // overdue 5, ivl 5
         let r2 = compute_approximate_recall(5, 50); // overdue 5, ivl 50
         let r3 = compute_approximate_recall(20, 50); // overdue 20, ivl 50
 
@@ -716,7 +707,10 @@ mod tests {
     fn test_find_matching_tag_exact() {
         let note_tags = "math::fractions vocab science::biology";
         let track_tags: Vec<String> = vec!["vocab".into(), "science::biology".into()];
-        assert_eq!(find_matching_tag(note_tags, &track_tags), Some("vocab".into()));
+        assert_eq!(
+            find_matching_tag(note_tags, &track_tags),
+            Some("vocab".into())
+        );
     }
 
     #[test]
@@ -765,14 +759,32 @@ mod tests {
             CREATE TABLE cards (id INTEGER PRIMARY KEY, nid INTEGER NOT NULL, did INTEGER NOT NULL DEFAULT 1, ord INTEGER NOT NULL DEFAULT 0, mod INTEGER NOT NULL DEFAULT 0, usn INTEGER NOT NULL DEFAULT -1, type INTEGER NOT NULL DEFAULT 0, queue INTEGER NOT NULL DEFAULT 0, due INTEGER NOT NULL DEFAULT 0, ivl INTEGER NOT NULL DEFAULT 0, factor INTEGER NOT NULL DEFAULT 0, reps INTEGER NOT NULL DEFAULT 0, lapses INTEGER NOT NULL DEFAULT 0, left INTEGER NOT NULL DEFAULT 0, odue INTEGER NOT NULL DEFAULT 0, odid INTEGER NOT NULL DEFAULT 0, flags INTEGER NOT NULL DEFAULT 0, data TEXT NOT NULL DEFAULT '');
             CREATE TABLE notes (id INTEGER PRIMARY KEY, guid TEXT NOT NULL DEFAULT '', mid INTEGER NOT NULL DEFAULT 0, mod INTEGER NOT NULL DEFAULT 0, usn INTEGER NOT NULL DEFAULT -1, tags TEXT NOT NULL DEFAULT '', flds TEXT NOT NULL DEFAULT '', sfld TEXT NOT NULL DEFAULT '', csum INTEGER NOT NULL DEFAULT 0, flags INTEGER NOT NULL DEFAULT 0, data TEXT NOT NULL DEFAULT '');"
         ).expect("create schema");
-        conn.execute("INSERT INTO col (id, crt) VALUES (1, ?)", rusqlite::params![now]).expect("col");
-        conn.execute("INSERT INTO notes (id, tags) VALUES (1, 'math')", []).expect("note1");
-        conn.execute("INSERT INTO notes (id, tags) VALUES (2, 'vocab')", []).expect("note2");
+        conn.execute(
+            "INSERT INTO col (id, crt) VALUES (1, ?)",
+            rusqlite::params![now],
+        )
+        .expect("col");
+        conn.execute("INSERT INTO notes (id, tags) VALUES (1, 'math')", [])
+            .expect("note1");
+        conn.execute("INSERT INTO notes (id, tags) VALUES (2, 'vocab')", [])
+            .expect("note2");
         // Active review cards — due = -5 (past), queue = 2
-        conn.execute("INSERT INTO cards (id,nid,type,queue,due,ivl) VALUES (1,1,2,2,-5,10)", []).expect("card1");
-        conn.execute("INSERT INTO cards (id,nid,type,queue,due,ivl) VALUES (2,2,2,2,-5,50)", []).expect("card2");
+        conn.execute(
+            "INSERT INTO cards (id,nid,type,queue,due,ivl) VALUES (1,1,2,2,-5,10)",
+            [],
+        )
+        .expect("card1");
+        conn.execute(
+            "INSERT INTO cards (id,nid,type,queue,due,ivl) VALUES (2,2,2,2,-5,50)",
+            [],
+        )
+        .expect("card2");
         // Suspended (queue=-1) -> excluded
-        conn.execute("INSERT INTO cards (id,nid,type,queue,due,ivl) VALUES (3,1,2,-1,-5,5)", []).expect("card3");
+        conn.execute(
+            "INSERT INTO cards (id,nid,type,queue,due,ivl) VALUES (3,1,2,-1,-5,5)",
+            [],
+        )
+        .expect("card3");
         drop(conn);
 
         let result = super::fetch_and_sort(
@@ -783,8 +795,16 @@ mod tests {
         let _ = std::fs::remove_file(&tmp);
         let sr = result.expect("fetch_and_sort should succeed");
 
-        assert_eq!(sr.ranked.len(), 2, "expected 2 active cards, got {}", sr.ranked.len());
-        assert!(sr.ranked.iter().all(|c| c.card_id != 3), "suspended card leaked");
+        assert_eq!(
+            sr.ranked.len(),
+            2,
+            "expected 2 active cards, got {}",
+            sr.ranked.len()
+        );
+        assert!(
+            sr.ranked.iter().all(|c| c.card_id != 3),
+            "suspended card leaked"
+        );
         assert!(sr.track_counts.values().sum::<usize>() == sr.ranked.len());
     }
 }

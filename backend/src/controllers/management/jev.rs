@@ -144,7 +144,9 @@ async fn evaluate(
     _state: State<AppContext>,
     Json(req): Json<EvaluateRequest>,
 ) -> Result<Json<serde_json::Value>> {
-    let api_key = match std::env::var("TYPESAFE_API_KEY").or_else(|_| std::env::var("ANKITOV_TYPESAFE_API_KEY")) {
+    let api_key = match std::env::var("TYPESAFE_API_KEY")
+        .or_else(|_| std::env::var("ANKITOV_TYPESAFE_API_KEY"))
+    {
         Ok(k) => k,
         Err(_) => {
             return Err(loco_rs::Error::Message(
@@ -160,17 +162,13 @@ async fn evaluate(
         .json(&req.request)
         .send()
         .await
-        .map_err(|e| {
-            loco_rs::Error::Message(format!("Jev request failed: {e}"))
-        })?;
+        .map_err(|e| loco_rs::Error::Message(format!("Jev request failed: {e}")))?;
 
     let status = resp.status();
     let body: serde_json::Value = resp
         .json()
         .await
-        .map_err(|e| {
-            loco_rs::Error::Message(format!("Jev response parse error: {e}"))
-        })?;
+        .map_err(|e| loco_rs::Error::Message(format!("Jev response parse error: {e}")))?;
 
     if !status.is_success() {
         return Ok(Json(serde_json::json!({

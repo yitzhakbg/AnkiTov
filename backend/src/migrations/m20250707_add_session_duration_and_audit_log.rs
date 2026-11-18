@@ -57,19 +57,15 @@ impl MigrationTrait for Migration {
             .create_table(
                 Table::create()
                     .table(AuditLogs::Table)
-                    .col(ColumnDef::new(AuditLogs::Id)
-                        .string()
-                        .not_null()
-                        .primary_key())
-                    .col(ColumnDef::new(AuditLogs::EventType)
-                        .string()
-                        .not_null())
-                    .col(ColumnDef::new(AuditLogs::EventData)
-                        .text()
-                        .not_null())
-                    .col(ColumnDef::new(AuditLogs::ActorId)
-                        .string()
-                        .not_null())
+                    .col(
+                        ColumnDef::new(AuditLogs::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(ColumnDef::new(AuditLogs::EventType).string().not_null())
+                    .col(ColumnDef::new(AuditLogs::EventData).text().not_null())
+                    .col(ColumnDef::new(AuditLogs::ActorId).string().not_null())
                     .col(string_null(AuditLogs::TargetId))
                     .col(big_integer(AuditLogs::CreatedAt).not_null())
                     .to_owned(),

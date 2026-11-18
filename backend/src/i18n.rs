@@ -53,18 +53,18 @@ static LOCALE_OVERRIDE: RwLock<Option<LanguageIdentifier>> = RwLock::new(None);
 /// (code, native_name, english_name)
 pub const SUPPORTED_LOCALES: &[(&str, &str, &str)] = &[
     ("en-US", "English (US)", "English (US)"),
-    ("ar",    "العربية",      "Arabic"),
-    ("he",    "עברית",        "Hebrew"),
-    ("fr",    "Français",     "French"),
-    ("es",    "Español",      "Spanish"),
-    ("de",    "Deutsch",      "German"),
-    ("it",    "Italiano",     "Italian"),
-    ("zh",    "简体中文",     "Chinese (Simplified)"),
-    ("ko",    "한국어",       "Korean"),
-    ("ja",    "日本語",       "Japanese"),
-    ("ru",    "Русский",      "Russian"),
-    ("pt",    "Português (Brasil)", "Portuguese (Brazil)"),
-    ("hi",    "हिन्दी",       "Hindi"),
+    ("ar", "العربية", "Arabic"),
+    ("he", "עברית", "Hebrew"),
+    ("fr", "Français", "French"),
+    ("es", "Español", "Spanish"),
+    ("de", "Deutsch", "German"),
+    ("it", "Italiano", "Italian"),
+    ("zh", "简体中文", "Chinese (Simplified)"),
+    ("ko", "한국어", "Korean"),
+    ("ja", "日本語", "Japanese"),
+    ("ru", "Русский", "Russian"),
+    ("pt", "Português (Brasil)", "Portuguese (Brazil)"),
+    ("hi", "हिन्दी", "Hindi"),
 ];
 
 /// Set the current locale override (called when user switches language).
@@ -137,7 +137,9 @@ pub fn t_optional(message_id: &str) -> Option<String> {
 
 /// Look up a translated string for a specific locale.
 pub fn t_for(locale_str: &str, message_id: &str) -> String {
-    let langid: LanguageIdentifier = locale_str.parse().unwrap_or_else(|_| "en-US".parse().unwrap());
+    let langid: LanguageIdentifier = locale_str
+        .parse()
+        .unwrap_or_else(|_| "en-US".parse().unwrap());
     LOCALES.lookup(&langid, message_id)
 }
 
@@ -146,7 +148,10 @@ pub fn t_with(message_id: &str, args: &[(&str, &str)]) -> String {
     let langid = current_langid();
     let mut map = std::collections::HashMap::new();
     for (k, v) in args {
-        map.insert(k.to_string(), fluent_templates::fluent_bundle::FluentValue::from(*v));
+        map.insert(
+            k.to_string(),
+            fluent_templates::fluent_bundle::FluentValue::from(*v),
+        );
     }
     LOCALES.lookup_with_args(&langid, message_id, &map)
 }
@@ -195,7 +200,11 @@ mod tests {
                 for error in errors {
                     let pos = error.pos.start;
                     let line_no = source[..pos].lines().count();
-                    let line = source.lines().nth(line_no.saturating_sub(1)).unwrap_or("").trim();
+                    let line = source
+                        .lines()
+                        .nth(line_no.saturating_sub(1))
+                        .unwrap_or("")
+                        .trim();
                     problems.push(format!(
                         "{locale}/main.ftl:{}: {:?} (byte {}) -> `{line}`",
                         line_no, error.kind, pos
@@ -303,16 +312,10 @@ mod tests {
     #[test]
     fn test_fallback_to_english_when_key_missing() {
         // `i18n-test-probe` exists ONLY in i18n/en-US/main.ftl.
-        assert_eq!(
-            t_for("en-US", "i18n-test-probe"),
-            "AnkiTov fallback probe"
-        );
+        assert_eq!(t_for("en-US", "i18n-test-probe"), "AnkiTov fallback probe");
         // Hebrew has no such key, so the fluent-templates fallback chain must
         // return the en-US string.
-        assert_eq!(
-            t_for("he", "i18n-test-probe"),
-            "AnkiTov fallback probe"
-        );
+        assert_eq!(t_for("he", "i18n-test-probe"), "AnkiTov fallback probe");
     }
 
     /// `is_rtl()` tracks the runtime locale override set by `set_locale`.

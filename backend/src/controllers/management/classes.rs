@@ -4,14 +4,14 @@
 //! Classes are the primary organizational unit — decks, profiles, and capsules
 //! can be distributed to classes rather than individual students.
 
+use crate::middleware::auth::ensure_role;
+use crate::middleware::auth::AuthUser;
 use axum::extract::{Path, Query, State};
 use axum::{Extension, Json};
 use loco_rs::{app::AppContext, prelude::*};
 use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
-use crate::middleware::auth::AuthUser;
-use crate::middleware::auth::ensure_role;
 
 use crate::models::entities::{class, class_enrollment};
 
@@ -112,7 +112,7 @@ pub fn routes() -> Routes {
 )]
 pub async fn list(
     State(ctx): State<AppContext>,
-    Query(params): Query<ClassQuery>
+    Query(params): Query<ClassQuery>,
 ) -> Result<Response> {
     let db = &ctx.db;
 
@@ -168,8 +168,8 @@ pub async fn list(
 pub async fn create(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
-    Json(payload): Json<CreateClassRequest>)
-     -> Result<Response> {
+    Json(payload): Json<CreateClassRequest>,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     let db = &ctx.db;
     let now = chrono::Utc::now().timestamp();
@@ -233,8 +233,8 @@ pub async fn update(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
     Path(id): Path<String>,
-    Json(payload): Json<CreateClassRequest>)
-     -> Result<Response> {
+    Json(payload): Json<CreateClassRequest>,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     let db = &ctx.db;
     let now = chrono::Utc::now().timestamp();
@@ -274,8 +274,8 @@ pub async fn update(
 pub async fn delete_class(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
-    Path(id): Path<String>)
-     -> Result<Response> {
+    Path(id): Path<String>,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     let db = &ctx.db;
 
@@ -300,7 +300,7 @@ pub async fn delete_class(
 )]
 pub async fn list_students(
     State(ctx): State<AppContext>,
-    Path(id): Path<String>
+    Path(id): Path<String>,
 ) -> Result<Response> {
     let db = &ctx.db;
 
@@ -313,11 +313,13 @@ pub async fn list_students(
 
     let students: Vec<serde_json::Value> = enrollments
         .into_iter()
-        .map(|e| serde_json::json!({
-            "student_id": e.student_id,
-            "enrolled_at": e.enrolled_at,
-            "active": e.active
-        }))
+        .map(|e| {
+            serde_json::json!({
+                "student_id": e.student_id,
+                "enrolled_at": e.enrolled_at,
+                "active": e.active
+            })
+        })
         .collect();
 
     format::json(students)
@@ -335,8 +337,8 @@ pub async fn enroll_students(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
     Path(id): Path<String>,
-    Json(payload): Json<EnrollStudentsRequest>)
-     -> Result<Response> {
+    Json(payload): Json<EnrollStudentsRequest>,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     let db = &ctx.db;
     let now = chrono::Utc::now().timestamp();
@@ -353,7 +355,10 @@ pub async fn enroll_students(
             metadata_json: sea_orm::ActiveValue::Set(None),
         };
 
-        match class_enrollment::Entity::insert(active_model).exec(db).await {
+        match class_enrollment::Entity::insert(active_model)
+            .exec(db)
+            .await
+        {
             Ok(_) => count += 1,
             Err(e) => tracing::warn!("Failed to enroll student {}: {:?}", student_id, e),
         }
@@ -372,8 +377,8 @@ pub async fn enroll_students(
 pub async fn transfer_student(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
-    Path((id, student_id)): Path<(String, String)>)
-     -> Result<Response> {
+    Path((id, student_id)): Path<(String, String)>,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     let db = &ctx.db;
 
@@ -393,10 +398,16 @@ pub async fn transfer_student(
         if e.to_string().contains("UNIQUE constraint failed") {
             // Unique constraint failed because a matching historical inactive record already exists!
             // We can safely hard-delete this duplicate active record instead.
-            class_enrollment::Entity::delete_by_id(enrollment_id).exec(db).await.map_err(|delete_err| {
-                tracing::error!("Failed to fallback delete student enrollment: {:?}", delete_err);
-                loco_rs::Error::InternalServerError
-            })?;
+            class_enrollment::Entity::delete_by_id(enrollment_id)
+                .exec(db)
+                .await
+                .map_err(|delete_err| {
+                    tracing::error!(
+                        "Failed to fallback delete student enrollment: {:?}",
+                        delete_err
+                    );
+                    loco_rs::Error::InternalServerError
+                })?;
         } else {
             tracing::error!("Failed to transfer student: {:?}", e);
             return Err(loco_rs::Error::InternalServerError);
@@ -418,8 +429,8 @@ pub async fn generate_sessions(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
     Path(id): Path<String>,
-    Json(payload): Json<GenerateForClassRequest>)
-     -> Result<Response> {
+    Json(payload): Json<GenerateForClassRequest>,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     let db = &ctx.db;
 
@@ -461,7 +472,7 @@ pub async fn generate_sessions(
 )]
 pub async fn lookup_by_code(
     State(ctx): State<AppContext>,
-    Path(code): Path<String>
+    Path(code): Path<String>,
 ) -> Result<Response> {
     let db = &ctx.db;
 
@@ -508,7 +519,7 @@ pub async fn enroll_by_code(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
     Path(code): Path<String>,
-    Json(payload): Json<EnrollByCodeRequest>
+    Json(payload): Json<EnrollByCodeRequest>,
 ) -> Result<Response> {
     // Student self-enrollment: any authenticated student may join a class by code.
     // (No teacher/admin gate — this endpoint enrolls the calling user's own

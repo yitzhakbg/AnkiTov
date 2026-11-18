@@ -5,13 +5,17 @@
 
 use backend::models::entities::user;
 use backend::services::admin_bootstrap::promote_admin_emails;
-use sea_orm::{ActiveModelTrait, ColumnTrait, Database, DatabaseConnection, EntityTrait, QueryFilter, Set};
+use sea_orm::{
+    ActiveModelTrait, ColumnTrait, Database, DatabaseConnection, EntityTrait, QueryFilter, Set,
+};
 use sea_orm_migration::MigratorTrait;
 
 /// A private migrated in-memory database (one per test, safe under nextest).
 async fn fresh_db() -> DatabaseConnection {
     let db = Database::connect("sqlite::memory:").await.expect("connect");
-    backend::migrations::Migrator::up(&db, None).await.expect("migrate");
+    backend::migrations::Migrator::up(&db, None)
+        .await
+        .expect("migrate");
     db
 }
 
@@ -35,10 +39,16 @@ async fn promote_promotes_teacher_to_admin_and_audits() {
     let db = fresh_db().await;
     let teacher = seed_user(&db, "op@example.test", "teacher").await;
 
-    let promoted = promote_admin_emails(&db, "op@example.test").await.expect("promote");
+    let promoted = promote_admin_emails(&db, "op@example.test")
+        .await
+        .expect("promote");
     assert_eq!(promoted, 1);
 
-    let after = user::Entity::find_by_id(teacher.id).one(&db).await.expect("find").expect("exists");
+    let after = user::Entity::find_by_id(teacher.id)
+        .one(&db)
+        .await
+        .expect("find")
+        .expect("exists");
     assert_eq!(after.role, "admin");
 
     // Promotion is audit-logged.
@@ -46,13 +56,17 @@ async fn promote_promotes_teacher_to_admin_and_audits() {
         .all(&db)
         .await
         .expect("audit rows");
-    assert!(audits.iter().any(|a| a.event_type == "admin.promote" && a.actor_id == teacher.id.to_string()));
+    assert!(audits
+        .iter()
+        .any(|a| a.event_type == "admin.promote" && a.actor_id == teacher.id.to_string()));
 }
 
 #[tokio::test]
 async fn promote_skips_unknown_email() {
     let db = fresh_db().await;
-    let promoted = promote_admin_emails(&db, "ghost@example.test").await.expect("promote");
+    let promoted = promote_admin_emails(&db, "ghost@example.test")
+        .await
+        .expect("promote");
     assert_eq!(promoted, 0);
 }
 
@@ -61,10 +75,16 @@ async fn promote_is_idempotent_for_existing_admins() {
     let db = fresh_db().await;
     let admin = seed_user(&db, "boss@example.test", "admin").await;
 
-    let promoted = promote_admin_emails(&db, "boss@example.test").await.expect("promote");
+    let promoted = promote_admin_emails(&db, "boss@example.test")
+        .await
+        .expect("promote");
     assert_eq!(promoted, 0);
 
-    let after = user::Entity::find_by_id(admin.id).one(&db).await.expect("find").expect("exists");
+    let after = user::Entity::find_by_id(admin.id)
+        .one(&db)
+        .await
+        .expect("find")
+        .expect("exists");
     assert_eq!(after.role, "admin");
     // No audit row for a no-op.
     let audits = backend::models::entities::audit_log::Entity::find()
@@ -81,12 +101,19 @@ async fn promote_handles_mixed_list_with_whitespace() {
     let _b = seed_user(&db, "b@example.test", "student").await;
 
     // b is already gone from the list; ghost does not exist.
-    let promoted = promote_admin_emails(&db, " a@example.test , ghost@example.test , b@example.test ")
-        .await
-        .expect("promote");
+    let promoted = promote_admin_emails(
+        &db,
+        " a@example.test , ghost@example.test , b@example.test ",
+    )
+    .await
+    .expect("promote");
     assert_eq!(promoted, 2);
 
-    let after_a = user::Entity::find_by_id(a.id).one(&db).await.expect("find").expect("exists");
+    let after_a = user::Entity::find_by_id(a.id)
+        .one(&db)
+        .await
+        .expect("find")
+        .expect("exists");
     assert_eq!(after_a.role, "admin");
     let b = user::Entity::find()
         .filter(backend::models::entities::user::Column::Email.eq("b@example.test"))

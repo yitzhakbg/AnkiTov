@@ -110,8 +110,10 @@ async fn eval_drop_kills_anki_process() {
         port = session.port();
 
         // Verify Anki is alive
-        assert!(ankiconnect_alive(port).await,
-            "AnkiConnect should be alive during session");
+        assert!(
+            ankiconnect_alive(port).await,
+            "AnkiConnect should be alive during session"
+        );
     }
     // session dropped here
 
@@ -305,7 +307,10 @@ async fn eval_concurrent_launch_rejection() {
 
     // Second launch must be rejected
     let result2 = AnkiSession::with_playground_profile(&profiles[0]).await;
-    assert!(result2.is_err(), "Second concurrent launch MUST be rejected");
+    assert!(
+        result2.is_err(),
+        "Second concurrent launch MUST be rejected"
+    );
 
     drop(session);
 }
@@ -334,7 +339,8 @@ fn eval_binary_paths_match_production() {
 
     if cfg!(target_os = "macos") {
         assert_eq!(
-            prod_binary, Some(expected_macos),
+            prod_binary,
+            Some(expected_macos),
             "macOS binary path must be {expected_macos}"
         );
         assert!(
@@ -357,10 +363,15 @@ fn eval_playground_path_graceful_degradation() {
     // fall through to the hardcoded path.
     let result = playground_path();
     // On this machine, the playground does exist at the hardcoded path.
-    assert!(result.is_some(), "playground_path should resolve on dev machine");
+    assert!(
+        result.is_some(),
+        "playground_path should resolve on dev machine"
+    );
     let path = result.unwrap();
-    assert!(path.join("addons21").join("2055492159").is_dir(),
-        "AnkiConnect addon (2055492159) must be present in addons21/");
+    assert!(
+        path.join("addons21").join("2055492159").is_dir(),
+        "AnkiConnect addon (2055492159) must be present in addons21/"
+    );
 }
 
 // =========================================================================
@@ -377,8 +388,7 @@ fn eval_temp_profile_copies_all_files() {
     let src = playground.join("Maya Chen");
     let src_count = count_files(&src);
 
-    let temp = TempAnkiProfile::from_playground("Maya Chen")
-        .expect("create temp profile");
+    let temp = TempAnkiProfile::from_playground("Maya Chen").expect("create temp profile");
 
     let dst = temp.base_dir().join("Maya Chen");
     let dst_count = count_files(&dst);

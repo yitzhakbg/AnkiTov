@@ -77,7 +77,7 @@ pub enum TrackHealthError {
 /// * `tracks` — List of (track_tag, track_name) pairs to compute metrics for.
 pub fn compute_track_health(
     anki2_path: impl AsRef<Path>,
-    tracks: &[(String, String)],  // (tag, name)
+    tracks: &[(String, String)], // (tag, name)
 ) -> Result<TrackHealthResponse, TrackHealthError> {
     let path_str = anki2_path.as_ref().display().to_string();
     let uri = format!("file:{}?immutable=1", path_str);
@@ -183,8 +183,7 @@ fn compute_single_track_health(
             "SELECT COUNT(*) FROM cards c JOIN notes n ON c.nid = n.id \
              WHERE {tag_filter} AND c.type = 2 AND c.due <= {today_day} AND c.queue != 0"
         );
-        conn.query_row(&stmt, [], |row| row.get(0))
-            .unwrap_or(0)
+        conn.query_row(&stmt, [], |row| row.get(0)).unwrap_or(0)
     };
 
     // 7-day retention from revlog (ease 3 or 4 = correct)

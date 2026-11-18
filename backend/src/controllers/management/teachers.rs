@@ -137,10 +137,7 @@ fn derive_username(full_name: &str) -> String {
 }
 
 /// Check whether a username is free; return a deduped variant if needed.
-async fn find_free_username(
-    db: &sea_orm::DbConn,
-    base: &str,
-) -> Result<String, loco_rs::Error> {
+async fn find_free_username(db: &sea_orm::DbConn, base: &str) -> Result<String, loco_rs::Error> {
     for i in 0..100 {
         let candidate = if i == 0 {
             base.to_string()
@@ -353,19 +350,22 @@ pub async fn create(
         created_at: sea_orm::ActiveValue::Set(now),
         updated_at: sea_orm::ActiveValue::Set(now),
     };
-    let inserted_user = user::Entity::insert(new_user)
-        .exec(db)
-        .await
-        .map_err(|e| {
-            let msg = e.to_string();
-            if msg.contains("UNIQUE") || msg.contains("unique") {
-                tracing::warn!("Duplicate email on insert: {msg}");
-                loco_rs::Error::CustomError(axum::http::StatusCode::CONFLICT, loco_rs::controller::ErrorDetail { error: Some("conflict".into()), description: Some("a user with this email already exists".into()) })
-            } else {
-                tracing::error!("Failed to insert teacher user: {e:?}");
-                loco_rs::Error::InternalServerError
-            }
-        })?;
+    let inserted_user = user::Entity::insert(new_user).exec(db).await.map_err(|e| {
+        let msg = e.to_string();
+        if msg.contains("UNIQUE") || msg.contains("unique") {
+            tracing::warn!("Duplicate email on insert: {msg}");
+            loco_rs::Error::CustomError(
+                axum::http::StatusCode::CONFLICT,
+                loco_rs::controller::ErrorDetail {
+                    error: Some("conflict".into()),
+                    description: Some("a user with this email already exists".into()),
+                },
+            )
+        } else {
+            tracing::error!("Failed to insert teacher user: {e:?}");
+            loco_rs::Error::InternalServerError
+        }
+    })?;
     let user_id: i64 = inserted_user.last_insert_id;
     let user_row = user::Entity::find_by_id(user_id)
         .one(db)
@@ -610,10 +610,7 @@ pub async fn first_login_status(
         })?;
 
     let now = chrono::Utc::now().timestamp();
-    if invite.used_at.is_some()
-        || invite.revoked_at.is_some()
-        || invite.expires_at < now
-    {
+    if invite.used_at.is_some() || invite.revoked_at.is_some() || invite.expires_at < now {
         return Err(loco_rs::Error::CustomError(
             axum::http::StatusCode::GONE,
             loco_rs::controller::ErrorDetail {
@@ -708,10 +705,7 @@ pub async fn first_login(
     let user_id = invite.user_id;
 
     // Rejected if already used, revoked, or expired.
-    if invite.used_at.is_some()
-        || invite.revoked_at.is_some()
-        || invite.expires_at < now
-    {
+    if invite.used_at.is_some() || invite.revoked_at.is_some() || invite.expires_at < now {
         return Err(loco_rs::Error::CustomError(
             axum::http::StatusCode::GONE,
             loco_rs::controller::ErrorDetail {
@@ -751,13 +745,10 @@ pub async fn first_login(
     let mut user_am: user::ActiveModel = u.into();
     user_am.password_hash = sea_orm::ActiveValue::Set(Some(hash));
     user_am.updated_at = sea_orm::ActiveValue::Set(now);
-    user::Entity::update(user_am)
-        .exec(db)
-        .await
-        .map_err(|e| {
-            tracing::error!("Failed to set password_hash: {e:?}");
-            loco_rs::Error::InternalServerError
-        })?;
+    user::Entity::update(user_am).exec(db).await.map_err(|e| {
+        tracing::error!("Failed to set password_hash: {e:?}");
+        loco_rs::Error::InternalServerError
+    })?;
 
     // Mark the invite used.
     let mut inv_am: teacher_invite::ActiveModel = invite.into();
@@ -794,8 +785,8 @@ pub async fn first_login(
             loco_rs::Error::InternalServerError
         })?
         .ok_or_else(|| loco_rs::Error::InternalServerError)?;
-    let token_out = auth::encode_token(u2.id, &u2.role, &u2.email, FIRST_LOGIN_TTL_SECS)
-        .map_err(|e| {
+    let token_out =
+        auth::encode_token(u2.id, &u2.role, &u2.email, FIRST_LOGIN_TTL_SECS).map_err(|e| {
             tracing::error!("JWT encode failed: {e:?}");
             loco_rs::Error::InternalServerError
         })?;

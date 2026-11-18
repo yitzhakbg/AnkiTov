@@ -4,15 +4,15 @@
 //! iterating over students, resolving their profiles, FSRS sorting their cards,
 //! and handling the anomaly fallbacks cleanly without crashing.
 
+use sea_orm::{
+    ActiveModelTrait, ActiveValue, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter,
+};
 use std::collections::HashMap;
 use std::path::Path;
-use sea_orm::{ActiveModelTrait, ActiveValue, DatabaseConnection, EntityTrait, QueryFilter, ColumnTrait};
 use uuid::Uuid;
 
 use crate::models::entities::{
-    generation_job as gj_entity,
-    user as user_entity,
-    capsule_session as cs_entity,
+    capsule_session as cs_entity, generation_job as gj_entity, user as user_entity,
 };
 
 use crate::services::capsule_generator::{self, GenerateRequest, GeneratorError};
@@ -66,7 +66,10 @@ pub async fn run_batch_generation(
     // 3. Sequentially process each student
     for student in &students {
         let student_str_id = student.id.to_string();
-        let student_fullname = student.full_name.clone().unwrap_or_else(|| student.username.clone());
+        let student_fullname = student
+            .full_name
+            .clone()
+            .unwrap_or_else(|| student.username.clone());
 
         // Locate their .anki2 database inside the playground sandbox
         let anki2_path = format!("{}/{}/collection.anki2", playground_dir, student_fullname);
@@ -82,7 +85,8 @@ pub async fn run_batch_generation(
             });
 
             completed_count += 1;
-            update_job_progress(db, job_id, completed_count, total_students, &anomalies_list).await?;
+            update_job_progress(db, job_id, completed_count, total_students, &anomalies_list)
+                .await?;
             continue;
         }
 
@@ -110,7 +114,8 @@ pub async fn run_batch_generation(
             Err(e) => {
                 // Determine anomaly categorization
                 let err_str = e.to_string();
-                let anomaly_type = if err_str.contains("NoDueCards") || err_str.contains("NoTracks") {
+                let anomaly_type = if err_str.contains("NoDueCards") || err_str.contains("NoTracks")
+                {
                     "insufficient_content".to_string()
                 } else if err_str.contains("rate limited") {
                     "rate_limited".to_string()
@@ -161,7 +166,11 @@ async fn update_job_progress(
         .unwrap()
         .into();
 
-    let prog_pct = if total > 0 { (completed * 100) / total } else { 100 };
+    let prog_pct = if total > 0 {
+        (completed * 100) / total
+    } else {
+        100
+    };
 
     job.progress = ActiveValue::Set(prog_pct);
     job.completed_students = ActiveValue::Set(completed);

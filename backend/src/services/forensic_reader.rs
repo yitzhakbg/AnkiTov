@@ -44,7 +44,7 @@
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
-use rusqlite::{OpenFlags, Connection};
+use rusqlite::{Connection, OpenFlags};
 
 /// Grade-to-retention mapping (SM-2 derived).
 const GRADE_RETENTION: &[(i32, f64)] = &[(1, 0.30), (2, 0.70), (3, 0.85), (4, 0.95)];
@@ -146,7 +146,9 @@ impl ForensicReader {
         let uri = format!("file:{}?immutable=1", path_str);
         let conn = Connection::open_with_flags(
             &uri,
-            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX | OpenFlags::SQLITE_OPEN_URI,
+            OpenFlags::SQLITE_OPEN_READ_ONLY
+                | OpenFlags::SQLITE_OPEN_NO_MUTEX
+                | OpenFlags::SQLITE_OPEN_URI,
         )
         .map_err(|e| ForensicError::CannotOpen(path_str, e))?;
 
@@ -241,8 +243,7 @@ impl ForensicReader {
             .ok()
         };
 
-        let deck_id =
-            deck_id.ok_or_else(|| ForensicError::DeckNotFound(deck_name.to_string()))?;
+        let deck_id = deck_id.ok_or_else(|| ForensicError::DeckNotFound(deck_name.to_string()))?;
 
         let cutoff_ts = (chrono::Utc::now().timestamp() - (days as i64 * 86_400)) * 1000;
 
@@ -347,8 +348,7 @@ impl ForensicReader {
             .ok()
         };
 
-        let deck_id =
-            deck_id.ok_or_else(|| ForensicError::DeckNotFound(deck_name.to_string()))?;
+        let deck_id = deck_id.ok_or_else(|| ForensicError::DeckNotFound(deck_name.to_string()))?;
         let cutoff_ts = (chrono::Utc::now().timestamp() - (days as i64 * 86_400)) * 1000;
 
         let (total_reviews, total_lapses, avg_interval) = {
@@ -421,8 +421,7 @@ impl ForensicReader {
             .ok()
         };
 
-        let deck_id =
-            deck_id.ok_or_else(|| ForensicError::DeckNotFound(deck_name.to_string()))?;
+        let deck_id = deck_id.ok_or_else(|| ForensicError::DeckNotFound(deck_name.to_string()))?;
 
         let (short, medium, long, avg_ivl, avg_ease) = {
             let conn = self.conn.lock().unwrap();
@@ -598,8 +597,8 @@ impl ForensicReader {
             });
         }
 
-        let mean = review_counts.iter().map(|&c| c as f64).sum::<f64>()
-            / review_counts.len() as f64;
+        let mean =
+            review_counts.iter().map(|&c| c as f64).sum::<f64>() / review_counts.len() as f64;
         let variance = review_counts
             .iter()
             .map(|&c| (c as f64 - mean).powi(2))
@@ -620,11 +619,7 @@ impl ForensicReader {
     }
 
     /// Gap Analysis — "How long are the gaps between practice sessions?"
-    pub fn gap_analysis(
-        &self,
-        deck_name: &str,
-        days: u32,
-    ) -> Result<GapReport, ForensicError> {
+    pub fn gap_analysis(&self, deck_name: &str, days: u32) -> Result<GapReport, ForensicError> {
         let deck_id = self.deck_id(deck_name)?;
         let cutoff_ms = chrono::Utc::now().timestamp_millis() - (days as i64 * 86_400_000);
 
@@ -748,9 +743,11 @@ impl ForensicReader {
 
             // Mature rate (ivl >= 21 days).
             let total_cards: u64 = conn
-                .query_row("SELECT COUNT(*) FROM cards WHERE did = ?1", [deck_id], |row| {
-                    row.get(0)
-                })
+                .query_row(
+                    "SELECT COUNT(*) FROM cards WHERE did = ?1",
+                    [deck_id],
+                    |row| row.get(0),
+                )
                 .unwrap_or(0);
             let mature_cards: u64 = conn
                 .query_row(

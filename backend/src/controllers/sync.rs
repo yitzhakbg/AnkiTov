@@ -1,4 +1,9 @@
-use axum::{extract::ws::{Message, WebSocket, WebSocketUpgrade}, response::IntoResponse, routing::get, Extension};
+use axum::{
+    extract::ws::{Message, WebSocket, WebSocketUpgrade},
+    response::IntoResponse,
+    routing::get,
+    Extension,
+};
 use loco_rs::prelude::*;
 use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast;
@@ -23,7 +28,9 @@ async fn handle_websocket_loop(mut socket: WebSocket, tx: broadcast::Sender<Stri
         if let Message::Text(text_payload) = frame {
             if let Ok(transaction) = serde_json::from_str::<CardReviewTransaction>(&text_payload) {
                 let _ = tx.send(serde_json::to_string(&transaction).unwrap());
-                if socket.send(Message::Text("SYNC_ACK".into())).await.is_err() { break; }
+                if socket.send(Message::Text("SYNC_ACK".into())).await.is_err() {
+                    break;
+                }
             }
         }
     }

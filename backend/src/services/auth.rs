@@ -31,7 +31,12 @@ pub struct Claims {
 /// Encode a JWT token for the given user.
 ///
 /// Tokens expire after 24 hours (configurable via `expire_secs`).
-pub fn encode_token(user_id: i64, role: &str, email: &str, expire_secs: usize) -> Result<String, jsonwebtoken::errors::Error> {
+pub fn encode_token(
+    user_id: i64,
+    role: &str,
+    email: &str,
+    expire_secs: usize,
+) -> Result<String, jsonwebtoken::errors::Error> {
     let now = chrono::Utc::now().timestamp() as usize;
     let claims = Claims {
         sub: user_id,
@@ -95,8 +100,7 @@ mod tests {
 
     #[test]
     fn test_encode_decode_roundtrip() {
-        let token = encode_token(42, "student", "alice@example.com", 3600)
-            .expect("encode");
+        let token = encode_token(42, "student", "alice@example.com", 3600).expect("encode");
         let claims = decode_token(&token).expect("decode");
         assert_eq!(claims.sub, 42);
         assert_eq!(claims.role, "student");

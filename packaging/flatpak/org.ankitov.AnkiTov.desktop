@@ -1,10 +1,11 @@
 [Desktop Entry]
 Type=Application
 Name=AnkiTov
-GenericName=Spaced repetition learning
-Comment=Classroom spaced-repetition practice (local AnkiTov server)
-Exec=org.ankitov.AnkiTov
+GenericName=Spaced Repetition Learning
+Comment=Self-hosted spaced repetition with FSRS scheduling
+Exec=ankitov-launch
 Icon=org.ankitov.AnkiTov
 Terminal=false
-Categories=Education;
-Keywords=anki;spaced repetition;flashcards;classroom;
+Categories=Education;Languages;Science;Math;
+Keywords=anki;flashcards;srs;fsrs;spaced repetition;ankitov;
+StartupWMClass=AnkiTov

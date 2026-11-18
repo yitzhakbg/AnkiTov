@@ -12,8 +12,8 @@
 //! - `recent_exceptions` — "show exceptions", "problems detected"
 
 use crate::models::entities::retention_exception as ret_exception_entity;
-use crate::models::entities::{class, deck, user};
 use crate::models::entities::sync_status as sync_entity;
+use crate::models::entities::{class, deck, user};
 use crate::models::management::{AskQuery, AskResponse, AskRow};
 use crate::services::rig_nlu;
 use axum::extract::State;
@@ -25,9 +25,7 @@ const TAG: &str = "Management Console";
 
 /// Routes for the Rig AI chatbox.
 pub fn routes() -> Routes {
-    Routes::new()
-        .prefix("/management")
-        .add("/ask", post(ask))
+    Routes::new().prefix("/management").add("/ask", post(ask))
 }
 
 /// Accept a natural language query and return structured results.
@@ -40,10 +38,7 @@ pub fn routes() -> Routes {
     ),
     tag = TAG
 )]
-pub async fn ask(
-    State(ctx): State<AppContext>,
-    Json(payload): Json<AskQuery>,
-) -> Result<Response> {
+pub async fn ask(State(ctx): State<AppContext>, Json(payload): Json<AskQuery>) -> Result<Response> {
     tracing::info!("Rig chatbox query: {}", payload.query);
 
     // ── Intent Detection (Rig NLU → Keyword Fallback) ──────────────
@@ -74,9 +69,32 @@ pub async fn ask(
 
 fn detect_intent(q: &str) -> String {
     // Priority-ordered keyword matches
-    let trouble_words = ["trouble", "struggl", "failing", "behind", "low retention", "worst"];
-    let drop_words = ["dropped off", "fell off", "decline", "decreased", "getting worse", "worse over", "past two weeks", "past week", "lately"];
-    let health_words = ["deck health", "how are my decks", "decks doing", "overall health", "status of"];
+    let trouble_words = [
+        "trouble",
+        "struggl",
+        "failing",
+        "behind",
+        "low retention",
+        "worst",
+    ];
+    let drop_words = [
+        "dropped off",
+        "fell off",
+        "decline",
+        "decreased",
+        "getting worse",
+        "worse over",
+        "past two weeks",
+        "past week",
+        "lately",
+    ];
+    let health_words = [
+        "deck health",
+        "how are my decks",
+        "decks doing",
+        "overall health",
+        "status of",
+    ];
     let exception_words = ["exceptions", "problems", "alerts", "warnings", "flagged"];
 
     if trouble_words.iter().any(|w| q.contains(w)) {
@@ -124,7 +142,11 @@ async fn struggling_students(ctx: &AppContext, q: &str) -> Result<AskResponse> {
                 label: format!("Student {}", e.user_id),
                 value: format!("{:.0}% retention", e.retention_rate * 100.0),
                 status: Some(status.to_string()),
-                detail: Some(format!("Deck: {} — threshold {:.0}%", e.deck_id, e.threshold * 100.0)),
+                detail: Some(format!(
+                    "Deck: {} — threshold {:.0}%",
+                    e.deck_id,
+                    e.threshold * 100.0
+                )),
             }
         })
         .collect();
@@ -155,7 +177,10 @@ async fn struggling_students(ctx: &AppContext, q: &str) -> Result<AskResponse> {
 
 /// Students who have missed practice for at least N consecutive days.
 async fn missed_practice(ctx: &AppContext, time_days: i64) -> Result<AskResponse> {
-    tracing::info!("Querying students who missed practice for >= {} days", time_days);
+    tracing::info!(
+        "Querying students who missed practice for >= {} days",
+        time_days
+    );
 
     // Query all sync statuses
     let syncs = sync_entity::Entity::find()
@@ -184,18 +209,22 @@ async fn missed_practice(ctx: &AppContext, time_days: i64) -> Result<AskResponse
                     let diff_hours = (now - last) / 3600;
                     let diff_days = diff_hours / 24;
                     if diff_days > 0 {
-                        format!("Last synced {} day{} ago", diff_days, if diff_days == 1 { "" } else { "s" })
+                        format!(
+                            "Last synced {} day{} ago",
+                            diff_days,
+                            if diff_days == 1 { "" } else { "s" }
+                        )
                     } else {
-                        format!("Last synced {} hour{} ago", diff_hours, if diff_hours == 1 { "" } else { "s" })
+                        format!(
+                            "Last synced {} hour{} ago",
+                            diff_hours,
+                            if diff_hours == 1 { "" } else { "s" }
+                        )
                     }
                 }
             };
 
-            let status = if time_days >= 3 {
-                "danger"
-            } else {
-                "warn"
-            };
+            let status = if time_days >= 3 { "danger" } else { "warn" };
 
             rows.push(AskRow {
                 label: format!("Student {}", s.user_id),
@@ -266,7 +295,11 @@ async fn retention_drop(ctx: &AppContext, q: &str) -> Result<AskResponse> {
             let days_ago = (now - e.detected_at) / 86400;
             AskRow {
                 label: format!("Student {}", e.user_id),
-                value: format!("{:.0}% → {:.0}% (threshold)", e.retention_rate * 100.0, e.threshold * 100.0),
+                value: format!(
+                    "{:.0}% → {:.0}% (threshold)",
+                    e.retention_rate * 100.0,
+                    e.threshold * 100.0
+                ),
                 status: Some("warn".into()),
                 detail: Some(format!(
                     "Deck: {} · detected {} day{} ago",
@@ -328,7 +361,11 @@ async fn deck_health(ctx: &AppContext) -> Result<AskResponse> {
             };
             AskRow {
                 label: deck,
-                value: format!("{} flagged student{}", count, if count == 1 { "" } else { "s" }),
+                value: format!(
+                    "{} flagged student{}",
+                    count,
+                    if count == 1 { "" } else { "s" }
+                ),
                 status: Some(status.to_string()),
                 detail: None,
             }
@@ -367,8 +404,19 @@ async fn recent_exceptions(ctx: &AppContext) -> Result<AskResponse> {
         .into_iter()
         .map(|e| AskRow {
             label: format!("{} / {}", e.user_id, e.deck_id),
-            value: format!("{:.0}% (limit {:.0}%)", e.retention_rate * 100.0, e.threshold * 100.0),
-            status: Some(if e.retention_rate < 0.40 { "danger" } else { "warn" }.into()),
+            value: format!(
+                "{:.0}% (limit {:.0}%)",
+                e.retention_rate * 100.0,
+                e.threshold * 100.0
+            ),
+            status: Some(
+                if e.retention_rate < 0.40 {
+                    "danger"
+                } else {
+                    "warn"
+                }
+                .into(),
+            ),
             detail: Some(format!("Type: {}", e.exception_type)),
         })
         .collect();
@@ -399,32 +447,41 @@ async fn count_question(ctx: &AppContext, q: &str) -> Result<AskResponse> {
     // Live counts from the database
     let students_total = user::Entity::find()
         .filter(user::Column::Role.eq("student"))
-        .count(&ctx.db).await? as u64;
+        .count(&ctx.db)
+        .await? as u64;
     let teachers_total = user::Entity::find()
         .filter(user::Column::Role.eq("teacher"))
-        .count(&ctx.db).await? as u64;
+        .count(&ctx.db)
+        .await? as u64;
     let classes_total = class::Entity::find().count(&ctx.db).await? as u64;
     let decks_total = deck::Entity::find().count(&ctx.db).await? as u64;
 
     let cards_total = deck::Entity::find()
-        .all(&ctx.db).await?
-        .iter().map(|d| d.card_count as u64).sum::<u64>();
+        .all(&ctx.db)
+        .await?
+        .iter()
+        .map(|d| d.card_count as u64)
+        .sum::<u64>();
 
     // "this month" approximations — created within last 30 days
     let students_new = user::Entity::find()
         .filter(user::Column::Role.eq("student"))
         .filter(user::Column::CreatedAt.gte(month_ago))
-        .count(&ctx.db).await? as u64;
+        .count(&ctx.db)
+        .await? as u64;
     let teachers_new = user::Entity::find()
         .filter(user::Column::Role.eq("teacher"))
         .filter(user::Column::CreatedAt.gte(month_ago))
-        .count(&ctx.db).await? as u64;
+        .count(&ctx.db)
+        .await? as u64;
     let classes_new = class::Entity::find()
         .filter(class::Column::CreatedAt.gte(month_ago))
-        .count(&ctx.db).await? as u64;
+        .count(&ctx.db)
+        .await? as u64;
     let decks_new = deck::Entity::find()
         .filter(deck::Column::CreatedAt.gte(month_ago))
-        .count(&ctx.db).await? as u64;
+        .count(&ctx.db)
+        .await? as u64;
 
     let this_month = q.contains("this month") || q.contains("last month") || q.contains("recently");
 
@@ -436,7 +493,13 @@ async fn count_question(ctx: &AppContext, q: &str) -> Result<AskResponse> {
     let want_cards = q.contains("card");
     let want_any = want_students || want_teachers || want_classes || want_decks || want_cards;
 
-    let pick = |total: u64, new: u64| -> u64 { if this_month { new } else { total } };
+    let pick = |total: u64, new: u64| -> u64 {
+        if this_month {
+            new
+        } else {
+            total
+        }
+    };
 
     let mut parts: Vec<String> = Vec::new();
     // Parts are plain "N unit" phrases; the scope ("currently" / "this month")
@@ -473,11 +536,36 @@ async fn count_question(ctx: &AppContext, q: &str) -> Result<AskResponse> {
 
     // Structured rows for the chatbox UI
     let rows: Vec<AskRow> = vec![
-        AskRow { label: "Students".into(), value: students_total.to_string(), status: Some("ok".into()), detail: None },
-        AskRow { label: "Teachers".into(), value: teachers_total.to_string(), status: Some("ok".into()), detail: None },
-        AskRow { label: "Classes".into(), value: classes_total.to_string(), status: Some("ok".into()), detail: None },
-        AskRow { label: "Decks".into(), value: decks_total.to_string(), status: Some("ok".into()), detail: None },
-        AskRow { label: "Cards".into(), value: cards_total.to_string(), status: Some("ok".into()), detail: None },
+        AskRow {
+            label: "Students".into(),
+            value: students_total.to_string(),
+            status: Some("ok".into()),
+            detail: None,
+        },
+        AskRow {
+            label: "Teachers".into(),
+            value: teachers_total.to_string(),
+            status: Some("ok".into()),
+            detail: None,
+        },
+        AskRow {
+            label: "Classes".into(),
+            value: classes_total.to_string(),
+            status: Some("ok".into()),
+            detail: None,
+        },
+        AskRow {
+            label: "Decks".into(),
+            value: decks_total.to_string(),
+            status: Some("ok".into()),
+            detail: None,
+        },
+        AskRow {
+            label: "Cards".into(),
+            value: cards_total.to_string(),
+            status: Some("ok".into()),
+            detail: None,
+        },
     ];
 
     Ok(AskResponse {
@@ -550,9 +638,24 @@ fn unknown_intent(q: &str) -> AskResponse {
 /// Extract a subject/deck name from the query (e.g., "7th Grade math").
 fn extract_subject(q: &str) -> Option<String> {
     let subjects = [
-        "math", "algebra", "geometry", "biology", "physics", "chemistry",
-        "vocab", "vocabulary", "spanish", "french", "history", "science",
-        "7th grade", "8th grade", "9th grade", "grade 7", "grade 8", "grade 9",
+        "math",
+        "algebra",
+        "geometry",
+        "biology",
+        "physics",
+        "chemistry",
+        "vocab",
+        "vocabulary",
+        "spanish",
+        "french",
+        "history",
+        "science",
+        "7th grade",
+        "8th grade",
+        "9th grade",
+        "grade 7",
+        "grade 8",
+        "grade 9",
     ];
     for s in &subjects {
         if q.contains(s) {

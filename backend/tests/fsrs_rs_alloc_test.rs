@@ -38,16 +38,22 @@ static GLOBAL: CountingAlloc = CountingAlloc;
 
 #[test]
 fn fsrs_hot_path_is_zero_allocation() {
-    use fsrs::{current_retrievability, FSRS6_DEFAULT_DECAY, FSRS, MemoryState};
+    use fsrs::{current_retrievability, MemoryState, FSRS, FSRS6_DEFAULT_DECAY};
 
     // Sanity probe: the counter must actually count, or the assertion below
     // would pass vacuously.
     let probe: Vec<u8> = Vec::with_capacity(64);
-    assert!(ALLOC_COUNT.load(Ordering::Relaxed) > 0, "allocator counter is not counting");
+    assert!(
+        ALLOC_COUNT.load(Ordering::Relaxed) > 0,
+        "allocator counter is not counting"
+    );
     drop(probe);
 
     let fsrs = FSRS::default();
-    let state = MemoryState { stability: 12.0, difficulty: 5.5 };
+    let state = MemoryState {
+        stability: 12.0,
+        difficulty: 5.5,
+    };
 
     // Warmup: touch every code path once (lazy init, caches, first-call setup)
     // so the measured section captures steady-state behavior only.

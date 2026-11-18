@@ -61,8 +61,7 @@ async fn current_session(
 
     match sessions.first() {
         Some(s) => {
-            let card_ids: Vec<i64> =
-                serde_json::from_str(&s.card_ids).unwrap_or_default();
+            let card_ids: Vec<i64> = serde_json::from_str(&s.card_ids).unwrap_or_default();
             format::json(serde_json::json!({
                 "status": "ok",
                 "session": {
@@ -155,17 +154,22 @@ async fn answer(
     Json(payload): Json<ReviewAnswer>,
 ) -> Result<Response> {
     // Trial read-only flip (class-trial spec §5): no new answers after day 90.
-    if crate::services::settings::trial_readonly(&ctx.db).await.unwrap_or(false) {
-        return format::json(serde_json::json!({"status": "trial_ended", "message": "This class trial has ended. Your progress is saved and exportable."}));
+    if crate::services::settings::trial_readonly(&ctx.db)
+        .await
+        .unwrap_or(false)
+    {
+        return format::json(
+            serde_json::json!({"status": "trial_ended", "message": "This class trial has ended. Your progress is saved and exportable."}),
+        );
     }
     match review_ingest::ingest_answer(&ctx.db, user.id, &user.email, &payload).await {
         Ok(result) => format::json(result),
-        Err(review_ingest::IngestError::BadEase(e)) => {
-            format::json(serde_json::json!({"status": "error", "message": format!("ease must be 1-4, got {}", e)}))
-        }
-        Err(review_ingest::IngestError::BadAnswerId) => {
-            format::json(serde_json::json!({"status": "error", "message": "answer_id must be 1-64 chars"}))
-        }
+        Err(review_ingest::IngestError::BadEase(e)) => format::json(
+            serde_json::json!({"status": "error", "message": format!("ease must be 1-4, got {}", e)}),
+        ),
+        Err(review_ingest::IngestError::BadAnswerId) => format::json(
+            serde_json::json!({"status": "error", "message": "answer_id must be 1-64 chars"}),
+        ),
         Err(e) => {
             tracing::error!("[{}] ingest failed for {}: {}", TAG, user.id, e);
             format::json(serde_json::json!({"status": "error", "message": "ingest failed"}))
@@ -184,8 +188,7 @@ async fn seed_packs(
     Extension(user): Extension<AuthUser>,
 ) -> Result<Response> {
     let _ = user; // auth-only gate; students may list the public seed library
-    let decks =
-        crate::controllers::management::deck_library::available_decks(&ctx).await?;
+    let decks = crate::controllers::management::deck_library::available_decks(&ctx).await?;
     format::json(decks)
 }
 
@@ -196,8 +199,13 @@ async fn import_seed(
     Json(payload): Json<serde_json::Value>,
 ) -> Result<Response> {
     // Trial read-only flip: no new imports after day 90 either.
-    if crate::services::settings::trial_readonly(&ctx.db).await.unwrap_or(false) {
-        return format::json(serde_json::json!({"status": "trial_ended", "message": "This class trial has ended."}));
+    if crate::services::settings::trial_readonly(&ctx.db)
+        .await
+        .unwrap_or(false)
+    {
+        return format::json(
+            serde_json::json!({"status": "trial_ended", "message": "This class trial has ended."}),
+        );
     }
     let Some(package) = payload.get("package").and_then(|v| v.as_str()) else {
         return format::json(serde_json::json!({"status": "error", "message": "missing package"}));
@@ -211,7 +219,9 @@ async fn import_seed(
             .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-'))
         && !package.contains("..");
     if !valid {
-        return format::json(serde_json::json!({"status": "error", "message": "invalid package name"}));
+        return format::json(
+            serde_json::json!({"status": "error", "message": "invalid package name"}),
+        );
     }
     // resolve the seed dir (same order as deck_library)
     let seed_dir = std::env::var("ANKITOV_SEED_DIR")
@@ -220,8 +230,16 @@ async fn import_seed(
     let path = seed_dir.join(package);
     match collection_store::import_apkg(&user.id.to_string(), &path) {
         Ok(media) => {
-            tracing::info!("[{}] imported {} for {} ({} media)", TAG, package, user.id, media);
-            format::json(serde_json::json!({"status": "ok", "package": package, "media_files": media}))
+            tracing::info!(
+                "[{}] imported {} for {} ({} media)",
+                TAG,
+                package,
+                user.id,
+                media
+            );
+            format::json(
+                serde_json::json!({"status": "ok", "package": package, "media_files": media}),
+            )
         }
         Err(e) => {
             tracing::warn!("[{}] import failed for {}: {}", TAG, user.id, e);
@@ -236,34 +254,55 @@ pub async fn spa_index() -> Result<Response> {
     let mut resp: Response = format::html(include_str!("../../resources/reviewer/index.html"))?;
     resp.headers_mut().insert(
         axum::http::header::CACHE_CONTROL,
-        axum::http::header::HeaderValue::from_static("no-store, no-cache, must-revalidate, max-age=0"),
+        axum::http::header::HeaderValue::from_static(
+            "no-store, no-cache, must-revalidate, max-age=0",
+        ),
     );
     Ok(resp)
 }
 
 pub async fn spa_css() -> impl IntoResponse {
-    ([(axum::http::header::CONTENT_TYPE, "text/css; charset=utf-8")],
-     include_str!("../../resources/reviewer/style.css"))
+    (
+        [(axum::http::header::CONTENT_TYPE, "text/css; charset=utf-8")],
+        include_str!("../../resources/reviewer/style.css"),
+    )
 }
 
 pub async fn spa_js() -> impl IntoResponse {
-    ([(axum::http::header::CONTENT_TYPE, "application/javascript; charset=utf-8")],
-     include_str!("../../resources/reviewer/app.js"))
+    (
+        [(
+            axum::http::header::CONTENT_TYPE,
+            "application/javascript; charset=utf-8",
+        )],
+        include_str!("../../resources/reviewer/app.js"),
+    )
 }
 
 pub async fn spa_manifest() -> impl IntoResponse {
-    ([(axum::http::header::CONTENT_TYPE, "application/manifest+json")],
-     include_str!("../../resources/reviewer/manifest.webmanifest"))
+    (
+        [(
+            axum::http::header::CONTENT_TYPE,
+            "application/manifest+json",
+        )],
+        include_str!("../../resources/reviewer/manifest.webmanifest"),
+    )
 }
 
 pub async fn spa_sw() -> impl IntoResponse {
-    ([(axum::http::header::CONTENT_TYPE, "application/javascript; charset=utf-8")],
-     include_str!("../../resources/reviewer/sw.js"))
+    (
+        [(
+            axum::http::header::CONTENT_TYPE,
+            "application/javascript; charset=utf-8",
+        )],
+        include_str!("../../resources/reviewer/sw.js"),
+    )
 }
 
 pub async fn spa_icon() -> impl IntoResponse {
-    ([(axum::http::header::CONTENT_TYPE, "image/svg+xml")],
-     include_str!("../../resources/reviewer/icon.svg"))
+    (
+        [(axum::http::header::CONTENT_TYPE, "image/svg+xml")],
+        include_str!("../../resources/reviewer/icon.svg"),
+    )
 }
 
 /// GET /media/{file} — serve a media file from the student's collection.
@@ -285,12 +324,12 @@ async fn media(
                 Some("gif") => "image/gif",
                 _ => "application/octet-stream",
             };
-            Ok((
-                [(axum::http::header::CONTENT_TYPE, mime)],
-                bytes,
-            )
-                .into_response())
+            Ok(([(axum::http::header::CONTENT_TYPE, mime)], bytes).into_response())
         }
-        None => Ok(([(axum::http::header::CONTENT_TYPE, "text/plain")], "not found").into_response()),
+        None => Ok((
+            [(axum::http::header::CONTENT_TYPE, "text/plain")],
+            "not found",
+        )
+            .into_response()),
     }
 }

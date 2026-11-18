@@ -3,11 +3,11 @@
 //! Manages the anki-cloud sync server for all users, provides
 //! per-user sync status, and allows manual sync triggering.
 
-use crate::models::management::{ApiResponse, SyncStatusQuery, SyncStatusResponse, UserSyncStatus};
-use axum::extract::{Path, Query, State, Extension};
-use loco_rs::{app::AppContext, prelude::*};
-use crate::middleware::auth::AuthUser;
 use crate::middleware::auth::ensure_role;
+use crate::middleware::auth::AuthUser;
+use crate::models::management::{ApiResponse, SyncStatusQuery, SyncStatusResponse, UserSyncStatus};
+use axum::extract::{Extension, Path, Query, State};
+use loco_rs::{app::AppContext, prelude::*};
 
 const TAG: &str = "Management Console";
 
@@ -60,15 +60,15 @@ pub async fn status(_ctx: State<AppContext>) -> Result<Response> {
 )]
 pub async fn list_user_statuses(
     State(ctx): State<AppContext>,
-    Query(params): Query<SyncStatusQuery>
+    Query(params): Query<SyncStatusQuery>,
 ) -> Result<Response> {
     tracing::info!("Listing user sync statuses — filter={:?}", params.status);
 
     use crate::models::entities::user as user_entity;
-    
+
     // Query users from the DB
     let mut query = user_entity::Entity::find();
-    
+
     // Filter out teachers/admins if we only want student sync statuses
     query = query.filter(user_entity::Column::Role.eq("student".to_string()));
 

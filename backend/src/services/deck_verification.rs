@@ -159,9 +159,7 @@ pub const STUB_CARD_COUNT: i32 = 12;
 impl Verifier for StubVerifier {
     async fn verify(&self, apkg_path: &Path) -> Result<DeckVerificationReport, VerificationError> {
         if !apkg_path.exists() {
-            return Err(VerificationError::NotFound(
-                apkg_path.display().to_string(),
-            ));
+            return Err(VerificationError::NotFound(apkg_path.display().to_string()));
         }
 
         let header = std::fs::read(apkg_path)
@@ -185,9 +183,7 @@ impl Verifier for StubVerifier {
                 media_integrity: MediaIntegrity::Ok,
                 ok: false,
                 warnings: Vec::new(),
-                reject_reason: Some(
-                    "not a valid .apkg package (missing ZIP header)".to_string(),
-                ),
+                reject_reason: Some("not a valid .apkg package (missing ZIP header)".to_string()),
             });
         }
 
@@ -271,9 +267,7 @@ enum CardKind {
 impl Verifier for AnkiVerifier {
     async fn verify(&self, apkg_path: &Path) -> Result<DeckVerificationReport, VerificationError> {
         if !apkg_path.exists() {
-            return Err(VerificationError::NotFound(
-                apkg_path.display().to_string(),
-            ));
+            return Err(VerificationError::NotFound(apkg_path.display().to_string()));
         }
 
         let deck_name = apkg_path
@@ -287,8 +281,7 @@ impl Verifier for AnkiVerifier {
             return Err(VerificationError::Backend(format!("{launch:?}")));
         }
 
-        let client =
-            crate::services::anki_connect::AnkiConnectClient::new(self.port, None);
+        let client = crate::services::anki_connect::AnkiConnectClient::new(self.port, None);
 
         // 2. Import into the dedicated verification collection. AnkiConnect's
         //    importPackage takes only the package path — the deck name comes
@@ -333,10 +326,7 @@ impl Verifier for AnkiVerifier {
                 .map_err(|e| VerificationError::Backend(e.to_string()))?;
             for card in &infos {
                 match Self::classify_model(
-                    card
-                        .get("modelName")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or(""),
+                    card.get("modelName").and_then(|v| v.as_str()).unwrap_or(""),
                     card,
                 ) {
                     CardKind::Basic => census.basic += 1,

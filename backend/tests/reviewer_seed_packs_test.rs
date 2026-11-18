@@ -19,10 +19,7 @@ fn student_token() -> String {
 
 /// Point the seed dir at a unique temp dir containing one fake package.
 fn set_seed_dir_with_one_package() -> std::path::PathBuf {
-    let dir = std::env::temp_dir().join(format!(
-        "ankitov-seedpacks-test-{}",
-        std::process::id()
-    ));
+    let dir = std::env::temp_dir().join(format!("ankitov-seedpacks-test-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).expect("create seed dir");
     let pkg = dir.join("math-definitions-en.apkg");

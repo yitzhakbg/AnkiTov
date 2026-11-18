@@ -74,14 +74,7 @@ pub async fn log_n_change(
         "new_n": new_n,
         "cohort_id": cohort_id,
     });
-    log_event(
-        db,
-        "n_change",
-        &data.to_string(),
-        actor_id,
-        cohort_id,
-    )
-    .await;
+    log_event(db, "n_change", &data.to_string(), actor_id, cohort_id).await;
 }
 
 /// Convenience: log a profile assignment event.

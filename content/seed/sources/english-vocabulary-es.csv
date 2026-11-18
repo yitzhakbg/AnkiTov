@@ -1,7 +1,7 @@
 note_type,concept_id,unit,grades,front,back,extra,pack_id,track,difficulty
-basic,homework,01,7 8 9,homework,deberes / tareas Please finish your homework before tomorrow's class.,In Spain 'deberes' is standard for school tasks; 'tareas' is widely used across Latin America.,english-vocabulary,languages,core
-basic,textbook,01,7 8 9,textbook,libro de texto Open your textbook to chapter three.,Directly aligns with textbook-bound learning materials in the factory.,english-vocabulary,languages,core
-basic,classroom,01,7 8 9,classroom,aula / salón de clases Students must remain quiet inside the classroom.,'Aula' is standard in secondary school settings.,english-vocabulary,languages,core
+cloze,homework,01,7 8 9,deberes / tareas Please finish your {{c1::homework}} before tomorrow's class.,homework,In Spain 'deberes' is standard for school tasks; 'tareas' is widely used across Latin America.,english-vocabulary,languages,core
+cloze,textbook,01,7 8 9,Directly aligns with {{c1::textbook}}-bound learning materials in the factory.,textbook,Directly aligns with textbook-bound learning materials in the factory.,english-vocabulary,languages,core
+cloze,classroom,01,7 8 9,aula / salón de clases Students must remain quiet inside the {{c1::classroom}}.,classroom,'Aula' is standard in secondary school settings.,english-vocabulary,languages,core
 basic,schedule,01,7 8 9,schedule,horario Check your class schedule for the new semester.,Type-in prompt tests spelling of schedule organization vocabulary.,english-vocabulary,languages,core
 basic,assignment,01,7 8 9,assignment,tarea / trabajo asignado The history teacher gave us a reading assignment.,Refers to specific coursework assigned for evaluation.,english-vocabulary,languages,core
 basic,teacher,01,7 8 9,teacher,profesor / profesora The math teacher explained the equation clearly.,Gendered noun in Spanish depending on the instructor.,english-vocabulary,languages,core

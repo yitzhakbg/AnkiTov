@@ -65,9 +65,10 @@ async fn start_anki_mock() -> wiremock::MockServer {
     wiremock::Mock::given(wiremock::matchers::body_partial_json(
         serde_json::json!({"action": "deckNames"}),
     ))
-    .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
-        serde_json::json!({"result": ["Default"], "error": null}),
-    ))
+    .respond_with(
+        wiremock::ResponseTemplate::new(200)
+            .set_body_json(serde_json::json!({"result": ["Default"], "error": null})),
+    )
     .up_to_n_times(1)
     .mount(&server)
     .await;
@@ -76,9 +77,10 @@ async fn start_anki_mock() -> wiremock::MockServer {
     wiremock::Mock::given(wiremock::matchers::body_partial_json(
         serde_json::json!({"action": "importPackage"}),
     ))
-    .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
-        serde_json::json!({"result": true, "error": null}),
-    ))
+    .respond_with(
+        wiremock::ResponseTemplate::new(200)
+            .set_body_json(serde_json::json!({"result": true, "error": null})),
+    )
     .mount(&server)
     .await;
 
@@ -86,9 +88,10 @@ async fn start_anki_mock() -> wiremock::MockServer {
     wiremock::Mock::given(wiremock::matchers::body_partial_json(
         serde_json::json!({"action": "findCards"}),
     ))
-    .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
-        serde_json::json!({"result": [101, 102, 103], "error": null}),
-    ))
+    .respond_with(
+        wiremock::ResponseTemplate::new(200)
+            .set_body_json(serde_json::json!({"result": [101, 102, 103], "error": null})),
+    )
     .mount(&server)
     .await;
 
@@ -97,9 +100,10 @@ async fn start_anki_mock() -> wiremock::MockServer {
     wiremock::Mock::given(wiremock::matchers::body_partial_json(
         serde_json::json!({"action": "deckNames"}),
     ))
-    .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
-        serde_json::json!({"result": ["Default", "Test Deck"], "error": null}),
-    ))
+    .respond_with(
+        wiremock::ResponseTemplate::new(200)
+            .set_body_json(serde_json::json!({"result": ["Default", "Test Deck"], "error": null})),
+    )
     .mount(&server)
     .await;
 
@@ -117,10 +121,7 @@ fn set_anki_port(server: &wiremock::MockServer) {
 /// `backend/uploads/decks/`. Safe under nextest (one process per test);
 /// do NOT run this suite under plain `cargo test` with default threading.
 fn set_unique_upload_dir() {
-    let dir = std::env::temp_dir().join(format!(
-        "ankitov-upload-test-{}",
-        std::process::id()
-    ));
+    let dir = std::env::temp_dir().join(format!("ankitov-upload-test-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);
     std::env::set_var("ANKITOV_UPLOAD_DIR", dir);
 }
@@ -148,7 +149,10 @@ async fn post_upload(
 #[tokio::test]
 async fn list_decks_empty_returns_200() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
-        let resp = server.get("/api/v1/management/decks").add_header("Authorization", format!("Bearer {}", teacher_token())).await;
+        let resp = server
+            .get("/api/v1/management/decks")
+            .add_header("Authorization", format!("Bearer {}", teacher_token()))
+            .await;
         assert_eq!(
             resp.status_code(),
             axum::http::StatusCode::OK,
@@ -164,10 +168,16 @@ async fn list_decks_empty_returns_200() {
 #[tokio::test]
 async fn list_decks_accepts_pagination_params() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
-        let r = server.get("/api/v1/management/decks?page=5&per_page=50").add_header("Authorization", format!("Bearer {}", teacher_token())).await;
+        let r = server
+            .get("/api/v1/management/decks?page=5&per_page=50")
+            .add_header("Authorization", format!("Bearer {}", teacher_token()))
+            .await;
         assert_eq!(r.status_code(), axum::http::StatusCode::OK);
 
-        let r2 = server.get("/api/v1/management/decks?page=0&per_page=0").add_header("Authorization", format!("Bearer {}", teacher_token())).await;
+        let r2 = server
+            .get("/api/v1/management/decks?page=0&per_page=0")
+            .add_header("Authorization", format!("Bearer {}", teacher_token()))
+            .await;
         assert_eq!(
             r2.status_code(),
             axum::http::StatusCode::OK,
@@ -394,7 +404,10 @@ async fn get_deck_returns_not_found() {
 #[tokio::test]
 async fn get_deck_rejects_invalid_uuid() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
-        let resp = server.get("/api/v1/management/decks/not-a-uuid").add_header("Authorization", format!("Bearer {}", teacher_token())).await;
+        let resp = server
+            .get("/api/v1/management/decks/not-a-uuid")
+            .add_header("Authorization", format!("Bearer {}", teacher_token()))
+            .await;
         let j = json(&resp.text());
         assert_eq!(
             j.get("success").and_then(|v| v.as_bool()),
@@ -432,7 +445,11 @@ async fn get_deck_returns_uploaded_deck() {
         let fetch_j: Value = json(&fetch_resp.text());
 
         assert_eq!(fetch_j["id"].as_str().unwrap(), deck_id, "id mismatch");
-        assert_eq!(fetch_j["name"].as_str().unwrap(), expected_name, "name mismatch");
+        assert_eq!(
+            fetch_j["name"].as_str().unwrap(),
+            expected_name,
+            "name mismatch"
+        );
         assert_eq!(fetch_j["card_count"], expected_count, "card_count mismatch");
     })
     .await;
@@ -470,7 +487,10 @@ async fn delete_deck_succeeds_without_distributions() {
         // Upload
         let payload: Vec<u8> = vec![42u8; 512];
         let upload_resp = post_upload(&server, "test-deck.apkg", &payload).await;
-        let deck_id = json(&upload_resp.text())["id"].as_str().unwrap().to_string();
+        let deck_id = json(&upload_resp.text())["id"]
+            .as_str()
+            .unwrap()
+            .to_string();
 
         // Delete
         let delete_resp = server
@@ -490,7 +510,11 @@ async fn delete_deck_succeeds_without_distributions() {
             .get(&format!("/api/v1/management/decks/{deck_id}"))
             .add_header("Authorization", format!("Bearer {}", teacher_token()))
             .await;
-        assert_eq!(fetch_resp.status_code(), axum::http::StatusCode::OK, "deck lookup should return 200");
+        assert_eq!(
+            fetch_resp.status_code(),
+            axum::http::StatusCode::OK,
+            "deck lookup should return 200"
+        );
         let fetch_j = json(&fetch_resp.text());
         assert_eq!(
             fetch_j.get("success").and_then(|v| v.as_bool()),
@@ -511,7 +535,10 @@ async fn delete_deck_fails_with_active_distributions() {
         // Upload
         let payload: Vec<u8> = vec![99u8; 512];
         let upload_resp = post_upload(&server, "test-deck.apkg", &payload).await;
-        let deck_id = json(&upload_resp.text())["id"].as_str().unwrap().to_string();
+        let deck_id = json(&upload_resp.text())["id"]
+            .as_str()
+            .unwrap()
+            .to_string();
 
         // Distribute
         let dist_payload = serde_json::json!({
@@ -538,7 +565,10 @@ async fn delete_deck_fails_with_active_distributions() {
             "delete with distributions should fail: {delete_j}"
         );
         assert!(
-            delete_j["message"].as_str().unwrap().contains("distribution"),
+            delete_j["message"]
+                .as_str()
+                .unwrap()
+                .contains("distribution"),
             "error should mention distributions"
         );
     })
@@ -559,7 +589,10 @@ async fn distribute_deck_to_user_succeeds() {
         // Upload
         let payload: Vec<u8> = vec![1u8; 1024];
         let upload_resp = post_upload(&server, "test-deck.apkg", &payload).await;
-        let deck_id = json(&upload_resp.text())["id"].as_str().unwrap().to_string();
+        let deck_id = json(&upload_resp.text())["id"]
+            .as_str()
+            .unwrap()
+            .to_string();
 
         // Distribute
         let dist_payload = serde_json::json!({
@@ -574,7 +607,10 @@ async fn distribute_deck_to_user_succeeds() {
 
         assert_eq!(dist_resp.status_code(), axum::http::StatusCode::OK);
         let text = dist_resp.text();
-        assert!(text.contains("\"deck_id\""), "should contain deck_id: {text}");
+        assert!(
+            text.contains("\"deck_id\""),
+            "should contain deck_id: {text}"
+        );
         assert!(
             text.contains("\"target_type\":\"user\""),
             "should contain target_type user: {text}"
@@ -592,7 +628,10 @@ async fn distribute_deck_rejects_invalid_target_type() {
         set_unique_upload_dir();
         let payload: Vec<u8> = vec![2u8; 512];
         let upload_resp = post_upload(&server, "test-deck.apkg", &payload).await;
-        let deck_id = json(&upload_resp.text())["id"].as_str().unwrap().to_string();
+        let deck_id = json(&upload_resp.text())["id"]
+            .as_str()
+            .unwrap()
+            .to_string();
 
         let dist_payload = serde_json::json!({
             "target_type": "invalid",
@@ -647,7 +686,10 @@ async fn distribute_deck_returns_error_for_invalid_target_id() {
         set_unique_upload_dir();
         let payload: Vec<u8> = vec![3u8; 512];
         let upload_resp = post_upload(&server, "test-deck.apkg", &payload).await;
-        let deck_id = json(&upload_resp.text())["id"].as_str().unwrap().to_string();
+        let deck_id = json(&upload_resp.text())["id"]
+            .as_str()
+            .unwrap()
+            .to_string();
 
         let dist_payload = serde_json::json!({
             "target_type": "user",

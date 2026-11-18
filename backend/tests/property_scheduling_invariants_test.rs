@@ -453,14 +453,20 @@ proptest! {
 // ---------------------------------------------------------------------------
 
 fn ranked_strategy() -> impl Strategy<Value = Vec<(i64, String)>> {
-    prop::collection::vec((1000i64..9000, prop_oneof![Just("alpha"), Just("beta"), Just("gamma")]), 0..40)
-        .prop_map(|v| {
-            let mut seen = BTreeSet::new();
-            v.into_iter()
-                .filter(|(id, _)| seen.insert(*id))
-                .map(|(id, t)| (id, t.to_string()))
-                .collect()
-        })
+    prop::collection::vec(
+        (
+            1000i64..9000,
+            prop_oneof![Just("alpha"), Just("beta"), Just("gamma")],
+        ),
+        0..40,
+    )
+    .prop_map(|v| {
+        let mut seen = BTreeSet::new();
+        v.into_iter()
+            .filter(|(id, _)| seen.insert(*id))
+            .map(|(id, t)| (id, t.to_string()))
+            .collect()
+    })
 }
 
 proptest! {

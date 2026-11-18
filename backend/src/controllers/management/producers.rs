@@ -19,10 +19,13 @@ use crate::models::entities::deck as deck_entity;
 use crate::models::entities::producer as producer_entity;
 use crate::models::entities::producer_deck as producer_deck_entity;
 use crate::services::deck_verification::{verifier, CardTypeCensus, MediaIntegrity};
-use axum::{extract::{Multipart, Path, State}, Extension, Json};
+use axum::{
+    extract::{Multipart, Path, State},
+    Extension, Json,
+};
 use loco_rs::{app::AppContext, prelude::*};
 use sea_orm::{
-    entity::prelude::{EntityTrait, ColumnTrait, QueryFilter},
+    entity::prelude::{ColumnTrait, EntityTrait, QueryFilter},
     ActiveModelTrait, ActiveValue, Set,
 };
 use serde::Serialize;
@@ -164,7 +167,11 @@ pub async fn create_producer(
         loco_rs::Error::InternalServerError
     })?;
 
-    tracing::info!("Producer created: id={} name={}", producer.id, producer.name);
+    tracing::info!(
+        "Producer created: id={} name={}",
+        producer.id,
+        producer.name
+    );
     format::json(ProducerResponse::from_model(producer))
 }
 
@@ -213,15 +220,18 @@ pub async fn list_producers(
             .get(&row.deck_id)
             .cloned()
             .unwrap_or(("<deleted>".to_string(), 0));
-        by_producer.entry(row.producer_id).or_default().push(ProducerCatalogEntry {
-            producer_deck_id: row.id,
-            deck_id: row.deck_id,
-            deck_name,
-            status: row.status,
-            reject_reason: row.reject_reason,
-            verified_at: row.verified_at,
-            card_count,
-        });
+        by_producer
+            .entry(row.producer_id)
+            .or_default()
+            .push(ProducerCatalogEntry {
+                producer_deck_id: row.id,
+                deck_id: row.deck_id,
+                deck_name,
+                status: row.status,
+                reject_reason: row.reject_reason,
+                verified_at: row.verified_at,
+                card_count,
+            });
     }
 
     let out: Vec<ProducerCatalogResponse> = producers

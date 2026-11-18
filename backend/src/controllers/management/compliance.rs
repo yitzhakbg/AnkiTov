@@ -55,8 +55,12 @@ pub struct ComplianceQuery {
     pub per_page: u32,
 }
 
-fn default_page() -> u32 { 1 }
-fn default_per_page() -> u32 { 50 }
+fn default_page() -> u32 {
+    1
+}
+fn default_per_page() -> u32 {
+    50
+}
 
 // ---------------------------------------------------------------------------
 // Handlers
@@ -144,7 +148,11 @@ pub async fn weekly_compliance(
     }
 
     let mut results: Vec<StudentComplianceRecord> = student_records.into_values().collect();
-    results.sort_by(|a, b| a.compliance_pct.partial_cmp(&b.compliance_pct).unwrap_or(std::cmp::Ordering::Equal));
+    results.sort_by(|a, b| {
+        a.compliance_pct
+            .partial_cmp(&b.compliance_pct)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
 
     // Apply threshold filter
     if let Some(threshold) = params.below_threshold {
@@ -196,14 +204,10 @@ pub async fn list_students(
         query = query.filter(cs_entity::Column::StudentId.like(&pattern));
     }
 
-    let students: Vec<String> = query
-        .into_tuple()
-        .all(&ctx.db)
-        .await
-        .map_err(|e| {
-            tracing::error!("list_students DB error: {:?}", e);
-            loco_rs::Error::InternalServerError
-        })?;
+    let students: Vec<String> = query.into_tuple().all(&ctx.db).await.map_err(|e| {
+        tracing::error!("list_students DB error: {:?}", e);
+        loco_rs::Error::InternalServerError
+    })?;
 
     format::json(students)
 }
@@ -246,17 +250,18 @@ pub async fn student_compliance(
         std::collections::HashMap::new();
 
     for s in &sessions {
-        let record = week_map
-            .entry(s.session_week.clone())
-            .or_insert_with(|| StudentComplianceRecord {
-                student_id: student_id.clone(),
-                session_week: s.session_week.clone(),
-                sessions_completed: 0,
-                sessions_target: s.n_value,
-                compliance_pct: 0.0,
-                total_cards_reviewed: 0,
-                avg_cards_per_session: 0.0,
-            });
+        let record =
+            week_map
+                .entry(s.session_week.clone())
+                .or_insert_with(|| StudentComplianceRecord {
+                    student_id: student_id.clone(),
+                    session_week: s.session_week.clone(),
+                    sessions_completed: 0,
+                    sessions_target: s.n_value,
+                    compliance_pct: 0.0,
+                    total_cards_reviewed: 0,
+                    avg_cards_per_session: 0.0,
+                });
         record.sessions_completed += 1;
         record.total_cards_reviewed += s.cards_completed;
         record.sessions_target = s.n_value; // most recent N wins per week

@@ -106,8 +106,8 @@ pub fn compute_capsule_size(
 /// - Total selected ≤ target_size.
 /// - Remaining cards returned for spill.
 pub fn slice_capsule(
-    ranked: &[(i64, String)],       // (card_id, track_tag), sorted most-urgent first
-    track_counts: &TrackCounts,     // total due cards per track
+    ranked: &[(i64, String)],   // (card_id, track_tag), sorted most-urgent first
+    track_counts: &TrackCounts, // total due cards per track
     target_size: usize,
 ) -> SliceResult {
     if ranked.is_empty() || target_size == 0 {
@@ -155,9 +155,9 @@ pub fn slice_capsule(
         // Otherwise, check if we still have room and all tracks have min
         if selected.len() < target_size {
             // Allow overflow if all tracks have their minimum
-            let all_have_min = track_counts.keys().all(|t| {
-                used_from_track.get(t).copied().unwrap_or(0) >= min_per_track
-            });
+            let all_have_min = track_counts
+                .keys()
+                .all(|t| used_from_track.get(t).copied().unwrap_or(0) >= min_per_track);
             if all_have_min {
                 selected.push(*card_id);
                 used_from_track.insert(track_tag.clone(), used + 1);

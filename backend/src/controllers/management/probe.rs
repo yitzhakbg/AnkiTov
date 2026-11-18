@@ -79,7 +79,9 @@ pub async fn deck_insert(
         card_count: Set(payload.card_count.unwrap_or(0)),
         file_size_bytes: Set(payload.file_size_bytes.unwrap_or(0)),
         checksum_sha256: Set(payload.checksum_sha256.unwrap_or_else(|| "x".repeat(64))),
-        uploaded_by: Set(payload.uploaded_by.unwrap_or_else(|| uuid::Uuid::nil().to_string())),
+        uploaded_by: Set(payload
+            .uploaded_by
+            .unwrap_or_else(|| uuid::Uuid::nil().to_string())),
         created_at: Set(payload.created_at.unwrap_or(now)),
         updated_at: Set(payload.updated_at.unwrap_or(now)),
     };

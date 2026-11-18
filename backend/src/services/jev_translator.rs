@@ -211,26 +211,18 @@ fn heuristic_human_to_jev(prompt: &str, state: &serde_json::Value) -> JevRequest
 /// Translate a free-form human prompt (and optional state) into a well-formed
 /// Jev request. Tries the configured LLM first; falls back to a deterministic
 /// `noul` request if no provider is reachable.
-pub async fn translate_human_to_jev(
-    prompt: &str,
-    state: &serde_json::Value,
-) -> HumanToJev {
+pub async fn translate_human_to_jev(prompt: &str, state: &serde_json::Value) -> HumanToJev {
     let user_content = if state.is_null() {
         format!("PROMPT: {prompt}\n\nSTATE: (none)")
     } else {
-        format!(
-            "PROMPT: {prompt}\n\nSTATE: {}",
-            state.to_string()
-        )
+        format!("PROMPT: {prompt}\n\nSTATE: {}", state.to_string())
     };
 
     let llm_request = match call_llm_for_request(HUMAN_TO_JEV_PREAMBLE, &user_content).await {
         Ok(Some(body)) => Some(body),
         Ok(None) => None,
         Err(e) => {
-            tracing::warn!(
-                "Jev translator: LLM call failed ({e}); using heuristic fallback"
-            );
+            tracing::warn!("Jev translator: LLM call failed ({e}); using heuristic fallback");
             None
         }
     };
@@ -314,8 +306,8 @@ async fn call_llm_for_request(
 async fn call_freetoken(preamble: &str, user_content: &str) -> Result<serde_json::Value, String> {
     let base_url = std::env::var("ANKITOV_FREETOKEN_BASE_URL")
         .unwrap_or_else(|_| "http://localhost:1919/v1".into());
-    let model = std::env::var("ANKITOV_FREETOKEN_MODEL")
-        .unwrap_or_else(|_| "Qwen3.6-35B-A3B".into());
+    let model =
+        std::env::var("ANKITOV_FREETOKEN_MODEL").unwrap_or_else(|_| "Qwen3.6-35B-A3B".into());
 
     let client = openai::CompletionsClient::builder()
         .base_url(&base_url)
@@ -388,11 +380,7 @@ pub fn translate_jev_to_human(request: &JevRequest) -> String {
     } else {
         format!(
             "(structured state: {} keys)",
-            request
-                .state
-                .as_object()
-                .map(|o| o.len())
-                .unwrap_or(0)
+            request.state.as_object().map(|o| o.len()).unwrap_or(0)
         )
     };
     out.push_str(&format!("- **State to evaluate:** {state_str}\n"));
@@ -531,7 +519,10 @@ mod tests {
 
     #[test]
     fn strip_fences_works() {
-        assert_eq!(strip_code_fences("```json\n{ \"a\": 1 }\n```"), "{ \"a\": 1 }");
+        assert_eq!(
+            strip_code_fences("```json\n{ \"a\": 1 }\n```"),
+            "{ \"a\": 1 }"
+        );
         assert_eq!(strip_code_fences("{ \"a\": 1 }"), "{ \"a\": 1 }");
     }
 }

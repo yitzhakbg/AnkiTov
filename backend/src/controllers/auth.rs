@@ -7,7 +7,11 @@
 //! | POST | `/api/v1/auth/register` | No | Create user account, return JWT |
 //! | POST | `/api/v1/auth/login` | No | Authenticate, return JWT |
 
-use axum::{extract::{Extension, State}, routing::post, Json};
+use axum::{
+    extract::{Extension, State},
+    routing::post,
+    Json,
+};
 use loco_rs::prelude::*;
 use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
@@ -106,7 +110,9 @@ pub async fn register(
         .map_err(|e| loco_rs::Error::InternalServerError)?;
 
     if existing.is_some() {
-        return Err(loco_rs::Error::BadRequest("email already registered".into()));
+        return Err(loco_rs::Error::BadRequest(
+            "email already registered".into(),
+        ));
     }
 
     // Hash password
@@ -188,7 +194,9 @@ pub async fn login(
         .map_err(|e| loco_rs::Error::InternalServerError)?;
 
     if !valid {
-        return Err(loco_rs::Error::Unauthorized("invalid email or password".into()));
+        return Err(loco_rs::Error::Unauthorized(
+            "invalid email or password".into(),
+        ));
     }
 
     // Issue JWT
@@ -203,7 +211,6 @@ pub async fn login(
         role: user_model.role,
     }))
 }
-
 
 /// Change the current user's password.
 ///
@@ -243,7 +250,10 @@ pub async fn change_password(
     let claims = match crate::services::auth::decode_token(token) {
         Ok(c) => c,
         Err(_) => {
-            return json_response(axum::http::StatusCode::UNAUTHORIZED, "invalid or expired token");
+            return json_response(
+                axum::http::StatusCode::UNAUTHORIZED,
+                "invalid or expired token",
+            );
         }
     };
 
@@ -252,7 +262,10 @@ pub async fn change_password(
     let body_bytes = match axum::body::to_bytes(req.into_body(), 1 << 20).await {
         Ok(b) => b,
         Err(_) => {
-            return json_response(axum::http::StatusCode::BAD_REQUEST, "could not read request body");
+            return json_response(
+                axum::http::StatusCode::BAD_REQUEST,
+                "could not read request body",
+            );
         }
     };
     let payload: ChangePasswordRequest = match serde_json::from_slice(&body_bytes) {
@@ -268,17 +281,26 @@ pub async fn change_password(
     let user_model = match user::Entity::find_by_id(claims.sub).one(db).await {
         Ok(Some(u)) => u,
         Ok(None) => {
-            return json_response(axum::http::StatusCode::UNAUTHORIZED, "invalid or expired token");
+            return json_response(
+                axum::http::StatusCode::UNAUTHORIZED,
+                "invalid or expired token",
+            );
         }
         Err(_) => {
-            return json_response(axum::http::StatusCode::INTERNAL_SERVER_ERROR, "database error");
+            return json_response(
+                axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+                "database error",
+            );
         }
     };
 
     let hash = match user_model.password_hash.as_deref() {
         Some(h) => h,
         None => {
-            return json_response(axum::http::StatusCode::BAD_REQUEST, "account has no password set");
+            return json_response(
+                axum::http::StatusCode::BAD_REQUEST,
+                "account has no password set",
+            );
         }
     };
 
@@ -286,7 +308,10 @@ pub async fn change_password(
     match auth::verify_password(&payload.current_password, hash) {
         Ok(true) => {}
         _ => {
-            return json_response(axum::http::StatusCode::UNAUTHORIZED, "current password is incorrect");
+            return json_response(
+                axum::http::StatusCode::UNAUTHORIZED,
+                "current password is incorrect",
+            );
         }
     }
 
@@ -307,7 +332,10 @@ pub async fn change_password(
     let new_hash = match auth::hash_password(&payload.new_password) {
         Ok(h) => h,
         Err(_) => {
-            return json_response(axum::http::StatusCode::INTERNAL_SERVER_ERROR, "password hashing failed");
+            return json_response(
+                axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+                "password hashing failed",
+            );
         }
     };
 
@@ -316,14 +344,20 @@ pub async fn change_password(
     active.password_hash = Set(Some(new_hash));
     active.updated_at = Set(now);
     if active.update(db).await.is_err() {
-        return json_response(axum::http::StatusCode::INTERNAL_SERVER_ERROR, "database error");
+        return json_response(
+            axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+            "database error",
+        );
     }
 
     json_response(axum::http::StatusCode::OK, "password updated")
 }
 
 /// Build a JSON `{ "error": message }` response with the given status.
-fn json_response(status: axum::http::StatusCode, message: &str) -> axum::http::Response<axum::body::Body> {
+fn json_response(
+    status: axum::http::StatusCode,
+    message: &str,
+) -> axum::http::Response<axum::body::Body> {
     let body = serde_json::json!({ "error": message }).to_string();
     axum::http::Response::builder()
         .status(status)
@@ -348,9 +382,7 @@ fn json_response(status: axum::http::StatusCode, message: &str) -> axum::http::R
     ),
     tag = TAG
 )]
-pub async fn logout(
-    req: axum::extract::Request,
-) -> Result<Json<LogoutResponse>> {
+pub async fn logout(req: axum::extract::Request) -> Result<Json<LogoutResponse>> {
     // `/auth/logout` is a *public* route (no `require_auth` in its chain — the
     // client already holds the token and is merely acknowledging the logout,
     // so it cannot go through a middleware that demands a valid token first).

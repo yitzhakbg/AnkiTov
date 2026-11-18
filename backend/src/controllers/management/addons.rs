@@ -3,11 +3,15 @@
 //! Handles installation, configuration, and distribution of Anki addons
 //! across managed user profiles.
 
-use crate::models::management::{AddonInfo, ApiResponse};
-use axum::{body::Bytes, extract::{Path, State}, Extension, Json};
-use loco_rs::{app::AppContext, prelude::*};
-use crate::middleware::auth::AuthUser;
 use crate::middleware::auth::ensure_role;
+use crate::middleware::auth::AuthUser;
+use crate::models::management::{AddonInfo, ApiResponse};
+use axum::{
+    body::Bytes,
+    extract::{Path, State},
+    Extension, Json,
+};
+use loco_rs::{app::AppContext, prelude::*};
 
 const TAG: &str = "Management Console";
 
@@ -96,13 +100,18 @@ pub async fn distribute_addon(
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     tracing::info!(
         "Distributing addon {} to {}:{}",
-        addon_id, payload.target_type, payload.target_id
+        addon_id,
+        payload.target_type,
+        payload.target_id
     );
 
     // TODO: Validate target, create distribution record, push to anki-cloud
     format::json(ApiResponse {
         success: true,
-        message: format!("Addon {} distributed to {}:{}", addon_id, payload.target_type, payload.target_id),
+        message: format!(
+            "Addon {} distributed to {}:{}",
+            addon_id, payload.target_type, payload.target_id
+        ),
     })
 }
 
@@ -119,7 +128,10 @@ pub async fn distribute_addon(
     ),
     tag = TAG
 )]
-pub async fn get_addon_config(_ctx: State<AppContext>, Path(addon_id): Path<String>) -> Result<Response> {
+pub async fn get_addon_config(
+    _ctx: State<AppContext>,
+    Path(addon_id): Path<String>,
+) -> Result<Response> {
     tracing::info!("Fetching config for addon: {}", addon_id);
 
     // TODO: SeaORM query for addon config JSON

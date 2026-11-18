@@ -23,7 +23,7 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(TeacherInvites::Table)
                     .col(string(TeacherInvites::Id).not_null().primary_key())
-                    .col(big_integer(TeacherInvites::UserId).not_null())          // FK → users.id
+                    .col(big_integer(TeacherInvites::UserId).not_null()) // FK → users.id
                     .col(string(TeacherInvites::School).not_null())
                     .col(string_null(TeacherInvites::Community))
                     .col(string_null(TeacherInvites::Role))

@@ -1,0 +1,14 @@
+slug: it-core-vocabulary
+subject_tag: subject::italian
+title:
+  en: AnkiTov — Italian Core Vocabulary
+  it: AnkiTov — Vocabolario fondamentale italiano
+deck_id:
+  it: 1699412247022
+description:
+  en: Grades 7-12 Italian core vocabulary that runs at the student's own pace, beside teaching, not inside it. Practice previously taught words to close gaps. SRS works. Word selection follows the Indicazioni Nazionali per il curricolo (DM 254/2012); definitions and example sentences are model-drafted and pending native-speaker review. NLM-generated, text only.
+  it: Vocabolario fondamentale italiano per le classi 7-12, che procede al ritmo dello studente, accanto all'insegnamento, non al suo interno. Ripete le parole già studiate per colmare le lacune. SRS works. La selezione delle parole segue le Indicazioni Nazionali per il curricolo (DM 254/2012); definizioni e frasi di esempio sono generate da modello e in attesa di revisione da parte di un madrelingua. NLM-generato, solo testo.
+expected_census:
+  basic: 140
+  cloze: 61
+  type_in: 0

@@ -9,7 +9,7 @@
 //!
 //! Run with: `cargo nextest run -p backend --test chatbox_actions_test`
 
-use backend::models::entities as entities;
+use backend::models::entities;
 use loco_rs::testing;
 use sea_orm::{entity::prelude::*, ActiveValue};
 use serde_json::{json, Value};
@@ -21,7 +21,6 @@ fn json_body(text: &str) -> Value {
     }
 }
 
-
 /// Mint a valid `teacher` JWT for the chatbox action tests. The management
 /// endpoints are auth-gated (Phase 0), so every management request in this
 /// harness must carry a valid teacher/admin bearer token.
@@ -29,7 +28,6 @@ fn teacher_token() -> String {
     backend::services::auth::encode_token(999, "teacher", "teacher-morris@example.edu", 86400)
         .expect("minting teacher token for chatbox actions test must succeed")
 }
-
 
 fn multipart_upload_body(filename: &str, data: &[u8]) -> (String, Vec<u8>) {
     let boundary = "ankitov-test-bnd-999";
@@ -136,34 +134,38 @@ async fn start_anki_mock(new_deck: String) -> wiremock::MockServer {
     wiremock::Mock::given(wiremock::matchers::body_partial_json(
         serde_json::json!({"action": "deckNames"}),
     ))
-    .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
-        serde_json::json!({"result": ["Default"], "error": null}),
-    ))
+    .respond_with(
+        wiremock::ResponseTemplate::new(200)
+            .set_body_json(serde_json::json!({"result": ["Default"], "error": null})),
+    )
     .up_to_n_times(1)
     .mount(&server)
     .await;
     wiremock::Mock::given(wiremock::matchers::body_partial_json(
         serde_json::json!({"action": "importPackage"}),
     ))
-    .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
-        serde_json::json!({"result": true, "error": null}),
-    ))
+    .respond_with(
+        wiremock::ResponseTemplate::new(200)
+            .set_body_json(serde_json::json!({"result": true, "error": null})),
+    )
     .mount(&server)
     .await;
     wiremock::Mock::given(wiremock::matchers::body_partial_json(
         serde_json::json!({"action": "findCards"}),
     ))
-    .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
-        serde_json::json!({"result": [201, 202], "error": null}),
-    ))
+    .respond_with(
+        wiremock::ResponseTemplate::new(200)
+            .set_body_json(serde_json::json!({"result": [201, 202], "error": null})),
+    )
     .mount(&server)
     .await;
     wiremock::Mock::given(wiremock::matchers::body_partial_json(
         serde_json::json!({"action": "deckNames"}),
     ))
-    .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
-        serde_json::json!({"result": ["Default", new_deck], "error": null}),
-    ))
+    .respond_with(
+        wiremock::ResponseTemplate::new(200)
+            .set_body_json(serde_json::json!({"result": ["Default", new_deck], "error": null})),
+    )
     .mount(&server)
     .await;
     server
@@ -178,7 +180,10 @@ fn set_anki_port(server: &wiremock::MockServer) {
 /// Redirect persisted uploads to a unique temp dir (see
 /// management_decks_test.rs::set_unique_upload_dir).
 fn set_unique_upload_dir() {
-    let dir = std::env::temp_dir().join(format!("ankitov-chatbox-upload-test-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!(
+        "ankitov-chatbox-upload-test-{}",
+        std::process::id()
+    ));
     let _ = std::fs::remove_dir_all(&dir);
     std::env::set_var("ANKITOV_UPLOAD_DIR", dir);
 }
@@ -256,7 +261,10 @@ async fn test_create_custom_sets_and_profiles() {
             }))
             .await;
         assert_eq!(track1_resp.status_code(), 200);
-        let t1_id = json_body(&track1_resp.text())["id"].as_str().unwrap().to_string();
+        let t1_id = json_body(&track1_resp.text())["id"]
+            .as_str()
+            .unwrap()
+            .to_string();
 
         let track2_resp = server
             .post("/api/v1/management/tracks")
@@ -271,7 +279,10 @@ async fn test_create_custom_sets_and_profiles() {
             }))
             .await;
         assert_eq!(track2_resp.status_code(), 200);
-        let t2_id = json_body(&track2_resp.text())["id"].as_str().unwrap().to_string();
+        let t2_id = json_body(&track2_resp.text())["id"]
+            .as_str()
+            .unwrap()
+            .to_string();
 
         // Step 2: Create a composite Track Profile (Remediation Capsule Set)
         let profile_resp = server
@@ -286,18 +297,25 @@ async fn test_create_custom_sets_and_profiles() {
             }))
             .await;
         assert_eq!(profile_resp.status_code(), 200);
-        let profile_id = json_body(&profile_resp.text())["id"].as_str().unwrap().to_string();
+        let profile_id = json_body(&profile_resp.text())["id"]
+            .as_str()
+            .unwrap()
+            .to_string();
 
         // Step 3: Assign both tracks to the profile
         let a1 = server
-            .post(&format!("/api/v1/management/track-profiles/{profile_id}/tracks"))
+            .post(&format!(
+                "/api/v1/management/track-profiles/{profile_id}/tracks"
+            ))
             .add_header("Authorization", format!("Bearer {}", teacher_token()))
             .json(&json!({"track_id": t1_id, "sort_order": 1}))
             .await;
         assert_eq!(a1.status_code(), 200);
 
         let a2 = server
-            .post(&format!("/api/v1/management/track-profiles/{profile_id}/tracks"))
+            .post(&format!(
+                "/api/v1/management/track-profiles/{profile_id}/tracks"
+            ))
             .add_header("Authorization", format!("Bearer {}", teacher_token()))
             .json(&json!({"track_id": t2_id, "sort_order": 2}))
             .await;

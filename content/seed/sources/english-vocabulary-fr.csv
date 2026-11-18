@@ -1,7 +1,7 @@
 note_type,concept_id,unit,grades,front,back,extra,pack_id,track,difficulty
-basic,school,01,7 8 9,school,école (f.) I go to school every morning at eight o'clock.,School Environment,english-vocabulary,languages,core
-basic,teacher,01,7 8 9,teacher,"professeur (m./f.), enseignant(e) Our English teacher explains the lesson clearly.",School Staff,english-vocabulary,languages,core
-basic,homework,01,7 8 9,homework,devoirs (m. pl.) I always do my homework before dinner.,Study Habits,english-vocabulary,languages,core
+cloze,school,01,7 8 9,école (f.) I go to {{c1::school}} every morning at eight o'clock.,school,School Environment,english-vocabulary,languages,core
+cloze,teacher,01,7 8 9,"professeur (m./f.), enseignant(e) Our English {{c1::teacher}} explains the lesson clearly.",teacher,School Staff,english-vocabulary,languages,core
+cloze,homework,01,7 8 9,pl.) I always do my {{c1::homework}} before dinner.,homework,Study Habits,english-vocabulary,languages,core
 basic,book,01,7 8 9,book,livre (m.) Please open your book on page twenty.,School Supplies,english-vocabulary,languages,core
 basic,friend,01,7 8 9,friend,"ami (m.), amie (f.) She plays soccer with her best friend at lunch.",Interpersonal Relationships,english-vocabulary,languages,core
 basic,family,01,7 8 9,family,famille (f.) My family lives in a small house near Paris.,Family Life,english-vocabulary,languages,core

@@ -48,7 +48,12 @@ impl MigrationTrait for Migration {
             .create_table(
                 Table::create()
                     .table(Producers::Table)
-                    .col(integer(Producers::Id).not_null().auto_increment().primary_key())
+                    .col(
+                        integer(Producers::Id)
+                            .not_null()
+                            .auto_increment()
+                            .primary_key(),
+                    )
                     .col(string(Producers::Name).not_null())
                     .col(string(Producers::Email).not_null())
                     .col(string_null(Producers::ContactNote))
@@ -66,7 +71,12 @@ impl MigrationTrait for Migration {
             .create_table(
                 Table::create()
                     .table(ProducerDecks::Table)
-                    .col(integer(ProducerDecks::Id).not_null().auto_increment().primary_key())
+                    .col(
+                        integer(ProducerDecks::Id)
+                            .not_null()
+                            .auto_increment()
+                            .primary_key(),
+                    )
                     .col(integer(ProducerDecks::ProducerId).not_null())
                     .col(integer(ProducerDecks::DeckId).not_null())
                     .col(string(ProducerDecks::Status).not_null().default("pending"))

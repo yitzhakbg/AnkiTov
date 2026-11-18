@@ -14,7 +14,7 @@
 //!   the swap boundary is defined as "fsrs-rs satisfies every ordering
 //!   invariant the in-house model guarantees, plus real memory-state dynamics".
 
-use fsrs::{current_retrievability, FSRS6_DEFAULT_DECAY, FSRS, MemoryState, NextStates};
+use fsrs::{current_retrievability, MemoryState, NextStates, FSRS, FSRS6_DEFAULT_DECAY};
 
 /// Tolerance for doc-example anchors: fsrs-rs docs round to 4-7 decimal places.
 const ANCHOR_TOL: f32 = 5e-4;
@@ -22,7 +22,11 @@ const ANCHOR_TOL: f32 = 5e-4;
 const INTERVAL_RTOL: f32 = 1e-3;
 
 fn assert_anchor(actual: f32, expected: f32, what: &str) {
-    let tol = if expected.abs() > 1.0 { expected.abs() * INTERVAL_RTOL } else { ANCHOR_TOL };
+    let tol = if expected.abs() > 1.0 {
+        expected.abs() * INTERVAL_RTOL
+    } else {
+        ANCHOR_TOL
+    };
     assert!(
         (actual - expected).abs() <= tol,
         "{what}: expected {expected}, got {actual} (tol {tol})"
@@ -59,11 +63,26 @@ fn reference_anchor_first_transition_matches_fsrs_docs() {
 /// space: new-ish, mature, struggling, strong).
 fn learned_states() -> Vec<MemoryState> {
     vec![
-        MemoryState { stability: 0.5, difficulty: 7.0 },
-        MemoryState { stability: 2.3065, difficulty: 2.118104 },
-        MemoryState { stability: 12.0, difficulty: 5.5 },
-        MemoryState { stability: 45.0, difficulty: 2.5 },
-        MemoryState { stability: 120.0, difficulty: 8.5 },
+        MemoryState {
+            stability: 0.5,
+            difficulty: 7.0,
+        },
+        MemoryState {
+            stability: 2.3065,
+            difficulty: 2.118104,
+        },
+        MemoryState {
+            stability: 12.0,
+            difficulty: 5.5,
+        },
+        MemoryState {
+            stability: 45.0,
+            difficulty: 2.5,
+        },
+        MemoryState {
+            stability: 120.0,
+            difficulty: 8.5,
+        },
     ]
 }
 
@@ -87,12 +106,30 @@ fn invariant_rating_ordering_stability_difficulty_interval() {
             if elapsed == 0 {
                 // Same-day: again < hard <= good < easy (hard/good may tie —
                 // short-term clamp leaves both at the pre-review stability).
-                assert!(ns.again.memory.stability < ns.hard.memory.stability, "again < hard (stability): {state:?}");
-                assert!(ns.hard.memory.stability <= ns.good.memory.stability, "hard <= good (stability): {state:?}");
-                assert!(ns.good.memory.stability < ns.easy.memory.stability, "good < easy (stability): {state:?}");
-                assert!(ns.again.interval < ns.hard.interval, "again < hard (interval): {state:?}");
-                assert!(ns.hard.interval <= ns.good.interval, "hard <= good (interval): {state:?}");
-                assert!(ns.good.interval < ns.easy.interval, "good < easy (interval): {state:?}");
+                assert!(
+                    ns.again.memory.stability < ns.hard.memory.stability,
+                    "again < hard (stability): {state:?}"
+                );
+                assert!(
+                    ns.hard.memory.stability <= ns.good.memory.stability,
+                    "hard <= good (stability): {state:?}"
+                );
+                assert!(
+                    ns.good.memory.stability < ns.easy.memory.stability,
+                    "good < easy (stability): {state:?}"
+                );
+                assert!(
+                    ns.again.interval < ns.hard.interval,
+                    "again < hard (interval): {state:?}"
+                );
+                assert!(
+                    ns.hard.interval <= ns.good.interval,
+                    "hard <= good (interval): {state:?}"
+                );
+                assert!(
+                    ns.good.interval < ns.easy.interval,
+                    "good < easy (interval): {state:?}"
+                );
             } else {
                 // Long-term formula: strict ordering across all four ratings.
                 let quad = [&ns.again, &ns.hard, &ns.good, &ns.easy];
@@ -129,9 +166,21 @@ fn invariant_success_never_loses_stability_again_always_drops() {
     let fsrs = FSRS::default();
     for state in learned_states() {
         let ns = fsrs.next_states(Some(state), 0.9, 1).unwrap();
-        assert!(ns.good.memory.stability >= state.stability, "good must not lose stability: {state:?} -> {}", ns.good.memory.stability);
-        assert!(ns.easy.memory.stability >= state.stability, "easy must not lose stability: {state:?} -> {}", ns.easy.memory.stability);
-        assert!(ns.again.memory.stability < state.stability, "again must drop stability: {state:?} -> {}", ns.again.memory.stability);
+        assert!(
+            ns.good.memory.stability >= state.stability,
+            "good must not lose stability: {state:?} -> {}",
+            ns.good.memory.stability
+        );
+        assert!(
+            ns.easy.memory.stability >= state.stability,
+            "easy must not lose stability: {state:?} -> {}",
+            ns.easy.memory.stability
+        );
+        assert!(
+            ns.again.memory.stability < state.stability,
+            "again must drop stability: {state:?} -> {}",
+            ns.again.memory.stability
+        );
     }
 }
 
@@ -144,7 +193,9 @@ fn invariant_difficulty_bounded_on_long_walk() {
     let mut x: u64 = 0x2545F4914F6CDD1D;
     let mut state: Option<MemoryState> = None;
     for step in 0..2000 {
-        x = x.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        x = x
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
         let rating = 1 + (x >> 33) % 4; // 1..=4
         let elapsed = (x >> 20) % 14; // 0..=13 days
         let ns = fsrs
@@ -157,14 +208,25 @@ fn invariant_difficulty_bounded_on_long_walk() {
             _ => ns.easy,
         };
         let m = next.memory;
-        assert!(m.stability.is_finite() && m.difficulty.is_finite(), "non-finite state at step {step}: {m:?}");
+        assert!(
+            m.stability.is_finite() && m.difficulty.is_finite(),
+            "non-finite state at step {step}: {m:?}"
+        );
         assert!(
             (1.0..=10.0).contains(&m.difficulty),
             "difficulty out of [1,10] at step {step}: {}",
             m.difficulty
         );
-        assert!(m.stability > 0.0, "stability must stay positive at step {step}: {}", m.stability);
-        assert!(next.interval.is_finite() && next.interval > 0.0, "bad interval at step {step}: {}", next.interval);
+        assert!(
+            m.stability > 0.0,
+            "stability must stay positive at step {step}: {}",
+            m.stability
+        );
+        assert!(
+            next.interval.is_finite() && next.interval > 0.0,
+            "bad interval at step {step}: {}",
+            next.interval
+        );
         state = Some(m);
     }
 }
@@ -176,12 +238,18 @@ fn invariant_difficulty_bounded_on_long_walk() {
 fn invariant_retrievability_monotone_decay_and_half_life() {
     for state in learned_states() {
         let r0 = current_retrievability(state, 0.0, FSRS6_DEFAULT_DECAY);
-        assert!((r0 - 1.0).abs() < 1e-6, "recall at elapsed 0 must be 1.0, got {r0}");
+        assert!(
+            (r0 - 1.0).abs() < 1e-6,
+            "recall at elapsed 0 must be 1.0, got {r0}"
+        );
         let mut prev = r0;
         for d in [1.0f32, 2.0, 5.0, 10.0, 30.0, 90.0, 365.0] {
             let r = current_retrievability(state, d, FSRS6_DEFAULT_DECAY);
             assert!(r > 0.0 && r <= 1.0, "recall out of (0,1] at {d}d: {r}");
-            assert!(r < prev, "recall must decrease with elapsed: {d}d {r} <= prev {prev}");
+            assert!(
+                r < prev,
+                "recall must decrease with elapsed: {d}d {r} <= prev {prev}"
+            );
             prev = r;
         }
         // Half-life: R(stability) must sit at 0.9 under the FSRS-6 decay.
@@ -233,19 +301,33 @@ fn invariant_transition_is_deterministic_and_copy_safe() {
 fn recall_ordering_agrees_with_in_house_half_life_model() {
     // (overdue_days, ivl) pairs spanning the sorter's operating range.
     let pairs: Vec<(i32, i64)> = vec![
-        (1, 1), (1, 3), (2, 3), (1, 7), (5, 7), (3, 10), (10, 10),
-        (7, 21), (20, 21), (15, 30), (40, 30), (30, 90), (100, 90), (200, 365),
+        (1, 1),
+        (1, 3),
+        (2, 3),
+        (1, 7),
+        (5, 7),
+        (3, 10),
+        (10, 10),
+        (7, 21),
+        (20, 21),
+        (15, 30),
+        (40, 30),
+        (30, 90),
+        (100, 90),
+        (200, 365),
     ];
     let recall_fsrs = |overdue: i32, ivl: i64| -> f32 {
         current_retrievability(
-            MemoryState { stability: ivl as f32, difficulty: 5.0 },
+            MemoryState {
+                stability: ivl as f32,
+                difficulty: 5.0,
+            },
             overdue as f32,
             FSRS6_DEFAULT_DECAY,
         )
     };
-    let recall_in_house = |overdue: i32, ivl: i64| -> f64 {
-        0.90 * 0.5f64.powf(overdue as f64 / ivl.max(1) as f64)
-    };
+    let recall_in_house =
+        |overdue: i32, ivl: i64| -> f64 { 0.90 * 0.5f64.powf(overdue as f64 / ivl.max(1) as f64) };
     for i in 0..pairs.len() {
         for j in (i + 1)..pairs.len() {
             let (a, b) = (pairs[i], pairs[j]);

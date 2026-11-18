@@ -25,15 +25,14 @@
 
 use std::path::Path;
 
-use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter};
+use sea_orm::{
+    ActiveModelTrait, ActiveValue, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait,
+    QueryFilter,
+};
 
 use crate::models::entities::{
-    capsule_session as cs_entity,
-    profile_assignment as pa_entity,
-    track as track_entity,
-    track_profile as tp_entity,
-    track_profile_track as tpt_entity,
-    user as user_entity,
+    capsule_session as cs_entity, profile_assignment as pa_entity, track as track_entity,
+    track_profile as tp_entity, track_profile_track as tpt_entity, user as user_entity,
 };
 
 use crate::services::audit_logger;
@@ -255,14 +254,8 @@ pub async fn generate_capsule(
     let anki2_path = Path::new(&request.anki2_path);
     let sort_result = match fsrs_sort::scheduler_mode() {
         fsrs_sort::SchedulerMode::FsrsRs => {
-            fsrs_sort::fetch_and_sort_cached(
-                db,
-                &request.student_id,
-                anki2_path,
-                &track_tags,
-                30,
-            )
-            .await?
+            fsrs_sort::fetch_and_sort_cached(db, &request.student_id, anki2_path, &track_tags, 30)
+                .await?
         }
         fsrs_sort::SchedulerMode::InHouse => {
             fsrs_sort::fetch_and_sort(anki2_path, &track_tags, 30)?
@@ -274,7 +267,8 @@ pub async fn generate_capsule(
     }
 
     // ── Step 4: Compute capsule size ─────────────────────────────────
-    let n_value = request.n_value
+    let n_value = request
+        .n_value
         .or(profile.n_value)
         .unwrap_or(capsule_slicer::DEFAULT_N_VALUE);
     let session_duration = match request.session_duration_minutes {
@@ -308,11 +302,8 @@ pub async fn generate_capsule(
         .map(|c| (c.card_id, c.track_tag.clone()))
         .collect();
 
-    let slice = capsule_slicer::slice_capsule(
-        &ranked_pairs,
-        &sort_result.track_counts,
-        target_size,
-    );
+    let slice =
+        capsule_slicer::slice_capsule(&ranked_pairs, &sort_result.track_counts, target_size);
 
     // ── Step 6: Persist CapsuleSession ───────────────────────────────
     let session_id = uuid::Uuid::new_v4().to_string();

@@ -77,10 +77,7 @@ pub struct SessionStatus {
 #[derive(Debug, thiserror::Error)]
 pub enum DeliveryError {
     #[error("addon unreachable at {url}: {source}")]
-    Unreachable {
-        url: String,
-        source: reqwest::Error,
-    },
+    Unreachable { url: String, source: reqwest::Error },
 
     #[error("addon returned error: {0}")]
     AddonError(String),
@@ -167,9 +164,8 @@ impl CapsuleDelivery {
     /// Unmatched students with a populated registry are logged loudly so
     /// operators catch missing registry entries.
     pub fn for_student(profile_name: &str) -> Self {
-        let registry = parse_endpoint_registry(
-            std::env::var("ANKITOV_CAPSULE_ENDPOINTS").ok().as_deref(),
-        );
+        let registry =
+            parse_endpoint_registry(std::env::var("ANKITOV_CAPSULE_ENDPOINTS").ok().as_deref());
         match registry.as_slice() {
             [] => Self::from_env(),
             [(name, url)] if name.is_empty() => Self::from_base_url(url), // bare URL: any student
@@ -256,13 +252,10 @@ impl CapsuleDelivery {
 
         match response.status.as_str() {
             "started" | "replaced" | "empty" => Ok(response),
-            "error" => Err(DeliveryError::AddonError(
-                format!(
-                    "addon rejected session {}: {:?}",
-                    response.session_uuid,
-                    response.status
-                )
-            )),
+            "error" => Err(DeliveryError::AddonError(format!(
+                "addon rejected session {}: {:?}",
+                response.session_uuid, response.status
+            ))),
             other => Err(DeliveryError::UnexpectedStatus(other.to_string())),
         }
     }
@@ -275,21 +268,16 @@ impl CapsuleDelivery {
     pub async fn get_status(&self) -> Result<SessionStatus, DeliveryError> {
         let url = format!("{}/status", self.base_url);
 
-        let resp = self
-            .http
-            .get(&url)
-            .send()
-            .await
-            .map_err(|e| {
-                if e.is_connect() || e.is_timeout() {
-                    DeliveryError::Unreachable {
-                        url: url.clone(),
-                        source: e,
-                    }
-                } else {
-                    DeliveryError::Http(e)
+        let resp = self.http.get(&url).send().await.map_err(|e| {
+            if e.is_connect() || e.is_timeout() {
+                DeliveryError::Unreachable {
+                    url: url.clone(),
+                    source: e,
                 }
-            })?;
+            } else {
+                DeliveryError::Http(e)
+            }
+        })?;
 
         let status: SessionStatus = resp.json().await?;
         Ok(status)
@@ -302,21 +290,16 @@ impl CapsuleDelivery {
     pub async fn cancel_session(&self) -> Result<serde_json::Value, DeliveryError> {
         let url = format!("{}/session", self.base_url);
 
-        let resp = self
-            .http
-            .delete(&url)
-            .send()
-            .await
-            .map_err(|e| {
-                if e.is_connect() || e.is_timeout() {
-                    DeliveryError::Unreachable {
-                        url: url.clone(),
-                        source: e,
-                    }
-                } else {
-                    DeliveryError::Http(e)
+        let resp = self.http.delete(&url).send().await.map_err(|e| {
+            if e.is_connect() || e.is_timeout() {
+                DeliveryError::Unreachable {
+                    url: url.clone(),
+                    source: e,
                 }
-            })?;
+            } else {
+                DeliveryError::Http(e)
+            }
+        })?;
 
         let body: serde_json::Value = resp.json().await?;
         Ok(body)
@@ -371,7 +354,10 @@ mod tests {
     #[test]
     fn test_registry_parse_bare_url() {
         let reg = parse_endpoint_registry(Some("http://host.docker.internal:18765"));
-        assert_eq!(reg, vec![("".into(), "http://host.docker.internal:18765".into())]);
+        assert_eq!(
+            reg,
+            vec![("".into(), "http://host.docker.internal:18765".into())]
+        );
     }
 
     #[test]
@@ -401,7 +387,10 @@ mod tests {
     #[test]
     fn test_for_student_bare_url_applies_to_all() {
         let _g = ENV_LOCK.lock().unwrap();
-        std::env::set_var("ANKITOV_CAPSULE_ENDPOINTS", "http://host.docker.internal:18765");
+        std::env::set_var(
+            "ANKITOV_CAPSULE_ENDPOINTS",
+            "http://host.docker.internal:18765",
+        );
         let c = CapsuleDelivery::for_student("anyone");
         assert_eq!(c.base_url, "http://host.docker.internal:18765");
         std::env::remove_var("ANKITOV_CAPSULE_ENDPOINTS");

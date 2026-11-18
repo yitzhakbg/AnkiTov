@@ -300,9 +300,15 @@ pub struct ListDeckQuery {
     pub target_id: Option<String>,
 }
 
-fn default_page() -> u32 { 1 }
-fn default_per_page() -> u32 { 20 }
-fn default_session_duration() -> i32 { 10 }
+fn default_page() -> u32 {
+    1
+}
+fn default_per_page() -> u32 {
+    20
+}
+fn default_session_duration() -> i32 {
+    10
+}
 
 /// Query params for statistics filtering.
 #[derive(Debug, Deserialize, ToSchema)]
@@ -567,8 +573,12 @@ pub struct GenerateCapsuleRequest {
     pub session_duration_minutes: Option<i32>,
 }
 
-fn default_target_retention() -> f64 { 0.80 }
-fn default_n_value() -> i32 { 3 }
+fn default_target_retention() -> f64 {
+    0.80
+}
+fn default_n_value() -> i32 {
+    3
+}
 
 // =============================================================================
 // RIG AI CHATBOX — Natural Language Queries

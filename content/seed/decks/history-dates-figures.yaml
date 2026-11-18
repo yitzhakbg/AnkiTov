@@ -1,0 +1,30 @@
+slug: history-dates-figures
+subject_tag: subject::history
+title:
+  en: 'AnkiTov Pilot — History: Dates & Figures'
+  he: 'AnkiTov Pilot — היסטוריה: תאריכים ואישים'
+  fr: 'AnkiTov Pilot — Histoire : dates et figures'
+  es: 'AnkiTov Pilot — Historia: Fechas y Cifras'
+deck_id:
+  en: 1699412247009
+  he: 1699412247010
+  fr: 1699412247011
+  es: 1699412247015
+description:
+  en: Grades 7-9 history dates and figures that run at their own pace, beside teaching, not inside it. Revisit previously taught milestones to close gaps. SRS works. Self-authored Phase 0 seed; text only.
+  he: תאריכים ואישים בהיסטוריה לכיתות ז-ט שרצים בקצב עצמאי, לצד ההוראה ולא בתוכה. חזרה על אבני דרך שהונהגו קודם לכן כדי לסגור פערים. SRS works. פיוט פאזה 0 שנכתב על ידנו; טקסט בלבד.
+  fr: Dates et figures d'histoire pour les classes 7-9 qui suivent leur propre rythme, à côté de l'enseignement, pas dedans. Revoyez les étapes clés apprises auparavant pour combler les lacunes. SRS works. Graine Phase 0 auto-écrite ; texte uniquement.
+  es: Fechas y cifras de historia para los grados 7-9 que avanzan a su propio ritmo, junto a la enseñanza, no dentro de ella. Repasa los hitos ya vistos para cerrar brechas. SRS works. Semilla Phase 0 propia; solo texto. (Pack es vía NLM + compilador nlm_pack_to_csv.)
+expected_census:
+  basic: 73
+  cloze: 32
+  type_in: 0
+expected_census_by_locale:
+  he:
+    basic: 10
+    cloze: 10
+    type_in: 0
+  es:
+    basic: 10
+    cloze: 10
+    type_in: 0

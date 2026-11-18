@@ -14,8 +14,8 @@
 use backend::models::entities::fsrs_memory_state::{self, Entity as FsrsMemoryState};
 use backend::services::fsrs_sort::{fetch_and_sort, fetch_and_sort_cached};
 use backend::services::fsrs_state::{
-    CardSchedFacts, SnapshotData, StateSource, derive_states_from_snapshot, ensure_states,
-    extract_snapshot,
+    derive_states_from_snapshot, ensure_states, extract_snapshot, CardSchedFacts, SnapshotData,
+    StateSource,
 };
 use sea_orm::{ColumnTrait, Database, DatabaseConnection, EntityTrait, QueryFilter};
 use sea_orm_migration::MigratorTrait;
@@ -29,7 +29,9 @@ use std::collections::HashMap;
 /// `property_audit_trail_test.rs` — one per test, safe under nextest).
 async fn fresh_db() -> DatabaseConnection {
     let db = Database::connect("sqlite::memory:").await.expect("connect");
-    backend::migrations::Migrator::up(&db, None).await.expect("migrate");
+    backend::migrations::Migrator::up(&db, None)
+        .await
+        .expect("migrate");
     db
 }
 
@@ -49,10 +51,16 @@ fn snapshot_with_revlog(card_id: i64, rows: &[(i64, i64, i64)]) -> SnapshotData 
     SnapshotData {
         web_rows: Default::default(),
         card_ids: vec![card_id],
-        revlog_heads: head.map(|h| HashMap::from([(card_id, h)])).unwrap_or_default(),
+        revlog_heads: head
+            .map(|h| HashMap::from([(card_id, h)]))
+            .unwrap_or_default(),
         sched_facts: HashMap::from([(
             card_id,
-            CardSchedFacts { card_type: 2, ivl: 10, factor: 2500 },
+            CardSchedFacts {
+                card_type: 2,
+                ivl: 10,
+                factor: 2500,
+            },
         )]),
         revlog_rows: HashMap::from([(card_id, rows.to_vec())]),
     }
@@ -96,8 +104,9 @@ fn more_successful_reviews_grow_stability() {
         (review_ms(20), 3, 0),
         (review_ms(10), 3, 0),
     ];
-    let states = derive_states_from_snapshot(&snapshot_with_revlog(1, &one)
-        .merged_with(&snapshot_with_revlog(2, &four)));
+    let states = derive_states_from_snapshot(
+        &snapshot_with_revlog(1, &one).merged_with(&snapshot_with_revlog(2, &four)),
+    );
     let s1 = states.get(&1).expect("one-review state").stability;
     let s4 = states.get(&2).expect("four-review state").stability;
     assert!(
@@ -110,10 +119,7 @@ fn more_successful_reviews_grow_stability() {
 fn cram_rows_and_out_of_range_ease_are_skipped() {
     // Only cram rows (type 3) and ease-0 rows → nothing usable → the card
     // falls through to the SM-2 fallback (its facts are review-shaped).
-    let cram_only = vec![
-        (review_ms(10), 0, 3),
-        (review_ms(5), 3, 3),
-    ];
+    let cram_only = vec![(review_ms(10), 0, 3), (review_ms(5), 3, 3)];
     let states = derive_states_from_snapshot(&snapshot_with_revlog(7, &cram_only));
     let state = states.get(&7).expect("fallback state");
     assert_eq!(state.source, StateSource::Sm2, "cram-only history → SM-2");
@@ -137,7 +143,11 @@ fn sm2_fallback_uses_review_card_facts() {
         revlog_heads: HashMap::new(),
         sched_facts: HashMap::from([(
             42,
-            CardSchedFacts { card_type: 2, ivl: 10, factor: 2500 },
+            CardSchedFacts {
+                card_type: 2,
+                ivl: 10,
+                factor: 2500,
+            },
         )]),
         revlog_rows: HashMap::new(),
     };
@@ -159,7 +169,11 @@ fn sm2_fallback_rejects_out_of_range_factors() {
         revlog_heads: HashMap::new(),
         sched_facts: HashMap::from([(
             43,
-            CardSchedFacts { card_type: 2, ivl: 10, factor: 100 },
+            CardSchedFacts {
+                card_type: 2,
+                ivl: 10,
+                factor: 100,
+            },
         )]),
         revlog_rows: HashMap::new(),
     };
@@ -178,7 +192,11 @@ fn first_transition_for_learning_cards() {
         revlog_heads: HashMap::new(),
         sched_facts: HashMap::from([(
             44,
-            CardSchedFacts { card_type: 1, ivl: 0, factor: 0 },
+            CardSchedFacts {
+                card_type: 1,
+                ivl: 0,
+                factor: 0,
+            },
         )]),
         revlog_rows: HashMap::new(),
     };
@@ -206,7 +224,10 @@ async fn seed_row(db: &DatabaseConnection, student: &str, card: i64, head: Optio
         revlog_head: sea_orm::Set(head),
         updated_at: sea_orm::Set(12_345),
     };
-    FsrsMemoryState::insert(model).exec(db).await.expect("seed row");
+    FsrsMemoryState::insert(model)
+        .exec(db)
+        .await
+        .expect("seed row");
 }
 
 async fn row_for(
@@ -233,7 +254,9 @@ async fn ensure_states_reuses_fresh_cache_without_rewrite() {
     // (sentinel updated_at survives).
     seed_row(&db, "alice", 101, Some(head)).await;
 
-    let states = ensure_states(&db, "alice", &mut snapshot).await.expect("ensure");
+    let states = ensure_states(&db, "alice", &mut snapshot)
+        .await
+        .expect("ensure");
     let state = states.get(&101).expect("cached state served");
     assert_eq!(state.stability, 3.25);
     assert_eq!(state.difficulty, 5.5);
@@ -252,7 +275,9 @@ async fn ensure_states_refreshes_stale_rows() {
     // Stale: persisted head is one review behind the snapshot.
     seed_row(&db, "alice", 101, Some(head - DAY_MS)).await;
 
-    let states = ensure_states(&db, "alice", &mut snapshot).await.expect("ensure");
+    let states = ensure_states(&db, "alice", &mut snapshot)
+        .await
+        .expect("ensure");
     let state = states.get(&101).expect("refreshed state");
     assert_eq!(state.revlog_head, Some(head), "stale row must re-derive");
     assert_eq!(state.source, StateSource::Revlog);
@@ -272,7 +297,9 @@ async fn ensure_states_isolates_students() {
     // Student A has a fresh cached row; student B has nothing.
     seed_row(&db, "alice", 101, Some(head)).await;
 
-    let states_b = ensure_states(&db, "bob", &mut snapshot).await.expect("ensure B");
+    let states_b = ensure_states(&db, "bob", &mut snapshot)
+        .await
+        .expect("ensure B");
     let state_b = states_b.get(&101).expect("B state derived fresh");
     assert_eq!(state_b.source, StateSource::Revlog);
     assert_ne!(
@@ -282,7 +309,10 @@ async fn ensure_states_isolates_students() {
 
     // A's row is untouched by B's resolution.
     let row_a = row_for(&db, "alice", 101).await.expect("A row exists");
-    assert_eq!(row_a.updated_at, 12_345, "A's fresh row must not be rewritten");
+    assert_eq!(
+        row_a.updated_at, 12_345,
+        "A's fresh row must not be rewritten"
+    );
     assert_eq!(row_a.stability, 3.25);
 
     // And B now has exactly one row of their own.
@@ -296,7 +326,9 @@ async fn ensure_states_derives_and_persists_missing_cards() {
     let head = review_ms(5);
     let mut snapshot = snapshot_with_revlog(101, &[(review_ms(30), 3, 0), (head, 3, 0)]);
 
-    let states = ensure_states(&db, "alice", &mut snapshot).await.expect("ensure");
+    let states = ensure_states(&db, "alice", &mut snapshot)
+        .await
+        .expect("ensure");
     let state = states.get(&101).expect("derived state");
     assert_eq!(state.source, StateSource::Revlog);
     assert_eq!(state.revlog_head, Some(head));
@@ -435,8 +467,9 @@ async fn fetch_and_sort_cached_end_to_end() {
     );
 
     let tags = vec!["vocab".to_string(), "grammar".to_string()];
-    let result =
-        fetch_and_sort_cached(&db, "student-e2e", &path, &tags, 30).await.expect("cached sort");
+    let result = fetch_and_sort_cached(&db, "student-e2e", &path, &tags, 30)
+        .await
+        .expect("cached sort");
 
     // All three cards admitted and ranked.
     assert_eq!(result.ranked.len(), 3, "all three cards must be admitted");
@@ -467,8 +500,9 @@ async fn fetch_and_sort_cached_end_to_end() {
 
     // Second call: everything is cached now — same result, no re-derivation
     // errors, and the rows are unchanged (fresh cache hit).
-    let again =
-        fetch_and_sort_cached(&db, "student-e2e", &path, &tags, 30).await.expect("second sort");
+    let again = fetch_and_sort_cached(&db, "student-e2e", &path, &tags, 30)
+        .await
+        .expect("second sort");
     assert_eq!(again.ranked.len(), 3);
     for (a, b) in result.ranked.iter().zip(again.ranked.iter()) {
         assert_eq!(a.card_id, b.card_id, "cached pass must reproduce ordering");
@@ -518,7 +552,10 @@ async fn cached_and_in_house_schedulers_admit_the_same_cards() {
     let ids_in_house: std::collections::BTreeSet<i64> =
         in_house.ranked.iter().map(|c| c.card_id).collect();
     let ids_fsrs: std::collections::BTreeSet<i64> = fsrs.ranked.iter().map(|c| c.card_id).collect();
-    assert_eq!(ids_in_house, ids_fsrs, "schedulers must admit the same cards");
+    assert_eq!(
+        ids_in_house, ids_fsrs,
+        "schedulers must admit the same cards"
+    );
     assert_eq!(in_house.track_counts, fsrs.track_counts);
 }
 

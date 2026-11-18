@@ -42,8 +42,13 @@ fn runtime() -> tokio::runtime::Runtime {
 use proptest::prelude::*;
 
 fn event_type() -> impl Strategy<Value = String> {
-    prop::sample::select(vec!["n_change", "profile_assign", "profile_revoke", "capsule_generate"])
-        .prop_map(String::from)
+    prop::sample::select(vec![
+        "n_change",
+        "profile_assign",
+        "profile_revoke",
+        "capsule_generate",
+    ])
+    .prop_map(String::from)
 }
 
 /// Random JSON-ish event_data payloads, including edge shapes (empty, unicode,
@@ -92,7 +97,11 @@ async fn log_event_tolerates_unwritable_db() {
     let broken = Database::connect("sqlite:///nonexistent-dir/ankitov.db?mode=rw").await;
     if let Ok(db) = broken {
         let _: () = backend::services::audit_logger::log_event(
-            &db, "capsule_generate", "{}", "system", None,
+            &db,
+            "capsule_generate",
+            "{}",
+            "system",
+            None,
         )
         .await;
     } else {

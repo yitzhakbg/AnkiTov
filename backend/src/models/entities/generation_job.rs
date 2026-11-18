@@ -7,14 +7,14 @@ use serde::{Deserialize, Serialize};
 #[sea_orm(table_name = "generation_jobs")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
-    pub id: String,                 // UUID
-    pub status: String,             // "pending", "processing", "completed", "failed"
-    pub progress: i32,              // 0 to 100
+    pub id: String, // UUID
+    pub status: String, // "pending", "processing", "completed", "failed"
+    pub progress: i32,  // 0 to 100
     pub total_students: i32,
     pub completed_students: i32,
-    pub anomalies: Option<String>,  // JSON serialized warning logs
-    pub completed_at: Option<i64>,  // UNIX timestamp
-    pub created_at: i64,            // UNIX timestamp
+    pub anomalies: Option<String>, // JSON serialized warning logs
+    pub completed_at: Option<i64>, // UNIX timestamp
+    pub created_at: i64,           // UNIX timestamp
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

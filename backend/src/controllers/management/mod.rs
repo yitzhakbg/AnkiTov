@@ -18,19 +18,19 @@ pub mod ask;
 pub mod capsule_sessions;
 pub mod classes;
 pub mod compliance;
-pub mod decks;
 pub mod deck_library;
+pub mod decks;
+pub mod jev;
 pub mod probe;
 pub mod producers;
-pub mod jev;
+pub mod profile_assignments;
+pub mod settings;
 pub mod stats;
 pub mod students;
 pub mod sync;
+pub mod teachers;
 pub mod track_profiles;
 pub mod tracks;
-pub mod profile_assignments;
-pub mod settings;
-pub mod teachers;
 
 use utoipa::OpenApi;
 

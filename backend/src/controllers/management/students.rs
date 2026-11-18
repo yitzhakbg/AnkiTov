@@ -4,9 +4,9 @@
 //! as a student profile. The directory name becomes the student's display name
 //! and a slug is generated as the student ID.
 
+use axum::extract::Multipart;
 use axum::extract::{Query, State};
 use axum::Json;
-use axum::extract::Multipart;
 use loco_rs::{app::AppContext, prelude::*};
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
@@ -15,7 +15,6 @@ use utoipa::ToSchema;
 
 use crate::models::entities::{class_enrollment, deck, user};
 use crate::services;
-
 
 const TAG: &str = "Management Console";
 
@@ -84,7 +83,10 @@ pub fn routes() -> Routes {
     Routes::new()
         .add("/management/students/scan-playground", get(scan_playground))
         .add("/management/students/bulk-enroll", post(bulk_enroll))
-        .add("/management/students/create-profiles", post(create_profiles))
+        .add(
+            "/management/students/create-profiles",
+            post(create_profiles),
+        )
         .add("/management/students/populate-decks", post(populate_decks))
         .add("/management/students/import-file", post(import_file))
 }
@@ -126,13 +128,17 @@ pub async fn scan_playground(
             }
 
             let student_id = name.to_lowercase().replace(' ', "-");
-            let display_name = name.split('-').map(|w| {
-                let mut c = w.chars();
-                match c.next() {
-                    Some(f) => f.to_uppercase().to_string() + c.as_str(),
-                    None => String::new()
-                }
-            }).collect::<Vec<_>>().join(" ");
+            let display_name = name
+                .split('-')
+                .map(|w| {
+                    let mut c = w.chars();
+                    match c.next() {
+                        Some(f) => f.to_uppercase().to_string() + c.as_str(),
+                        None => String::new(),
+                    }
+                })
+                .collect::<Vec<_>>()
+                .join(" ");
             let collection_path = entry.path().join("collection.anki2");
             let has_collection = collection_path.exists();
 
@@ -170,7 +176,10 @@ pub async fn bulk_enroll(
     let mut skipped = 0;
 
     for (i, student_id) in payload.student_ids.iter().enumerate() {
-        let display_name = payload.display_names.as_ref().and_then(|names| names.get(i).cloned());
+        let display_name = payload
+            .display_names
+            .as_ref()
+            .and_then(|names| names.get(i).cloned());
         // Try direct insert — if it fails due to unique constraint, skip
         let active_model = crate::models::entities::class_enrollment::ActiveModel {
             id: sea_orm::ActiveValue::NotSet,
@@ -271,7 +280,10 @@ pub async fn create_profiles(
 
     for name in &payload.names {
         let trimmed = name.trim();
-        if trimmed.is_empty() || skip.contains(&trimmed) { skipped += 1; continue; }
+        if trimmed.is_empty() || skip.contains(&trimmed) {
+            skipped += 1;
+            continue;
+        }
 
         let dir = base.join(trimmed);
         let student_id = trimmed.to_lowercase().replace(' ', "-");
@@ -349,8 +361,12 @@ pub async fn populate_decks(
         for deck_id_str in deck_ids {
             if let Ok(deck_id) = deck_id_str.parse::<i32>() {
                 let deck = deck::Entity::find_by_id(deck_id)
-                    .one(db).await.map_err(|_| loco_rs::Error::InternalServerError)?;
-                if let Some(d) = deck { deck_paths.push(d.name); }
+                    .one(db)
+                    .await
+                    .map_err(|_| loco_rs::Error::InternalServerError)?;
+                if let Some(d) = deck {
+                    deck_paths.push(d.name);
+                }
             }
         }
     }
@@ -361,7 +377,9 @@ pub async fn populate_decks(
 
     for enrollment in &enrollments {
         let dir = base.join(&enrollment.student_id);
-        if !dir.exists() { continue; }
+        if !dir.exists() {
+            continue;
+        }
 
         // For now, ensure collection.anki2 exists
         let coll = dir.join("collection.anki2");
@@ -401,12 +419,12 @@ pub async fn import_file(
     mut multipart: Multipart,
 ) -> Result<Response> {
     let db = &ctx.db;
-    
+
     // Extract class_id from form field
     let mut class_id = None;
     let mut file_data = None;
     let mut file_name = String::from("import.csv");
-    
+
     while let Some(field) = multipart.next_field().await.map_err(|e| {
         tracing::error!("Multipart error: {:?}", e);
         Error::InternalServerError
@@ -435,41 +453,39 @@ pub async fn import_file(
             }
         }
     }
-    
-    let class_id = class_id.ok_or_else(|| {
-        Error::BadRequest("Missing class_id parameter".to_string())
-    })?;
-    
-    let file_data = file_data.ok_or_else(|| {
-        Error::BadRequest("Missing file upload".to_string())
-    })?;
-    
+
+    let class_id =
+        class_id.ok_or_else(|| Error::BadRequest("Missing class_id parameter".to_string()))?;
+
+    let file_data =
+        file_data.ok_or_else(|| Error::BadRequest("Missing file upload".to_string()))?;
+
     // Check class exists
     let class = crate::models::entities::class::Entity::find_by_id(class_id.clone())
         .one(db)
         .await
         .map_err(|_| Error::InternalServerError)?
         .ok_or(Error::NotFound)?;
-    
+
     // Determine delimiter
     let delimiter = if file_name.ends_with(".tsv") {
         '\t'
     } else {
         ','
     };
-    
+
     // Parse file
     let rows = services::student_import::parse_text_file(&file_data, delimiter)
         .map_err(|e| Error::BadRequest(e))?;
-    
+
     // Validate rows
     let (validated, validation_errors) = services::student_import::validate_rows(rows);
-    
+
     // Import using existing bulk-enroll logic
     let mut enrolled = 0;
     let mut skipped = 0;
     let mut imported_students = Vec::new();
-    
+
     for row in &validated {
         let active_model = crate::models::entities::class_enrollment::ActiveModel {
             id: sea_orm::ActiveValue::NotSet,
@@ -480,7 +496,7 @@ pub async fn import_file(
             display_name: sea_orm::ActiveValue::Set(Some(row.display_name.clone())),
             metadata_json: sea_orm::ActiveValue::Set(None),
         };
-        
+
         match crate::models::entities::class_enrollment::Entity::insert(active_model)
             .exec(db)
             .await
@@ -492,9 +508,7 @@ pub async fn import_file(
                 // credentials (unique profile name from display_name, password =
                 // their numeric id) into the shared sync-users.env. A failure
                 // here must NOT abort the import.
-                if let Some((uid, fname)) =
-                    resolve_student_name(db, row.student_id.as_str())
-                        .await
+                if let Some((uid, fname)) = resolve_student_name(db, row.student_id.as_str()).await
                 {
                     match services::sync_user::upsert_sync_user(db, uid, &fname).await {
                         Ok(profile) => {
@@ -528,13 +542,16 @@ pub async fn import_file(
             }
         }
     }
-    
+
     // Build error list
-    let errors: Vec<ImportError> = validation_errors.iter().map(|e| ImportError {
-        row: e.row,
-        reason: e.reason.clone(),
-    }).collect();
-    
+    let errors: Vec<ImportError> = validation_errors
+        .iter()
+        .map(|e| ImportError {
+            row: e.row,
+            reason: e.reason.clone(),
+        })
+        .collect();
+
     format::json(ImportFileResponse {
         enrolled,
         skipped,
@@ -555,10 +572,7 @@ pub async fn import_file(
 ///
 /// Returns `(numeric_user_id, display_name)`, or `None` if no student can be
 /// resolved.
-async fn resolve_student_name(
-    db: &sea_orm::DbConn,
-    slug: &str,
-) -> Option<(i64, String)> {
+async fn resolve_student_name(db: &sea_orm::DbConn, slug: &str) -> Option<(i64, String)> {
     let slug_norm = slug.to_lowercase();
 
     // 1) Exact username match.
@@ -567,10 +581,7 @@ async fn resolve_student_name(
         .one(db)
         .await
     {
-        let name = u
-            .full_name
-            .clone()
-            .unwrap_or_else(|| u.username.clone());
+        let name = u.full_name.clone().unwrap_or_else(|| u.username.clone());
         return Some((u.id, name));
     }
 
@@ -597,10 +608,7 @@ async fn resolve_student_name(
             .one(db)
             .await
         {
-            let name = u
-                .full_name
-                .clone()
-                .unwrap_or_else(|| u.username.clone());
+            let name = u.full_name.clone().unwrap_or_else(|| u.username.clone());
             return Some((u.id, name));
         }
     }

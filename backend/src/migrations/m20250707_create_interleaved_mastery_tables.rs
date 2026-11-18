@@ -22,26 +22,23 @@ impl MigrationTrait for Migration {
             .create_table(
                 Table::create()
                     .table(Tracks::Table)
-                    .col(ColumnDef::new(Tracks::Id)
-                        .string()
-                        .not_null()
-                        .primary_key())
-                    .col(ColumnDef::new(Tracks::Name)
-                        .string()
-                        .not_null())
+                    .col(ColumnDef::new(Tracks::Id).string().not_null().primary_key())
+                    .col(ColumnDef::new(Tracks::Name).string().not_null())
                     .col(text_null(Tracks::Description))
                     .col(string_null(Tracks::SubjectArea))
-                    .col(ColumnDef::new(Tracks::Tag)
-                        .string()
-                        .not_null())
-                    .col(ColumnDef::new(Tracks::TargetRetention)
-                        .double()
-                        .not_null()
-                        .default(0.80))
-                    .col(ColumnDef::new(Tracks::NValue)
-                        .integer()
-                        .not_null()
-                        .default(3))
+                    .col(ColumnDef::new(Tracks::Tag).string().not_null())
+                    .col(
+                        ColumnDef::new(Tracks::TargetRetention)
+                            .double()
+                            .not_null()
+                            .default(0.80),
+                    )
+                    .col(
+                        ColumnDef::new(Tracks::NValue)
+                            .integer()
+                            .not_null()
+                            .default(3),
+                    )
                     .col(big_integer(Tracks::CreatedAt).not_null())
                     .col(big_integer(Tracks::UpdatedAt).not_null())
                     .to_owned(),
@@ -55,14 +52,18 @@ impl MigrationTrait for Migration {
             .create_table(
                 Table::create()
                     .table(TrackProfiles::Table)
-                    .col(ColumnDef::new(TrackProfiles::Id)
-                        .string()
-                        .not_null()
-                        .primary_key())
-                    .col(ColumnDef::new(TrackProfiles::Name)
-                        .string()
-                        .not_null()
-                        .unique_key())
+                    .col(
+                        ColumnDef::new(TrackProfiles::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(TrackProfiles::Name)
+                            .string()
+                            .not_null()
+                            .unique_key(),
+                    )
                     .col(text_null(TrackProfiles::Description))
                     .col(double_null(TrackProfiles::TargetRetention))
                     .col(integer_null(TrackProfiles::NValue))
@@ -80,20 +81,29 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(TrackProfileTracks::Table)
                     .col(pk_auto(TrackProfileTracks::Id))
-                    .col(ColumnDef::new(TrackProfileTracks::TrackProfileId)
-                        .string()
-                        .not_null())
-                    .col(ColumnDef::new(TrackProfileTracks::TrackId)
-                        .string()
-                        .not_null())
-                    .col(ColumnDef::new(TrackProfileTracks::SortOrder)
-                        .integer()
-                        .not_null()
-                        .default(0))
+                    .col(
+                        ColumnDef::new(TrackProfileTracks::TrackProfileId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(TrackProfileTracks::TrackId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(TrackProfileTracks::SortOrder)
+                            .integer()
+                            .not_null()
+                            .default(0),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_tpt_track_profile")
-                            .from(TrackProfileTracks::Table, TrackProfileTracks::TrackProfileId)
+                            .from(
+                                TrackProfileTracks::Table,
+                                TrackProfileTracks::TrackProfileId,
+                            )
                             .to(TrackProfiles::Table, TrackProfiles::Id)
                             .on_delete(ForeignKeyAction::Cascade),
                     )
@@ -115,36 +125,46 @@ impl MigrationTrait for Migration {
             .create_table(
                 Table::create()
                     .table(CapsuleSessions::Table)
-                    .col(ColumnDef::new(CapsuleSessions::Id)
-                        .string()
-                        .not_null()
-                        .primary_key())
-                    .col(ColumnDef::new(CapsuleSessions::StudentId)
-                        .string()
-                        .not_null())
-                    .col(ColumnDef::new(CapsuleSessions::TrackProfileId)
-                        .string()
-                        .not_null())
-                    .col(ColumnDef::new(CapsuleSessions::NValue)
-                        .integer()
-                        .not_null())
-                    .col(ColumnDef::new(CapsuleSessions::CardIds)
-                        .text()
-                        .not_null())
-                    .col(ColumnDef::new(CapsuleSessions::Status)
-                        .string()
-                        .not_null()
-                        .default("pending"))
-                    .col(ColumnDef::new(CapsuleSessions::SessionWeek)
-                        .string()
-                        .not_null())
-                    .col(ColumnDef::new(CapsuleSessions::CardsCompleted)
-                        .integer()
-                        .not_null()
-                        .default(0))
-                    .col(ColumnDef::new(CapsuleSessions::CardsTotal)
-                        .integer()
-                        .not_null())
+                    .col(
+                        ColumnDef::new(CapsuleSessions::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(CapsuleSessions::StudentId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(CapsuleSessions::TrackProfileId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(CapsuleSessions::NValue).integer().not_null())
+                    .col(ColumnDef::new(CapsuleSessions::CardIds).text().not_null())
+                    .col(
+                        ColumnDef::new(CapsuleSessions::Status)
+                            .string()
+                            .not_null()
+                            .default("pending"),
+                    )
+                    .col(
+                        ColumnDef::new(CapsuleSessions::SessionWeek)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(CapsuleSessions::CardsCompleted)
+                            .integer()
+                            .not_null()
+                            .default(0),
+                    )
+                    .col(
+                        ColumnDef::new(CapsuleSessions::CardsTotal)
+                            .integer()
+                            .not_null(),
+                    )
                     .col(big_integer(CapsuleSessions::CreatedAt).not_null())
                     .col(big_integer_null(CapsuleSessions::CompletedAt))
                     .foreign_key(

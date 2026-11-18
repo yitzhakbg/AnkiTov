@@ -5,7 +5,7 @@
 //!
 //! Run with: `cargo nextest run -p backend --test chatbox_nl_scenarios_test`
 
-use backend::models::entities as entities;
+use backend::models::entities;
 use loco_rs::testing;
 use sea_orm::{entity::prelude::*, ActiveValue};
 use serde_json::{json, Value};
@@ -16,7 +16,6 @@ fn json_body(text: &str) -> Value {
         Err(e) => panic!("invalid JSON: {e}\nbody: {text:?}"),
     }
 }
-
 
 /// Mint a valid `teacher` JWT for the NL scenarios harness (management auth-gated).
 fn teacher_token() -> String {
@@ -35,9 +34,27 @@ async fn test_teacher_plain_language_scenarios() {
         // 1. Retention exceptions
         let excs = [
             ("Maya Chen", "7th Grade Science", 0.32, 0.60, now - 86400),
-            ("Ben Carter", "Geometry Essentials", 0.52, 0.75, now - 86400 * 3),
-            ("Zoe Okafor", "Spanish Vocabulary", 0.38, 0.60, now - 86400 * 5),
-            ("Alon Harish", "7th Grade Science", 0.45, 0.60, now - 86400 * 2),
+            (
+                "Ben Carter",
+                "Geometry Essentials",
+                0.52,
+                0.75,
+                now - 86400 * 3,
+            ),
+            (
+                "Zoe Okafor",
+                "Spanish Vocabulary",
+                0.38,
+                0.60,
+                now - 86400 * 5,
+            ),
+            (
+                "Alon Harish",
+                "7th Grade Science",
+                0.45,
+                0.60,
+                now - 86400 * 2,
+            ),
         ];
 
         for (i, (user, deck, rate, thresh, ts)) in excs.iter().enumerate() {
@@ -65,7 +82,11 @@ async fn test_teacher_plain_language_scenarios() {
             let sync = entities::sync_status::ActiveModel {
                 id: ActiveValue::Set(format!("nl-sync-{i}")),
                 user_id: ActiveValue::Set((*user).to_string()),
-                status: ActiveValue::Set(if last_sync.is_some() { "active".into() } else { "idle".into() }),
+                status: ActiveValue::Set(if last_sync.is_some() {
+                    "active".into()
+                } else {
+                    "idle".into()
+                }),
                 last_sync: ActiveValue::Set(*last_sync),
                 pending_changes: ActiveValue::Set(0),
                 error_message: ActiveValue::Set(None),
@@ -150,4 +171,3 @@ async fn test_teacher_plain_language_scenarios() {
     })
     .await;
 }
-

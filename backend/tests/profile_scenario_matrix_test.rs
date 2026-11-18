@@ -25,10 +25,10 @@
 
 mod common;
 
-use backend::services::forensic_reader::{ForensicReader, ForensicError};
+use backend::services::forensic_reader::{ForensicError, ForensicReader};
 use backend::services::fsrs_sort::{compute_approximate_recall, fetch_and_sort};
 use common::{
-    collection_snapshot_and_stats, classify, deck_names, note_tags, sample_recall_pairs,
+    classify, collection_snapshot_and_stats, deck_names, note_tags, sample_recall_pairs,
     CollectionSnapshot, CollectionStats, ProfileClass,
 };
 use std::path::PathBuf;
@@ -68,8 +68,8 @@ fn discover_all() -> Vec<Discovered> {
     entries.sort();
     for dir in entries {
         let name = dir.file_name().unwrap().to_string_lossy().to_string();
-        let (snapshot, stats) = collection_snapshot_and_stats(&dir)
-            .unwrap_or_else(|e| panic!("snapshot {name}: {e}"));
+        let (snapshot, stats) =
+            collection_snapshot_and_stats(&dir).unwrap_or_else(|e| panic!("snapshot {name}: {e}"));
         let class = classify(stats);
         let anki2 = snapshot.anki2_path();
         out.push(Discovered {
@@ -90,8 +90,14 @@ fn discover_all() -> Vec<Discovered> {
 #[test]
 fn census_pins_dispatch_scope() {
     let all = discover_all();
-    let active = all.iter().filter(|d| d.class == ProfileClass::Active).count();
-    let fresh = all.iter().filter(|d| d.class == ProfileClass::Fresh).count();
+    let active = all
+        .iter()
+        .filter(|d| d.class == ProfileClass::Active)
+        .count();
+    let fresh = all
+        .iter()
+        .filter(|d| d.class == ProfileClass::Fresh)
+        .count();
 
     assert_eq!(
         all.len(),
@@ -229,8 +235,7 @@ fn forensic_battery_over_every_collection() {
 
         // Per-deck battery (up to 3 decks per collection keeps the matrix
         // bounded while still covering every collection).
-        let decks = deck_names(&d.anki2)
-            .unwrap_or_else(|e| panic!("{}: deck_names: {e}", d.name));
+        let decks = deck_names(&d.anki2).unwrap_or_else(|e| panic!("{}: deck_names: {e}", d.name));
         assert!(!decks.is_empty(), "{}: no decks", d.name);
         for deck in decks.iter().take(3) {
             if let Some(curve) = expect_battery_ok(
@@ -348,12 +353,9 @@ fn forensic_battery_over_every_collection() {
                     spor.coverage
                 );
             }
-            if let Some(gaps) = expect_battery_ok(
-                &d.name,
-                deck,
-                "gap_analysis",
-                reader.gap_analysis(deck, 30),
-            ) {
+            if let Some(gaps) =
+                expect_battery_ok(&d.name, deck, "gap_analysis", reader.gap_analysis(deck, 30))
+            {
                 assert!(
                     gaps.avg_gap_days.is_finite() && gaps.avg_gap_days >= 0.0,
                     "{}/{deck}: avg_gap_days {}",
@@ -399,8 +401,7 @@ fn fsrs_sort_invariants_over_every_collection() {
     let all = discover_all();
 
     for d in &all {
-        let tags = note_tags(&d.anki2)
-            .unwrap_or_else(|e| panic!("{}: note_tags: {e}", d.name));
+        let tags = note_tags(&d.anki2).unwrap_or_else(|e| panic!("{}: note_tags: {e}", d.name));
         // Bound the tag set: fetch_and_sort ORs tags together; the full
         // distinct set (30+ per collection) is fine but redundant — take a
         // stable subset covering every top-level track prefix.

@@ -48,7 +48,9 @@ pub struct SchoolSettings {
 
 /// Read one raw setting value.
 pub async fn get(db: &DatabaseConnection, key: &str) -> Result<Option<String>, sea_orm::DbErr> {
-    let row = app_setting::Entity::find_by_id(key.to_string()).one(db).await?;
+    let row = app_setting::Entity::find_by_id(key.to_string())
+        .one(db)
+        .await?;
     Ok(row.map(|m| m.value))
 }
 
@@ -62,10 +64,7 @@ pub async fn trial_readonly(db: &DatabaseConnection) -> Result<bool, sea_orm::Db
 /// Unknown keys in the table are ignored (forward-compatible).
 pub async fn load(db: &DatabaseConnection) -> Result<SchoolSettings, sea_orm::DbErr> {
     let rows = app_setting::Entity::find().all(db).await?;
-    let map: HashMap<String, String> = rows
-        .into_iter()
-        .map(|m| (m.key, m.value))
-        .collect();
+    let map: HashMap<String, String> = rows.into_iter().map(|m| (m.key, m.value)).collect();
     Ok(SchoolSettings {
         school_name: map.get(KEY_SCHOOL_NAME).cloned(),
         locale: map.get(KEY_LOCALE).cloned(),
@@ -77,7 +76,9 @@ pub async fn load(db: &DatabaseConnection) -> Result<SchoolSettings, sea_orm::Db
 /// on SQLite and Postgres, unlike dialect-specific `ON CONFLICT` helpers).
 pub async fn set(db: &DatabaseConnection, key: &str, value: &str) -> Result<(), sea_orm::DbErr> {
     let now = chrono::Utc::now().timestamp();
-    let existing = app_setting::Entity::find_by_id(key.to_string()).one(db).await?;
+    let existing = app_setting::Entity::find_by_id(key.to_string())
+        .one(db)
+        .await?;
     match existing {
         Some(row) => {
             let mut am: app_setting::ActiveModel = row.into();
@@ -99,7 +100,10 @@ pub async fn set(db: &DatabaseConnection, key: &str, value: &str) -> Result<(), 
 
 /// Validate a locale code against the server's supported list.
 pub fn validate_locale(locale: &str) -> Result<(), String> {
-    if crate::i18n::SUPPORTED_LOCALES.iter().any(|(code, _, _)| *code == locale) {
+    if crate::i18n::SUPPORTED_LOCALES
+        .iter()
+        .any(|(code, _, _)| *code == locale)
+    {
         Ok(())
     } else {
         Err(format!("unsupported locale: {locale}"))

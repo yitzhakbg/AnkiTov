@@ -1,0 +1,13 @@
+slug: english-bagrut-band1
+subject_tag: subject::english
+title:
+  he: 'AnkiTov — אוצר מילים לבגרות אנגלית: Band I'
+  en: 'AnkiTov — English Bagrut: Band I (for Hebrew speakers)'
+deck_id:
+  he: 1699412247022
+description:
+  he: אוצר מילים בסיסי לבגרות באנגלית (רמת יסוד) — כרטיסים דו-כיווניים אנגלית↔עברית לתלמידי תיכון. המילים נבחרו מרשימת Band I הרשמית של הפיקוח על הוראת האנגלית במשרד החינוך; הגדרות ותרגומים נוסחו במקור וממתינים לעריכה על ידי דובר עברית. SRS works.
+expected_census:
+  basic: 126
+  cloze: 54
+  type_in: 0

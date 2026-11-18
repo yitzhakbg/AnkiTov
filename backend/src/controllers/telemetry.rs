@@ -106,7 +106,11 @@ pub async fn ingest_card_answer(
         match update_session_progress(db, session_uuid).await {
             Ok(p) => Some(p),
             Err(e) => {
-                tracing::warn!("Failed to update session progress for {}: {}", session_uuid, e);
+                tracing::warn!(
+                    "Failed to update session progress for {}: {}",
+                    session_uuid,
+                    e
+                );
                 None
             }
         }
@@ -201,10 +205,16 @@ pub async fn session_complete(
         });
     }
 
-    let session = match cs_entity::Entity::find_by_id(&payload.session_uuid).one(db).await {
+    let session = match cs_entity::Entity::find_by_id(&payload.session_uuid)
+        .one(db)
+        .await
+    {
         Ok(Some(s)) => s,
         Ok(None) => {
-            tracing::warn!("session-complete for unknown session {}", payload.session_uuid);
+            tracing::warn!(
+                "session-complete for unknown session {}",
+                payload.session_uuid
+            );
             return format::json(SessionCompleteResponse {
                 status: "unknown".to_string(),
                 session_id: None,
@@ -213,7 +223,11 @@ pub async fn session_complete(
             });
         }
         Err(e) => {
-            tracing::error!("session-complete db error for {}: {}", payload.session_uuid, e);
+            tracing::error!(
+                "session-complete db error for {}: {}",
+                payload.session_uuid,
+                e
+            );
             return format::json(SessionCompleteResponse {
                 status: "error".to_string(),
                 session_id: None,
@@ -239,7 +253,14 @@ pub async fn session_complete(
             "via": "session-complete",
         })
         .to_string();
-        audit_logger::log_event(db, "capsule_complete", &done, "system", Some(&payload.session_uuid)).await;
+        audit_logger::log_event(
+            db,
+            "capsule_complete",
+            &done,
+            "system",
+            Some(&payload.session_uuid),
+        )
+        .await;
     }
     active.update(db).await?;
 
@@ -291,7 +312,14 @@ pub(crate) async fn update_session_progress(
             "cards_completed": new_completed,
         })
         .to_string();
-        audit_logger::log_event(db, "capsule_complete", &event_data, "system", Some(session_uuid)).await;
+        audit_logger::log_event(
+            db,
+            "capsule_complete",
+            &event_data,
+            "system",
+            Some(session_uuid),
+        )
+        .await;
     }
 
     active.update(db).await?;

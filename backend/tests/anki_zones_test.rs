@@ -55,8 +55,9 @@ mod zone1_forensic {
                 decks   TEXT NOT NULL DEFAULT '{}',
                 dconf   TEXT NOT NULL DEFAULT '{}',
                 tags    TEXT NOT NULL DEFAULT ''
-            );"
-        ).expect("create col table");
+            );",
+        )
+        .expect("create col table");
 
         conn.execute_batch(
             "CREATE TABLE notes (
@@ -71,8 +72,9 @@ mod zone1_forensic {
                 csum    INTEGER NOT NULL DEFAULT 0,
                 flags   INTEGER NOT NULL DEFAULT 0,
                 data    TEXT NOT NULL DEFAULT ''
-            );"
-        ).expect("create notes table");
+            );",
+        )
+        .expect("create notes table");
 
         conn.execute_batch(
             "CREATE TABLE cards (
@@ -94,8 +96,9 @@ mod zone1_forensic {
                 odid    INTEGER NOT NULL DEFAULT 0,
                 flags   INTEGER NOT NULL DEFAULT 0,
                 data    TEXT NOT NULL DEFAULT ''
-            );"
-        ).expect("create cards table");
+            );",
+        )
+        .expect("create cards table");
 
         conn.execute_batch(
             "CREATE TABLE revlog (
@@ -108,8 +111,9 @@ mod zone1_forensic {
                 factor  INTEGER NOT NULL DEFAULT 0,
                 time    INTEGER NOT NULL DEFAULT 0,
                 type    INTEGER NOT NULL DEFAULT 0
-            );"
-        ).expect("create revlog table");
+            );",
+        )
+        .expect("create revlog table");
 
         conn.execute_batch(
             "CREATE TABLE decks (
@@ -119,8 +123,9 @@ mod zone1_forensic {
                 usn         INTEGER NOT NULL DEFAULT 0,
                 common      TEXT NOT NULL DEFAULT '{}',
                 kind        TEXT NOT NULL DEFAULT '{}'
-            );"
-        ).expect("create decks table");
+            );",
+        )
+        .expect("create decks table");
 
         conn.execute_batch(
             "CREATE TABLE notetypes (
@@ -132,14 +137,16 @@ mod zone1_forensic {
                 fields      TEXT NOT NULL DEFAULT '[]',
                 templates   TEXT NOT NULL DEFAULT '[]',
                 type        INTEGER NOT NULL DEFAULT 0
-            );"
-        ).expect("create notetypes table");
+            );",
+        )
+        .expect("create notetypes table");
 
         // Insert collection metadata (schema v18)
         conn.execute(
             "INSERT INTO col (id, crt, mod, scm, ver, conf) VALUES (1, 0, 0, 0, 18, '{}')",
             [],
-        ).expect("insert col");
+        )
+        .expect("insert col");
 
         // Insert decks
         conn.execute(
@@ -157,7 +164,8 @@ mod zone1_forensic {
                 "INSERT INTO notes (id, guid, mid, mod, usn, tags, flds, sfld, csum, flags, data)
                  VALUES (?1, '', 1, 0, 0, '', ?2, '', 0, 0, '')",
                 rusqlite::params![i, format!("field_{i}")],
-            ).expect("insert note");
+            )
+            .expect("insert note");
         }
 
         // Insert cards: 3 in deck 1, 1 in deck 2
@@ -192,11 +200,11 @@ mod zone1_forensic {
 
         let revlog_entries: Vec<(i64, i64, i32)> = vec![
             // Today (day 1) — 5 reviews in deck 1
-            (now_ms - 3600_000, 1001i64, 3i32),  // Good
-            (now_ms - 3600_001, 1002, 4),         // Easy
-            (now_ms - 3600_002, 1001, 1),         // Again (lapse)
-            (now_ms - 3600_003, 1002, 2),         // Hard
-            (now_ms - 3600_004, 1003, 3),         // Good
+            (now_ms - 3600_000, 1001i64, 3i32), // Good
+            (now_ms - 3600_001, 1002, 4),       // Easy
+            (now_ms - 3600_002, 1001, 1),       // Again (lapse)
+            (now_ms - 3600_003, 1002, 2),       // Hard
+            (now_ms - 3600_004, 1003, 3),       // Good
             // Yesterday (day 2) — 5 reviews in deck 1
             (now_ms - day_ms - 3600_000, 1001, 3), // Good
             (now_ms - day_ms - 3600_001, 1002, 3), // Good
@@ -211,7 +219,8 @@ mod zone1_forensic {
                 "INSERT INTO revlog (id, cid, usn, ease, ivl, lastIvl, factor, time, type)
                  VALUES (?1, ?2, 0, ?3, 0, 0, 0, 0, 0)",
                 rusqlite::params![ts, cid, ease],
-            ).expect("insert revlog");
+            )
+            .expect("insert revlog");
         }
 
         // Insert a notetype
@@ -219,7 +228,8 @@ mod zone1_forensic {
             "INSERT INTO notetypes (id, name, mtime_secs, usn, config, fields, templates, type)
              VALUES (1, 'Basic', 0, 0, '{}', '[]', '[]', 0)",
             [],
-        ).expect("insert notetype");
+        )
+        .expect("insert notetype");
 
         // Close connection so Anki2 file is fully written
         drop(conn);
@@ -345,10 +355,7 @@ mod zone1_forensic {
 
         // Other Deck should have no reviews (card 1004 has no revlog entries)
         let curve2 = reader.retention_curve("Other Deck", 7);
-        assert!(
-            curve2.is_err(),
-            "Other Deck should fail (no review data)"
-        );
+        assert!(curve2.is_err(), "Other Deck should fail (no review data)");
     }
 
     // -----------------------------------------------------------------------
@@ -393,9 +400,15 @@ mod zone1_forensic {
         // 2 active days out of 7 → coverage ≈ 0.286
         assert_eq!(spi.active_days, 2);
         assert_eq!(spi.total_days, 7);
-        assert!((spi.coverage - 0.286).abs() < 0.01, "coverage should be ~0.286");
+        assert!(
+            (spi.coverage - 0.286).abs() < 0.01,
+            "coverage should be ~0.286"
+        );
         // Both days have 5 reviews each → CV = 0 → SPI = 0 (consistent volume)
-        assert_eq!(spi.index, 0.0, "SPI should be 0 when daily volume is consistent");
+        assert_eq!(
+            spi.index, 0.0,
+            "SPI should be 0 when daily volume is consistent"
+        );
         assert_eq!(spi.avg_reviews_per_active_day, 5.0);
     }
 
@@ -404,9 +417,7 @@ mod zone1_forensic {
         let tmp = create_test_anki2();
         let reader = ForensicReader::open(tmp.path()).expect("open forensic reader");
 
-        let gaps = reader
-            .gap_analysis("Test Deck", 7)
-            .expect("gap analysis");
+        let gaps = reader.gap_analysis("Test Deck", 7).expect("gap analysis");
 
         // We have reviews on 2 days (today and yesterday) → gap between them is 0
         // (they're consecutive). So max_gap_days should be 0.
@@ -464,9 +475,10 @@ mod zone2_ankiconnect {
         wiremock::Mock::given(wiremock::matchers::body_partial_json(
             serde_json::json!({"action": "version"}),
         ))
-        .respond_with(wiremock::ResponseTemplate::new(200).set_body_json(
-            serde_json::json!({"result": 6, "error": null}),
-        ))
+        .respond_with(
+            wiremock::ResponseTemplate::new(200)
+                .set_body_json(serde_json::json!({"result": 6, "error": null})),
+        )
         .mount(&server)
         .await;
 
@@ -502,9 +514,9 @@ mod zone2_ankiconnect {
 // ===========================================================================
 
 mod zone3_composed {
-    use backend::services::forensic_reader::ForensicReader;
     use backend::services::anki_connect::AnkiConnectClient;
     use backend::services::deck_health::DeckHealthReporter;
+    use backend::services::forensic_reader::ForensicReader;
 
     #[test]
     fn test_deck_health_reporter_construction() {

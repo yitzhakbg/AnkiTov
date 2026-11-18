@@ -24,7 +24,7 @@ impl MigrationTrait for Migration {
                     .table(ProfileAssignments::Table)
                     .col(pk_auto(ProfileAssignments::Id))
                     .col(string(ProfileAssignments::TargetType).not_null()) // "student" or "cohort"
-                    .col(string(ProfileAssignments::TargetId).not_null())   // user.id or subsection_id
+                    .col(string(ProfileAssignments::TargetId).not_null()) // user.id or subsection_id
                     .col(string(ProfileAssignments::TrackProfileId).not_null())
                     .col(integer(ProfileAssignments::Priority).not_null().default(1))
                     .col(string(ProfileAssignments::AssignedBy).not_null())
@@ -50,11 +50,15 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(GenerationJobs::Table)
                     .col(string(GenerationJobs::Id).not_null().primary_key())
-                    .col(string(GenerationJobs::Status).not_null())         // "pending", "processing", "completed", "failed"
+                    .col(string(GenerationJobs::Status).not_null()) // "pending", "processing", "completed", "failed"
                     .col(integer(GenerationJobs::Progress).not_null().default(0))
                     .col(integer(GenerationJobs::TotalStudents).not_null().default(0))
-                    .col(integer(GenerationJobs::CompletedStudents).not_null().default(0))
-                    .col(text_null(GenerationJobs::Anomalies))             // JSON structured log of anomalies
+                    .col(
+                        integer(GenerationJobs::CompletedStudents)
+                            .not_null()
+                            .default(0),
+                    )
+                    .col(text_null(GenerationJobs::Anomalies)) // JSON structured log of anomalies
                     .col(big_integer_null(GenerationJobs::CompletedAt))
                     .col(big_integer(GenerationJobs::CreatedAt).not_null())
                     .to_owned(),

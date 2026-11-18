@@ -3,20 +3,27 @@
 //! Handles upload, distribution, and listing of Anki decks across
 //! user profiles, groups, and classes.
 
+use crate::middleware::auth::ensure_role;
+use crate::middleware::auth::AuthUser;
 use crate::models::entities::deck as deck_entity;
 use crate::models::entities::deck_distribution as dist_entity;
-use crate::models::management::{ApiResponse, BindDeckTrackRequest, DeckDistributionResponse, DeckInfo, DistributeDeckRequest, ListDeckQuery};
 use crate::models::entities::track as track_entity;
-use axum::{body::Bytes, extract::{DefaultBodyLimit, Multipart, Path, Query, State}, Extension, Json};
+use crate::models::management::{
+    ApiResponse, BindDeckTrackRequest, DeckDistributionResponse, DeckInfo, DistributeDeckRequest,
+    ListDeckQuery,
+};
+use crate::services::anki_connect::AnkiConnectError;
+use axum::{
+    body::Bytes,
+    extract::{DefaultBodyLimit, Multipart, Path, Query, State},
+    Extension, Json,
+};
 use loco_rs::{app::AppContext, prelude::*};
-use crate::middleware::auth::AuthUser;
-use crate::middleware::auth::ensure_role;
 use sea_orm::{
     entity::prelude::{EntityTrait, PaginatorTrait},
     ActiveModelTrait, ActiveValue, QueryFilter, Set,
 };
 use sha2::{Digest, Sha256};
-use crate::services::anki_connect::AnkiConnectError;
 
 const TAG: &str = "Management Console";
 
@@ -27,7 +34,10 @@ pub fn routes() -> Routes {
         .add("/", get(list_decks))
         // Upload carries its own body limit — Loco's global default (2 MB)
         // is far too small for real media-bearing decks.
-        .add("/", post(upload_deck).layer(DefaultBodyLimit::max(DEFAULT_MAX_UPLOAD_BYTES)))
+        .add(
+            "/",
+            post(upload_deck).layer(DefaultBodyLimit::max(DEFAULT_MAX_UPLOAD_BYTES)),
+        )
         .add("/:deck_id", get(get_deck))
         .add("/:deck_id", delete(delete_deck))
         .add("/:deck_id/distribute", post(distribute_deck))
@@ -36,7 +46,10 @@ pub fn routes() -> Routes {
         .add("/:deck_id/track", delete(unbind_deck_track))
         // Deck Library — one-click import of bundled seed decks
         .add("/available", get(super::deck_library::list_available_decks))
-        .add("/available/:name/import", post(super::deck_library::import_available_deck))
+        .add(
+            "/available/:name/import",
+            post(super::deck_library::import_available_deck),
+        )
 }
 
 // ---------------------------------------------------------------------------
@@ -60,18 +73,19 @@ pub fn routes() -> Routes {
 )]
 pub async fn list_decks(
     State(ctx): State<AppContext>,
-    Query(params): Query<ListDeckQuery>
+    Query(params): Query<ListDeckQuery>,
 ) -> Result<Response> {
     tracing::info!(
         "Listing decks — page={}, per_page={}, target={:?}",
-        params.page, params.per_page, params.target_type
+        params.page,
+        params.per_page,
+        params.target_type
     );
 
     let page: u64 = params.page.max(1) as u64;
     let per_page: u64 = params.per_page.max(1) as u64;
 
-    let paginator = deck_entity::Entity::find()
-        .paginate(&ctx.db, per_page);
+    let paginator = deck_entity::Entity::find().paginate(&ctx.db, per_page);
 
     let decks: Vec<DeckInfo> = paginator
         .fetch_page(page.saturating_sub(1))
@@ -167,8 +181,8 @@ fn sanitize_stem(stem: &str) -> String {
 pub async fn upload_deck(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
-    mut multipart: Multipart)
-             -> Result<Response> {
+    mut multipart: Multipart,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     let mut file_data = Bytes::new();
     let mut filename = String::new();
@@ -247,11 +261,7 @@ pub async fn upload_deck(
         tracing::error!("upload_deck create_dir_all {:?} failed: {:?}", dir, e);
         loco_rs::Error::InternalServerError
     })?;
-    let path = dir.join(format!(
-        "{}-{}.apkg",
-        &checksum[..8],
-        sanitize_stem(stem)
-    ));
+    let path = dir.join(format!("{}-{}.apkg", &checksum[..8], sanitize_stem(stem)));
     std::fs::write(&path, &file_data).map_err(|e| {
         tracing::error!("upload_deck write {:?} failed: {:?}", path, e);
         loco_rs::Error::InternalServerError
@@ -299,9 +309,7 @@ pub async fn upload_deck(
             // Anki rejected the package (corrupt archive, unsupported
             // notetypes, …) — a client error, not a server fault.
             tracing::warn!("upload_deck import {filename} rejected: {:?}", e);
-            loco_rs::Error::BadRequest(format!(
-                "Anki rejected the package: {e}"
-            ))
+            loco_rs::Error::BadRequest(format!("Anki rejected the package: {e}"))
         })?;
     if !imported {
         tracing::warn!("upload_deck import {filename}: AnkiConnect returned false");
@@ -322,7 +330,10 @@ pub async fn upload_deck(
                 new_decks = after.into_iter().filter(|n| !before.contains(n)).collect();
             }
             Err(e) => {
-                tracing::warn!("upload_deck post-import deckNames failed for {filename}: {:?}", e);
+                tracing::warn!(
+                    "upload_deck post-import deckNames failed for {filename}: {:?}",
+                    e
+                );
                 break;
             }
         }
@@ -350,13 +361,13 @@ pub async fn upload_deck(
     };
 
     // Real card count from the collection after import.
-    let card_count: i32 = match client
-        .find_cards(&format!("deck:\"{deck_name}\""))
-        .await
-    {
+    let card_count: i32 = match client.find_cards(&format!("deck:\"{deck_name}\"")).await {
         Ok(cards) => cards.len() as i32,
         Err(e) => {
-            tracing::warn!("upload_deck post-import count failed for {deck_name}: {:?}", e);
+            tracing::warn!(
+                "upload_deck post-import count failed for {deck_name}: {:?}",
+                e
+            );
             0
         }
     };
@@ -419,8 +430,8 @@ pub async fn distribute_deck(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
     Path(deck_id): Path<String>,
-    Json(payload): Json<DistributeDeckRequest>)
-     -> Result<Response> {
+    Json(payload): Json<DistributeDeckRequest>,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     let deck_i32: i32 = match deck_id.parse() {
         Ok(n) => n,
@@ -434,7 +445,10 @@ pub async fn distribute_deck(
 
     tracing::info!(
         "Distributing deck {} ({}) to {}:{}",
-        deck_id, deck_i32, payload.target_type, payload.target_id
+        deck_id,
+        deck_i32,
+        payload.target_type,
+        payload.target_id
     );
 
     if !["user", "group", "class"].contains(&payload.target_type.as_str()) {
@@ -448,7 +462,10 @@ pub async fn distribute_deck(
     if uuid::Uuid::parse_str(&payload.target_id).is_err() {
         return format::json(ApiResponse {
             success: false,
-            message: format!("Invalid target_id: '{}' is not a valid UUID", payload.target_id),
+            message: format!(
+                "Invalid target_id: '{}' is not a valid UUID",
+                payload.target_id
+            ),
         });
     }
 
@@ -474,7 +491,10 @@ pub async fn distribute_deck(
         target_type: Set(payload.target_type.clone()),
         target_id: Set(payload.target_id.clone()),
         distributed_by: Set(uuid::Uuid::nil().to_string()),
-        distributed_at: Set(std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs() as i64),
+        distributed_at: Set(std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as i64),
     }
     .insert(&ctx.db)
     .await
@@ -485,7 +505,9 @@ pub async fn distribute_deck(
 
     tracing::info!(
         "Deck {} distributed to {}:{}",
-        deck_id, payload.target_type, payload.target_id
+        deck_id,
+        payload.target_type,
+        payload.target_id
     );
 
     format::json(DeckDistributionResponse {
@@ -512,7 +534,7 @@ pub async fn distribute_deck(
 )]
 pub async fn get_deck(
     State(ctx): State<AppContext>,
-    Path(deck_id): Path<String>
+    Path(deck_id): Path<String>,
 ) -> Result<Response> {
     let deck_i32: i32 = match deck_id.parse() {
         Ok(n) => n,
@@ -567,8 +589,8 @@ pub async fn get_deck(
 pub async fn delete_deck(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
-    Path(deck_id): Path<String>)
-     -> Result<Response> {
+    Path(deck_id): Path<String>,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     tracing::warn!("Delete request for deck: {}", deck_id);
 
@@ -647,7 +669,7 @@ pub async fn bind_deck_track(
     State(ctx): State<AppContext>,
     Extension(user): Extension<AuthUser>,
     Path(deck_id): Path<String>,
-    Json(payload): Json<BindDeckTrackRequest>
+    Json(payload): Json<BindDeckTrackRequest>,
 ) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
 
@@ -661,10 +683,13 @@ pub async fn bind_deck_track(
         }
     };
 
-    let deck = match deck_entity::Entity::find_by_id(deck_i32).one(&ctx.db).await.map_err(|e| {
-        tracing::error!("bind_deck_track DB error (deck lookup): {:?}", e);
-        loco_rs::Error::InternalServerError
-    })? {
+    let deck = match deck_entity::Entity::find_by_id(deck_i32)
+        .one(&ctx.db)
+        .await
+        .map_err(|e| {
+            tracing::error!("bind_deck_track DB error (deck lookup): {:?}", e);
+            loco_rs::Error::InternalServerError
+        })? {
         Some(d) => d,
         None => {
             return format::json(ApiResponse {
@@ -730,7 +755,7 @@ pub async fn bind_deck_track(
 pub async fn unbind_deck_track(
     State(ctx): State<AppContext>,
     Extension(user): Extension<AuthUser>,
-    Path(deck_id): Path<String>
+    Path(deck_id): Path<String>,
 ) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
 
@@ -744,10 +769,13 @@ pub async fn unbind_deck_track(
         }
     };
 
-    let deck = match deck_entity::Entity::find_by_id(deck_i32).one(&ctx.db).await.map_err(|e| {
-        tracing::error!("unbind_deck_track DB error: {:?}", e);
-        loco_rs::Error::InternalServerError
-    })? {
+    let deck = match deck_entity::Entity::find_by_id(deck_i32)
+        .one(&ctx.db)
+        .await
+        .map_err(|e| {
+            tracing::error!("unbind_deck_track DB error: {:?}", e);
+            loco_rs::Error::InternalServerError
+        })? {
         Some(d) => d,
         None => {
             return format::json(ApiResponse {

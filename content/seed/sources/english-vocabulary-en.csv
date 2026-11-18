@@ -1,15 +1,15 @@
 note_type,concept_id,unit,grades,front,back,extra,direction,pack_id,track,difficulty
-basic,abundance,01,7 8,abundance,The state of having a very large supply; a great quantity of something.,The harvest brought an abundance of apples and pears.,en-he,english-vocabulary,languages,core
-basic,scarcity,01,7 8,scarcity,The state of a thing being rare or in short supply; a lack of enough of something.,Scarcity of fresh water forced the village to ration its use.,en-he,english-vocabulary,languages,core
-basic,adequate,01,7,adequate,Enough or good enough for a particular purpose; sufficient.,The food the family stored was adequate for the winter.,en-he,english-vocabulary,languages,core
-basic,ambiguous,01,8 9,ambiguous,Open to more than one interpretation; not having one clear meaning.,The instructions were so ambiguous that no one knew what to do.,en-he,english-vocabulary,languages,core
-basic,benevolent,02,8 9,benevolent,"Kind, generous, and caring about the well-being of others.",The benevolent neighbor shared her garden with the whole street.,en-he,english-vocabulary,languages,core
-basic,gratitude,02,7 8,gratitude,The feeling of being thankful; gratefulness.,She expressed her gratitude with a handwritten note.,en-he,english-vocabulary,languages,core
-basic,indulge,02,9,indulge,"To allow yourself to enjoy something, especially something you ought to limit.","After hours of studying, he indulged in a slice of chocolate cake.",en-he,english-vocabulary,languages,core
-basic,mild,02,7,mild,Gentle in strength or degree; not harsh or extreme.,The school has a mild winter when the temperature never falls below freezing.,en-he,english-vocabulary,languages,core
-basic,reconcile,02,9,reconcile,To restore harmony between people; to bring differing views into agreement.,It took weeks before the two friends could reconcile after the argument.,en-he,english-vocabulary,languages,core
-basic,vivid,03,7 8,vivid,"Producing powerful, clear, and detailed images in the mind.",The witness gave a vivid description of the car that hit him.,en-he,english-vocabulary,languages,core
-basic,compel,03,8 9,compel,To force or oblige someone to do something; to make it impossible not to feel a certain way.,The evidence compelled the jury to reach a guilty verdict.,en-he,english-vocabulary,languages,core
+cloze,abundance,01,7 8,The harvest brought an {{c1::abundance}} of apples and pears.,abundance,The harvest brought an abundance of apples and pears.,en-he,english-vocabulary,languages,core
+cloze,scarcity,01,7 8,{{c1::Scarcity}} of fresh water forced the village to ration its use.,Scarcity,Scarcity of fresh water forced the village to ration its use.,en-he,english-vocabulary,languages,core
+cloze,adequate,01,7,The food the family stored was {{c1::adequate}} for the winter.,adequate,The food the family stored was adequate for the winter.,en-he,english-vocabulary,languages,core
+cloze,ambiguous,01,8 9,The instructions were so {{c1::ambiguous}} that no one knew what to do.,ambiguous,The instructions were so ambiguous that no one knew what to do.,en-he,english-vocabulary,languages,core
+cloze,benevolent,02,8 9,The {{c1::benevolent}} neighbor shared her garden with the whole street.,benevolent,The benevolent neighbor shared her garden with the whole street.,en-he,english-vocabulary,languages,core
+cloze,gratitude,02,7 8,She expressed her {{c1::gratitude}} with a handwritten note.,gratitude,She expressed her gratitude with a handwritten note.,en-he,english-vocabulary,languages,core
+cloze,indulge,02,9,"After hours of studying, he {{c1::indulge}}d in a slice of chocolate cake.",indulge,"After hours of studying, he indulged in a slice of chocolate cake.",en-he,english-vocabulary,languages,core
+cloze,mild,02,7,The school has a {{c1::mild}} winter when the temperature never falls below freezing.,mild,The school has a mild winter when the temperature never falls below freezing.,en-he,english-vocabulary,languages,core
+cloze,reconcile,02,9,It took weeks before the two friends could {{c1::reconcile}} after the argument.,reconcile,It took weeks before the two friends could reconcile after the argument.,en-he,english-vocabulary,languages,core
+cloze,vivid,03,7 8,The witness gave a {{c1::vivid}} description of the car that hit him.,vivid,The witness gave a vivid description of the car that hit him.,en-he,english-vocabulary,languages,core
+cloze,compel,03,8 9,The evidence {{c1::compel}}led the jury to reach a guilty verdict.,compel,The evidence compelled the jury to reach a guilty verdict.,en-he,english-vocabulary,languages,core
 basic,diligent,03,7 8,diligent,"Showing steady, careful effort and hard work; industrious.",A diligent student checks the homework list every single day.,en-he,english-vocabulary,languages,core
 basic,empathy,03,8 9,empathy,The ability to understand and share the feelings of another person.,Empathy helped her see why her classmate was upset.,en-he,english-vocabulary,languages,core
 basic,feasible,04,8 9,feasible,Possible and practical to do easily; can be done successfully.,Building a bridge that long is not feasible without much more funding.,en-he,english-vocabulary,languages,core

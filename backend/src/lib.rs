@@ -7,12 +7,12 @@
 pub mod app;
 pub mod controllers;
 pub mod i18n;
-pub mod models;
-pub mod server;
+pub mod middleware; // JWT auth middleware
 pub mod migrations; // resolves to src/migrations/ directory
-pub mod services;   // AnkiConnect + Forensic + Composed health services
-pub mod middleware;  // JWT auth middleware
-pub mod openapi;    // OpenAPI aggregation + /scalar API reference
+pub mod models;
+pub mod openapi;
+pub mod server;
+pub mod services; // AnkiConnect + Forensic + Composed health services // OpenAPI aggregation + /scalar API reference
 
 // Re-export `App` so `main.rs` can use `backend::App`
 pub use app::App;

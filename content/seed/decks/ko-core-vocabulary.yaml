@@ -1,0 +1,16 @@
+slug: ko-core-vocabulary
+subject_tag: subject::korean
+title:
+  en: AnkiTov — Korean Core Vocabulary
+  ko: AnkiTov — 한국어 기초 어휘
+deck_id:
+  ko: 1699412247023
+description:
+  en: Grades 7-12 Korean core vocabulary that runs at the student's own pace, beside teaching, not inside it. Practice previously taught words to close gaps. SRS works. Word selection follows the national curriculum's Korean-language vocabulary themes; definitions and example sentences are model-drafted and pending native-speaker review. NLM-generated, text only.
+  ko: 7-12학년 한국어 기초 어휘 덱. 학생 각자의 속도로, 수업 옆에서 진행하며 이미 배운 어휘를 복습해 부족을 메웁니다. SRS works. 단어 선정은 국가공통교육과정 국어과의 어휘 주제를 따르며, 정의와 예문은 모델이 작성해 원어민 검토를 기다립니다. NLM 생성, 텍스트만 포함.
+  he: Grades 7-12 Korean core vocabulary that runs at the student's own pace, beside teaching, not inside it. Practice previously taught words to close gaps. SRS works. Word selection follows the national curriculum's Korean-language vocabulary themes; definitions and example sentences are model-drafted and pending native-speaker review. NLM-generated, text only.
+  fr: Grades 7-12 Korean core vocabulary that runs at the student's own pace, beside teaching, not inside it. Practice previously taught words to close gaps. SRS works. Word selection follows the national curriculum's Korean-language vocabulary themes; definitions and example sentences are model-drafted and pending native-speaker review. NLM-generated, text only.
+expected_census:
+  basic: 182
+  cloze: 78
+  type_in: 0

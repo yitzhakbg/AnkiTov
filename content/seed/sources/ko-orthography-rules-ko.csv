@@ -1,0 +1,221 @@
+note_type,concept_id,unit,grades,front,back,extra,pack_id,track,difficulty
+basic,spacing-particle-basic-01,01,7 8 9 10 11 12,"""spacing_particle_basic_01""의 뜻은 무엇인가요?",조사는 혼자 쓸 수 없어서 앞말에 바로 붙여 써요. 나는 학교에서 친구들과 축구를 했다.,,ko-orthography-rules,general,core
+basic,spacing-particle-stack-02,01,7 8 9 10 11 12,"""spacing_particle_stack_02""의 뜻은 무엇인가요?",조사가 두 개 이상 이어져 나와도 앞말에 계속 붙여 써요. 학교에서처럼 집에서도 스스로 숙제를 잘해요.,,ko-orthography-rules,general,core
+basic,spacing-particle-cloze-03,01,7 8 9 10 11 12,"""spacing_particle_cloze_03""의 뜻은 무엇인가요?","은, 는, 이, 가, 에서 같은 조사는 앞말에 꼭 붙여 써요. 우리는 교실에서 다 함께 책을 읽었다.",,ko-orthography-rules,general,core
+basic,spacing-depnoun-basic-04,01,7 8 9 10 11 12,"""spacing_depnoun_basic_04""의 뜻은 무엇인가요?",것이나 수처럼 혼자 못 쓰는 의존 명사는 앞말과 띄어 써요. 나는 달리기를 빠르게 할 수 있다.,,ko-orthography-rules,general,core
+basic,spacing-depnoun-cloze-05,01,7 8 9 10 11 12,"""spacing_depnoun_cloze_05""의 뜻은 무엇인가요?",혼자 서지 못하고 다른 말의 도움을 받는 의존 명사는 앞말과 띄어 써요. 내가 좋아하는 축구를 마음껏 볼 수 있어서 신나요.,,ko-orthography-rules,general,core
+basic,spacing-depnoun-ji-06,01,7 8 9 10 11 12,"""spacing_depnoun_ji_06""의 뜻은 무엇인가요?",어떤 일이 일어난 뒤 흘러간 시간을 나타내는 지는 앞말과 띄어 써요. 우리가 서로 친구가 된 지 벌써 일 년이 되었다.,,ko-orthography-rules,general,core
+basic,spacing-unit-basic-07,01,7 8 9 10 11 12,"""spacing_unit_basic_07""의 뜻은 무엇인가요?",개나 권처럼 물건을 세는 단위 말은 앞말과 띄어 써요. 쉬는 시간에 친구와 사과 한 개를 나누어 먹었다.,,ko-orthography-rules,general,core
+basic,spacing-unit-arabic-08,02,7 8 9 10 11 12,"""spacing_unit_arabic_08""의 뜻은 무엇인가요?",아라비아 숫자 바로 뒤에 쓰는 단위 말은 붙여 써도 돼요. 체육 시간에 농구공 3개를 챙겨서 운동장으로 갔다.,,ko-orthography-rules,general,core
+basic,spacing-unit-order-09,02,7 8 9 10 11 12,"""spacing_unit_order_09""의 뜻은 무엇인가요?",순서를 나타내거나 숫자와 함께 쓸 때는 단위 말을 붙여 써도 돼요. 나는 올해 중학교 1학년이 되어 새 친구를 사귀었다.,,ko-orthography-rules,general,core
+basic,spacing-number-unit-10,02,7 8 9 10 11 12,"""spacing_number_unit_10""의 뜻은 무엇인가요?",큰 수를 한글로 적을 때는 만 단위마다 띄어 써요. 우리 학교 도서관에는 책이 삼만 오천 권이나 있어요.,,ko-orthography-rules,general,core
+basic,spacing-number-cloze-11,02,7 8 9 10 11 12,"""spacing_number_cloze_11""의 뜻은 무엇인가요?",숫자를 글자로 풀어서 쓸 때는 만 단위로 끊어서 띄어 써요. 우리는 이번 바자회에서 이만 삼천 원을 모았다.,,ko-orthography-rules,general,core
+basic,spacing-contrast-ppun-12,02,7 8 9 10 11 12,"""spacing_contrast_ppun_12""의 뜻은 무엇인가요?",너뿐이야처럼 이름 뒤 뿐은 붙여 쓰고 할 뿐처럼 꾸밈을 받으면 띄어 써요. 우리 팀에서 점수를 낸 사람은 오직 너뿐이야.,,ko-orthography-rules,general,core
+basic,spacing-contrast-mankeum-13,02,7 8 9 10 11 12,"""spacing_contrast_mankeum_13""의 뜻은 무엇인가요?",너만큼처럼 이름 뒤 만큼은 붙여 쓰고 노력한 만큼처럼 움직임 뒤는 띄어 써요. 나도 형만큼 축구를 능숙하게 잘하고 싶다.,,ko-orthography-rules,general,core
+basic,spacing-contrast-daero-14,02,7 8 9 10 11 12,"""spacing_contrast_daero_14""의 뜻은 무엇인가요?",친구대로처럼 이름 뒤 대로는 붙여 쓰고 약속한 대로처럼 꾸밈 뒤는 띄어 써요. 우리는 어제 약속한 대로 아침 일찍 운동장에서 만났다.,,ko-orthography-rules,general,core
+basic,spacing-contrast-man-15,03,7 8 9 10 11 12,"""spacing_contrast_man_15""의 뜻은 무엇인가요?",너만처럼 오직 하나를 뜻할 때는 붙이고 지난 시간을 뜻할 때는 띄어 써요. 방학이 끝나고 삼 주 만에 교실에서 친구들을 만났다.,,ko-orthography-rules,general,core
+basic,spacing-auxverb-basic-16,03,7 8 9 10 11 12,"""spacing_auxverb_basic_16""의 뜻은 무엇인가요?",뒤에서 뜻을 돕는 보조 용언은 앞말과 띄어 쓰는 것이 기본이에요. 숙제를 다 끝내고 나니 기분이 날아갈 듯하다.,,ko-orthography-rules,general,core
+basic,spacing-auxverb-cloze-17,03,7 8 9 10 11 12,"""spacing_auxverb_cloze_17""의 뜻은 무엇인가요?",앞말의 뜻을 돕는 보조 용언은 띄어 쓰는 것이 올바른 규칙이에요. 동생이 혼자 밥을 맛있게 다 먹어 버렸다.,,ko-orthography-rules,general,core
+basic,spacing-auxverb-restrict-18,03,7 8 9 10 11 12,"""spacing_auxverb_restrict_18""의 뜻은 무엇인가요?",앞말에 조사가 붙어 있으면 뒤에 오는 보조 용언은 반드시 띄어 써요. 친구가 내 장난에 소리 내어 웃어만 보았다.,,ko-orthography-rules,general,core
+basic,spacing-auxverb-compound-19,03,7 8 9 10 11 12,"""spacing_auxverb_compound_19""의 뜻은 무엇인가요?",앞말이 이미 두 낱말이 합쳐진 단어라면 뒤의 돕는 말은 꼭 띄어 써요. 비가 많이 와서 작은 나뭇잎이 물에 떠내려가 버렸다.,,ko-orthography-rules,general,core
+basic,spacing-contrast-de-20,03,7 8 9 10 11 12,"""spacing_contrast_de_20""의 뜻은 무엇인가요?",장소를 뜻하는 데는 띄어 쓰고 문장을 부드럽게 이어 주는 데는 붙여 써요. 주말에 친구들과 함께 신나게 축구할 데를 찾아보았다.,,ko-orthography-rules,general,core
+basic,spacing-particle-basic-01-2,03,7 8 9 10 11 12,"""spacing_particle_basic_01""의 뜻은 무엇인가요?",조사는 단어이지만 혼자 쓸 수 없어서 앞말에 꼭 붙여 써요. 나는 오늘 아침에 사과를 맛있게 먹었다.,,ko-orthography-rules,general,core
+basic,spacing-particle-stack-02-2,04,7 8 9 10 11 12,"""spacing_particle_stack_02""의 뜻은 무엇인가요?",조사가 둘 이상 겹쳐서 나와도 앞말에 모두 붙여 써요. 너에게만은 내 비밀을 꼭 알려 주고 싶어.,,ko-orthography-rules,general,core
+basic,spacing-particle-cloze-03-2,04,7 8 9 10 11 12,"""spacing_particle_cloze_03""의 뜻은 무엇인가요?",조사는 앞말과 한 덩어리처럼 붙여서 써야 해요. 친구들이 운동장에서 신나게 축구를 하고 있다.,,ko-orthography-rules,general,core
+basic,spacing-depnoun-basic-04-2,04,7 8 9 10 11 12,"""spacing_depnoun_basic_04""의 뜻은 무엇인가요?",혼자 쓰지 못하고 꾸며 주는 말을 필요로 하는 의존 명사는 앞말과 띄어 써요. 내가 좋아하는 것은 친구들과 함께 축구하는 일이다.,,ko-orthography-rules,general,core
+basic,spacing-depnoun-cloze-05-2,04,7 8 9 10 11 12,"""spacing_depnoun_cloze_05""의 뜻은 무엇인가요?",의존 명사는 뜻이 혼자 완전하지 않아서 앞말과 띄어 써요. 나도 그 어려운 수학 문제를 혼자 풀 수 있다.,,ko-orthography-rules,general,core
+basic,spacing-depnoun-ji-06-2,04,7 8 9 10 11 12,"""spacing_depnoun_ji_06""의 뜻은 무엇인가요?",어떤 일이 일어나고 흐른 시간을 나타내는 '지'는 앞말과 띄어 써요. 우리가 같은 반 친구로 지낸 지 벌써 일 년이 되었다.,,ko-orthography-rules,general,core
+basic,spacing-unit-basic-07-2,04,7 8 9 10 11 12,"""spacing_unit_basic_07""의 뜻은 무엇인가요?",물건의 수량을 세는 단위를 나타내는 말은 앞말과 띄어 써요. 서점에 가서 재미있는 만화책 세 권을 샀다.,,ko-orthography-rules,general,core
+basic,spacing-unit-arabic-08-2,04,7 8 9 10 11 12,"""spacing_unit_arabic_08""의 뜻은 무엇인가요?",아라비아 숫자 뒤에 붙는 단위 명사는 붙여 쓸 수도 있어요. 선생님께서 우리 모둠에 연필 10자루를 나누어 주셨다.,,ko-orthography-rules,general,core
+basic,spacing-unit-order-09-2,05,7 8 9 10 11 12,"""spacing_unit_order_09""의 뜻은 무엇인가요?",차례나 순서를 나타내는 말은 앞말에 붙여 쓸 수 있어요. 우리 형은 올해 중학교 3학년이 되었다.,,ko-orthography-rules,general,core
+basic,spacing-number-unit-10-2,05,7 8 9 10 11 12,"""spacing_number_unit_10""의 뜻은 무엇인가요?",숫자를 한글로 적을 때는 '만' 단위마다 띄어 써요. 도서관에 책이 삼만 오천 권이나 있어서 놀랐다.,,ko-orthography-rules,general,core
+basic,spacing-number-cloze-11-2,05,7 8 9 10 11 12,"""spacing_number_cloze_11""의 뜻은 무엇인가요?",우리말 숫자는 만 단위로 묶어서 띄어 쓰는 규칙이 있어요. 우리 학교 전교생 수는 모두 오백 명이다.,,ko-orthography-rules,general,core
+basic,spacing-contrast-ppun-12-2,05,7 8 9 10 11 12,"""spacing_contrast_ppun_12""의 뜻은 무엇인가요?","명사 뒤의 '뿐'은 붙여 쓰고, 꾸며 주는 말 뒤의 '뿐'은 띄어 써요. 믿을 사람은 너뿐이지만 우리는 조용히 웃을 뿐이었다.",,ko-orthography-rules,general,core
+basic,spacing-contrast-mankeum-13-2,05,7 8 9 10 11 12,"""spacing_contrast_mankeum_13""의 뜻은 무엇인가요?","명사 뒤의 '만큼'은 붙여 쓰고, 행동을 나타내는 꾸밈말 뒤의 '만큼'은 띄어 써요. 형만큼 달리기를 잘하고 싶어서 매일 연습할 만큼 노력했다.",,ko-orthography-rules,general,core
+basic,spacing-contrast-daero-14-2,05,7 8 9 10 11 12,"""spacing_contrast_daero_14""의 뜻은 무엇인가요?","명사 뒤의 '대로'는 붙여 쓰고, 꾸며 주는 말 뒤의 '대로'는 띄어 써요. 교칙대로 행동하며 마음이 내키는 대로 놀지 않았다.",,ko-orthography-rules,general,core
+basic,spacing-contrast-man-15-2,05,7 8 9 10 11 12,"""spacing_contrast_man_15""의 뜻은 무엇인가요?","오직 하나를 뜻하는 '만'은 붙여 쓰고, 시간을 나타내는 '만'은 띄어 써요. 너만 바라보며 기다린 지 세 시간 만에 드디어 만났다.",,ko-orthography-rules,general,core
+basic,spacing-auxverb-basic-16-2,06,7 8 9 10 11 12,"""spacing_auxverb_basic_16""의 뜻은 무엇인가요?",도움을 주는 보조 용언은 띄어 쓰는 것이 원칙이지만 붙여 써도 돼요. 하늘을 보니 곧 비가 올 듯하다.,,ko-orthography-rules,general,core
+basic,spacing-auxverb-cloze-17-2,06,7 8 9 10 11 12,"""spacing_auxverb_cloze_17""의 뜻은 무엇인가요?",본래 뜻을 돕는 보조 용언은 띄어 쓰는 것이 기본 원칙이에요. 주말에 빌린 책을 다 읽어 보았다.,,ko-orthography-rules,general,core
+basic,spacing-auxverb-restrict-18-2,06,7 8 9 10 11 12,"""spacing_auxverb_restrict_18""의 뜻은 무엇인가요?",앞 단어에 조사가 붙어 있으면 뒤따르는 보조 용언은 반드시 띄어 써요. 방학 숙제를 다 끝내고 책도 읽어도 보았다.,,ko-orthography-rules,general,core
+basic,spacing-auxverb-compound-19-2,06,7 8 9 10 11 12,"""spacing_auxverb_compound_19""의 뜻은 무엇인가요?",앞말이 이미 합성어이면 뒤에 오는 보조 용언은 반드시 띄어 써요. 친구의 재미있는 농담에 아이들이 모두 웃어넘겨 버렸다.,,ko-orthography-rules,general,core
+basic,spacing-contrast-de-20-2,06,7 8 9 10 11 12,"""spacing_contrast_de_20""의 뜻은 무엇인가요?","장소나 일을 뜻하는 '데'는 띄어 쓰고, 뒤를 이어 주는 '-ㄴ데'는 붙여 써요. 갈 데가 없었는데 마침 민수가 자기 집에 초대했다.",,ko-orthography-rules,general,core
+cloze,sai-siot-native-densification,06,7 8 9 10 11 12,선생님은 국어 시간에 sai-siot-native-{{c1::densification}} 규칙으로 냇가를 공책에 적게 하셨다.,densification,,ko-orthography-rules,general,core
+cloze,sai-siot-native-n-addition,06,7 8 9 10 11 12,동생과 양치를 하다가 sai-siot-native-n-{{c1::addition}} 규칙이 생각나 잇몸이라는 글자를 떠올렸다.,addition,,ko-orthography-rules,general,core
+cloze,sai-siot-native-nn-addition,07,7 8 9 10 11 12,단풍놀이를 가서 친구와 sai-siot-native-nn-{{c1::addition}} 규칙을 떠올리며 나뭇잎을 함께 주웠다.,addition,,ko-orthography-rules,general,core
+cloze,sai-siot-aspirate-glottal-contrast,07,7 8 9 10 11 12,축구 경기 중 sai-siot-aspirate-glottal-{{c1::contrast}} 규칙을 떠올려 위쪽 골대로 공을 찼다.,contrast,,ko-orthography-rules,general,core
+cloze,sai-siot-sino-native-densification,07,7 8 9 10 11 12,과학 동아리 방에서 sai-siot-sino-native-{{c1::densification}} 규칙을 떠올리며 촛불을 켰다.,densification,,ko-orthography-rules,general,core
+cloze,sai-siot-sino-native-n-addition,07,7 8 9 10 11 12,할머니 댁에서 우리는 sai-siot-sino-native-n-{{c1::addition}} 규칙을 배우며 제삿날을 달력에 표시했다.,addition,,ko-orthography-rules,general,core
+cloze,sai-siot-sino-sino-contrast,07,7 8 9 10 11 12,도서관에서 짝꿍과 sai-siot-sino-sino-{{c1::contrast}} 규칙을 정리하며 국어 시험을 준비했다.,contrast,,ko-orthography-rules,general,core
+cloze,sai-siot-sino-six-exceptions-cloze,07,7 8 9 10 11 12,국어 퀴즈 시간에 sai-siot-sino-six-exceptions-{{c1::cloze}} 문제를 친구와 힘을 합쳐 풀었다.,cloze,,ko-orthography-rules,general,core
+cloze,sai-siot-sino-general-no-s,07,7 8 9 10 11 12,방과 후 교실에서 {{c1::s}}ai-siot-sino-general-no-s 규칙을 익히며 초점이라는 단어를 연습했다.,s,,ko-orthography-rules,general,core
+cloze,sai-siot-jeonse-contrast,08,7 8 9 10 11 12,새 집으로 이사 갈 때 sai-siot-jeonse-{{c1::contrast}} 규칙을 생각하며 전셋집을 바르게 썼다.,contrast,,ko-orthography-rules,general,core
+cloze,sai-siot-coda-presence-blocking,08,7 8 9 10 11 12,친구들과 소풍을 가서 sai-siot-coda-presence-{{c1::blocking}} 규칙을 떠올리며 물가에서 놀았다.,blocking,,ko-orthography-rules,general,core
+cloze,sai-siot-sino-native-nn-addition,08,7 8 9 10 11 12,할아버지와 이야기하다가 sai-siot-sino-native-nn-{{c1::addition}} 규칙을 떠올리며 훗일을 공책에 메모했다.,addition,,ko-orthography-rules,general,core
+cloze,sai-siot-loanword-contrast,08,7 8 9 10 11 12,동아리 친구들과 sai-siot-loanword-{{c1::contrast}} 규칙을 떠올리며 피자집으로 점심을 먹으러 갔다.,contrast,,ko-orthography-rules,general,core
+cloze,sai-siot-native-n-addition-cloze,08,7 8 9 10 11 12,교실에서 국어 짝꿍과 sai-siot-native-n-addition-{{c1::cloze}} 카드를 맞히며 재밌게 공부했다.,cloze,,ko-orthography-rules,general,core
+cloze,sai-siot-aspirate-front-no-s,08,7 8 9 10 11 12,시골 외할머니 댁에서 {{c1::s}}ai-siot-aspirate-front-no-s 규칙을 생각하며 위채 마루에 앉았다.,s,,ko-orthography-rules,general,core
+cloze,sai-siot-wi-wit-ut-contrast,08,7 8 9 10 11 12,명절에 예쁜 웃옷을 입으며 sai-siot-wi-wit-ut-{{c1::contrast}} 규칙을 머릿속으로 떠올렸다.,contrast,,ko-orthography-rules,general,core
+cloze,sai-siot-six-exceptions-setbang,09,7 8 9 10 11 12,사회 시간에 부동산을 배우며 sai-siot-six-exceptions-{{c1::setbang}} 규칙에 나온 셋방을 찾아보았다.,setbang,,ko-orthography-rules,general,core
+cloze,sai-siot-six-exceptions-gotgan,09,7 8 9 10 11 12,박물관 견학을 가서 sai-siot-six-exceptions-{{c1::gotgan}} 규칙에 나오는 옛날 곳간을 직접 보았다.,gotgan,,ko-orthography-rules,general,core
+cloze,sai-siot-sino-sino-naegwa,09,7 8 9 10 11 12,감기에 걸려 병원에 가며 sai-siot-sino-sino-{{c1::naegwa}} 규칙을 생각하고 내과 간판을 읽었다.,naegwa,,ko-orthography-rules,general,core
+cloze,sai-siot-six-exceptions-toetgan,09,7 8 9 10 11 12,한옥마을 체험 학습에서 sai-siot-six-exceptions-{{c1::toetgan}} 규칙에 적힌 툇간 구조를 관찰했다.,toetgan,,ko-orthography-rules,general,core
+cloze,sai-siot-native-densification-2,09,7 8 9 10 11 12,친구와 촛불을 켜며 sai-siot-native-{{c1::densification}} 규칙을 공부했다.,densification,,ko-orthography-rules,general,core
+cloze,sai-siot-native-n-addition-2,09,7 8 9 10 11 12,양치질하다 잇몸을 보며 sai-siot-native-n-{{c1::addition}} 현상을 떠올렸다.,addition,,ko-orthography-rules,general,core
+cloze,sai-siot-native-nn-addition-2,09,7 8 9 10 11 12,방 청소 뒷일을 도우며 sai-siot-native-nn-{{c1::addition}} 현상을 배웠다.,addition,,ko-orthography-rules,general,core
+cloze,sai-siot-aspirate-glottal-contrast-2,10,7 8 9 10 11 12,운동장 위쪽을 가리키며 sai-siot-aspirate-glottal-{{c1::contrast}} 규칙을 확인했다.,contrast,,ko-orthography-rules,general,core
+cloze,sai-siot-sino-native-densification-2,10,7 8 9 10 11 12,수영 후 귓병을 치료하며 sai-siot-sino-native-{{c1::densification}} 규칙을 복습했다.,densification,,ko-orthography-rules,general,core
+cloze,sai-siot-sino-native-n-addition-2,10,7 8 9 10 11 12,할머니 댁 제삿날에 모여 sai-siot-sino-native-n-{{c1::addition}} 원리를 익혔다.,addition,,ko-orthography-rules,general,core
+cloze,sai-siot-sino-sino-contrast-2,10,7 8 9 10 11 12,친구와 치과에 가며 sai-siot-sino-sino-{{c1::contrast}} 규칙을 복습했다.,contrast,,ko-orthography-rules,general,core
+cloze,sai-siot-sino-six-exceptions-cloze-2,10,7 8 9 10 11 12,수학 시험 숫자 문제를 풀며 sai-siot-sino-six-exceptions-{{c1::cloze}} 내용을 연습했다.,cloze,,ko-orthography-rules,general,core
+cloze,sai-siot-sino-general-no-s-2,10,7 8 9 10 11 12,카메라 초점을 맞추며 sai-siot-sino-general-no-{{c1::s}} 원리를 확인했다.,s,,ko-orthography-rules,general,core
+cloze,sai-siot-jeonse-contrast-2,10,7 8 9 10 11 12,새집으로 이사하며 sai-siot-jeonse-{{c1::contrast}} 차이를 국어 공책에 정리했다.,contrast,,ko-orthography-rules,general,core
+cloze,sai-siot-coda-presence-blocking-2,11,7 8 9 10 11 12,급식 눈물 떡볶이를 먹으며 sai-siot-coda-presence-{{c1::blocking}} 규칙을 떠올렸다.,blocking,,ko-orthography-rules,general,core
+cloze,sai-siot-sino-native-nn-addition-2,11,7 8 9 10 11 12,어려운 숙제는 예삿일이 아니라며 sai-siot-sino-native-nn-{{c1::addition}} 규칙을 공부했다.,addition,,ko-orthography-rules,general,core
+cloze,sai-siot-loanword-contrast-2,11,7 8 9 10 11 12,생일 파티 피자집 앞에서 sai-siot-loanword-{{c1::contrast}} 규칙을 복습했다.,contrast,,ko-orthography-rules,general,core
+cloze,sai-siot-native-n-addition-cloze-2,11,7 8 9 10 11 12,아랫니 빈칸 문제를 풀며 sai-siot-native-n-addition-{{c1::cloze}} 연습을 끝냈다.,cloze,,ko-orthography-rules,general,core
+cloze,sai-siot-aspirate-front-no-s-2,11,7 8 9 10 11 12,교실 뒤편 게시판을 보며 sai-siot-aspirate-front-no-{{c1::s}} 규칙을 확인했다.,s,,ko-orthography-rules,general,core
+cloze,sai-siot-wi-wit-ut-contrast-2,11,7 8 9 10 11 12,체육 시간에 윗옷을 입으며 sai-siot-wi-wit-ut-{{c1::contrast}} 규칙을 복습했다.,contrast,,ko-orthography-rules,general,core
+cloze,sai-siot-six-exceptions-setbang-2,11,7 8 9 10 11 12,친구 집 셋방 이야기를 들으며 sai-siot-six-exceptions-{{c1::setbang}} 카드를 풀었다.,setbang,,ko-orthography-rules,general,core
+cloze,sai-siot-six-exceptions-gotgan-2,12,7 8 9 10 11 12,시골 할머니 곳간을 보며 sai-siot-six-exceptions-{{c1::gotgan}} 규칙을 기억했다.,gotgan,,ko-orthography-rules,general,core
+cloze,sai-siot-sino-sino-naegwa-2,12,7 8 9 10 11 12,감기 때문에 내과에 가며 sai-siot-sino-sino-{{c1::naegwa}} 맞춤법을 익혔다.,naegwa,,ko-orthography-rules,general,core
+cloze,sai-siot-six-exceptions-toetgan-2,12,7 8 9 10 11 12,한옥 박물관 툇간을 보며 sai-siot-six-exceptions-{{c1::toetgan}} 단어를 배웠다.,toetgan,,ko-orthography-rules,general,core
+cloze,card,12,7 8 9 10 11 12,선생님께서 국어 시간에 받침-대표음-{{c1::개수}} 일곱 개를 쉽게 외우는 법을 알려주셨다.,개수,,ko-orthography-rules,general,core
+cloze,card-2,12,7 8 9 10 11 12,친구와 받아쓰기 연습을 하며 받침-ㄱ-{{c1::대표음}} 규칙을 문제에 바르게 적용해 보았다.,대표음,,ko-orthography-rules,general,core
+cloze,card-3,12,7 8 9 10 11 12,단어 카드를 뒤집으며 받침-ㅂ-{{c1::대표음}} 소리가 나는 글자들을 하나씩 찾아보았다.,대표음,,ko-orthography-rules,general,core
+cloze,card-4,12,7 8 9 10 11 12,짝꿍과 퀴즈를 풀면서 받침-ㄷ-계열-{{c1::통합}} 규칙을 서로 재미있게 맞춰 보았다.,통합,,ko-orthography-rules,general,core
+cloze,card-5,13,7 8 9 10 11 12,공책에 글씨를 쓰다가 받침-ㄷ규정-{{c1::원칙}} 내용을 떠올려 맞춤법을 바르게 고쳤다.,원칙,,ko-orthography-rules,general,core
+cloze,card-6,13,7 8 9 10 11 12,운동장에서 달리기를 하고 난 뒤 받침-ㄷ유지-{{c1::용언}} 단어인 '걷다'를 공책에 적었다.,용언,,ko-orthography-rules,general,core
+cloze,card-7,13,7 8 9 10 11 12,국어 책을 소리 내어 읽으며 받침-연음-{{c1::원칙}} 규칙에 맞게 또박또박 발음했다.,원칙,,ko-orthography-rules,general,core
+cloze,card-8,13,7 8 9 10 11 12,동생에게 '옷 안'을 소리 내는 받침-실질형태소-{{c1::대표음연음}} 원리를 친절하게 설명해 주었다.,대표음연음,,ko-orthography-rules,general,core
+cloze,card-9,13,7 8 9 10 11 12,급식실에서 점심을 먹기 전에 대비-숟가락-{{c1::젓가락}} 글자 표기를 친구와 확인했다.,젓가락,,ko-orthography-rules,general,core
+cloze,card-10,13,7 8 9 10 11 12,일기장에 글을 쓰면서 대비-빗-빚-{{c1::빛}} 세 단어의 받침을 헷갈리지 않고 정확히 썼다.,빛,,ko-orthography-rules,general,core
+cloze,card-11,13,7 8 9 10 11 12,소풍 다녀온 다음 날 친구들과 어원-이튿날-{{c1::표기}} 맞춤법에 대해 이야기했다.,표기,,ko-orthography-rules,general,core
+cloze,card-12,14,7 8 9 10 11 12,국어 시간에 대비-낫-낮-{{c1::낯}} 단어 카드를 알맞은 그림과 짝지어 보았다.,낯,,ko-orthography-rules,general,core
+cloze,card-13,14,7 8 9 10 11 12,추운 날 덧신을 신으면서 받침-접두사-덧-{{c1::선택}} 맞춤법 규칙을 떠올렸다.,선택,,ko-orthography-rules,general,core
+cloze,card-14,14,7 8 9 10 11 12,달력을 보며 할머니께 받침-섣달-{{c1::어원표기}} 단어의 뜻이 음력 12월인지 여쭈어보았다.,어원표기,,ko-orthography-rules,general,core
+cloze,card-15,14,7 8 9 10 11 12,숙제를 하다가 받침-못하다-{{c1::표기근거}} 설명을 읽고 '못하다'를 바르게 적었다.,표기근거,,ko-orthography-rules,general,core
+cloze,card-16,14,7 8 9 10 11 12,책을 읽을 때 받침-겹받침-탈락-{{c1::원칙}} 규칙을 떠올리며 닭을 [닥]으로 소리 내어 읽었다.,원칙,,ko-orthography-rules,general,core
+cloze,card-17,14,7 8 9 10 11 12,국어 퀴즈 대회에서 받침-겹받침-{{c1::뒤자음발음}} 문제를 자신 있게 맞혔다.,뒤자음발음,,ko-orthography-rules,general,core
+cloze,card-18,14,7 8 9 10 11 12,운동장 모래를 밟으며 받침-ㄼ-{{c1::예외발음}} 규칙을 친구에게 설명해 주었다.,예외발음,,ko-orthography-rules,general,core
+cloze,card-19,15,7 8 9 10 11 12,새해 사흗날 아침에 가족들과 떡국을 먹으며 받침-사흘날-사흗날-{{c1::규정}} 단어를 떠올렸다.,규정,,ko-orthography-rules,general,core
+cloze,card-20,15,7 8 9 10 11 12,국어 수업 시간에 받침-절음-{{c1::합성어발음}} 단어들을 친구들과 함께 소리 내어 읽었다.,합성어발음,,ko-orthography-rules,general,core
+cloze,card-21,15,7 8 9 10 11 12,선생님께서 국어 시간에 받침-대표음-{{c1::개수}} 규칙을 칠판에 적어 주셨다.,개수,,ko-orthography-rules,general,core
+cloze,card-22,15,7 8 9 10 11 12,친구와 시험공부를 하며 받침-ㄱ-{{c1::대표음}} 소리를 함께 소리 내어 읽었다.,대표음,,ko-orthography-rules,general,core
+cloze,card-23,15,7 8 9 10 11 12,짝꿍에게 받침-ㅂ-{{c1::대표음}} 발음 방법을 말해 주며 같이 문제를 풀었다.,대표음,,ko-orthography-rules,general,core
+cloze,card-24,15,7 8 9 10 11 12,쉬는 시간에 친구와 받침-ㄷ-계열-{{c1::통합}} 단어들을 공책에 정리했다.,통합,,ko-orthography-rules,general,core
+cloze,card-25,15,7 8 9 10 11 12,받침-ㄷ규정-{{c1::원칙}} 문제를 풀고 맞아서 친구에게 자랑했다.,원칙,,ko-orthography-rules,general,core
+cloze,card-26,16,7 8 9 10 11 12,선생님께서 국어 문제로 받침-ㄷ유지-{{c1::용언}} 예시를 찾아보라고 하셨다.,용언,,ko-orthography-rules,general,core
+basic,card-27,16,7 8 9 10 11 12,"""받침-연음-원칙""의 뜻은 무엇인가요?",받침 뒤에 모음으로 시작하는 말이 오면 받침 소리가 다음 글자로 넘어가는 규칙이다. 책을 소리 내어 읽을 때 받침-연음-원칙 지켜서 부드럽게 발음했다.,,ko-orthography-rules,general,core
+basic,card-28,16,7 8 9 10 11 12,"""받침-실질형태소-대표음연음""의 뜻은 무엇인가요?",받침 뒤에 뜻을 가진 말이 오면 대표음으로 바꾼 뒤 넘겨서 소리 내는 규칙이다. 국어 시간에 받침-실질형태소-대표음연음 규칙을 배우고 직접 소리를 내보았다.,,ko-orthography-rules,general,core
+basic,card-29,16,7 8 9 10 11 12,"""대비-숟가락-젓가락""의 뜻은 무엇인가요?",숟가락은 술에서 와서 디귿 받침이고 젓가락은 사이시옷이 붙어 시옷 받침인 차이이다. 급식실에서 친구에게 대비-숟가락-젓가락 받침 차이를 설명해 주었다.,,ko-orthography-rules,general,core
+basic,card-30,16,7 8 9 10 11 12,"""대비-빗-빚-빛""의 뜻은 무엇인가요?",소리는 모두 같지만 머리 빗기나 빌린 돈이나 밝은 빛처럼 뜻과 받침이 서로 다른 말들이다. 받아쓰기 시험에서 대비-빗-빚-빛 세 낱말의 받침을 모두 맞혔다.,,ko-orthography-rules,general,core
+basic,card-31,16,7 8 9 10 11 12,"""어원-이튿날-표기""의 뜻은 무엇인가요?",원래 이틀에서 온 말이지만 디귿 소리가 나서 이튿날로 적는 표기법이다. 일기장을 쓰며 어원-이튿날-표기 기억해서 바르게 적었다.,,ko-orthography-rules,general,core
+basic,card-32,16,7 8 9 10 11 12,"""대비-낫-낮-낯""의 뜻은 무엇인가요?",발음은 모두 같지만 풀 베는 도구와 밝은 시간과 얼굴이라는 서로 다른 뜻을 가진 말들이다. 국어 퀴즈 시간에 대비-낫-낮-낯 문제를 친구보다 먼저 맞혔다.,,ko-orthography-rules,general,core
+basic,card-33,17,7 8 9 10 11 12,"""받침-접두사-덧-선택""의 뜻은 무엇인가요?",겹치거나 거듭된다는 뜻을 더할 때 시옷 받침을 써서 덧으로 적는 원칙이다. 겨울에 신는 덧신을 떠올리며 받침-접두사-덧-선택 원리를 쉽게 이해했다.,,ko-orthography-rules,general,core
+basic,card-34,17,7 8 9 10 11 12,"""받침-섣달-어원표기""의 뜻은 무엇인가요?",원래 설과 달이 합쳐졌지만 리을이 디귿 소리로 바뀌어 섣달로 적는 표기이다. 할머니께서 말씀하신 음력 달력을 보며 받침-섣달-어원표기 규칙을 떠올렸다.,,ko-orthography-rules,general,core
+basic,card-35,17,7 8 9 10 11 12,"""받침-못하다-표기근거""의 뜻은 무엇인가요?",어떤 일을 잘 해내지 못한다는 뜻에서 시옷 받침인 못으로 적는 표기 근거이다. 축구 연습을 끝내고 친구와 받침-못하다-표기근거 내용을 복습했다.,,ko-orthography-rules,general,core
+basic,card-36,17,7 8 9 10 11 12,"""받침-겹받침-탈락-원칙""의 뜻은 무엇인가요?",겹받침 두 글자 중에서 한 자음이 빠지고 하나만 소리 나는 규칙이다. 국어 시간에 책을 읽으며 받침-겹받침-탈락-원칙 따라 바르게 소리 냈다.,,ko-orthography-rules,general,core
+basic,card-37,17,7 8 9 10 11 12,"""받침-겹받침-뒤자음발음""의 뜻은 무엇인가요?",겹받침 두 자음 중에서 앞 자음 대신 뒤에 있는 자음 소리로 나는 규칙이다. 닭이라는 글자를 소리 내며 받침-겹받침-뒤자음발음 규칙을 배웠다.,,ko-orthography-rules,general,core
+basic,card-38,17,7 8 9 10 11 12,"""받침-ㄼ-예외발음""의 뜻은 무엇인가요?",리을비읍 받침은 보통 리을로 소리 나지만 밟다처럼 비읍으로 소리 나는 특별한 규칙이다. 운동장에서 흙을 밟으며 받침-ㄼ-예외발음 단어인 밟다를 떠올렸다.,,ko-orthography-rules,general,core
+basic,card-39,17,7 8 9 10 11 12,"""받침-사흘날-사흗날-규정""의 뜻은 무엇인가요?",사흘과 날이 만날 때 리을이 디귿 소리로 바뀌어 사흗날로 적는 규칙이다. 달력에서 초사흘 다음 날을 가리키며 받침-사흘날-사흗날-규정 내용을 확인했다.,,ko-orthography-rules,general,core
+basic,card-40,18,7 8 9 10 11 12,"""받침-절음-합성어발음""의 뜻은 무엇인가요?",두 말이 합쳐질 때 앞 받침이 바로 넘어가지 않고 한 번 끊어서 소리 나는 규칙이다. 선생님께서 합성어를 읽을 때 받침-절음-합성어발음 현상이 일어난다고 설명하셨다.,,ko-orthography-rules,general,core
+basic,jukgyeok-i,18,7 8 9 10 11 12,"""jukgyeok-i""의 뜻은 무엇인가요?",앞말에 받침이 있을 때 붙어서 행동의 주인공을 나타내는 말이에요. 교실에서 반장이 재미있는 게임 규칙을 친구들에게 설명했다.,,ko-orthography-rules,general,core
+basic,jukgyeok-ga,18,7 8 9 10 11 12,"""jukgyeok-ga""의 뜻은 무엇인가요?",앞말에 받침이 없을 때 붙어서 행동의 주인공을 나타내는 말이에요. 방과 후에 친구가 운동장에서 같이 축구를 하자고 불렀다.,,ko-orthography-rules,general,core
+basic,bojosa-eun,18,7 8 9 10 11 12,"""bojosa-eun""의 뜻은 무엇인가요?",받침이 있는 말 뒤에 붙어서 이야기의 중심 대상이나 다른 것과의 차이를 나타내요. 동생은 그림을 아주 잘 그리지만 노래는 아직 서툴러요.,,ko-orthography-rules,general,core
+basic,bojosa-neun,18,7 8 9 10 11 12,"""bojosa-neun""의 뜻은 무엇인가요?",받침이 없는 말 뒤에 붙어서 이야기의 중심 대상이나 다른 것과의 차이를 나타내요. 민수는 점심시간마다 친구들과 함께 농구를 즐겨 해요.,,ko-orthography-rules,general,core
+basic,mokjeokgyeok-eul,18,7 8 9 10 11 12,"""mokjeokgyeok-eul""의 뜻은 무엇인가요?",받침이 있는 이름 뒤에 붙어서 어떤 행동을 직접 받는 대상을 나타내요. 형이 방에서 재미있는 만화책을 소리 내어 읽고 있어요.,,ko-orthography-rules,general,core
+basic,mokjeokgyeok-reul,18,7 8 9 10 11 12,"""mokjeokgyeok-reul""의 뜻은 무엇인가요?",받침이 없는 이름 뒤에 붙어서 어떤 행동을 직접 받는 대상을 나타내요. 우리는 체육 시간에 넓은 운동장에서 축구를 신나게 했다.,,ko-orthography-rules,general,core
+basic,cloze-jukgyeok-phonology,19,7 8 9 10 11 12,"""cloze-jukgyeok-phonology""의 뜻은 무엇인가요?",앞말의 끝에 받침이 있으면 '이'를 쓰고 받침이 없으면 '가'를 써요. 선생님이 교실에 들어오시고 지수가 칠판을 깨끗하게 지웠다.,,ko-orthography-rules,general,core
+basic,cloze-mokjeokgyeok-phonology,19,7 8 9 10 11 12,"""cloze-mokjeokgyeok-phonology""의 뜻은 무엇인가요?",앞말의 끝에 받침이 있으면 '을'을 쓰고 받침이 없으면 '를'을 써요. 점심에 밥을 맛있게 먹고 나서 달콤한 주스를 마셨다.,,ko-orthography-rules,general,core
+basic,contrast-subject-topic-function,19,7 8 9 10 11 12,"""contrast-subject-topic-function""의 뜻은 무엇인가요?",'이/가'는 새로운 주인공을 알리고 '은/는'은 이미 아는 이야기 대상을 알리거나 다른 것과 비교해요. 옛날에 착한 토끼가 살았는데 그 토끼는 달리기를 정말 잘했어요.,,ko-orthography-rules,general,core
+basic,contrast-question-answer-particle,19,7 8 9 10 11 12,"""contrast-question-answer-particle""의 뜻은 무엇인가요?",'누가'처럼 의문사를 써서 물어보면 대답할 때도 '이/가'를 써서 주인공을 밝혀요. 누가 골을 넣었냐는 질문에 친구들이 민수가 넣었다고 소리쳤다.,,ko-orthography-rules,general,core
+basic,cloze-topic-contrast-neun,19,7 8 9 10 11 12,"""cloze-topic-contrast-neun""의 뜻은 무엇인가요?",받침이 없는 말에 붙어 다른 대상과 서로 다르다는 점을 뚜렷하게 보여 줘요. 피아노는 매일 연습하지만 기타는 아직 배운 적이 없어요.,,ko-orthography-rules,general,core
+basic,contrast-subject-object-marking,19,7 8 9 10 11 12,"""contrast-subject-object-marking""의 뜻은 무엇인가요?",'이/가'는 행동을 하는 주인공에 붙고 '을/를'은 그 행동을 받는 대상에 붙어요. 민수가 축구공을 멀리 차서 골대 안으로 멋지게 넣었다.,,ko-orthography-rules,general,core
+basic,cloze-object-marking-eul,19,7 8 9 10 11 12,"""cloze-object-marking-eul""의 뜻은 무엇인가요?",받침이 있는 이름 뒤에 붙어 행동을 직접 받는 대상임을 꼭 집어 알려 줘요. 학교 도서관에서 친구와 함께 동화책을 조용히 읽었다.,,ko-orthography-rules,general,core
+basic,complement-vs-subject-marker,20,7 8 9 10 11 12,"""complement-vs-subject-marker""의 뜻은 무엇인가요?",'되다'나 '아니다' 바로 앞에 오는 '이/가'는 주인공이 아니라 보충해 주는 말이에요. 내 친구 민호는 올해 우리 학교 학생회장이 되었다.,,ko-orthography-rules,general,core
+basic,topic-outer-subject-inner,20,7 8 9 10 11 12,"""topic-outer-subject-inner""의 뜻은 무엇인가요?",전체 이야기 주제를 '은/는'으로 먼저 말하고 그 속의 구체적인 부분을 '이/가'로 설명해요. 우리 삼촌은 키가 커서 농구를 아주 잘하신다.,,ko-orthography-rules,general,core
+basic,cloze-embedded-subject-ga,20,7 8 9 10 11 12,"""cloze-embedded-subject-ga""의 뜻은 무엇인가요?",큰 문장 속에 들어간 작은 문장의 주인공 자리에는 주로 '가'를 써요. 어제 우리가 응원한 야구팀이 결승전에서 짜릿하게 이겼다.,,ko-orthography-rules,general,core
+basic,object-topic-contrast-neun,20,7 8 9 10 11 12,"""object-topic-contrast-neun""의 뜻은 무엇인가요?",목적어 자리에 '는'을 써서 다른 것은 몰라도 그것만은 그렇다는 비교의 뜻을 나타내요. 나는 다른 운동은 못해도 줄넘기는 매일 백 개씩 넘을 수 있다.,,ko-orthography-rules,general,core
+basic,cloze-object-contrast-eun,20,7 8 9 10 11 12,"""cloze-object-contrast-eun""의 뜻은 무엇인가요?",받침이 있는 목적어 뒤에 '은'을 써서 다른 대상과 비교하여 강조해요. 동생이 당근은 골라내고 달콤한 사과만 쏙 골라서 다 먹었다.,,ko-orthography-rules,general,core
+basic,contrast-subject-object-psych-verb,20,7 8 9 10 11 12,"""contrast-subject-object-psych-verb""의 뜻은 무엇인가요?",'좋다'나 '싫다'처럼 마음을 나타내는 말 앞에서는 목적어가 아니라 '이/가'를 써요. 나는 어두운 방에 혼자 있는 귀신 이야기가 정말 무섭다.,,ko-orthography-rules,general,core
+basic,discourse-topic-shift,20,7 8 9 10 11 12,"""discourse-topic-shift""의 뜻은 무엇인가요?",이야기를 나누다가 다른 새로운 내용으로 화제를 바꿀 때 '은/는'을 써요. 축구 연습 이야기는 여기까지 하고 다음 주 시험 준비는 어떻게 할까?,,ko-orthography-rules,general,core
+basic,card-41,21,7 8 9 10 11 12,"""되-돼-기초판별""의 뜻은 무엇인가요?",하와 해를 넣어 보고 말이 되는 쪽으로 되와 돼를 가려내는 방법이다. 국어 시간에 짝과 함께 되-돼-기초판별 연습 문제를 풀었다.,,ko-orthography-rules,general,core
+basic,card-42,21,7 8 9 10 11 12,"""되-돼-종결어미""의 뜻은 무엇인가요?",문장을 끝낼 때 되어의 줄임말인 돼를 쓰고 되는 혼자 쓰지 않는 규칙이다. 선생님께서 문장 끝에 알맞은 말을 넣는 되-돼-종결어미 문제를 내주셨다.,,ko-orthography-rules,general,core
+basic,card-43,21,7 8 9 10 11 12,"""되-돼-빈칸완성""의 뜻은 무엇인가요?",문장의 빈칸에 들어갈 말이 되인지 돼인지 알맞게 채워 넣는 활동이다. 쉬는 시간에 친구와 문제집에 나온 되-돼-빈칸완성 퀴즈를 같이 풀었다.,,ko-orthography-rules,general,core
+basic,card-44,21,7 8 9 10 11 12,"""되-돼-어간결합""의 뜻은 무엇인가요?",되 뒤에 자음이나 모음으로 시작하는 여러 말이 이어져 붙는 모양이다. 방과 후 국어 동아리에서 되-돼-어간결합 카드를 보고 알맞은 짝을 찾았다.,,ko-orthography-rules,general,core
+basic,card-45,21,7 8 9 10 11 12,"""되-돼-의문형활용""의 뜻은 무엇인가요?",질문하는 문장에서 되니나 돼처럼 물어보는 말로 바뀌어 쓰이는 모습이다. 친구에게 지금 축구해도 되냐고 묻는 문장으로 되-돼-의문형활용을 배웠다.,,ko-orthography-rules,general,core
+basic,card-46,21,7 8 9 10 11 12,"""안-않-부사판별""의 뜻은 무엇인가요?",아니의 줄임말로 동사나 형용사 앞에서 뜻을 부정하는 안을 가려내는 규칙이다. 오늘 체육 수업에 안 가겠다고 말하며 안-않-부사판별 규칙을 떠올렸다.,,ko-orthography-rules,general,core
+basic,card-47,21,7 8 9 10 11 12,"""안-않-보조용언""의 뜻은 무엇인가요?",하지 않다처럼 다른 말 뒤에 붙어 그 뜻을 부정해 주는 쓰임이다. 동생이 밥을 먹지 않는다고 해서 안-않-보조용언 쓰는 법을 알려주었다.,,ko-orthography-rules,general,core
+basic,card-48,22,7 8 9 10 11 12,"""안-않-빈칸완성""의 뜻은 무엇인가요?",문장의 빈자리에 안과 않 가운데 알맞은 말을 골라 채우는 연습이다. 국어 시험을 앞두고 교과서의 안-않-빈칸완성 문제를 꼼꼼하게 풀었다.,,ko-orthography-rules,general,core
+basic,card-49,22,7 8 9 10 11 12,"""안-않-대조판별""의 뜻은 무엇인가요?",아니가 줄어든 안과 아니하가 줄어든 않의 차이를 비교해 구별하는 방법이다. 짝꿍과 오답 노트를 정리하며 안-않-대조판별 표를 공책에 그렸다.,,ko-orthography-rules,general,core
+basic,card-50,22,7 8 9 10 11 12,"""안-않-어간결합심화""의 뜻은 무엇인가요?",않 뒤에 여러 가지 어미가 복잡하게 이어져 붙는 형태를 깊이 배우는 과정이다. 방과 후 수업에서 선생님 설명을 듣고 안-않-어간결합심화 문제를 해결했다.,,ko-orthography-rules,general,core
+basic,card-51,22,7 8 9 10 11 12,"""이-히-사동피동접미사""의 뜻은 무엇인가요?",남에게 시키거나 동작을 당하게 만드는 뜻을 더해 주는 말의 꼬리이다. 국어 시간에 먹이다와 잡히다를 적으며 이-히-사동피동접미사 역할을 익혔다.,,ko-orthography-rules,general,core
+basic,card-52,22,7 8 9 10 11 12,"""이-히-부사화-깨끗이""의 뜻은 무엇인가요?",깨끗하다처럼 시옷 받침으로 끝나는 말 뒤에 이가 붙어 부사가 되는 규칙이다. 청소 시간에 교실을 깨끗하게 닦으며 이-히-부사화-깨끗이 표기를 연습했다.,,ko-orthography-rules,general,core
+basic,card-53,22,7 8 9 10 11 12,"""이-히-부사화-솔직히""의 뜻은 무엇인가요?",솔직하다처럼 하다 앞이 기역 받침이 아닌 말 뒤에 히가 붙는 규칙이다. 친구에게 솔직하게 털어놓는 편지를 쓰며 이-히-부사화-솔직히 형태를 적었다.,,ko-orthography-rules,general,core
+basic,card-54,22,7 8 9 10 11 12,"""이-히-부사화-규칙대조""의 뜻은 무엇인가요?",낱말 끝소리에 따라 이와 히 가운데 무엇을 붙여야 하는지 비교하는 방법이다. 단어 퀴즈 대회에서 이-히-부사화-규칙대조 카드를 맞히고 큰 점수를 얻었다.,,ko-orthography-rules,general,core
+basic,card-55,23,7 8 9 10 11 12,"""이-히-부사화-첩어""의 뜻은 무엇인가요?",낱낱이나 곳곳처럼 같은 말이 겹친 낱말 뒤에 이를 붙이는 규칙이다. 선생님께서 틈틈이라는 단어를 예시로 들어 이-히-부사화-첩어 원리를 설명하셨다.,,ko-orthography-rules,general,core
+basic,card-56,23,7 8 9 10 11 12,"""에-에서-기초격조사""의 뜻은 무엇인가요?",사람이나 사물이 있는 곳 또는 움직임이 일어나는 자리를 나타내는 조사이다. 집에 간다와 방에서 논다를 쓰며 에-에서-기초격조사 구분을 배웠다.,,ko-orthography-rules,general,core
+basic,card-57,23,7 8 9 10 11 12,"""에-에서-목적지도달""의 뜻은 무엇인가요?",움직여서 가 닿는 최종 목표 장소 뒤에 에를 붙여 나타내는 쓰임이다. 방과 후에 학교 운동장에 도착했다며 에-에서-목적지도달 문장을 완성했다.,,ko-orthography-rules,general,core
+basic,card-58,23,7 8 9 10 11 12,"""에-에서-출발점대조""의 뜻은 무엇인가요?",시작하는 장소를 가리키는 에서와 도착하는 곳을 뜻하는 에를 맞비교하는 방법이다. 집에서 출발해 공원에 도착한 경로를 그리며 에-에서-출발점대조 연습을 했다.,,ko-orthography-rules,general,core
+basic,card-59,23,7 8 9 10 11 12,"""에-에서-행동장소대조""의 뜻은 무엇인가요?",어떤 행동이 벌어지는 에서와 단순히 머무는 자리를 뜻하는 에의 차이다. 교실에 가만히 있기와 운동장에서 달리기 문장으로 에-에서-행동장소대조 카드를 풀었다.,,ko-orthography-rules,general,core
+basic,card-60,23,7 8 9 10 11 12,"""에-에서-주격조사확장""의 뜻은 무엇인가요?",정부나 학교 같은 단체가 주어가 될 때 뒤에 에서를 붙여 쓰는 쓰임이다. 우리 학교에서 축구 대회를 연다는 알림판을 보고 에-에서-주격조사확장 쓰임을 이해했다.,,ko-orthography-rules,general,core
+basic,card-61,23,7 8 9 10 11 12,"""되-돼-기초판별""의 뜻은 무엇인가요?",'되'와 '돼' 중 무엇을 쓸지 '하'와 '해'를 넣어 쉽게 구별하는 방법이다. 국어 시간에 되-돼-기초판별 문제를 친구와 함께 풀었다.,,ko-orthography-rules,general,core
+basic,card-62,24,7 8 9 10 11 12,"""되-돼-종결어미""의 뜻은 무엇인가요?",문장 끝을 마칠 때 '되'가 아니라 '돼'를 쓰는 규칙이다. 선생님께서 문장 끝에 되-돼-종결어미 규칙을 쓰라고 알려 주셨다.,,ko-orthography-rules,general,core
+basic,card-63,24,7 8 9 10 11 12,"""되-돼-빈칸완성""의 뜻은 무엇인가요?",빈칸에 들어갈 말이 '되'인지 '돼'인지 알맞게 골라 넣는 연습이다. 짝꿍과 국어 시험 대비로 되-돼-빈칸완성 퀴즈를 풀었다.,,ko-orthography-rules,general,core
+basic,card-64,24,7 8 9 10 11 12,"""되-돼-어간결합""의 뜻은 무엇인가요?",'되' 뒤에 자음으로 시작하는 말이 바로 붙는 결합이다. 숙제를 하다가 되-돼-어간결합 예시로 '되고'를 공책에 적었다.,,ko-orthography-rules,general,core
+basic,card-65,24,7 8 9 10 11 12,"""되-돼-의문형활용""의 뜻은 무엇인가요?",궁금한 점을 물어볼 때 '되'를 활용하여 질문하는 방법이다. 친구에게 질문할 때 되-돼-의문형활용 규칙을 써서 쪽지를 보냈다.,,ko-orthography-rules,general,core
+basic,card-66,24,7 8 9 10 11 12,"""안-않-부사판별""의 뜻은 무엇인가요?",'아니'의 줄임말로 뒤에 오는 말을 바로 꾸며 주는 쓰임이다. 국어 시간에 안-않-부사판별 규칙을 배워서 문장을 고쳤다.,,ko-orthography-rules,general,core
+basic,card-67,24,7 8 9 10 11 12,"""안-않-보조용언""의 뜻은 무엇인가요?",앞말 뒤에 붙어서 그 행동을 하지 않는다고 나타내는 말이다. 방과 후에 친구와 안-않-보조용언 규칙을 복습했다.,,ko-orthography-rules,general,core
+basic,card-68,24,7 8 9 10 11 12,"""안-않-빈칸완성""의 뜻은 무엇인가요?",문장의 빈칸에 '안'과 '않' 중 알맞은 글자를 넣는 공부다. 국어 문제집에서 안-않-빈칸완성 다섯 문제를 금방 풀었다.,,ko-orthography-rules,general,core
+basic,card-69,25,7 8 9 10 11 12,"""안-않-대조판별""의 뜻은 무엇인가요?",짧은 부정의 '안'과 긴 부정의 '않'을 서로 비교해 가리는 방법이다. 도서관에서 짝꿍과 안-않-대조판별 카드를 보며 공부했다.,,ko-orthography-rules,general,core
+basic,card-70,25,7 8 9 10 11 12,"""안-않-어간결합심화""의 뜻은 무엇인가요?",'않' 뒤에 여러 말이 이어져 다양하게 변하는 쓰임이다. 국어 동아리에서 안-않-어간결합심화 문제를 함께 의논했다.,,ko-orthography-rules,general,core
+basic,card-71,25,7 8 9 10 11 12,"""이-히-사동피동접미사""의 뜻은 무엇인가요?",남에게 시키거나 어떤 일을 당하게 만들 때 붙는 말이다. 수업 시간에 이-히-사동피동접미사 카드를 모둠별로 모았다.,,ko-orthography-rules,general,core
+basic,card-72,25,7 8 9 10 11 12,"""이-히-부사화-깨끗이""의 뜻은 무엇인가요?",끝소리가 'ㅅ'인 말 뒤에 '이'가 붙어 꾸미는 말로 바뀌는 규칙이다. 청소를 마치고 이-히-부사화-깨끗이 규칙을 일기장에 정리했다.,,ko-orthography-rules,general,core
+basic,card-73,25,7 8 9 10 11 12,"""이-히-부사화-솔직히""의 뜻은 무엇인가요?",'-하다'가 붙는 말 뒤에 '히'가 붙어 꾸미는 말로 바뀌는 규칙이다. 짝꿍에게 이-히-부사화-솔직히 단어를 넣어서 편지를 썼다.,,ko-orthography-rules,general,core
+basic,card-74,25,7 8 9 10 11 12,"""이-히-부사화-규칙대조""의 뜻은 무엇인가요?",단어 뒤에 '이'와 '히' 중 어느 쪽이 붙는지 비교하는 방법이다. 점심시간에 친구들과 이-히-부사화-규칙대조 놀이를 했다.,,ko-orthography-rules,general,core
+basic,card-75,25,7 8 9 10 11 12,"""이-히-부사화-첩어""의 뜻은 무엇인가요?",같은 말이 두 번 겹친 단어 뒤에 '이'가 붙는 규칙이다. 국어 공책에 이-히-부사화-첩어 규칙을 예쁘게 필기했다.,,ko-orthography-rules,general,core
+basic,card-76,26,7 8 9 10 11 12,"""에-에서-기초격조사""의 뜻은 무엇인가요?",장소나 시간을 나타내는 단어 뒤에 붙이는 말이다. 운동장에 가기 전에 에-에서-기초격조사 문제를 다 풀었다.,,ko-orthography-rules,general,core
+basic,card-77,26,7 8 9 10 11 12,"""에-에서-목적지도달""의 뜻은 무엇인가요?",어떤 곳을 향해 가거나 마지막에 닿는 목적지를 나타내는 쓰임이다. 교실로 걸어가며 에-에서-목적지도달 예문을 머릿속으로 떠올렸다.,,ko-orthography-rules,general,core
+basic,card-78,26,7 8 9 10 11 12,"""에-에서-출발점대조""의 뜻은 무엇인가요?",동작이 시작되는 출발점과 머무는 곳을 구별하는 방법이다. 쉬는 시간에 에-에서-출발점대조 문제를 친구와 맞춰 보았다.,,ko-orthography-rules,general,core
+basic,card-79,26,7 8 9 10 11 12,"""에-에서-행동장소대조""의 뜻은 무엇인가요?",단순히 머무는 자리와 어떤 행동을 하는 곳을 구별하는 방법이다. 체육관에서 놀다가 에-에서-행동장소대조 규칙이 떠올랐다.,,ko-orthography-rules,general,core
+basic,card-80,26,7 8 9 10 11 12,"""에-에서-주격조사확장""의 뜻은 무엇인가요?",학교 같은 단체가 어떤 일을 할 때 주어로 나타내는 쓰임이다. 방송실 친구들과 에-에서-주격조사확장 문장을 방송 대본에 넣었다.,,ko-orthography-rules,general,core
+basic,card-81,26,7 8 9 10 11 12,"""마침표의 기본 쓰임""의 뜻은 무엇인가요?",무엇을 설명하거나 알리는 문장이 끝났을 때 끝에 점을 찍어 나타내는 방법이에요. 오늘 국어 시간에 마침표의 기본 쓰임 규칙을 배우고 공책에 예문을 적었어요.,,ko-orthography-rules,general,core
+basic,card-82,26,7 8 9 10 11 12,"""마침표 표기 제외 규정""의 뜻은 무엇인가요?",제목이나 간판처럼 문장이 아닌 짧은 글 뒤에는 점을 찍지 않는 규칙이에요. 발표 자료 제목을 적을 때는 마침표 표기 제외 규정 내용을 확인해야 해요.,,ko-orthography-rules,general,core
+basic,card-83,27,7 8 9 10 11 12,"""연월일 표기 마침표""의 뜻은 무엇인가요?",숫자 뒤에 점을 찍어서 몇 년 몇 월 며칠인지 쉽게 나타내는 기호예요. 생일 초대장에 날짜를 적으며 연월일 표기 마침표 쓰는 법을 연습했어요.,,ko-orthography-rules,general,core
+basic,card-84,27,7 8 9 10 11 12,"""물음표의 쓰임""의 뜻은 무엇인가요?",상대방에게 궁금한 점을 물어보는 문장의 끝에 붙여 물음을 나타내는 역할이에요. 친구에게 준비물을 물어보는 문장을 쓰면서 물음표의 쓰임 방법을 익혔어요.,,ko-orthography-rules,general,core
+basic,card-85,27,7 8 9 10 11 12,"""느낌표의 쓰임""의 뜻은 무엇인가요?",크게 놀라거나 기쁜 마음 또는 크게 부르는 말을 강조할 때 끝에 쓰는 역할이에요. 축구 경기 응원 문구를 지을 때 느낌표의 쓰임 규칙을 살려 썼어요.,,ko-orthography-rules,general,core
+basic,card-86,27,7 8 9 10 11 12,"""쉼표의 기본 쓰임""의 뜻은 무엇인가요?",같은 자격의 낱말을 나열하거나 문장 중간에서 잠깐 쉬어 읽게 하는 기호의 사용법이에요. 시장에서 살 물건 목록을 적을 때 쉼표의 기본 쓰임 규칙을 잘 지켰어요.,,ko-orthography-rules,general,core
+basic,card-87,27,7 8 9 10 11 12,"""쉼표와 가운뎃점 대비""의 뜻은 무엇인가요?","여러 말을 나열할 때 문장 전체의 흐름을 쉼표로, 짝을 이루는 단어는 가운뎃점으로 나누어 비교하는 방식이에요. 국어 문제집에서 쉼표와 가운뎃점 대비 설명을 읽고 차이점을 알게 되었어요.",,ko-orthography-rules,general,core
+basic,card-88,27,7 8 9 10 11 12,"""큰따옴표와 작은따옴표 대조""의 뜻은 무엇인가요?","소리 내어 한 말은 큰따옴표로, 마음속 생각은 작은따옴표로 쓰는 차이를 비교한 거예요. 독서록을 쓰면서 큰따옴표와 작은따옴표 대조 내용을 떠올려 구별해 적었어요.",,ko-orthography-rules,general,core
+basic,card-89,27,7 8 9 10 11 12,"""작은따옴표의 마음속 생각 표현""의 뜻은 무엇인가요?",겉으로 말하지 않고 혼자 머릿속으로 조용히 생각한 말을 나타낼 때 쓰는 방법이에요. 일기장에 비밀을 적을 때 작은따옴표의 마음속 생각 표현 방법을 사용했어요.,,ko-orthography-rules,general,core
+basic,card-90,28,7 8 9 10 11 12,"""소괄호의 보충 설명 기능""의 뜻은 무엇인가요?",문장 안의 낱말 뜻을 더 쉽게 알려주거나 덧붙여 설명할 때 묶어 주는 역할이에요. 발표 대본에 낱말 뜻을 적으며 소괄호의 보충 설명 기능 예시를 넣었어요.,,ko-orthography-rules,general,core
+basic,card-91,28,7 8 9 10 11 12,"""대괄호의 원문 보충 기능""의 뜻은 무엇인가요?",원래 글쓴이의 글에 빠진 말을 읽는 사람을 위해 글 바깥에서 보태어 넣어 주는 역할이에요. 옛이야기 책을 읽다가 대괄호의 원문 보충 기능 덕분에 뜻을 쉽게 이해했어요.,,ko-orthography-rules,general,core
+basic,card-92,28,7 8 9 10 11 12,"""줄표와 붙임표의 기능 대조""의 뜻은 무엇인가요?",문장 뒤에 내용을 덧붙여 설명하는 줄표와 단어를 이어 주는 붙임표의 서로 다른 쓰임을 비교한 거예요. 국어 시간에 줄표와 붙임표의 기능 대조 문제를 풀며 두 기호를 구별했어요.,,ko-orthography-rules,general,core
+basic,card-93,28,7 8 9 10 11 12,"""가운뎃점의 동등 어구 열거""의 뜻은 무엇인가요?",중요도가 서로 같은 단어나 짝이 되는 낱말들을 가운데 점을 찍어 나란히 늘어놓는 방법이에요. 짝꿍과 동아리 이름을 지을 때 가운뎃점의 동등 어구 열거 규칙을 활용했어요.,,ko-orthography-rules,general,core
+basic,card-94,28,7 8 9 10 11 12,"""쌍점의 설명 및 구별 기능""의 뜻은 무엇인가요?",어떤 제목 뒤에 그 내용을 자세히 풀거나 두 대상을 나누어 보여줄 때 쓰는 방법이에요. 시간표를 작성하면서 쌍점의 설명 및 구별 기능 쓰임을 바르게 지켜 적었어요.,,ko-orthography-rules,general,core
+basic,card-95,28,7 8 9 10 11 12,"""빗금의 행 구분 기능""의 뜻은 무엇인가요?",시나 노래 가사를 줄바꿈 없이 한 줄로 이어서 쓸 때 줄이 바뀌는 자리를 표시해 주는 역할이에요. 좋아하는 동시를 공책에 한 줄로 쓰며 빗금의 행 구분 기능 기호를 넣었어요.,,ko-orthography-rules,general,core
+basic,card-96,28,7 8 9 10 11 12,"""줄임표의 점 개수 규정""의 뜻은 무엇인가요?",말을 줄일 때 찍는 점을 기본 여섯 개나 세 개로 정해 놓은 규칙이에요. 받아쓰기 시험을 볼 때 줄임표의 점 개수 규정 대로 점을 여섯 개 찍었어요.,,ko-orthography-rules,general,core
+basic,card-97,29,7 8 9 10 11 12,"""줄임표 띄어쓰기 규정""의 뜻은 무엇인가요?",말을 줄이는 점 세 개씩을 묶어서 가운데를 띄어 쓰거나 붙여 쓸 수 있게 한 규칙이에요. 편지를 쓰면서 줄임표 띄어쓰기 규정 방법을 참고해 점 사이를 띄어 보았어요.,,ko-orthography-rules,general,core
+basic,card-98,29,7 8 9 10 11 12,"""준말 모음 탈락 축약""의 뜻은 무엇인가요?",두 단어가 합쳐질 때 모음 하나가 빠지면서 글자가 더 짧아지는 줄임말 현상이에요. '가아서'가 '가서'로 줄어든 예를 보며 준말 모음 탈락 축약 원리를 배웠어요.,,ko-orthography-rules,general,core
+basic,card-99,29,7 8 9 10 11 12,"""어간 받침 축약 준말""의 뜻은 무엇인가요?",단어의 중심이 되는 글자 받침이 뒷말과 만나 합쳐지면서 글자 수가 줄어드는 줄임말이에요. 국어 시간에 줄임말을 공부하면서 어간 받침 축약 준말 단어를 찾아보았어요.,,ko-orthography-rules,general,core
+basic,card-100,29,7 8 9 10 11 12,"""약칭 및 두문자 표기""의 뜻은 무엇인가요?",긴 단어나 이름을 부르기 쉽게 앞 글자만 따서 짧게 줄여 쓰는 표기 방식이에요. 방송국 이름을 줄여 부르는 법을 배우며 약칭 및 두문자 표기 예를 익혔어요.,,ko-orthography-rules,general,core
+basic,card-101,29,7 8 9 10 11 12,"""마침표의 기본 쓰임""의 뜻은 무엇인가요?",서술이나 명령처럼 평범하게 끝나는 문장의 맨 끝에 점을 찍는 일이다. 우리는 마침표의 기본 쓰임 규칙대로 문장 끝에 점을 찍었다.,,ko-orthography-rules,general,core
+basic,card-102,29,7 8 9 10 11 12,"""마침표 표기 제외 규정""의 뜻은 무엇인가요?",글의 제목이나 간판처럼 짧게 끝나는 말 뒤에는 점을 찍지 않는 규칙이다. 공책 제목을 쓸 때는 마침표 표기 제외 규정에 따라 점을 빼야 한다.,,ko-orthography-rules,general,core
+basic,card-103,29,7 8 9 10 11 12,"""연월일 표기 마침표""의 뜻은 무엇인가요?",날짜를 숫자로만 쓸 때 연도와 달과 날 뒤에 점을 찍는 방법이다. 생일 카드에 날짜를 적으며 연월일 표기 마침표 모양을 바르게 찍었다.,,ko-orthography-rules,general,core
+basic,card-104,30,7 8 9 10 11 12,"""물음표의 쓰임""의 뜻은 무엇인가요?",궁금한 것을 물어보거나 의심스러운 마음을 나타내는 문장 끝에 적는 방법이다. 친구에게 질문을 보낼 때 물음표의 쓰임 규칙에 맞게 기호를 넣었다.,,ko-orthography-rules,general,core
+basic,card-105,30,7 8 9 10 11 12,"""느낌표의 쓰임""의 뜻은 무엇인가요?",크게 놀라거나 기쁘거나 감정이 가득 찬 문장 끝에 붙이는 방법이다. 축구 경기에서 골을 넣고 느낌표의 쓰임에 맞게 신나게 소리쳤다.,,ko-orthography-rules,general,core
+basic,card-106,30,7 8 9 10 11 12,"""쉼표의 기본 쓰임""의 뜻은 무엇인가요?",같은 자격의 낱말을 나열하거나 문장 중간에서 잠깐 쉴 때 쓰는 방법이다. 짝꿍과 좋아하는 과일을 나열하며 쉼표의 기본 쓰임 규칙을 배웠다.,,ko-orthography-rules,general,core
+basic,card-107,30,7 8 9 10 11 12,"""쉼표와 가운뎃점 대비""의 뜻은 무엇인가요?",문장 안에서 낱말을 잇는 쉼표와 묶어서 나열하는 가운뎃점의 다른 점이다. 국어 시간에 시험 문제를 풀며 쉼표와 가운뎃점 대비 문제를 확인했다.,,ko-orthography-rules,general,core
+basic,card-108,30,7 8 9 10 11 12,"""큰따옴표와 작은따옴표 대조""의 뜻은 무엇인가요?",입으로 직접 말한 대화와 마음속으로 혼자 생각한 말을 구별하는 기준이다. 일기를 쓰면서 큰따옴표와 작은따옴표 대조 규칙을 지켜 문장을 적었다.,,ko-orthography-rules,general,core
+basic,card-109,30,7 8 9 10 11 12,"""작은따옴표의 마음속 생각 표현""의 뜻은 무엇인가요?",겉으로 소리 내지 않고 마음속으로 조용히 품은 생각을 적을 때 쓰는 방법이다. 동화책을 읽다가 작은따옴표의 마음속 생각 표현 방식을 보고 인물의 마음을 알았다.,,ko-orthography-rules,general,core
+basic,card-110,30,7 8 9 10 11 12,"""소괄호의 보충 설명 기능""의 뜻은 무엇인가요?",문장 안의 낱말이나 내용에 대해 덧붙여 자세히 밝혀 주는 역할이다. 단어장에 어려운 낱말 뜻을 적을 때 소괄호의 보충 설명 기능을 이용했다.,,ko-orthography-rules,general,core
+basic,card-111,31,7 8 9 10 11 12,"""대괄호의 원문 보충 기능""의 뜻은 무엇인가요?",원래 글에 빠진 말을 글쓴이가 따로 덧붙여 이해를 돕는 역할이다. 보고서를 수정하며 빠진 내용을 채울 때 대괄호의 원문 보충 기능을 활용했다.,,ko-orthography-rules,general,core
+basic,card-112,31,7 8 9 10 11 12,"""줄표와 붙임표의 기능 대조""의 뜻은 무엇인가요?",긴 보충 설명을 넣는 줄표와 짧은 낱말을 잇는 붙임표의 차이점이다. 모둠 활동 시간에 줄표와 붙임표의 기능 대조 규칙을 찾아 발표했다.,,ko-orthography-rules,general,core
+basic,card-113,31,7 8 9 10 11 12,"""가운뎃점의 동등 어구 열거""의 뜻은 무엇인가요?",서로 짝이 되거나 같은 자격을 가진 낱말들을 나란히 묶어 늘어놓는 일이다. 시간표에 체육·음악을 적으며 가운뎃점의 동등 어구 열거 방법을 익혔다.,,ko-orthography-rules,general,core
+basic,card-114,31,7 8 9 10 11 12,"""쌍점의 설명 및 구별 기능""의 뜻은 무엇인가요?",앞말에 대한 설명을 덧붙이거나 시간과 분을 갈라 적는 역할이다. 운동 경기 시간을 알리는 표지판에서 쌍점의 설명 및 구별 기능을 보았다.,,ko-orthography-rules,general,core
+basic,card-115,31,7 8 9 10 11 12,"""빗금의 행 구분 기능""의 뜻은 무엇인가요?",시나 노랫말을 한 줄로 길게 적을 때 줄바꿈 자리를 나누는 역할이다. 동시를 공책에 이어 쓸 때 빗금의 행 구분 기능대로 빗금을 그었다.,,ko-orthography-rules,general,core
+basic,card-116,31,7 8 9 10 11 12,"""줄임표의 점 개수 규정""의 뜻은 무엇인가요?",말을 줄일 때 점을 여섯 개나 세 개로 정해서 찍는 규칙이다. 편지에 아쉬운 마음을 적으며 줄임표의 점 개수 규정을 기억해 점을 찍었다.,,ko-orthography-rules,general,core
+basic,card-117,31,7 8 9 10 11 12,"""줄임표 띄어쓰기 규정""의 뜻은 무엇인가요?",말을 줄이는 부호를 쓸 때 앞말에는 붙이고 뒷말과는 띄어 쓰는 방법이다. 독서록을 작성하며 선생님께 배운 줄임표 띄어쓰기 규정대로 바르게 썼다.,,ko-orthography-rules,general,core
+basic,card-118,32,7 8 9 10 11 12,"""준말 모음 탈락 축약""의 뜻은 무엇인가요?",모음이 빠지거나 하나로 줄어들면서 낱말의 길이가 짧아지는 현상이다. 받아쓰기 연습을 하면서 준말 모음 탈락 축약 현상을 바르게 적었다.,,ko-orthography-rules,general,core
+basic,card-119,32,7 8 9 10 11 12,"""어간 받침 축약 준말""의 뜻은 무엇인가요?",낱말의 기본 줄기 끝에 붙은 받침이 합쳐지며 소리가 줄어든 말이다. 국어 문제집을 풀면서 어간 받침 축약 준말 형태를 찾아 동그라미를 쳤다.,,ko-orthography-rules,general,core
+basic,card-120,32,7 8 9 10 11 12,"""약칭 및 두문자 표기""의 뜻은 무엇인가요?",긴 단어나 이름의 첫 글자나 중요한 글자만 따서 짧게 줄여 쓰는 방법이다. 축구 동아리 이름을 줄여 부를 때 약칭 및 두문자 표기 방식을 썼다.,,ko-orthography-rules,general,core

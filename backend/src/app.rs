@@ -1,8 +1,7 @@
 use std::path::Path;
 
-use axum::Router as AxumRouter;
 use async_trait::async_trait;
-use tower_http::cors::{Any, CorsLayer};
+use axum::Router as AxumRouter;
 use chrono::Utc;
 use loco_rs::{
     app::{AppContext, Hooks},
@@ -13,6 +12,7 @@ use loco_rs::{
     task::Tasks,
 };
 use sea_orm::{ActiveModelTrait, DatabaseConnection, Set};
+use tower_http::cors::{Any, CorsLayer};
 
 use crate::controllers;
 use crate::migrations::Migrator;
@@ -139,9 +139,9 @@ impl Hooks for App {
     }
 
     async fn after_routes(router: AxumRouter, ctx: &AppContext) -> Result<AxumRouter> {
-        use axum::Router;
-        use axum::routing::{get, post};
         use crate::middleware::auth::require_auth_for_management;
+        use axum::routing::{get, post};
+        use axum::Router;
 
         // CORS: allow the Management Console GUI loaded from file:// or local dev.
         let cors = CorsLayer::new()
@@ -162,30 +162,84 @@ impl Hooks for App {
             // is JWT-gated via require_auth_for_management's reviewer branch).
             .route("/reviewer", get(controllers::reviewer::spa_index))
             .route("/reviewer/", get(controllers::reviewer::spa_index))
-            .route("/reviewer/index.html", get(controllers::reviewer::spa_index))
+            .route(
+                "/reviewer/index.html",
+                get(controllers::reviewer::spa_index),
+            )
             .route("/reviewer/style.css", get(controllers::reviewer::spa_css))
             .route("/reviewer/app.js", get(controllers::reviewer::spa_js))
-            .route("/reviewer/manifest.webmanifest", get(controllers::reviewer::spa_manifest))
+            .route(
+                "/reviewer/manifest.webmanifest",
+                get(controllers::reviewer::spa_manifest),
+            )
             .route("/reviewer/sw.js", get(controllers::reviewer::spa_sw))
             .route("/reviewer/icon.svg", get(controllers::reviewer::spa_icon))
             .route("/dashboard/i18n.js", get(controllers::dashboard::i18n_js))
             .route("/dashboard/rtl.css", get(controllers::dashboard::rtl_css))
-            .route("/dashboard/locales/en-US.json", get(controllers::dashboard::locale_en_us))
-            .route("/dashboard/locales/ar.json", get(controllers::dashboard::locale_ar))
-            .route("/dashboard/locales/he.json", get(controllers::dashboard::locale_he))
-            .route("/dashboard/locales/fr.json", get(controllers::dashboard::locale_fr))
-            .route("/dashboard/locales/es.json", get(controllers::dashboard::locale_es))
-            .route("/dashboard/locales/de.json", get(controllers::dashboard::locale_de))
-            .route("/dashboard/locales/it.json", get(controllers::dashboard::locale_it))
-            .route("/dashboard/locales/zh.json", get(controllers::dashboard::locale_zh))
-            .route("/dashboard/locales/ko.json", get(controllers::dashboard::locale_ko))
-            .route("/dashboard/locales/ja.json", get(controllers::dashboard::locale_ja))
-            .route("/dashboard/locales/ru.json", get(controllers::dashboard::locale_ru))
-            .route("/dashboard/locales/pt.json", get(controllers::dashboard::locale_pt))
-            .route("/dashboard/locales/hi.json", get(controllers::dashboard::locale_hi))
-            .route("/dashboard/vendor/popper.min.js", get(controllers::dashboard::popper_js))
-            .route("/dashboard/vendor/tippy.min.js", get(controllers::dashboard::tippy_js))
-            .route("/dashboard/vendor/driver.min.js", get(controllers::dashboard::driver_js))
+            .route(
+                "/dashboard/locales/en-US.json",
+                get(controllers::dashboard::locale_en_us),
+            )
+            .route(
+                "/dashboard/locales/ar.json",
+                get(controllers::dashboard::locale_ar),
+            )
+            .route(
+                "/dashboard/locales/he.json",
+                get(controllers::dashboard::locale_he),
+            )
+            .route(
+                "/dashboard/locales/fr.json",
+                get(controllers::dashboard::locale_fr),
+            )
+            .route(
+                "/dashboard/locales/es.json",
+                get(controllers::dashboard::locale_es),
+            )
+            .route(
+                "/dashboard/locales/de.json",
+                get(controllers::dashboard::locale_de),
+            )
+            .route(
+                "/dashboard/locales/it.json",
+                get(controllers::dashboard::locale_it),
+            )
+            .route(
+                "/dashboard/locales/zh.json",
+                get(controllers::dashboard::locale_zh),
+            )
+            .route(
+                "/dashboard/locales/ko.json",
+                get(controllers::dashboard::locale_ko),
+            )
+            .route(
+                "/dashboard/locales/ja.json",
+                get(controllers::dashboard::locale_ja),
+            )
+            .route(
+                "/dashboard/locales/ru.json",
+                get(controllers::dashboard::locale_ru),
+            )
+            .route(
+                "/dashboard/locales/pt.json",
+                get(controllers::dashboard::locale_pt),
+            )
+            .route(
+                "/dashboard/locales/hi.json",
+                get(controllers::dashboard::locale_hi),
+            )
+            .route(
+                "/dashboard/vendor/popper.min.js",
+                get(controllers::dashboard::popper_js),
+            )
+            .route(
+                "/dashboard/vendor/tippy.min.js",
+                get(controllers::dashboard::tippy_js),
+            )
+            .route(
+                "/dashboard/vendor/driver.min.js",
+                get(controllers::dashboard::driver_js),
+            )
             // Prong 8 — public first-login wizard (NOT auth-gated; the token in the
             // path is the credential). Served before the require_auth_for_management layer.
             //
@@ -193,7 +247,10 @@ impl Hooks for App {
             // registered on the `first_login_api` sub-router below, also under the
             // non-gated `/d/` prefix — NOT here, and NOT under `/api/v1/management/*`
             // (that prefix is JWT-gated and the wizard holds no token yet).
-            .route("/d/:invite_id/:token", get(controllers::dashboard::first_login))
+            .route(
+                "/d/:invite_id/:token",
+                get(controllers::dashboard::first_login),
+            )
             // First-run setup screen (public; the dashboard redirects here
             // while zero admin accounts exist — see controllers/setup.rs).
             .route("/setup", get(controllers::dashboard::setup_page));
@@ -239,38 +296,200 @@ impl Hooks for App {
 
         let students: Vec<(&str, &str, Option<&str>, &str, Option<&str>)> = vec![
             // Grade 7-A
-            ("alice.chen",     "alice.chen@example.edu",      Some("Alice Chen"),      "student", Some("grade7-a")),
-            ("ben.carter",     "ben.carter@example.edu",      Some("Ben Carter"),      "student", Some("grade7-a")),
-            ("carlos.diaz",    "carlos.diaz@example.edu",     Some("Carlos Diaz"),     "student", Some("grade7-a")),
-            ("diana.evans",    "diana.evans@example.edu",     Some("Diana Evans"),     "student", Some("grade7-a")),
-            ("ethan.foster",   "ethan.foster@example.edu",    Some("Ethan Foster"),    "student", Some("grade7-a")),
+            (
+                "alice.chen",
+                "alice.chen@example.edu",
+                Some("Alice Chen"),
+                "student",
+                Some("grade7-a"),
+            ),
+            (
+                "ben.carter",
+                "ben.carter@example.edu",
+                Some("Ben Carter"),
+                "student",
+                Some("grade7-a"),
+            ),
+            (
+                "carlos.diaz",
+                "carlos.diaz@example.edu",
+                Some("Carlos Diaz"),
+                "student",
+                Some("grade7-a"),
+            ),
+            (
+                "diana.evans",
+                "diana.evans@example.edu",
+                Some("Diana Evans"),
+                "student",
+                Some("grade7-a"),
+            ),
+            (
+                "ethan.foster",
+                "ethan.foster@example.edu",
+                Some("Ethan Foster"),
+                "student",
+                Some("grade7-a"),
+            ),
             // Grade 7-B
-            ("fatima.garcia",  "fatima.garcia@example.edu",   Some("Fatima Garcia"),   "student", Some("grade7-b")),
-            ("george.harris",  "george.harris@example.edu",   Some("George Harris"),   "student", Some("grade7-b")),
-            ("hannah.ito",     "hannah.ito@example.edu",      Some("Hannah Ito"),      "student", Some("grade7-b")),
-            ("ivan.jackson",   "ivan.jackson@example.edu",    Some("Ivan Jackson"),    "student", Some("grade7-b")),
-            ("julia.kim",      "julia.kim@example.edu",       Some("Julia Kim"),       "student", Some("grade7-b")),
+            (
+                "fatima.garcia",
+                "fatima.garcia@example.edu",
+                Some("Fatima Garcia"),
+                "student",
+                Some("grade7-b"),
+            ),
+            (
+                "george.harris",
+                "george.harris@example.edu",
+                Some("George Harris"),
+                "student",
+                Some("grade7-b"),
+            ),
+            (
+                "hannah.ito",
+                "hannah.ito@example.edu",
+                Some("Hannah Ito"),
+                "student",
+                Some("grade7-b"),
+            ),
+            (
+                "ivan.jackson",
+                "ivan.jackson@example.edu",
+                Some("Ivan Jackson"),
+                "student",
+                Some("grade7-b"),
+            ),
+            (
+                "julia.kim",
+                "julia.kim@example.edu",
+                Some("Julia Kim"),
+                "student",
+                Some("grade7-b"),
+            ),
             // Grade 8-A
-            ("kevin.liu",      "kevin.liu@example.edu",       Some("Kevin Liu"),       "student", Some("grade8-a")),
-            ("luna.martinez",  "luna.martinez@example.edu",   Some("Luna Martinez"),   "student", Some("grade8-a")),
-            ("marcus.nguyen",  "marcus.nguyen@example.edu",   Some("Marcus Nguyen"),   "student", Some("grade8-a")),
-            ("nina.okonkwo",   "nina.okonkwo@example.edu",    Some("Nina Okonkwo"),    "student", Some("grade8-a")),
-            ("oliver.patel",   "oliver.patel@example.edu",    Some("Oliver Patel"),    "student", Some("grade8-a")),
+            (
+                "kevin.liu",
+                "kevin.liu@example.edu",
+                Some("Kevin Liu"),
+                "student",
+                Some("grade8-a"),
+            ),
+            (
+                "luna.martinez",
+                "luna.martinez@example.edu",
+                Some("Luna Martinez"),
+                "student",
+                Some("grade8-a"),
+            ),
+            (
+                "marcus.nguyen",
+                "marcus.nguyen@example.edu",
+                Some("Marcus Nguyen"),
+                "student",
+                Some("grade8-a"),
+            ),
+            (
+                "nina.okonkwo",
+                "nina.okonkwo@example.edu",
+                Some("Nina Okonkwo"),
+                "student",
+                Some("grade8-a"),
+            ),
+            (
+                "oliver.patel",
+                "oliver.patel@example.edu",
+                Some("Oliver Patel"),
+                "student",
+                Some("grade8-a"),
+            ),
             // Grade 8-B
-            ("priya.quinn",    "priya.quinn@example.edu",     Some("Priya Quinn"),     "student", Some("grade8-b")),
-            ("quincy.rivera",  "quincy.rivera@example.edu",   Some("Quincy Rivera"),   "student", Some("grade8-b")),
-            ("rachel.suzuki",  "rachel.suzuki@example.edu",   Some("Rachel Suzuki"),   "student", Some("grade8-b")),
-            ("sam.tanaka",     "sam.tanaka@example.edu",      Some("Sam Tanaka"),      "student", Some("grade8-b")),
-            ("tara.uribe",     "tara.uribe@example.edu",      Some("Tara Uribe"),      "student", Some("grade8-b")),
+            (
+                "priya.quinn",
+                "priya.quinn@example.edu",
+                Some("Priya Quinn"),
+                "student",
+                Some("grade8-b"),
+            ),
+            (
+                "quincy.rivera",
+                "quincy.rivera@example.edu",
+                Some("Quincy Rivera"),
+                "student",
+                Some("grade8-b"),
+            ),
+            (
+                "rachel.suzuki",
+                "rachel.suzuki@example.edu",
+                Some("Rachel Suzuki"),
+                "student",
+                Some("grade8-b"),
+            ),
+            (
+                "sam.tanaka",
+                "sam.tanaka@example.edu",
+                Some("Sam Tanaka"),
+                "student",
+                Some("grade8-b"),
+            ),
+            (
+                "tara.uribe",
+                "tara.uribe@example.edu",
+                Some("Tara Uribe"),
+                "student",
+                Some("grade8-b"),
+            ),
             // Grade 9-A
-            ("uma.vasquez",    "uma.vasquez@example.edu",     Some("Uma Vasquez"),     "student", Some("grade9-a")),
-            ("victor.wang",    "victor.wang@example.edu",     Some("Victor Wang"),     "student", Some("grade9-a")),
-            ("wendy.xu",       "wendy.xu@example.edu",        Some("Wendy Xu"),        "student", Some("grade9-a")),
-            ("xander.young",   "xander.young@example.edu",    Some("Xander Young"),    "student", Some("grade9-a")),
-            ("yara.zawadi",    "yara.zawadi@example.edu",     Some("Yara Zawadi"),     "student", Some("grade9-a")),
+            (
+                "uma.vasquez",
+                "uma.vasquez@example.edu",
+                Some("Uma Vasquez"),
+                "student",
+                Some("grade9-a"),
+            ),
+            (
+                "victor.wang",
+                "victor.wang@example.edu",
+                Some("Victor Wang"),
+                "student",
+                Some("grade9-a"),
+            ),
+            (
+                "wendy.xu",
+                "wendy.xu@example.edu",
+                Some("Wendy Xu"),
+                "student",
+                Some("grade9-a"),
+            ),
+            (
+                "xander.young",
+                "xander.young@example.edu",
+                Some("Xander Young"),
+                "student",
+                Some("grade9-a"),
+            ),
+            (
+                "yara.zawadi",
+                "yara.zawadi@example.edu",
+                Some("Yara Zawadi"),
+                "student",
+                Some("grade9-a"),
+            ),
             // Grade 9-B
-            ("zach.ali",       "zach.ali@example.edu",        Some("Zach Ali"),        "student", Some("grade9-b")),
-            ("zoe.brighton",   "zoe.brighton@example.edu",    Some("Zoe Brighton"),    "student", Some("grade9-b")),
+            (
+                "zach.ali",
+                "zach.ali@example.edu",
+                Some("Zach Ali"),
+                "student",
+                Some("grade9-b"),
+            ),
+            (
+                "zoe.brighton",
+                "zoe.brighton@example.edu",
+                Some("Zoe Brighton"),
+                "student",
+                Some("grade9-b"),
+            ),
         ];
 
         for (i, (username, email, full_name, role, subsection_id)) in students.iter().enumerate() {

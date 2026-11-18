@@ -34,7 +34,6 @@ fn teacher_token() -> String {
         .expect("mint teacher token")
 }
 
-
 macro_rules! create_track {
     ($server:expr, $name:expr, $tag:expr, $subject:expr) => {{
         let resp = $server
@@ -127,8 +126,8 @@ mod imp15_capsule_slicing {
     }
 
     /// POST /generate without proper setup returns meaningful error.
-    
-#[tokio::test]
+
+    #[tokio::test]
     async fn generate_returns_error_without_tracks() {
         testing::request::<backend::App, _, _>(|server, _ctx| async move {
             let resp = server
@@ -162,16 +161,26 @@ mod imp16_fsrs_cross_domain {
         let math = TrackHealth {
             track_tag: "math::fractions".into(),
             track_name: "Fractions".into(),
-            cards_total: 50, cards_due: 10, cards_mature: 30,
-            avg_interval_days: 15.5, avg_ease_factor: 2.5,
-            retention_7d: 0.85, avg_time_secs: 12.3, reviews_7d: 40,
+            cards_total: 50,
+            cards_due: 10,
+            cards_mature: 30,
+            avg_interval_days: 15.5,
+            avg_ease_factor: 2.5,
+            retention_7d: 0.85,
+            avg_time_secs: 12.3,
+            reviews_7d: 40,
         };
         let vocab = TrackHealth {
             track_tag: "vocab::grade7".into(),
             track_name: "Grade 7 Vocab".into(),
-            cards_total: 60, cards_due: 5, cards_mature: 45,
-            avg_interval_days: 22.0, avg_ease_factor: 2.7,
-            retention_7d: 0.92, avg_time_secs: 8.1, reviews_7d: 55,
+            cards_total: 60,
+            cards_due: 5,
+            cards_mature: 45,
+            avg_interval_days: 22.0,
+            avg_ease_factor: 2.7,
+            retention_7d: 0.92,
+            avg_time_secs: 8.1,
+            reviews_7d: 55,
         };
 
         let response = TrackHealthResponse {
@@ -185,8 +194,10 @@ mod imp16_fsrs_cross_domain {
         assert_eq!(tracks.len(), 2);
         assert_eq!(tracks[0]["retention_7d"], 0.85);
         assert_eq!(tracks[1]["retention_7d"], 0.92);
-        assert_ne!(tracks[0]["retention_7d"], tracks[1]["retention_7d"],
-            "Per-track metrics must be independent");
+        assert_ne!(
+            tracks[0]["retention_7d"], tracks[1]["retention_7d"],
+            "Per-track metrics must be independent"
+        );
     }
 
     /// FSRS approximate recall model: math failure doesn't affect vocab.
@@ -195,8 +206,10 @@ mod imp16_fsrs_cross_domain {
         use backend::services::fsrs_sort::compute_approximate_recall;
         let math_recall = compute_approximate_recall(15, 5);
         let vocab_recall = compute_approximate_recall(2, 50);
-        assert!(math_recall < vocab_recall,
-            "Math card (overdue 15, ivl 5) should be more urgent than vocab (overdue 2, ivl 50)");
+        assert!(
+            math_recall < vocab_recall,
+            "Math card (overdue 15, ivl 5) should be more urgent than vocab (overdue 2, ivl 50)"
+        );
     }
 
     /// FSRS sort: cards from different tracks are interleaved.
@@ -221,7 +234,11 @@ mod imp16_fsrs_cross_domain {
         let result = capsule_slicer::slice_capsule(&ranked, &counts, 6);
         let mut track_seen = HashMap::new();
         for id in &result.selected {
-            let tag = ranked.iter().find(|(i, _)| i == id).map(|(_, t)| t.clone()).unwrap();
+            let tag = ranked
+                .iter()
+                .find(|(i, _)| i == id)
+                .map(|(_, t)| t.clone())
+                .unwrap();
             *track_seen.entry(tag).or_insert(0) += 1;
         }
         assert!(track_seen.contains_key("math"));
@@ -242,8 +259,10 @@ mod imp17_n_lever_adjustment {
         use backend::services::capsule_slicer;
         let size_n3 = capsule_slicer::compute_capsule_size(90, 3, 25, 10, 25.0, 3);
         let size_n1 = capsule_slicer::compute_capsule_size(90, 1, 25, 10, 25.0, 3);
-        assert!(size_n1 <= size_n3 || size_n1 == 25,
-            "N=1: {size_n1} should be ≤ N=3: {size_n3} or at hard cap");
+        assert!(
+            size_n1 <= size_n3 || size_n1 == 25,
+            "N=1: {size_n1} should be ≤ N=3: {size_n3} or at hard cap"
+        );
     }
 
     #[test]
@@ -262,7 +281,10 @@ mod imp17_n_lever_adjustment {
     #[test]
     fn n_zero_returns_empty_capsule() {
         use backend::services::capsule_slicer;
-        assert_eq!(capsule_slicer::compute_capsule_size(90, 0, 25, 10, 25.0, 3), 0);
+        assert_eq!(
+            capsule_slicer::compute_capsule_size(90, 0, 25, 10, 25.0, 3),
+            0
+        );
     }
 
     /// API: Update profile N-value via API and verify the response.
@@ -308,9 +330,12 @@ mod imp18_per_track_presence {
         use std::collections::HashMap;
 
         let ranked = vec![
-            (1i64, "math".to_string()), (2i64, "math".to_string()),
-            (3i64, "vocab".to_string()), (4i64, "vocab".to_string()),
-            (5i64, "science".to_string()), (6i64, "science".to_string()),
+            (1i64, "math".to_string()),
+            (2i64, "math".to_string()),
+            (3i64, "vocab".to_string()),
+            (4i64, "vocab".to_string()),
+            (5i64, "science".to_string()),
+            (6i64, "science".to_string()),
         ];
         let mut counts = HashMap::new();
         counts.insert("math".to_string(), 2usize);
@@ -322,7 +347,11 @@ mod imp18_per_track_presence {
 
         let mut track_seen: HashMap<String, usize> = HashMap::new();
         for id in &result.selected {
-            let tag = ranked.iter().find(|(i, _)| i == id).map(|(_, t)| t.clone()).unwrap();
+            let tag = ranked
+                .iter()
+                .find(|(i, _)| i == id)
+                .map(|(_, t)| t.clone())
+                .unwrap();
             *track_seen.entry(tag).or_insert(0) += 1;
         }
         for (_tag, count) in &track_seen {
@@ -369,8 +398,10 @@ mod imp18_per_track_presence {
             let tracks = detail["tracks"].as_array().unwrap();
             assert_eq!(tracks.len(), 3);
 
-            let track_ids: Vec<&str> = tracks.iter()
-                .map(|t| t["track_id"].as_str().unwrap()).collect();
+            let track_ids: Vec<&str> = tracks
+                .iter()
+                .map(|t| t["track_id"].as_str().unwrap())
+                .collect();
             assert!(track_ids.contains(&math["id"].as_str().unwrap()));
             assert!(track_ids.contains(&vocab["id"].as_str().unwrap()));
             assert!(track_ids.contains(&science["id"].as_str().unwrap()));
@@ -397,19 +428,28 @@ mod imp19_session_duration_sizing {
     #[test]
     fn long_duration_hits_hard_cap() {
         use backend::services::capsule_slicer;
-        assert_eq!(capsule_slicer::compute_capsule_size(500, 3, 25, 60, 25.0, 1), 25);
+        assert_eq!(
+            capsule_slicer::compute_capsule_size(500, 3, 25, 60, 25.0, 1),
+            25
+        );
     }
 
     #[test]
     fn fast_cards_fit_more_in_short_session() {
         use backend::services::capsule_slicer;
-        assert_eq!(capsule_slicer::compute_capsule_size(500, 3, 25, 1, 5.0, 1), 12);
+        assert_eq!(
+            capsule_slicer::compute_capsule_size(500, 3, 25, 1, 5.0, 1),
+            12
+        );
     }
 
     #[test]
     fn slow_cards_limit_capsule() {
         use backend::services::capsule_slicer;
-        assert_eq!(capsule_slicer::compute_capsule_size(500, 3, 25, 5, 60.0, 1), 5);
+        assert_eq!(
+            capsule_slicer::compute_capsule_size(500, 3, 25, 5, 60.0, 1),
+            5
+        );
     }
 
     /// API: Create profile with custom session_duration, verify it's stored.
@@ -463,7 +503,10 @@ mod imp34_full_suite {
             assert_eq!(detail["tracks"].as_array().unwrap().len(), 2);
 
             // List profiles
-            let list = server.get("/api/v1/management/track-profiles").add_header("Authorization", format!("Bearer {}", teacher_token())).await;
+            let list = server
+                .get("/api/v1/management/track-profiles")
+                .add_header("Authorization", format!("Bearer {}", teacher_token()))
+                .await;
             assert_eq!(list.status_code(), 200);
             assert!(json_body(&list.text()).as_array().unwrap().len() >= 1);
 
@@ -482,11 +525,18 @@ mod imp34_full_suite {
                 .get(&format!("/api/v1/management/track-profiles/{pid}"))
                 .add_header("Authorization", format!("Bearer {}", teacher_token()))
                 .await;
-            assert_eq!(json_body(&resp.text())["tracks"].as_array().unwrap().len(), 1);
+            assert_eq!(
+                json_body(&resp.text())["tracks"].as_array().unwrap().len(),
+                1
+            );
 
             // Delete profile
             assert_eq!(
-                server.delete(&format!("/api/v1/management/track-profiles/{pid}")).add_header("Authorization", format!("Bearer {}", teacher_token())).await.status_code(),
+                server
+                    .delete(&format!("/api/v1/management/track-profiles/{pid}"))
+                    .add_header("Authorization", format!("Bearer {}", teacher_token()))
+                    .await
+                    .status_code(),
                 200
             );
         })
@@ -528,11 +578,18 @@ mod imp34_full_suite {
     async fn track_listing_includes_created_tracks() {
         testing::request::<backend::App, _, _>(|server, _ctx| async move {
             let _track = create_track!(&server, "List Test Track", "list::test", "Test");
-            let resp = server.get("/api/v1/management/tracks").add_header("Authorization", format!("Bearer {}", teacher_token())).await;
+            let resp = server
+                .get("/api/v1/management/tracks")
+                .add_header("Authorization", format!("Bearer {}", teacher_token()))
+                .await;
             assert_eq!(resp.status_code(), 200);
             let body = json_body(&resp.text());
-            let names: Vec<&str> = body.as_array().unwrap()
-                .iter().map(|t| t["name"].as_str().unwrap()).collect();
+            let names: Vec<&str> = body
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|t| t["name"].as_str().unwrap())
+                .collect();
             assert!(names.contains(&"List Test Track"));
         })
         .await;
@@ -604,10 +661,10 @@ mod imp34_full_suite {
     #[tokio::test]
     async fn n_change_writes_audit_log() {
         testing::request::<backend::App, _, _>(|server, ctx| async move {
-            use sea_orm::EntityTrait;
-            use sea_orm::ColumnTrait;
-            use sea_orm::QueryFilter;
             use backend::models::entities::audit_log;
+            use sea_orm::ColumnTrait;
+            use sea_orm::EntityTrait;
+            use sea_orm::QueryFilter;
 
             // Create a track profile
             let create = server
@@ -637,7 +694,10 @@ mod imp34_full_suite {
                 .all(&ctx.db)
                 .await
                 .expect("query audit_log");
-            assert!(!rows.is_empty(), "Expected at least one n_change audit entry");
+            assert!(
+                !rows.is_empty(),
+                "Expected at least one n_change audit entry"
+            );
             let n_change = &rows[0];
             assert_eq!(n_change.event_type, "n_change");
             assert!(n_change.event_data.contains("new_n"));
@@ -649,10 +709,10 @@ mod imp34_full_suite {
     #[tokio::test]
     async fn profile_assign_writes_audit_log() {
         testing::request::<backend::App, _, _>(|server, ctx| async move {
-            use sea_orm::EntityTrait;
-            use sea_orm::ColumnTrait;
-            use sea_orm::QueryFilter;
             use backend::models::entities::audit_log;
+            use sea_orm::ColumnTrait;
+            use sea_orm::EntityTrait;
+            use sea_orm::QueryFilter;
 
             // Create a track profile first (needed for assignment FK)
             let profile_resp = server
@@ -735,10 +795,10 @@ mod imp34_full_suite {
     #[tokio::test]
     async fn profile_revoke_writes_audit_log() {
         testing::request::<backend::App, _, _>(|server, ctx| async move {
-            use sea_orm::EntityTrait;
-            use sea_orm::ColumnTrait;
-            use sea_orm::QueryFilter;
             use backend::models::entities::audit_log;
+            use sea_orm::ColumnTrait;
+            use sea_orm::EntityTrait;
+            use sea_orm::QueryFilter;
 
             // Create profile + assignment
             let profile_resp = server

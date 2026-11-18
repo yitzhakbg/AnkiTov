@@ -4,7 +4,7 @@
 Reads versioned CSV sources from content/seed/sources/ (one CSV per slug+locale,
 named <slug>-<locale>.csv), builds the shared AnkiTov note types from plan
 section 3, writes content/seed/packages/<slug>-<locale>.apkg, and updates
-content/seed/manifest.json (schema v1, plan section 4).
+content/seed/manifest.json (schema v2: entries carry rules_version, plan section 4 + spec §8c).
 
 Note types (plan section 3):
     AnkiTovBasic  { Front, Back }        qfmt: {{Front}}
@@ -32,11 +32,28 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import genanki
+import yaml
 
 SEED_DIR = Path(__file__).resolve().parent          # content/seed/
+REPO_ROOT = SEED_DIR.parent.parent                  # monorepo root
 SOURCES_DIR = SEED_DIR / "sources"
 PACKAGES_DIR = SEED_DIR / "packages"
 MANIFEST_PATH = SEED_DIR / "manifest.json"
+RULES_PATH = REPO_ROOT / "specs" / "qa" / "bar1-rules.yaml"
+
+
+def _rules_version() -> int:
+    """BAR 1 rules_version stamped into every manifest entry (spec §8c control 5).
+
+    The manifest records WHICH rules version a pack was last audited under;
+    scripts/qa/grandfather_check.py re-runs the gate over packs stamped with an
+    older version when the rules file bumps.
+    """
+    doc = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
+    version = doc.get("rules_version")
+    if not isinstance(version, int):
+        raise RuntimeError(f"{RULES_PATH}: missing integer rules_version")
+    return version
 
 # ---------------------------------------------------------------------------
 # Deck registry (plan sections 1.1, 3.2, 4). Titles are locale-keyed; the
@@ -54,170 +71,44 @@ def _desc(en: str, **by_locale: str) -> dict:
     return out
 
 
-DECKS = {
-    "math-definitions": {
-        "subject_tag": "subject::math",
-        "title": {
-            "en": "AnkiTov Pilot — Math Definitions",
-            "he": "AnkiTov Pilot — הגדרות מתמטיקה",
-            "fr": "AnkiTov Pilot — Définitions de maths",
-            "es": "AnkiTov Pilot — Definiciones de Matemáticas",
-        },
-        "deck_id": {"en": 1699412247001, "he": 1699412247002, "fr": 1699412247012,
-                    "es": 1699412247013},
-        "description": _desc(
-            "Grades 7-9 math definitions that run at their own pace, beside "
-            "teaching, not inside it. Practice previously taught material to "
-            "close gaps. SRS works. Self-authored Phase 0 seed; text only.",
-            he="גדרות מתמטיקה לכיתות ז-ט שרצות בקצב עצמאי, לצד ההוראה ולא בתוכה. "
-               "תרגול של חומר שהונהג קודם לכן כדי לסגור פערים. SRS works. "
-               "פיוט פאזה 0 שנכתב על ידנו; טקסט בלבד.",
-            fr="Définitions mathématiques pour les classes 7-9 qui suivent leur propre "
-               "rythme, à côté de l'enseignement, pas dedans. Revoyez les concepts "
-               "appris auparavant pour combler les lacunes. SRS works. Graine Phase 0 "
-               "auto-écrite ; texte uniquement.",
-            es="Definiciones de matemáticas para los grados 7-9 que avanzan a su propio "
-               "ritmo, junto a la enseñanza, no dentro de ella. Practica el material "
-               "ya visto para cerrar brechas. SRS works. Semilla Phase 0 propia; "
-               "solo texto. (Pack fr/es generado vía NLM + compilador nlm_pack_to_csv.)",
-        ),
-        # en/he = original 105-card Phase 0 sets; fr/es = 20-card NLM pilot packs
-        "expected_census": {"basic": 47, "cloze": 47, "type_in": 11},
-        "expected_census_by_locale": {
-            "fr": {"basic": 12, "cloze": 8, "type_in": 0},
-            "es": {"basic": 17, "cloze": 2, "type_in": 1},
-        },
-    },
-    "english-vocabulary": {
-        "subject_tag": "subject::english",
-        # vocab deck direction tags (R4): he = bidirectional en-he pairs;
-        # fr/es NLM packs are one-way en->target — no direction column.
-        "directions_by_locale": {"he": True},
-        "title": {
-            "en": "AnkiTov Pilot — English Vocabulary",
-            "he": "AnkiTov Pilot — אוצר מילים באנגלית",
-            "fr": "AnkiTov Pilot — Vocabulaire anglais",
-            "es": "AnkiTov Pilot — Vocabulario Inglés",
-        },
-        "deck_id": {"en": 1699412247003, "he": 1699412247004, "fr": 1699412247005,
-                    "es": 1699412247016},
-        "description": _desc(
-            "Grades 7-9 English vocabulary that runs at its own pace, beside "
-            "teaching, not inside it. Revisit previously taught words to close "
-            "gaps. SRS works. Self-authored Phase 0 seed; text only.",
-            he="אוצר מילים באנגלית לכיתות ז-ט שרץ בקצב עצמאי, לצד ההוראה ולא בתוכה. "
-               "חזרה על מילים שהונהגו קודם לכן כדי לסגור פערים. SRS works. "
-               "פיוט פאזה 0 שנכתב על ידנו; טקסט בלבד.",
-            fr="Vocabulaire anglais pour les classes 7-9 qui suit son propre rythme, "
-               "à côté de l'enseignement, pas dedans. Revoyez les mots appris "
-               "auparavant pour combler les lacunes. SRS works. Graine Phase 0 "
-               "auto-écrite ; texte uniquement.",
-            es="Vocabulario inglés para los grados 7-9 que avanza a su propio ritmo, "
-               "junto a la enseñanza, no dentro de ella. Repasa las palabras ya vistas "
-               "para cerrar brechas. SRS works. Semilla Phase 0 propia; solo texto. "
-               "(Pack es vía NLM + compilador nlm_pack_to_csv.)",
-        ),
-        "expected_census": {"basic": 58, "cloze": 21, "type_in": 26},
-        # he/fr/es = 20-card NLM packs (wave1b batch, 2026-10-30; he carries direction::en-he)
-        "expected_census_by_locale": {
-            "he": {"basic": 17, "cloze": 3, "type_in": 0},
-            "fr": {"basic": 17, "cloze": 3, "type_in": 0},
-            "es": {"basic": 17, "cloze": 3, "type_in": 0},
-        },
-    },
-    "science-terms": {
-        "subject_tag": "subject::science",
-        "title": {
-            "en": "AnkiTov Pilot — Science Terms",
-            "he": "AnkiTov Pilot — מונחים במדעים",
-            "fr": "AnkiTov Pilot — Termes scientifiques",
-            "es": "AnkiTov Pilot — Términos Científicos",
-        },
-        "deck_id": {"en": 1699412247006, "he": 1699412247007, "fr": 1699412247008,
-                    "es": 1699412247014},
-        "description": _desc(
-            "Grades 7-9 science terms that run at their own pace, beside "
-            "teaching, not inside it. Revisit previously taught concepts to "
-            "close gaps. SRS works. Self-authored Phase 0 seed; text only.",
-            he="מונחים מדעיים לכיתות ז-ט שרצים בקצב עצמאי, לצד ההוראה ולא בתוכה. "
-               "חזרה על מושגים שהונהגו קודם לכן כדי לסגור פערים. SRS works. "
-               "פיוט פאזה 0 שנכתב על ידנו; טקסט בלבד.",
-            fr="Termes scientifiques pour les classes 7-9 qui suivent leur propre "
-               "rythme, à côté de l'enseignement, pas dedans. Revoyez les "
-               "concepts appris auparavant pour combler les lacunes. SRS works. "
-               "Graine Phase 0 auto-écrite ; texte uniquement.",
-            es="Términos científicos para los grados 7-9 que avanzan a su propio "
-               "ritmo, junto a la enseñanza, no dentro de ella. Repasa los conceptos "
-               "ya vistos para cerrar brechas. SRS works. Semilla Phase 0 propia; "
-               "solo texto. (Pack es vía NLM + compilador nlm_pack_to_csv.)",
-        ),
-        "expected_census": {"basic": 63, "cloze": 32, "type_in": 10},
-        # fr/es = 20-card NLM packs (wave1b batch, 2026-10-30)
-        "expected_census_by_locale": {
-            "fr": {"basic": 14, "cloze": 6, "type_in": 0},
-            "es": {"basic": 14, "cloze": 6, "type_in": 0},
-        },
-    },
-    "history-dates-figures": {
-        "subject_tag": "subject::history",
-        "title": {
-            "en": "AnkiTov Pilot — History: Dates & Figures",
-            "he": "AnkiTov Pilot — היסטוריה: תאריכים ואישים",
-            "fr": "AnkiTov Pilot — Histoire : dates et figures",
-            "es": "AnkiTov Pilot — Historia: Fechas y Cifras",
-        },
-        "deck_id": {"en": 1699412247009, "he": 1699412247010, "fr": 1699412247011,
-                    "es": 1699412247015},
-        "description": _desc(
-            "Grades 7-9 history dates and figures that run at their own pace, "
-            "beside teaching, not inside it. Revisit previously taught "
-            "milestones to close gaps. SRS works. Self-authored Phase 0 seed; "
-            "text only.",
-            he="תאריכים ואישים בהיסטוריה לכיתות ז-ט שרצים בקצב עצמאי, לצד ההוראה "
-               "ולא בתוכה. חזרה על אבני דרך שהונהגו קודם לכן כדי לסגור פערים. "
-               "SRS works. פיוט פאזה 0 שנכתב על ידנו; טקסט בלבד.",
-            fr="Dates et figures d'histoire pour les classes 7-9 qui suivent leur "
-               "propre rythme, à côté de l'enseignement, pas dedans. Revoyez les "
-               "étapes clés apprises auparavant pour combler les lacunes. SRS works. "
-               "Graine Phase 0 auto-écrite ; texte uniquement.",
-            es="Fechas y cifras de historia para los grados 7-9 que avanzan a su propio "
-               "ritmo, junto a la enseñanza, no dentro de ella. Repasa los hitos ya "
-               "vistos para cerrar brechas. SRS works. Semilla Phase 0 propia; solo "
-               "texto. (Pack es vía NLM + compilador nlm_pack_to_csv.)",
-        ),
-        "expected_census": {"basic": 79, "cloze": 26, "type_in": 0},
-        # he/es = 20-card NLM packs (wave1b batch, 2026-10-30)
-        "expected_census_by_locale": {
-            "he": {"basic": 10, "cloze": 10, "type_in": 0},
-            "es": {"basic": 10, "cloze": 10, "type_in": 0},
-        },
-    },
-    "ela-high-frequency": {
-        "subject_tag": "subject::english",
-        "title": {"en": "AnkiTov — High-Frequency Words (Grades 7-12 Intervention)"},
-        "deck_id": {"en": 1699412247020},
-        "description": {"en": "High-frequency words for grades 7-12 readers working below "
-                              "grade level, running at their own pace beside teaching, not inside "
-                              "it. Practice material already taught to close gaps. SRS works. "
-                              "Phase A family 1 (public-domain word lists) — the recorded K-2 "
-                              "exception to the 7-12 default; NLM-generated, text only."},
-        "expected_census": {"basic": 7, "cloze": 7, "type_in": 6},
-    },
-    "ela-content-words": {
-        "subject_tag": "subject::english",
-        "title": {"en": "AnkiTov — Content Words (Grades 7-12)"},
-        "deck_id": {"en": 1699412247021},
-        "description": {"en": "Content words (nouns, verbs, adjectives) from ranks 150-1200 of a "
-                              "public-domain frequency corpus, for grades 7-12 readers working below "
-                              "grade level. Practice material already taught to close gaps, running at "
-                              "the student's own pace beside teaching, not inside it. SRS works. "
-                              "Phase A family 1, pack #2 — grounded on the derived frequency list for "
-                              "word selection; definitions are WordNet-grounded from pack #3 onward. "
-                              "NLM-generated, text only."},
-        "expected_census": {"basic": 11, "cloze": 9, "type_in": 0},
-    },
+class SourceError(Exception):
+    pass
 
-}
+
+# Per-deck configs live in content/seed/decks/<slug>.yaml (B-0040 Phase 1):
+# the former hardcoded DECKS literal was externalized verbatim (deep-equality
+# verified at conversion time). The YAML files are the single source of truth
+# for subject tags, titles, deck ids, descriptions, and census targets.
+DECKS_DIR = SEED_DIR / "decks"
+
+
+def _load_decks() -> dict:
+    decks = {}
+    for path in sorted(DECKS_DIR.glob("*.yaml")):
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        slug = path.stem
+        if data.get("slug") != slug:
+            raise SourceError(f"{path.name}: slug {data.get('slug')!r} != filename {slug!r}")
+        cfg = {
+            "subject_tag": data["subject_tag"],
+            "title": data["title"],
+            "deck_id": {loc: int(v) for loc, v in data["deck_id"].items()},
+            "description": data["description"],
+            "expected_census": data["expected_census"],
+        }
+        if data.get("expected_census_by_locale"):
+            cfg["expected_census_by_locale"] = data["expected_census_by_locale"]
+        if data.get("directions_by_locale"):
+            cfg["directions_by_locale"] = data["directions_by_locale"]
+        if "directions" in data:
+            cfg["directions"] = data["directions"]
+        decks[slug] = cfg
+    if not decks:
+        raise SourceError(f"no deck configs under {DECKS_DIR}")
+    return decks
+
+
+DECKS = _load_decks()
 
 # Fixed IDs so rebuilds are stable (plan section 5: deterministic, re-runnable).
 # Per-locale model IDs: each .apkg ships its own self-contained note types, so
@@ -227,6 +118,12 @@ MODEL_IDS = {
     "he": {"basic": 1607392318101, "cloze": 1607392318102, "type_in": 1607392318103},
     "fr": {"basic": 1607392318201, "cloze": 1607392318202, "type_in": 1607392318203},
     "es": {"basic": 1607392318301, "cloze": 1607392318302, "type_in": 1607392318303},
+    # Wave-L1 locales (2026-11-17): de/it/pt/ru/ko model-ID blocks
+    "de": {"basic": 1607392318401, "cloze": 1607392318402, "type_in": 1607392318403},
+    "it": {"basic": 1607392318501, "cloze": 1607392318502, "type_in": 1607392318503},
+    "pt": {"basic": 1607392318601, "cloze": 1607392318602, "type_in": 1607392318603},
+    "ru": {"basic": 1607392318701, "cloze": 1607392318702, "type_in": 1607392318703},
+    "ko": {"basic": 1607392318801, "cloze": 1607392318802, "type_in": 1607392318803},
 }
 NOTE_TYPE_NAMES = {"basic": "AnkiTovBasic", "cloze": "AnkiTovCloze", "type_in": "AnkiTovTypeIn"}
 
@@ -317,9 +214,6 @@ CONCEPT_RE = re.compile(r"^[a-z][a-z0-9-]*$")
 ALLOWED_GRADES = {str(g) for g in range(7, 13)} | {"K", "1", "2"}
 CLOZE_TAG_RE = re.compile(r"\{\{c(\d+)::")
 
-
-class SourceError(Exception):
-    pass
 
 
 def validate_row(row: dict, seen: set, locale: str, directions: bool = False) -> None:
@@ -452,12 +346,15 @@ def update_manifest(entry: dict) -> None:
         doc = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
     else:
         doc = {
-            "schema_version": 1,
+            "schema_version": 2,
             "author_name": "AnkiTov Pilot Seed",
             "license": "TBC-OWNER-DECISION",
             "source_url": None,
             "decks": [],
         }
+    # Manifest v2 (spec §8c control 5): every entry carries the rules_version
+    # it was last audited under; schema_version rides along.
+    doc["schema_version"] = 2
     doc["generated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     decks = [d for d in doc["decks"]
              if not (d["locale"] == entry["locale"] and d["slug"] == entry["slug"])]
@@ -465,6 +362,73 @@ def update_manifest(entry: dict) -> None:
     decks.sort(key=lambda d: (d["locale"], d["slug"]))   # plan section 4: sorted by (locale, slug)
     doc["decks"] = decks
     MANIFEST_PATH.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def build_deck(csv_path: Path, slug: str, locale: str, cfg: dict) -> tuple:
+    """Build one .apkg from a source CSV; return (out, census, verify, entry, samples).
+
+    Extracted from main() so tests can rebuild a deck deterministically and
+    assert the GUID re-import contract (spec section 4.3) without touching
+    the manifest.
+    """
+    models = build_models(locale)
+
+    directions = cfg.get("directions_by_locale", {}).get(locale, cfg.get("directions", False))
+    rows = read_rows(csv_path, directions)
+    seen: set = set()
+    deck = genanki.Deck(
+        cfg["deck_id"][locale], cfg["title"][locale], description=cfg["description"][locale]
+    )
+    census: Counter = Counter()
+    samples = {}
+    for row in rows:
+        nt = row["note_type"]
+        validate_row(row, seen, locale, directions)
+        direction = row.get("direction", "") if directions else ""
+        if direction:
+            direction = f"direction::{direction}"
+        tags = build_tags(row["concept_id"], row["unit"], row["grades"].split(),
+                          cfg["subject_tag"], direction)
+        fields = [row["front"], row["extra"]] if nt == "cloze" else [row["front"], row["back"]]
+        note = genanki.Note(
+            model=models[nt],
+            fields=fields,
+            tags=tags,
+            # Plan section 5: explicit GUID from concept_id + locale + slug
+            # so rebuilds never duplicate notes on re-import.
+            guid=genanki.guid_for(f"{row['concept_id']}|{locale}|{slug}"),
+        )
+        deck.add_note(note)
+        census[nt] += 1
+        samples.setdefault(nt, row)
+
+    actual = {k: census.get(k, 0) for k in ("basic", "cloze", "type_in")}
+    expected = cfg.get("expected_census_by_locale", {}).get(
+        locale, cfg["expected_census"])
+    if actual != expected:
+        raise SourceError(f"{slug}/{locale}: census {actual} != plan target {cfg['expected_census']}")
+    if sum(actual.values()) != len(rows):
+        raise SourceError(f"{slug}/{locale}: census does not sum to row count")
+
+    out = PACKAGES_DIR / f"{slug}-{locale}.apkg"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    genanki.Package(deck).write_to_file(str(out))
+
+    expected_models = [NOTE_TYPE_NAMES[nt] for nt, count in actual.items() if count > 0]
+    v = verify_apkg(out, len(rows), expected_models, locale)
+    sha = hashlib.sha256(out.read_bytes()).hexdigest()
+    entry = {
+        "locale": locale,
+        "slug": slug,
+        "file": f"packages/{out.name}",
+        "title": cfg["title"][locale],
+        "card_count": v["cards"],
+        "note_type_census": actual,
+        "sha256": sha,
+        "rtl": locale == "he",
+        "rules_version": _rules_version(),
+    }
+    return out, actual, v, entry, samples
 
 
 def main() -> int:
@@ -481,68 +445,13 @@ def main() -> int:
         cfg = DECKS.get(slug)
         if cfg is None or locale not in cfg["title"]:
             raise SourceError(f"no deck config for {slug}/{locale}; add it to DECKS first")
-        models = build_models(locale)
-
-        directions = cfg.get("directions_by_locale", {}).get(locale, cfg.get("directions", False))
-        rows = read_rows(csv_path, directions)
-        seen: set = set()
-        deck = genanki.Deck(
-            cfg["deck_id"][locale], cfg["title"][locale], description=cfg["description"][locale]
-        )
-        census: Counter = Counter()
-        samples = {}
-        for row in rows:
-            nt = row["note_type"]
-            validate_row(row, seen, locale, directions)
-            direction = row.get("direction", "") if directions else ""
-            if direction:
-                direction = f"direction::{direction}"
-            tags = build_tags(row["concept_id"], row["unit"], row["grades"].split(),
-                              cfg["subject_tag"], direction)
-            fields = [row["front"], row["extra"]] if nt == "cloze" else [row["front"], row["back"]]
-            note = genanki.Note(
-                model=models[nt],
-                fields=fields,
-                tags=tags,
-                # Plan section 5: explicit GUID from concept_id + locale + slug
-                # so rebuilds never duplicate notes on re-import.
-                guid=genanki.guid_for(f"{row['concept_id']}|{locale}|{slug}"),
-            )
-            deck.add_note(note)
-            census[nt] += 1
-            samples.setdefault(nt, row)
-
-        actual = {k: census.get(k, 0) for k in ("basic", "cloze", "type_in")}
-        expected = cfg.get("expected_census_by_locale", {}).get(
-            locale, cfg["expected_census"])
-        if actual != expected:
-            raise SourceError(f"{slug}/{locale}: census {actual} != plan target {cfg['expected_census']}")
-        if sum(actual.values()) != len(rows):
-            raise SourceError(f"{slug}/{locale}: census does not sum to row count")
-
-        out = PACKAGES_DIR / f"{slug}-{locale}.apkg"
-        out.parent.mkdir(parents=True, exist_ok=True)
-        genanki.Package(deck).write_to_file(str(out))
-
-        expected_models = [NOTE_TYPE_NAMES[nt] for nt, count in actual.items() if count > 0]
-        v = verify_apkg(out, len(rows), expected_models, locale)
-        sha = hashlib.sha256(out.read_bytes()).hexdigest()
-        entry = {
-            "locale": locale,
-            "slug": slug,
-            "file": f"packages/{out.name}",
-            "title": cfg["title"][locale],
-            "card_count": v["cards"],
-            "note_type_census": actual,
-            "sha256": sha,
-            "rtl": locale == "he",
-        }
+        out, actual, v, entry, samples = build_deck(csv_path, slug, locale, cfg)
         update_manifest(entry)
 
         print(f"== {slug}/{locale} ==")
         print(f"  notes={v['notes']} cards={v['cards']} census={actual} (sum={sum(actual.values())})")
         print(f"  file: {out}")
-        print(f"  sha256: {sha}")
+        print(f"  sha256: {entry['sha256']}")
         for nt in ("basic", "cloze", "type_in"):
             s = samples.get(nt)
             if not s:
@@ -551,7 +460,7 @@ def main() -> int:
             print(f"  sample {nt} [{s['concept_id']}]: front={s['front']!r} back={tail!r}")
 
     deck_count = len(json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))["decks"])
-    print(f"manifest: {MANIFEST_PATH} ({deck_count} deck entries, schema v1)")
+    print(f"manifest: {MANIFEST_PATH} ({deck_count} deck entries, schema v2, rules v{_rules_version()})")
     return 0
 
 

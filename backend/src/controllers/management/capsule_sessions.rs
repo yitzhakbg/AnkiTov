@@ -6,18 +6,18 @@
 //! - **GET /management/capsule-sessions** — list sessions with filters
 //! - **GET /management/capsule-sessions/{session_id}** — inspect a single session
 
+use crate::middleware::auth::ensure_role;
+use crate::middleware::auth::AuthUser;
 use crate::models::entities::capsule_session as cs_entity;
 use crate::models::entities::track_profile as tp_entity;
 use crate::models::management::{
     ApiResponse, CapsuleSessionInfo, CapsuleSessionQuery, GenerateCapsuleRequest,
 };
-use crate::services::capsule_generator::{self, GenerateRequest};
 use crate::services::capsule_delivery::CapsuleDelivery;
-use axum::extract::{Path, Query, State, Json, Extension};
+use crate::services::capsule_generator::{self, GenerateRequest};
+use axum::extract::{Extension, Json, Path, Query, State};
 use loco_rs::{app::AppContext, prelude::*};
 use sea_orm::{ActiveModelTrait, ActiveValue, EntityTrait, PaginatorTrait, QueryOrder};
-use crate::middleware::auth::AuthUser;
-use crate::middleware::auth::ensure_role;
 
 const TAG: &str = "Management Console";
 
@@ -73,11 +73,13 @@ fn entity_to_info(s: &cs_entity::Model) -> CapsuleSessionInfo {
 )]
 pub async fn list_sessions(
     State(ctx): State<AppContext>,
-    Query(params): Query<CapsuleSessionQuery>
+    Query(params): Query<CapsuleSessionQuery>,
 ) -> Result<Response> {
     tracing::info!(
         "Listing capsule sessions — student={:?}, status={:?}, week={:?}",
-        params.student_id, params.status, params.session_week
+        params.student_id,
+        params.status,
+        params.session_week
     );
 
     let mut query = cs_entity::Entity::find();
@@ -123,7 +125,7 @@ pub async fn list_sessions(
 )]
 pub async fn get_session(
     State(ctx): State<AppContext>,
-    Path(session_id): Path<String>
+    Path(session_id): Path<String>,
 ) -> Result<Response> {
     tracing::info!("Fetching capsule session: {session_id}");
 
@@ -258,11 +260,10 @@ pub async fn deliver_session(
     }
 
     // Parse card IDs from JSON
-    let card_ids: Vec<i64> = serde_json::from_str(&session.card_ids)
-        .map_err(|e| {
-            tracing::error!("Failed to parse card_ids for session {}: {}", session_id, e);
-            loco_rs::Error::InternalServerError
-        })?;
+    let card_ids: Vec<i64> = serde_json::from_str(&session.card_ids).map_err(|e| {
+        tracing::error!("Failed to parse card_ids for session {}: {}", session_id, e);
+        loco_rs::Error::InternalServerError
+    })?;
 
     // Resolve track profile name for the addon
     let profile_name = tp_entity::Entity::find_by_id(&session.track_profile_id)

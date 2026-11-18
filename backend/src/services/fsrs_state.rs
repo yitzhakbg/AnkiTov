@@ -54,11 +54,11 @@
 use std::collections::HashMap;
 use std::sync::LazyLock;
 
-use fsrs::{FSRS, FSRSItem, FSRSReview, MemoryState};
+use fsrs::{FSRSItem, FSRSReview, MemoryState, FSRS};
 use rusqlite::Connection;
 use sea_orm::{
-    ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder,
-    sea_query::OnConflict,
+    sea_query::OnConflict, ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait,
+    QueryFilter, QueryOrder,
 };
 
 use crate::models::entities::fsrs_memory_state::{ActiveModel, Column, Entity};
@@ -360,9 +360,7 @@ fn state_from_revlog_rows(rows: &[(i64, i64, i64)]) -> Option<MemoryState> {
         prev_id = Some(id);
     }
 
-    let state = FSRS_MODEL
-        .memory_state(FSRSItem { reviews }, None)
-        .ok()?;
+    let state = FSRS_MODEL.memory_state(FSRSItem { reviews }, None).ok()?;
     if !is_usable_state(&state) {
         return None;
     }
@@ -702,7 +700,14 @@ fn card_scheduling_facts(
         while let Some(row) = rows.next() {
             let (id, card_type, ivl, factor) =
                 row.map_err(|e| FsrsStateError::Snapshot("cards facts row".into(), e))?;
-            out.insert(id, CardSchedFacts { card_type, ivl, factor });
+            out.insert(
+                id,
+                CardSchedFacts {
+                    card_type,
+                    ivl,
+                    factor,
+                },
+            );
         }
     }
     Ok(out)
@@ -801,8 +806,7 @@ mod tests {
         s.revlog_rows
             .insert(703, vec![(DAY0_MS, 3, 0), (DAY0_MS + 10 * DAY_MS, 3, 0)]);
         s.revlog_heads.insert(703, DAY0_MS + 10 * DAY_MS);
-        s.web_rows
-            .insert(703, vec![(DAY0_MS + 5 * DAY_MS, 2)]); // Hard, mid-history
+        s.web_rows.insert(703, vec![(DAY0_MS + 5 * DAY_MS, 2)]); // Hard, mid-history
 
         let rows = merged_rows(&s, 703).expect("merged rows");
         let ids: Vec<i64> = rows.iter().map(|&(id, _, _)| id).collect();

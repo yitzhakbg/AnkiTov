@@ -43,26 +43,26 @@
 
 pub mod anki_connect;
 pub mod anki_launcher;
-pub mod forensic_reader;
 pub mod deck_health;
+pub mod forensic_reader;
 
 // Interleaved Mastery Pipeline — Phase 3 (Capsule Generation Engine)
+pub mod capsule_delivery;
+pub mod capsule_generator;
+pub mod capsule_generator_job;
 pub mod capsule_slicer;
 pub mod fsrs_sort;
 pub mod fsrs_state;
-pub mod capsule_generator;
-pub mod capsule_delivery;
-pub mod capsule_generator_job;
 
 // Interleaved Mastery Pipeline — Phase 4 (Telemetry, Analytics, Audit)
-pub mod telemetry_ingestor;
-pub mod track_health;
-pub mod audit_logger;
 pub mod admin_bootstrap;
-pub mod settings;
+pub mod audit_logger;
 pub mod rig_nlu;
+pub mod settings;
 pub mod student_import;
 pub mod sync_user;
+pub mod telemetry_ingestor;
+pub mod track_health;
 
 // Deck verification — P1 producer intake (env-selectable Verifier)
 pub mod deck_verification;
@@ -74,7 +74,7 @@ pub mod auth;
 pub mod password_policy;
 
 // TypeSafe System One (Jev) prompt translator
-pub mod jev_translator;
 pub mod card_renderer;
 pub mod collection_store;
+pub mod jev_translator;
 pub mod review_ingest;

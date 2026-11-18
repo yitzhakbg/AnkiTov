@@ -1,0 +1,16 @@
+slug: ru-core-vocabulary
+subject_tag: subject::russian
+title:
+  en: AnkiTov — Russian Core Vocabulary
+  ru: AnkiTov — Русский базовый словарь
+deck_id:
+  ru: 1699412247024
+description:
+  en: Grades 7-12 Russian core vocabulary that runs at the student's own pace, beside teaching, not inside it. Practice previously taught words to close gaps. SRS works. Word selection follows the FGOS Russian-language requirements; definitions and example sentences are model-drafted and pending native-speaker review. NLM-generated, text only.
+  ru: 'Базовая лексика русского языка для 7-12 классов. Занимайтесь в своём темпе, рядом с уроками, а не вместо них: повторяйте уже пройденные слова, чтобы закрыть пробелы. SRS works. Отбор слов следует требованиям ФГОС по русскому языку; определения и примеры составлены моделью и ожидают проверки носителем языка. Создано NLM, только текст.'
+  he: Grades 7-12 Russian core vocabulary that runs at the student's own pace, beside teaching, not inside it. Practice previously taught words to close gaps. SRS works. Word selection follows the FGOS Russian-language requirements; definitions and example sentences are model-drafted and pending native-speaker review. NLM-generated, text only.
+  fr: Grades 7-12 Russian core vocabulary that runs at the student's own pace, beside teaching, not inside it. Practice previously taught words to close gaps. SRS works. Word selection follows the FGOS Russian-language requirements; definitions and example sentences are model-drafted and pending native-speaker review. NLM-generated, text only.
+expected_census:
+  basic: 196
+  cloze: 84
+  type_in: 0

@@ -42,8 +42,13 @@ fn teacher_token() -> String {
 /// Mint a valid `admin` JWT — the Prong-8 teacher-management routes
 /// (list / create / get_detail / resend) are admin-gated.
 fn admin_token() -> String {
-    backend::services::auth::encode_token(998, "admin", "admin@endpoint-coverage.example.edu", 86400)
-        .expect("minting admin token for endpoint coverage test must succeed")
+    backend::services::auth::encode_token(
+        998,
+        "admin",
+        "admin@endpoint-coverage.example.edu",
+        86400,
+    )
+    .expect("minting admin token for endpoint coverage test must succeed")
 }
 
 /// Build a multipart body for `/management/students/import-file` with a
@@ -74,8 +79,25 @@ fn multipart_import_body(class_id: Option<&str>, csv: &str) -> (String, Vec<u8>)
 // 1. anki_ops — full 17-route surface
 // ─────────────────────────────────────────────────────────────────────────────
 
+/// Point the backend's Zone 2 AnkiConnect client at a dead port so tests
+/// never touch a real, running Anki. AnkiConnect's `getDeckStats` CREATES
+/// any deck name it is asked about (`collection.decks.id(d)` side effect),
+/// so a test backend that can reach live Anki on :8765 litters the desktop
+/// collection with zero-card `EndpointCoverageProbe` decks (2026-11-12
+/// incident). Bind-and-drop claims a port with nothing behind it; handlers
+/// then degrade to `success:false`, which is exactly what these tests
+/// assert. Safe under nextest (one process per test); do NOT run this
+/// suite under plain `cargo test` with default threading.
+fn isolate_anki() {
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("bind probe");
+    let dead_port = listener.local_addr().unwrap().port();
+    drop(listener);
+    std::env::set_var("ANKICONNECT_PORT", dead_port.to_string());
+}
+
 #[tokio::test]
 async fn test_anki_ops_full_endpoint_surface() {
+    isolate_anki();
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let auth = format!("Bearer {}", teacher_token());
 
@@ -112,11 +134,17 @@ async fn test_anki_ops_full_endpoint_surface() {
                 .await;
             assert_eq!(resp.status_code(), 200, "GET {route} must return 200");
             let body = json_body(&resp.text());
-            assert!(body.is_object(), "GET {route} must return a JSON object, got: {body:?}");
+            assert!(
+                body.is_object(),
+                "GET {route} must return a JSON object, got: {body:?}"
+            );
         }
 
         // POST routes — backup + sync must also degrade gracefully (200).
-        for route in ["/api/v1/management/anki/backup", "/api/v1/management/anki/sync"] {
+        for route in [
+            "/api/v1/management/anki/backup",
+            "/api/v1/management/anki/sync",
+        ] {
             let resp = server
                 .post(route)
                 .add_header("Authorization", auth.clone())
@@ -135,6 +163,7 @@ async fn test_anki_ops_full_endpoint_surface() {
 
 #[tokio::test]
 async fn test_probe_deck_insert_endpoints() {
+    isolate_anki();
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let auth = format!("Bearer {}", teacher_token());
 
@@ -163,7 +192,10 @@ async fn test_probe_deck_insert_endpoints() {
             .await;
         assert_eq!(minimal.status_code(), 200);
         let body = json_body(&minimal.text());
-        assert_eq!(body["success"], true, "deck-insert-minimal must succeed: {body:?}");
+        assert_eq!(
+            body["success"], true,
+            "deck-insert-minimal must succeed: {body:?}"
+        );
 
         // Both rows must now be visible via the standard deck list
         let decks = server
@@ -196,6 +228,7 @@ async fn test_probe_deck_insert_endpoints() {
 
 #[tokio::test]
 async fn test_sync_endpoint_surface() {
+    isolate_anki();
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let auth = format!("Bearer {}", teacher_token());
 
@@ -248,18 +281,25 @@ async fn test_sync_endpoint_surface() {
 
 #[tokio::test]
 async fn test_locale_endpoint_surface() {
+    isolate_anki();
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         // Full translation map for the current locale
         let map = server.get("/api/v1/locale").await;
         assert_eq!(map.status_code(), 200);
-        assert!(json_body(&map.text()).is_object(), "locale map must be an object");
+        assert!(
+            json_body(&map.text()).is_object(),
+            "locale map must be an object"
+        );
 
         // Locale metadata
         let info = server.get("/api/v1/locale/info").await;
         assert_eq!(info.status_code(), 200);
         let body = json_body(&info.text());
         for key in ["locale", "direction", "native_name", "english_name"] {
-            assert!(body.get(key).is_some(), "locale/info missing key {key}: {body:?}");
+            assert!(
+                body.get(key).is_some(),
+                "locale/info missing key {key}: {body:?}"
+            );
         }
 
         // Supported locales list
@@ -296,6 +336,7 @@ async fn test_locale_endpoint_surface() {
 
 #[tokio::test]
 async fn test_capsule_sessions_inspect_deliver_and_generation_jobs() {
+    isolate_anki();
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let auth = format!("Bearer {}", teacher_token());
 
@@ -314,11 +355,16 @@ async fn test_capsule_sessions_inspect_deliver_and_generation_jobs() {
             .await;
         assert_eq!(get_unknown.status_code(), 200);
         let body = json_body(&get_unknown.text());
-        assert_eq!(body["success"], false, "unknown session must be graceful: {body:?}");
+        assert_eq!(
+            body["success"], false,
+            "unknown session must be graceful: {body:?}"
+        );
 
         // Deliver unknown session → graceful (404 or 200+success:false), never 5xx
         let deliver_unknown = server
-            .post(&format!("/api/v1/management/capsule-sessions/{unknown}/deliver"))
+            .post(&format!(
+                "/api/v1/management/capsule-sessions/{unknown}/deliver"
+            ))
             .add_header("Authorization", auth.clone())
             .await;
         let status = deliver_unknown.status_code().as_u16();
@@ -357,8 +403,14 @@ async fn test_capsule_sessions_inspect_deliver_and_generation_jobs() {
             .await;
         assert_eq!(generate_all.status_code(), 200);
         let body = json_body(&generate_all.text());
-        assert!(body["id"].is_string(), "generate-all must return job id: {body:?}");
-        assert_eq!(body["status"], "pending", "fresh job must be pending: {body:?}");
+        assert!(
+            body["id"].is_string(),
+            "generate-all must return job id: {body:?}"
+        );
+        assert_eq!(
+            body["status"], "pending",
+            "fresh job must be pending: {body:?}"
+        );
 
         // generation-jobs/latest must now surface the (or a) job
         let latest = server
@@ -367,7 +419,10 @@ async fn test_capsule_sessions_inspect_deliver_and_generation_jobs() {
             .await;
         assert_eq!(latest.status_code(), 200);
         let body = json_body(&latest.text());
-        assert!(body["id"].is_string(), "latest job must have an id: {body:?}");
+        assert!(
+            body["id"].is_string(),
+            "latest job must have an id: {body:?}"
+        );
     })
     .await;
 }
@@ -378,6 +433,7 @@ async fn test_capsule_sessions_inspect_deliver_and_generation_jobs() {
 
 #[tokio::test]
 async fn test_students_bulk_enroll_populate_decks_and_import_file() {
+    isolate_anki();
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let auth = format!("Bearer {}", teacher_token());
 
@@ -422,11 +478,18 @@ async fn test_students_bulk_enroll_populate_decks_and_import_file() {
             .await;
         assert_eq!(populate.status_code(), 200);
         let body = json_body(&populate.text());
-        assert_eq!(body["populated"], 0, "no profile dirs → populated:0: {body:?}");
-        assert_eq!(body["total_students"], 2, "roster of 2 must be counted: {body:?}");
+        assert_eq!(
+            body["populated"], 0,
+            "no profile dirs → populated:0: {body:?}"
+        );
+        assert_eq!(
+            body["total_students"], 2,
+            "roster of 2 must be counted: {body:?}"
+        );
 
         // import-file happy path → 200 {enrolled: 2, errors: [], students: 2}
-        let csv = "student_id,display_name\nendpoint-cov-imp-a,Import A\nendpoint-cov-imp-b,Import B\n";
+        let csv =
+            "student_id,display_name\nendpoint-cov-imp-a,Import A\nendpoint-cov-imp-b,Import B\n";
         let (content_type, body_bytes) = multipart_import_body(Some(&class_id), csv);
         let import = server
             .post("/api/v1/management/students/import-file")
@@ -437,7 +500,11 @@ async fn test_students_bulk_enroll_populate_decks_and_import_file() {
         assert_eq!(import.status_code(), 200);
         let body = json_body(&import.text());
         assert_eq!(body["enrolled"], 2, "import-file must enroll 2: {body:?}");
-        assert_eq!(body["errors"], json!([]), "valid CSV must have no errors: {body:?}");
+        assert_eq!(
+            body["errors"],
+            json!([]),
+            "valid CSV must have no errors: {body:?}"
+        );
         assert_eq!(body["students"].as_array().map(Vec::len), Some(2));
 
         // import-file without class_id field → clean 400 BadRequest
@@ -476,6 +543,7 @@ async fn test_students_bulk_enroll_populate_decks_and_import_file() {
 
 #[tokio::test]
 async fn test_teachers_management_surface() {
+    isolate_anki();
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let admin = format!("Bearer {}", admin_token());
         let teacher = format!("Bearer {}", teacher_token());
@@ -498,7 +566,11 @@ async fn test_teachers_management_surface() {
                 "locale": "en-US"
             }))
             .await;
-        assert_eq!(gate_create.status_code(), 403, "create as teacher must be 403");
+        assert_eq!(
+            gate_create.status_code(),
+            403,
+            "create as teacher must be 403"
+        );
 
         // ── 2. list (admin) → 200 + JSON array (may be empty before create).
         let list = server
@@ -567,7 +639,10 @@ async fn test_teachers_management_surface() {
             serde_json::json!(new_user_id),
             "detail.user.id must match the created id: {detail_body:?}"
         );
-        assert_eq!(detail_body["user"]["password_hash_set"], false, "fresh teacher has no password yet");
+        assert_eq!(
+            detail_body["user"]["password_hash_set"], false,
+            "fresh teacher has no password yet"
+        );
         assert!(
             detail_body["invite"].is_object(),
             "detail.invite must be an object (a live invite exists): {detail_body:?}"
@@ -578,7 +653,11 @@ async fn test_teachers_management_surface() {
             .get("/api/v1/management/teachers/99999999999")
             .add_header("Authorization", admin.clone())
             .await;
-        assert_eq!(detail_missing.status_code(), 404, "unknown user_id must be 404");
+        assert_eq!(
+            detail_missing.status_code(),
+            404,
+            "unknown user_id must be 404"
+        );
 
         // ── 5. resend (admin) → 200 + a ROTATED token that differs from the original.
         let resend = server
@@ -588,8 +667,14 @@ async fn test_teachers_management_surface() {
         assert_eq!(resend.status_code(), 200, "resend as admin must be 200");
         let resent = json_body(&resend.text());
         let original = created["invite"]["token"].as_str().unwrap_or("");
-        let rotated = resent["token"].as_str().expect("resend must return a token");
-        assert_eq!(rotated.len(), 64, "rotated token must be 256-bit hex: {rotated:?}");
+        let rotated = resent["token"]
+            .as_str()
+            .expect("resend must return a token");
+        assert_eq!(
+            rotated.len(),
+            64,
+            "rotated token must be 256-bit hex: {rotated:?}"
+        );
         assert_ne!(
             rotated, original,
             "resend must rotate the invite token (old: {original}, new: {rotated})"

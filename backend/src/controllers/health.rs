@@ -6,9 +6,7 @@ use axum::extract::State;
 use loco_rs::prelude::*;
 
 pub fn routes() -> Routes {
-    Routes::new()
-        .prefix("/health")
-        .add("/", get(check))
+    Routes::new().prefix("/health").add("/", get(check))
 }
 
 /// Full health check with database connectivity.

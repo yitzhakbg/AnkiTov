@@ -218,8 +218,7 @@ pub async fn rewrite_sync_user_file(
 /// Write `content` to `path` atomically (temp file + rename) with 0600 mode.
 fn write_atomic(path: &std::path::Path, content: &str) -> Result<(), SyncUserError> {
     if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(parent)
-            .map_err(SyncUserError::Io)?;
+        std::fs::create_dir_all(parent).map_err(SyncUserError::Io)?;
     }
     let mut tmp = path.to_path_buf();
     let name = path

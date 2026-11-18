@@ -95,7 +95,10 @@ impl AnkiSession {
             .ok_or_else(|| "ANKIPLAYGROUND_PATH not set and playground not found".to_string())?;
 
         if !base.join(profile_name).is_dir() {
-            return Err(format!("profile '{}' not found in playground", profile_name));
+            return Err(format!(
+                "profile '{}' not found in playground",
+                profile_name
+            ));
         }
 
         Self::launch(&base, profile_name, port_from_env()).await
@@ -207,7 +210,7 @@ impl AnkiSession {
     pub fn is_alive(&mut self) -> bool {
         if let Some(ref mut child) = self.process {
             match child.try_wait() {
-                Ok(None) => true,  // still running
+                Ok(None) => true, // still running
                 _ => false,
             }
         } else {
@@ -301,7 +304,10 @@ impl TempAnkiProfile {
 
     /// Path to this profile's collection.anki2.
     pub fn collection_path(&self) -> PathBuf {
-        self.dir.path().join(&self.profile_name).join("collection.anki2")
+        self.dir
+            .path()
+            .join(&self.profile_name)
+            .join("collection.anki2")
     }
 
     /// Consume the `TempAnkiProfile` and return the underlying `TempDir`.
@@ -417,9 +423,9 @@ pub fn playground_path() -> Option<PathBuf> {
         }
     }
     // Fallback: relative to the AnkiTov workspace root
-    let candidates = [
-        PathBuf::from("/Volumes/YBG1TB4Mac/AnkiTov-C/AnkiPlayGround"),
-    ];
+    let candidates = [PathBuf::from(
+        "/Volumes/YBG1TB4Mac/AnkiTov-C/AnkiPlayGround",
+    )];
     for p in &candidates {
         if p.is_dir() {
             return Some(p.to_path_buf());
@@ -476,7 +482,10 @@ mod harness_tests {
     #[test]
     fn test_playground_path_resolves() {
         let path = playground_path();
-        assert!(path.is_some(), "playground should be resolvable on dev machines");
+        assert!(
+            path.is_some(),
+            "playground should be resolvable on dev machines"
+        );
         let path = path.unwrap();
         assert!(path.is_dir());
         assert!(path.join("addons21").is_dir(), "addons21 must exist");
@@ -683,10 +692,7 @@ pub fn note_tags(anki2_path: &Path) -> Result<Vec<String>, String> {
 
 /// Sample `(overdue_days, ivl)` pairs from review-state cards (`type=2`),
 /// mirroring `fetch_and_sort`'s day arithmetic against `col.crt`.
-pub fn sample_recall_pairs(
-    anki2_path: &Path,
-    max_pairs: usize,
-) -> Result<Vec<(i32, i64)>, String> {
+pub fn sample_recall_pairs(anki2_path: &Path, max_pairs: usize) -> Result<Vec<(i32, i64)>, String> {
     let conn = rusqlite::Connection::open_with_flags(
         anki2_path,
         rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY

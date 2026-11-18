@@ -151,9 +151,10 @@ fn detect_flags(html: &str, flags: &mut FidelityFlags) {
         flags.images = true;
     }
     // RTL heuristic: any Hebrew/Arabic block character in the rendered content.
-    if html.chars().any(|c| {
-        ('\u{0590}'..='\u{05FF}').contains(&c) || ('\u{0600}'..='\u{06FF}').contains(&c)
-    }) {
+    if html
+        .chars()
+        .any(|c| ('\u{0590}'..='\u{05FF}').contains(&c) || ('\u{0600}'..='\u{06FF}').contains(&c))
+    {
         flags.rtl = true;
     }
 }
@@ -190,7 +191,10 @@ fn render_template(
     if type_re.is_match(&out) {
         flags.type_answer = true;
         out = type_re
-            .replace_all(&out, r#"<input class="ankitov-typein" autocomplete="off" inputmode="text">"#)
+            .replace_all(
+                &out,
+                r#"<input class="ankitov-typein" autocomplete="off" inputmode="text">"#,
+            )
             .to_string();
     }
 
@@ -211,7 +215,9 @@ fn render_template(
     let text_re = regex::Regex::new(r"\{\{text:([^}]+)\}\}").unwrap();
     out = text_re
         .replace_all(&out, |caps: &regex::Captures| {
-            lookup(map, caps.get(1).unwrap().as_str()).unwrap_or("").to_string()
+            lookup(map, caps.get(1).unwrap().as_str())
+                .unwrap_or("")
+                .to_string()
         })
         .to_string();
 
@@ -247,7 +253,12 @@ fn render_template(
 /// Conditional blocks: `{{#Field}}body{{/Field}}` kept when the field has
 /// non-empty content; `{{^Field}}body{{/Field}}` kept when it is empty.
 /// Non-nested (v1 subset); unmatched closers render as empty.
-fn render_conditionals(input: &str, map: &[(String, String)], marker: &str, keep_when_present: bool) -> String {
+fn render_conditionals(
+    input: &str,
+    map: &[(String, String)],
+    marker: &str,
+    keep_when_present: bool,
+) -> String {
     let open_re = regex::Regex::new(&format!(
         r"\{{\{{{}\s*([^}}]+?)\s*\}}\}}",
         regex::escape(marker)
@@ -335,7 +346,13 @@ pub fn render_card(raw: &RawCard, field_names: &[String]) -> RenderedCard {
     }
 
     let q_html = render_template(&raw.qfmt, &map, raw.is_cloze, raw.card_ord, &mut q_flags);
-    let a_html = render_template(&raw.afmt, &answer_map, raw.is_cloze, raw.card_ord, &mut a_flags);
+    let a_html = render_template(
+        &raw.afmt,
+        &answer_map,
+        raw.is_cloze,
+        raw.card_ord,
+        &mut a_flags,
+    );
 
     // merge flags (answer side wins for unsupported/type; rtl/audio/images OR-ed)
     let flags = FidelityFlags {
@@ -366,7 +383,12 @@ mod tests {
     use super::*;
 
     fn names() -> Vec<String> {
-        vec!["Front".into(), "Back".into(), "Text".into(), "Back Extra".into()]
+        vec![
+            "Front".into(),
+            "Back".into(),
+            "Text".into(),
+            "Back Extra".into(),
+        ]
     }
 
     fn raw(qfmt: &str, afmt: &str, fields: Vec<&str>, is_cloze: bool, ord: i32) -> RawCard {
@@ -385,7 +407,13 @@ mod tests {
     #[test]
     fn basic_replacement() {
         let c = render_card(
-            &raw("{{Front}}", "{{Front}}<hr>{{Back}}", vec!["What is a cell?", "The smallest unit of life"], false, 0),
+            &raw(
+                "{{Front}}",
+                "{{Front}}<hr>{{Back}}",
+                vec!["What is a cell?", "The smallest unit of life"],
+                false,
+                0,
+            ),
             &names(),
         );
         assert_eq!(c.question.html, "What is a cell?");
@@ -399,13 +427,21 @@ mod tests {
             &raw(
                 "{{cloze:Text}}",
                 "{{cloze:Text}}<br>{{Back Extra}}",
-                vec!["", "", "The {{c1::cell theory}} states that {{c2::all cells}} come from cells.", "Schleiden & Schwann"],
+                vec![
+                    "",
+                    "",
+                    "The {{c1::cell theory}} states that {{c2::all cells}} come from cells.",
+                    "Schleiden & Schwann",
+                ],
                 true,
                 0,
             ),
             &names(),
         );
-        assert!(c.question.html.contains(r#"<span class="cloze">[...]</span>"#));
+        assert!(c
+            .question
+            .html
+            .contains(r#"<span class="cloze">[...]</span>"#));
         assert!(c.question.html.contains("all cells come from cells")); // c2 inactive → shown
         assert!(!c.question.html.contains("cell theory")); // c1 active → hidden
         assert!(c.answer.html.contains("cell theory")); // answer shows the deletion text
@@ -414,12 +450,24 @@ mod tests {
     #[test]
     fn conditional_blocks() {
         let c = render_card(
-            &raw("{{#Back}}{{Back}}{{/Back}}{{^Back}}no back{{/Back}}", "{{Front}}", vec!["F", ""], false, 0),
+            &raw(
+                "{{#Back}}{{Back}}{{/Back}}{{^Back}}no back{{/Back}}",
+                "{{Front}}",
+                vec!["F", ""],
+                false,
+                0,
+            ),
             &names(),
         );
         assert_eq!(c.question.html, "no back");
         let c2 = render_card(
-            &raw("{{#Back}}{{Back}}{{/Back}}{{^Back}}no back{{/Back}}", "{{Front}}", vec!["F", "present"], false, 0),
+            &raw(
+                "{{#Back}}{{Back}}{{/Back}}{{^Back}}no back{{/Back}}",
+                "{{Front}}",
+                vec!["F", "present"],
+                false,
+                0,
+            ),
             &names(),
         );
         assert_eq!(c2.question.html, "present");
@@ -428,17 +476,32 @@ mod tests {
     #[test]
     fn sound_and_rtl_and_math() {
         let c = render_card(
-            &raw("{{Front}}", "{{Front}}", vec!["שלום [sound:shalom.mp3] \\(x^2\\)", ""], false, 0),
+            &raw(
+                "{{Front}}",
+                "{{Front}}",
+                vec!["שלום [sound:shalom.mp3] \\(x^2\\)", ""],
+                false,
+                0,
+            ),
             &names(),
         );
         assert!(c.flags.audio && c.flags.rtl && c.flags.mathjax);
-        assert!(c.question.html.contains("/api/v1/reviewer/media/shalom.mp3"));
+        assert!(c
+            .question
+            .html
+            .contains("/api/v1/reviewer/media/shalom.mp3"));
     }
 
     #[test]
     fn type_answer_and_unknown_filter() {
         let c = render_card(
-            &raw("{{type:Back}}", "{{furigana:Front}}", vec!["f", "answer"], false, 0),
+            &raw(
+                "{{type:Back}}",
+                "{{furigana:Front}}",
+                vec!["f", "answer"],
+                false,
+                0,
+            ),
             &names(),
         );
         assert!(c.flags.type_answer);

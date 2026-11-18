@@ -109,7 +109,11 @@ pub async fn ingest_answer(
         match crate::controllers::telemetry::update_session_progress(db, sid).await {
             Ok(p) => Some(p),
             Err(e) => {
-                tracing::warn!("web reviewer: session progress update failed for {}: {}", sid, e);
+                tracing::warn!(
+                    "web reviewer: session progress update failed for {}: {}",
+                    sid,
+                    e
+                );
                 None
             }
         }

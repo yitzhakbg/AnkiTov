@@ -71,7 +71,11 @@ mod tests {
 
     #[test]
     fn split_tolerates_whitespace_and_empties() {
-        let emails: Vec<&str> = " a@x.test ,  ,b@x.test, ".split(',').map(str::trim).filter(|s| !s.is_empty()).collect();
+        let emails: Vec<&str> = " a@x.test ,  ,b@x.test, "
+            .split(',')
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .collect();
         assert_eq!(emails, vec!["a@x.test", "b@x.test"]);
     }
 }

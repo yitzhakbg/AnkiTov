@@ -81,7 +81,11 @@ async fn setup_creates_admin_and_flips_status() {
         // Create the admin.
         let resp = server
             .post("/api/v1/setup")
-            .json(&setup_payload("setupadmin", "setup-admin@example.com", "Sup3r-Secret-Passw0rd!"))
+            .json(&setup_payload(
+                "setupadmin",
+                "setup-admin@example.com",
+                "Sup3r-Secret-Passw0rd!",
+            ))
             .await;
         assert_eq!(
             resp.status_code(),
@@ -97,7 +101,9 @@ async fn setup_creates_admin_and_flips_status() {
             Some("setup-admin@example.com")
         );
         assert!(
-            body.get("token").and_then(|v| v.as_str()).is_some_and(|t| !t.is_empty()),
+            body.get("token")
+                .and_then(|v| v.as_str())
+                .is_some_and(|t| !t.is_empty()),
             "setup response must include a JWT (body: {})",
             resp.text()
         );
@@ -144,13 +150,21 @@ async fn setup_second_post_is_409() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let first = server
             .post("/api/v1/setup")
-            .json(&setup_payload("setupadmin", "setup-admin@example.com", "Sup3r-Secret-Passw0rd!"))
+            .json(&setup_payload(
+                "setupadmin",
+                "setup-admin@example.com",
+                "Sup3r-Secret-Passw0rd!",
+            ))
             .await;
         assert_eq!(first.status_code(), axum::http::StatusCode::OK);
 
         let second = server
             .post("/api/v1/setup")
-            .json(&setup_payload("otheradmin", "other-admin@example.com", "Sup3r-Secret-Passw0rd!"))
+            .json(&setup_payload(
+                "otheradmin",
+                "other-admin@example.com",
+                "Sup3r-Secret-Passw0rd!",
+            ))
             .await;
         assert_eq!(
             second.status_code(),
@@ -171,7 +185,11 @@ async fn setup_concurrent_double_post_creates_exactly_one_admin() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         // Same payload on both — the loser must fail on the guard or the
         // unique constraint, never succeed.
-        let payload = setup_payload("setupadmin", "setup-admin@example.com", "Sup3r-Secret-Passw0rd!");
+        let payload = setup_payload(
+            "setupadmin",
+            "setup-admin@example.com",
+            "Sup3r-Secret-Passw0rd!",
+        );
         let (a, b) = tokio::join!(
             server.post("/api/v1/setup").json(&payload),
             server.post("/api/v1/setup").json(&payload),
@@ -181,7 +199,8 @@ async fn setup_concurrent_double_post_creates_exactly_one_admin() {
             .filter(|s| **s == axum::http::StatusCode::OK)
             .count();
         assert_eq!(
-            ok_count, 1,
+            ok_count,
+            1,
             "exactly one concurrent POST /setup must succeed (got {ok_count}; bodies: {} / {})",
             a.text(),
             b.text()
@@ -226,7 +245,11 @@ async fn setup_rejects_missing_fields() {
         // Present-but-empty fields → 400 from handler validation.
         let resp = server
             .post("/api/v1/setup")
-            .json(&setup_payload("", "setup-admin@example.com", "Sup3r-Secret-Passw0rd!"))
+            .json(&setup_payload(
+                "",
+                "setup-admin@example.com",
+                "Sup3r-Secret-Passw0rd!",
+            ))
             .await;
         assert_eq!(
             resp.status_code(),
@@ -245,7 +268,11 @@ async fn setup_rejects_short_password() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server
             .post("/api/v1/setup")
-            .json(&setup_payload("setupadmin", "setup-admin@example.com", "abc"))
+            .json(&setup_payload(
+                "setupadmin",
+                "setup-admin@example.com",
+                "abc",
+            ))
             .await;
         assert_eq!(
             resp.status_code(),
@@ -279,7 +306,11 @@ async fn setup_rejects_duplicate_email() {
         // Setup with the same email must not succeed.
         let resp = server
             .post("/api/v1/setup")
-            .json(&setup_payload("setupadmin", "taken@example.com", "Sup3r-Secret-Passw0rd!"))
+            .json(&setup_payload(
+                "setupadmin",
+                "taken@example.com",
+                "Sup3r-Secret-Passw0rd!",
+            ))
             .await;
         assert_eq!(
             resp.status_code(),

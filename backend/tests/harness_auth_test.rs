@@ -52,8 +52,8 @@ fn mint_token(user_id: i64, role: &str, email: &str) -> String {
 /// A tampered token: a structurally valid JWT but signed with a *different*
 /// secret, so signature verification fails → the middleware must return 401.
 fn mint_garbage_token() -> String {
-    use jsonwebtoken::{encode, EncodingKey, Header};
     use backend::services::auth::Claims;
+    use jsonwebtoken::{encode, EncodingKey, Header};
     let now = chrono::Utc::now().timestamp() as usize;
     let claims = Claims {
         sub: 1,
@@ -128,7 +128,10 @@ async fn management_read_as_teacher_is_200() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server
             .get("/api/v1/management/decks")
-            .add_header("Authorization", format!("Bearer {}", mint_token(101, "teacher", "t@example.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint_token(101, "teacher", "t@example.edu")),
+            )
             .await;
         assert_eq!(
             resp.status_code(),
@@ -147,7 +150,10 @@ async fn management_read_as_admin_is_200() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server
             .get("/api/v1/management/decks")
-            .add_header("Authorization", format!("Bearer {}", mint_token(102, "admin", "a@example.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint_token(102, "admin", "a@example.edu")),
+            )
             .await;
         assert_eq!(resp.status_code(), axum::http::StatusCode::OK);
     })
@@ -164,7 +170,10 @@ async fn management_read_as_student_is_200() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server
             .get("/api/v1/management/decks")
-            .add_header("Authorization", format!("Bearer {}", mint_token(201, "student", "s@example.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint_token(201, "student", "s@example.edu")),
+            )
             .await;
         assert_eq!(
             resp.status_code(),
@@ -186,7 +195,10 @@ async fn management_write_as_student_is_403() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server
             .post("/api/v1/management/classes")
-            .add_header("Authorization", format!("Bearer {}", mint_token(201, "student", "s@example.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint_token(201, "student", "s@example.edu")),
+            )
             // `CreateClassRequest` requires `teacher_id`; we include it so the
             // request validates and reaches the *role* gate (which yields 403
             // for a student) rather than a 422 validation error first.
@@ -213,7 +225,10 @@ async fn management_delete_as_student_is_403() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server
             .delete("/api/v1/management/classes/999")
-            .add_header("Authorization", format!("Bearer {}", mint_token(201, "student", "s@example.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint_token(201, "student", "s@example.edu")),
+            )
             .await;
         assert_eq!(
             resp.status_code(),
@@ -242,7 +257,10 @@ async fn health_is_public() {
             "GET /health must be public, not 401"
         );
         let body = json(&resp.text());
-        assert_eq!(body.get("service").and_then(|v| v.as_str()), Some("ankitov"));
+        assert_eq!(
+            body.get("service").and_then(|v| v.as_str()),
+            Some("ankitov")
+        );
     })
     .await;
 }
@@ -295,7 +313,10 @@ async fn logout_with_token_is_200() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server
             .post("/api/v1/auth/logout")
-            .add_header("Authorization", format!("Bearer {}", mint_token(301, "student", "bye@example.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint_token(301, "student", "bye@example.edu")),
+            )
             .await;
         assert_eq!(
             resp.status_code(),

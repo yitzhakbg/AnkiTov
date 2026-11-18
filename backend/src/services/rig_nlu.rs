@@ -76,11 +76,8 @@ pub async fn parse_query(query: &str) -> NluIntent {
 
     // ── FreeToken path ──────────────────────────────────────────────────
     if provider == "freetoken" {
-        match tokio::time::timeout(
-            std::time::Duration::from_secs(3),
-            try_freetoken_nlu(query),
-        )
-        .await
+        match tokio::time::timeout(std::time::Duration::from_secs(3), try_freetoken_nlu(query))
+            .await
         {
             Ok(Ok(intent)) => {
                 tracing::info!(
@@ -102,12 +99,7 @@ pub async fn parse_query(query: &str) -> NluIntent {
     }
 
     if provider == "deepseek" {
-        match tokio::time::timeout(
-            std::time::Duration::from_secs(5),
-            try_rig_nlu(query),
-        )
-        .await
-        {
+        match tokio::time::timeout(std::time::Duration::from_secs(5), try_rig_nlu(query)).await {
             Ok(Ok(intent)) => {
                 tracing::info!(
                     intent = %intent.intent,
@@ -142,8 +134,8 @@ pub async fn parse_query(query: &str) -> NluIntent {
 async fn try_freetoken_nlu(query: &str) -> Result<NluIntent, String> {
     let base_url = std::env::var("ANKITOV_FREETOKEN_BASE_URL")
         .unwrap_or_else(|_| "http://localhost:1919/v1".into());
-    let model = std::env::var("ANKITOV_FREETOKEN_MODEL")
-        .unwrap_or_else(|_| "Qwen3.6-35B-A3B".into());
+    let model =
+        std::env::var("ANKITOV_FREETOKEN_MODEL").unwrap_or_else(|_| "Qwen3.6-35B-A3B".into());
 
     let client = openai::CompletionsClient::builder()
         .base_url(&base_url)
@@ -206,16 +198,32 @@ async fn try_rig_nlu(query: &str) -> Result<NluIntent, String> {
         .build();
 
     let user_prompt = format!("User question: \"{query}\"");
-    let response = agent.prompt(&user_prompt).await.map_err(|e| format!("LLM call failed: {e}"))?;
+    let response = agent
+        .prompt(&user_prompt)
+        .await
+        .map_err(|e| format!("LLM call failed: {e}"))?;
 
     // Parse the JSON response — strip any accidental markdown fences
-    let json_str = response.trim().trim_start_matches("```json").trim_start_matches("```").trim_end_matches("```").trim();
+    let json_str = response
+        .trim()
+        .trim_start_matches("```json")
+        .trim_start_matches("```")
+        .trim_end_matches("```")
+        .trim();
 
-    let intent: NluIntent =
-        serde_json::from_str(json_str).map_err(|e| format!("JSON parse error: {e}. Raw response: {json_str}"))?;
+    let intent: NluIntent = serde_json::from_str(json_str)
+        .map_err(|e| format!("JSON parse error: {e}. Raw response: {json_str}"))?;
 
     // Basic validation
-    let valid_intents = ["struggling_students", "retention_drop", "deck_health", "recent_exceptions", "missed_practice", "count_question", "unknown"];
+    let valid_intents = [
+        "struggling_students",
+        "retention_drop",
+        "deck_health",
+        "recent_exceptions",
+        "missed_practice",
+        "count_question",
+        "unknown",
+    ];
     if !valid_intents.contains(&intent.intent.as_str()) {
         return Err(format!("Unknown intent: {}", intent.intent));
     }
@@ -228,29 +236,71 @@ fn keyword_fallback(q: &str) -> NluIntent {
     let lower = q.to_lowercase();
 
     // Intent detection
-    let trouble_words = ["trouble", "struggl", "failing", "behind", "low retention", "worst"];
-    let drop_words = ["dropped off", "fell off", "decline", "decreased", "getting worse", "worse over", "past two weeks", "past week", "lately"];
-    let health_words = ["deck health", "how are my decks", "decks doing", "overall health", "status of"];
+    let trouble_words = [
+        "trouble",
+        "struggl",
+        "failing",
+        "behind",
+        "low retention",
+        "worst",
+    ];
+    let drop_words = [
+        "dropped off",
+        "fell off",
+        "decline",
+        "decreased",
+        "getting worse",
+        "worse over",
+        "past two weeks",
+        "past week",
+        "lately",
+    ];
+    let health_words = [
+        "deck health",
+        "how are my decks",
+        "decks doing",
+        "overall health",
+        "status of",
+    ];
     let exception_words = ["exceptions", "problems", "alerts", "warnings", "flagged"];
     // NOTE: no bare "practice" here — it would hijack trend questions like
     // "has practice dropped off recently?" into missed_practice before the
     // drop_words check ever ran (surfaced 2026-10-13 when the double-harness
     // gate first ran with ANKITOV_NLU_PROVIDER=test). Absence phrasings carry
     // their own markers ("miss", "hasn't practiced", "consecutive", ...).
-    let missed_words = ["miss", "haven't studied", "not studied", "studied", "absent", "consecutive", "haven't practiced", "not practiced", "hasn't practiced", "lazy"];
+    let missed_words = [
+        "miss",
+        "haven't studied",
+        "not studied",
+        "studied",
+        "absent",
+        "consecutive",
+        "haven't practiced",
+        "not practiced",
+        "hasn't practiced",
+        "lazy",
+    ];
 
     // Count/enumeration questions: "how many X are there?", "total number of X",
     // "number of X", "how many X do I have?". Must be checked BEFORE the
     // struggle/miss/deck-health words because "how many students are having
     // trouble?" is a count question, not a struggle question.
-    let is_count = (lower.contains("how many") || lower.contains("how much")
-        || lower.contains("total number") || lower.contains("total count")
-        || lower.contains("number of") || lower.contains("count of")
-        || lower.contains("how many") || lower.contains("give me the number"))
-        && (lower.contains("student") || lower.contains("teacher")
-            || lower.contains("class") || lower.contains("deck")
-            || lower.contains("card") || lower.contains("module")
-            || lower.contains("practice plan") || lower.contains("profile"));
+    let is_count = (lower.contains("how many")
+        || lower.contains("how much")
+        || lower.contains("total number")
+        || lower.contains("total count")
+        || lower.contains("number of")
+        || lower.contains("count of")
+        || lower.contains("how many")
+        || lower.contains("give me the number"))
+        && (lower.contains("student")
+            || lower.contains("teacher")
+            || lower.contains("class")
+            || lower.contains("deck")
+            || lower.contains("card")
+            || lower.contains("module")
+            || lower.contains("practice plan")
+            || lower.contains("profile"));
 
     // Deck / upload / distribution actions → "decks" (handled by the fallback,
     // which routes the user to the Decks screen). Checked before the health
@@ -279,16 +329,38 @@ fn keyword_fallback(q: &str) -> NluIntent {
 
     // Subject extraction
     let subjects = [
-        "math", "algebra", "geometry", "biology", "physics", "chemistry",
-        "vocab", "vocabulary", "spanish", "french", "history", "science",
-        "7th grade", "8th grade", "9th grade", "grade 7", "grade 8", "grade 9",
+        "math",
+        "algebra",
+        "geometry",
+        "biology",
+        "physics",
+        "chemistry",
+        "vocab",
+        "vocabulary",
+        "spanish",
+        "french",
+        "history",
+        "science",
+        "7th grade",
+        "8th grade",
+        "9th grade",
+        "grade 7",
+        "grade 8",
+        "grade 9",
     ];
-    let subject = subjects.iter().find(|s| lower.contains(*s)).map(|s| s.to_string());
+    let subject = subjects
+        .iter()
+        .find(|s| lower.contains(*s))
+        .map(|s| s.to_string());
 
     // Time window
-    let mut time_window_days = if lower.contains("past two weeks") || lower.contains("last two weeks") || lower.contains("2 weeks") {
+    let mut time_window_days = if lower.contains("past two weeks")
+        || lower.contains("last two weeks")
+        || lower.contains("2 weeks")
+    {
         Some(14)
-    } else if lower.contains("past week") || lower.contains("last week") || lower.contains("1 week") {
+    } else if lower.contains("past week") || lower.contains("last week") || lower.contains("1 week")
+    {
         Some(7)
     } else if lower.contains("past month") || lower.contains("last month") {
         Some(30)
@@ -299,11 +371,23 @@ fn keyword_fallback(q: &str) -> NluIntent {
     };
 
     if intent == "missed_practice" && time_window_days.is_none() {
-        if lower.contains("two consecutive") || lower.contains("2 consecutive") || lower.contains("two days") || lower.contains("2 days") {
+        if lower.contains("two consecutive")
+            || lower.contains("2 consecutive")
+            || lower.contains("two days")
+            || lower.contains("2 days")
+        {
             time_window_days = Some(2);
-        } else if lower.contains("three consecutive") || lower.contains("3 consecutive") || lower.contains("three days") || lower.contains("3 days") {
+        } else if lower.contains("three consecutive")
+            || lower.contains("3 consecutive")
+            || lower.contains("three days")
+            || lower.contains("3 days")
+        {
             time_window_days = Some(3);
-        } else if lower.contains("four consecutive") || lower.contains("4 consecutive") || lower.contains("four days") || lower.contains("4 days") {
+        } else if lower.contains("four consecutive")
+            || lower.contains("4 consecutive")
+            || lower.contains("four days")
+            || lower.contains("4 days")
+        {
             time_window_days = Some(4);
         } else {
             time_window_days = Some(2); // default missed practice query to 2 days

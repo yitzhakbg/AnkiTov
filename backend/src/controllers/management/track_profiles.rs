@@ -4,6 +4,8 @@
 //! tracks into a single remediation capsule. Profiles can override target
 //! retention and N on a per-cohort or per-student basis.
 
+use crate::middleware::auth::ensure_role;
+use crate::middleware::auth::AuthUser;
 use crate::models::entities::track as track_entity;
 use crate::models::entities::track_profile as tp_entity;
 use crate::models::entities::track_profile_track as tpt_entity;
@@ -12,11 +14,9 @@ use crate::models::management::{
     TrackProfileDetail, TrackProfileInfo, UpdateTrackProfileRequest,
 };
 use crate::services::audit_logger;
-use axum::extract::{Path, State, Json, Extension};
+use axum::extract::{Extension, Json, Path, State};
 use loco_rs::{app::AppContext, prelude::*};
 use sea_orm::{entity::prelude::*, ActiveValue, QueryOrder};
-use crate::middleware::auth::AuthUser;
-use crate::middleware::auth::ensure_role;
 
 const TAG: &str = "Management Console";
 
@@ -59,7 +59,7 @@ fn entity_to_info(p: &tp_entity::Model, track_count: u32) -> TrackProfileInfo {
 
 async fn fetch_profile_detail(
     db: &impl sea_orm::ConnectionTrait,
-    profile: &tp_entity::Model
+    profile: &tp_entity::Model,
 ) -> Result<TrackProfileDetail, loco_rs::Error> {
     let junctions = tpt_entity::Entity::find()
         .filter(tpt_entity::Column::TrackProfileId.eq(&profile.id))
@@ -166,7 +166,7 @@ pub async fn list_profiles(State(ctx): State<AppContext>) -> Result<Response> {
 )]
 pub async fn get_profile(
     State(ctx): State<AppContext>,
-    Path(profile_id): Path<String>
+    Path(profile_id): Path<String>,
 ) -> Result<Response> {
     tracing::info!("Fetching profile: {profile_id}");
     let profile = tp_entity::Entity::find_by_id(&profile_id)
@@ -202,8 +202,8 @@ pub async fn get_profile(
 pub async fn create_profile(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
-    Json(payload): Json<CreateTrackProfileRequest>)
-     -> Result<Response> {
+    Json(payload): Json<CreateTrackProfileRequest>,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     tracing::info!("Creating track profile: {}", payload.name);
     let ts = now_ts();
@@ -231,11 +231,8 @@ pub async fn create_profile(
     // Audit: initial N-value
     if let Some(n) = profile.n_value {
         audit_logger::log_n_change(
-            &ctx.db,
-            "system",
-            None,
-            0,  // old_n = 0 (no previous value)
-            n
+            &ctx.db, "system", None, 0, // old_n = 0 (no previous value)
+            n,
         )
         .await;
     }
@@ -260,8 +257,8 @@ pub async fn update_profile(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
     Path(profile_id): Path<String>,
-    Json(payload): Json<UpdateTrackProfileRequest>)
-     -> Result<Response> {
+    Json(payload): Json<UpdateTrackProfileRequest>,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     tracing::info!("Updating profile: {profile_id}");
 
@@ -286,16 +283,24 @@ pub async fn update_profile(
     let mut active: tp_entity::ActiveModel = profile.into();
     active.updated_at = ActiveValue::Set(ts);
 
-    if let Some(v) = payload.name { active.name = ActiveValue::Set(v); }
-    if let Some(v) = payload.description { active.description = ActiveValue::Set(Some(v)); }
-    if let Some(v) = payload.target_retention { active.target_retention = ActiveValue::Set(Some(v)); }
+    if let Some(v) = payload.name {
+        active.name = ActiveValue::Set(v);
+    }
+    if let Some(v) = payload.description {
+        active.description = ActiveValue::Set(Some(v));
+    }
+    if let Some(v) = payload.target_retention {
+        active.target_retention = ActiveValue::Set(Some(v));
+    }
     if let Some(v) = payload.n_value {
         if v != old_n {
             audit_logger::log_n_change(&ctx.db, "system", None, old_n, v).await;
         }
         active.n_value = ActiveValue::Set(Some(v));
     }
-    if let Some(v) = payload.session_duration_minutes { active.session_duration_minutes = ActiveValue::Set(v); }
+    if let Some(v) = payload.session_duration_minutes {
+        active.session_duration_minutes = ActiveValue::Set(v);
+    }
 
     let updated = active.update(&ctx.db).await.map_err(|e| {
         tracing::error!("update_profile save error: {:?}", e);
@@ -320,8 +325,8 @@ pub async fn update_profile(
 pub async fn delete_profile(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
-    Path(profile_id): Path<String>)
-     -> Result<Response> {
+    Path(profile_id): Path<String>,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     tracing::info!("Deleting profile: {profile_id}");
     let res = tp_entity::Entity::delete_by_id(&profile_id)
@@ -361,10 +366,14 @@ pub async fn assign_track(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
     Path(profile_id): Path<String>,
-    Json(payload): Json<AssignTrackRequest>)
-     -> Result<Response> {
+    Json(payload): Json<AssignTrackRequest>,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
-    tracing::info!("Assigning track {} to profile {}", payload.track_id, profile_id);
+    tracing::info!(
+        "Assigning track {} to profile {}",
+        payload.track_id,
+        profile_id
+    );
 
     // Verify profile exists
     let profile = tp_entity::Entity::find_by_id(&profile_id)
@@ -431,7 +440,11 @@ pub async fn assign_track(
         })?;
     }
 
-    tracing::info!("Track {} assigned to profile {}", payload.track_id, profile_id);
+    tracing::info!(
+        "Track {} assigned to profile {}",
+        payload.track_id,
+        profile_id
+    );
     format::json(ApiResponse {
         success: true,
         message: format!(
@@ -458,8 +471,8 @@ pub async fn assign_track(
 pub async fn unassign_track(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
-    Path((profile_id, track_id)): Path<(String, String)>)
-     -> Result<Response> {
+    Path((profile_id, track_id)): Path<(String, String)>,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     tracing::info!("Unassigning track {} from profile {}", track_id, profile_id);
 

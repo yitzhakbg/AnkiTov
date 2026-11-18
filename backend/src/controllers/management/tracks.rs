@@ -3,17 +3,15 @@
 //! Tracks are tag-based sub-collections of cards that can be mixed into
 //! remediation capsules. Each track carries FSRS aggregation metadata.
 
+use crate::middleware::auth::ensure_role;
+use crate::middleware::auth::AuthUser;
 use crate::models::entities::track as track_entity;
 use crate::models::entities::track_profile_track as tpt_entity;
-use crate::models::management::{
-    ApiResponse, CreateTrackRequest, TrackInfo, UpdateTrackRequest,
-};
+use crate::models::management::{ApiResponse, CreateTrackRequest, TrackInfo, UpdateTrackRequest};
 use crate::services::audit_logger;
-use axum::extract::{Path, State, Json, Extension};
+use axum::extract::{Extension, Json, Path, State};
 use loco_rs::{app::AppContext, prelude::*};
 use sea_orm::{entity::prelude::*, ActiveValue, QueryOrder};
-use crate::middleware::auth::AuthUser;
-use crate::middleware::auth::ensure_role;
 
 const TAG: &str = "Management Console";
 
@@ -92,7 +90,7 @@ pub async fn list_tracks(State(ctx): State<AppContext>) -> Result<Response> {
 )]
 pub async fn get_track(
     State(ctx): State<AppContext>,
-    Path(track_id): Path<String>
+    Path(track_id): Path<String>,
 ) -> Result<Response> {
     tracing::info!("Fetching track: {track_id}");
     let track = track_entity::Entity::find_by_id(&track_id)
@@ -125,8 +123,8 @@ pub async fn get_track(
 pub async fn create_track(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
-    Json(payload): Json<CreateTrackRequest>)
-     -> Result<Response> {
+    Json(payload): Json<CreateTrackRequest>,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     tracing::info!("Creating track: {}", payload.name);
     let ts = now_ts();
@@ -170,8 +168,8 @@ pub async fn update_track(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
     Path(track_id): Path<String>,
-    Json(payload): Json<UpdateTrackRequest>)
-     -> Result<Response> {
+    Json(payload): Json<UpdateTrackRequest>,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     tracing::info!("Updating track: {track_id}");
 
@@ -197,11 +195,21 @@ pub async fn update_track(
     let mut active: track_entity::ActiveModel = track.into();
     active.updated_at = ActiveValue::Set(ts);
 
-    if let Some(v) = payload.name { active.name = ActiveValue::Set(v); }
-    if let Some(v) = payload.description { active.description = ActiveValue::Set(Some(v)); }
-    if let Some(v) = payload.subject_area { active.subject_area = ActiveValue::Set(Some(v)); }
-    if let Some(v) = payload.tag { active.tag = ActiveValue::Set(v); }
-    if let Some(v) = payload.target_retention { active.target_retention = ActiveValue::Set(v); }
+    if let Some(v) = payload.name {
+        active.name = ActiveValue::Set(v);
+    }
+    if let Some(v) = payload.description {
+        active.description = ActiveValue::Set(Some(v));
+    }
+    if let Some(v) = payload.subject_area {
+        active.subject_area = ActiveValue::Set(Some(v));
+    }
+    if let Some(v) = payload.tag {
+        active.tag = ActiveValue::Set(v);
+    }
+    if let Some(v) = payload.target_retention {
+        active.target_retention = ActiveValue::Set(v);
+    }
     if let Some(v) = payload.n_value {
         if v != old_n {
             audit_logger::log_n_change(&ctx.db, "system", None, old_n, v).await;
@@ -233,8 +241,8 @@ pub async fn update_track(
 pub async fn delete_track(
     Extension(user): Extension<AuthUser>,
     State(ctx): State<AppContext>,
-    Path(track_id): Path<String>)
-     -> Result<Response> {
+    Path(track_id): Path<String>,
+) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     tracing::info!("Deleting track: {track_id}");
 

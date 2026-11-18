@@ -46,7 +46,10 @@ pub enum LaunchResult {
 
 impl LaunchResult {
     pub fn is_ok(&self) -> bool {
-        matches!(self, LaunchResult::AlreadyRunning | LaunchResult::Launched { .. })
+        matches!(
+            self,
+            LaunchResult::AlreadyRunning | LaunchResult::Launched { .. }
+        )
     }
 }
 
@@ -107,11 +110,11 @@ pub async fn ensure_anki_running(port: u16) -> LaunchResult {
     // Resolve base directory from env or runtime state.
     let base_dir = match resolve_base_dir() {
         Some(dir) => dir,
-        None => {
-            return LaunchResult::NotConfigured {
-                reason: "ANKI_BASE_DIR not set and ANKIPLAYGROUND_PATH/ANKICOLLECTION_PATH not resolvable".to_string(),
-            }
-        }
+        None => return LaunchResult::NotConfigured {
+            reason:
+                "ANKI_BASE_DIR not set and ANKIPLAYGROUND_PATH/ANKICOLLECTION_PATH not resolvable"
+                    .to_string(),
+        },
     };
 
     let binary = match anki_binary() {
@@ -145,7 +148,10 @@ pub async fn ensure_anki_running(port: u16) -> LaunchResult {
     // Spawn the process (detached).
     match cmd.spawn() {
         Ok(child) => {
-            tracing::info!("Anki launched (PID {}), polling AnkiConnect on :{port}", child.id());
+            tracing::info!(
+                "Anki launched (PID {}), polling AnkiConnect on :{port}",
+                child.id()
+            );
         }
         Err(e) => {
             return LaunchResult::NotConfigured {
@@ -218,8 +224,17 @@ mod tests {
     #[test]
     fn test_launch_result_is_ok() {
         assert!(LaunchResult::AlreadyRunning.is_ok());
-        assert!(LaunchResult::Launched { elapsed: Duration::from_secs(0) }.is_ok());
-        assert!(!LaunchResult::Timeout { elapsed: Duration::from_secs(0) }.is_ok());
-        assert!(!LaunchResult::NotConfigured { reason: "test".into() }.is_ok());
+        assert!(LaunchResult::Launched {
+            elapsed: Duration::from_secs(0)
+        }
+        .is_ok());
+        assert!(!LaunchResult::Timeout {
+            elapsed: Duration::from_secs(0)
+        }
+        .is_ok());
+        assert!(!LaunchResult::NotConfigured {
+            reason: "test".into()
+        }
+        .is_ok());
     }
 }

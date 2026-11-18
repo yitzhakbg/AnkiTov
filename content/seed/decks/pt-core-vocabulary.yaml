@@ -1,0 +1,14 @@
+slug: pt-core-vocabulary
+subject_tag: subject::portuguese
+title:
+  en: AnkiTov — Portuguese Core Vocabulary
+  pt: AnkiTov — Vocabulário fundamental de português
+deck_id:
+  pt: 1699412247021
+description:
+  en: Grades 7-12 Portuguese core vocabulary that runs at the student's own pace, beside teaching, not inside it. Practice previously taught words to close gaps. SRS works. Word selection follows the Aprendizagens Essenciais de Português (DGE); definitions and example sentences are model-drafted and pending native-speaker review. NLM-generated, text only.
+  pt: Vocabulário fundamental de português para os anos 7-12, ao ritmo do próprio aluno, ao lado do ensino, não dentro dele. Pratica palavras já dadas para fechar lacunas. SRS works. A seleção de palavras segue as Aprendizagens Essenciais de Português (DGE); definições e frases de exemplo são geradas por modelo e aguardam revisão de um falante nativo. NLM-gerado, apenas texto.
+expected_census:
+  basic: 112
+  cloze: 48
+  type_in: 0

@@ -64,7 +64,10 @@ mod smoke {
 
         let client = session.client();
         let version = client.api_version().await.expect("version query");
-        assert_eq!(version["result"], 6, "AnkiConnect should report API version 6");
+        assert_eq!(
+            version["result"], 6,
+            "AnkiConnect should report API version 6"
+        );
 
         // session drops → Anki killed
     }
@@ -213,7 +216,10 @@ mod imp_pipeline {
             let pool = due.len();
             let capsule_size = capsule_slicer::compute_capsule_size(pool, 3, 25, 10, 25.0, 3);
 
-            assert!(capsule_size > 0, "should produce non-empty capsule from {pool} cards");
+            assert!(
+                capsule_size > 0,
+                "should produce non-empty capsule from {pool} cards"
+            );
             assert!(
                 capsule_size <= pool,
                 "capsule should not exceed pool ({capsule_size} > {pool})"

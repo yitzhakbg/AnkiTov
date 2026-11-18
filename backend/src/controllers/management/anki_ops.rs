@@ -25,19 +25,18 @@
 //!
 //! See: [services module docs](crate::services)
 
+use crate::middleware::auth::ensure_role;
+use crate::middleware::auth::AuthUser;
 use crate::models::management::{
-    ApiResponse, BackupResponse, DeckHealthReport,
+    ApiResponse, BackupResponse, DeckHealthReport, DeckSuitabilityResponse, GapAnalysisResponse,
     PracticeAdherenceResponse, SporadicPracticeResponse,
-    GapAnalysisResponse, DeckSuitabilityResponse,
 };
 use crate::services::anki_connect::AnkiConnectClient;
 use crate::services::deck_health::DeckHealthReporter;
 use crate::services::forensic_reader::ForensicReader;
-use axum::extract::{Path, Query, State, Extension};
+use axum::extract::{Extension, Path, Query, State};
 use loco_rs::{app::AppContext, prelude::*};
 use serde::Deserialize;
-use crate::middleware::auth::AuthUser;
-use crate::middleware::auth::ensure_role;
 use std::sync::OnceLock;
 
 // ---------------------------------------------------------------------------
@@ -83,7 +82,9 @@ pub struct ForensicDeckQuery {
     pub days: u32,
 }
 
-fn default_days() -> u32 { 30 }
+fn default_days() -> u32 {
+    30
+}
 
 /// Query parameters for the full health report endpoint.
 #[derive(Debug, Deserialize)]
@@ -241,9 +242,7 @@ pub async fn health_check(_ctx: State<AppContext>) -> Result<Response> {
         crate::services::anki_launcher::LaunchResult::Launched { elapsed } => {
             format::json(ApiResponse {
                 success: true,
-                message: format!(
-                    "Anki launched headless — AnkiConnect v6 ready after {elapsed:?}"
-                ),
+                message: format!("Anki launched headless — AnkiConnect v6 ready after {elapsed:?}"),
             })
         }
         crate::services::anki_launcher::LaunchResult::Timeout { elapsed } => {
@@ -294,7 +293,8 @@ pub async fn sync_collection(
             let friendly = if msg.contains("auth not configured") {
                 "Sync not configured — Anki needs an AnkiWeb account or self-hosted sync server credentials. Set SYNC_USER1 env var before launching Anki.".to_string()
             } else if msg.contains("cannot connect") || msg.contains("Unreachable") {
-                "Anki is not running. Click Refresh to auto-launch, then try sync again.".to_string()
+                "Anki is not running. Click Refresh to auto-launch, then try sync again."
+                    .to_string()
             } else {
                 format!("Sync failed: {e}")
             };
@@ -345,13 +345,13 @@ pub async fn list_decks(_ctx: State<AppContext>) -> Result<Response> {
 )]
 pub async fn deck_health(
     _ctx: State<AppContext>,
-    Path(deck_name): Path<String>
+    Path(deck_name): Path<String>,
 ) -> Result<Response> {
     let client = anki_client();
 
     let (stats, due) = match (
         client.get_deck_stats(vec![deck_name.clone()]).await,
-        client.get_due_cards(&deck_name).await
+        client.get_due_cards(&deck_name).await,
     ) {
         (Ok(s), Ok(d)) => (s, d),
         (Err(e), _) | (_, Err(e)) => {
@@ -371,16 +371,17 @@ pub async fn deck_health(
         .as_object()
         .and_then(|o| {
             // Iterate values to find the one matching our deck name
-            o.values().find(|v| {
-                v.get("name").and_then(|n| n.as_str()) == Some(&deck_name)
-            })
+            o.values()
+                .find(|v| v.get("name").and_then(|n| n.as_str()) == Some(&deck_name))
         })
         .map(|ds| {
             (
                 ds.get("new_count").and_then(|v| v.as_u64()).unwrap_or(0) as u32,
                 ds.get("learn_count").and_then(|v| v.as_u64()).unwrap_or(0) as u32,
                 ds.get("review_count").and_then(|v| v.as_u64()).unwrap_or(0) as u32,
-                ds.get("total_in_deck").and_then(|v| v.as_u64()).unwrap_or(0) as u32
+                ds.get("total_in_deck")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(0) as u32,
             )
         })
         .unwrap_or((0, 0, 0, 0));
@@ -420,10 +421,7 @@ pub async fn deck_health(
     ),
     tag = TAG
 )]
-pub async fn due_cards(
-    _ctx: State<AppContext>,
-    Path(deck_name): Path<String>
-) -> Result<Response> {
+pub async fn due_cards(_ctx: State<AppContext>, Path(deck_name): Path<String>) -> Result<Response> {
     let client = anki_client();
     match client.get_due_cards(&deck_name).await {
         Ok(cards) => format::json(serde_json::json!({ "due": cards })),
@@ -495,7 +493,7 @@ pub async fn collection_health(_ctx: State<AppContext>) -> Result<Response> {
 pub async fn retention_curve_forensic(
     _ctx: State<AppContext>,
     Path(deck_name): Path<String>,
-    Query(params): Query<ForensicDeckQuery>
+    Query(params): Query<ForensicDeckQuery>,
 ) -> Result<Response> {
     let Some(reader) = forensic_reader() else {
         return format::json(ApiResponse {
@@ -538,7 +536,7 @@ pub async fn retention_curve_forensic(
 pub async fn lapse_analysis(
     _ctx: State<AppContext>,
     Path(deck_name): Path<String>,
-    Query(params): Query<ForensicDeckQuery>
+    Query(params): Query<ForensicDeckQuery>,
 ) -> Result<Response> {
     let Some(reader) = forensic_reader() else {
         return format::json(ApiResponse {
@@ -579,7 +577,7 @@ pub async fn lapse_analysis(
 )]
 pub async fn interval_degradation(
     _ctx: State<AppContext>,
-    Path(deck_name): Path<String>
+    Path(deck_name): Path<String>,
 ) -> Result<Response> {
     let Some(reader) = forensic_reader() else {
         return format::json(ApiResponse {
@@ -629,7 +627,7 @@ pub async fn interval_degradation(
 pub async fn full_health_report(
     _ctx: State<AppContext>,
     Path(deck_name): Path<String>,
-    Query(params): Query<FullHealthQuery>
+    Query(params): Query<FullHealthQuery>,
 ) -> Result<Response> {
     let Some(reporter) = health_reporter() else {
         return format::json(ApiResponse {
@@ -827,7 +825,10 @@ pub async fn switch_profile(
     if !col_path.exists() {
         return format::json(ApiResponse {
             success: false,
-            message: format!("Profile '{}' not found or has no collection.anki2", body.profile),
+            message: format!(
+                "Profile '{}' not found or has no collection.anki2",
+                body.profile
+            ),
         });
     }
 
@@ -836,7 +837,11 @@ pub async fn switch_profile(
         *guard = Some(path_str.clone());
     }
 
-    tracing::info!("Switched active forensic profile to '{}' ({})", body.profile, path_str);
+    tracing::info!(
+        "Switched active forensic profile to '{}' ({})",
+        body.profile,
+        path_str
+    );
 
     format::json(serde_json::json!({
         "success": true,
@@ -868,14 +873,17 @@ pub async fn switch_profile(
 pub async fn practice_adherence(
     _ctx: State<AppContext>,
     Path(deck): Path<String>,
-    Query(params): Query<DaysQuery>
+    Query(params): Query<DaysQuery>,
 ) -> Result<Response> {
     let reader = match forensic_reader() {
         Some(r) => r,
-        None => return format::json(ApiResponse {
-            success: false,
-            message: "ANKICOLLECTION_PATH not set — cannot perform forensic analysis".to_string(),
-        }),
+        None => {
+            return format::json(ApiResponse {
+                success: false,
+                message: "ANKICOLLECTION_PATH not set — cannot perform forensic analysis"
+                    .to_string(),
+            })
+        }
     };
     let days = params.days.unwrap_or(30);
     match reader.practice_adherence(&deck, days) {
@@ -886,7 +894,10 @@ pub async fn practice_adherence(
             "missed_days": data.missed_days,
             "window_days": data.window_days,
         })),
-        Err(e) => format::json(ApiResponse { success: false, message: e.to_string() }),
+        Err(e) => format::json(ApiResponse {
+            success: false,
+            message: e.to_string(),
+        }),
     }
 }
 
@@ -908,14 +919,16 @@ pub async fn practice_adherence(
 pub async fn sporadic_index(
     _ctx: State<AppContext>,
     Path(deck): Path<String>,
-    Query(params): Query<DaysQuery>
+    Query(params): Query<DaysQuery>,
 ) -> Result<Response> {
     let reader = match forensic_reader() {
         Some(r) => r,
-        None => return format::json(ApiResponse {
-            success: false,
-            message: "ANKICOLLECTION_PATH not set".to_string(),
-        }),
+        None => {
+            return format::json(ApiResponse {
+                success: false,
+                message: "ANKICOLLECTION_PATH not set".to_string(),
+            })
+        }
     };
     let days = params.days.unwrap_or(30);
     match reader.sporadic_index(&deck, days) {
@@ -926,7 +939,10 @@ pub async fn sporadic_index(
             "coverage": data.coverage,
             "avg_reviews_per_active_day": data.avg_reviews_per_active_day,
         })),
-        Err(e) => format::json(ApiResponse { success: false, message: e.to_string() }),
+        Err(e) => format::json(ApiResponse {
+            success: false,
+            message: e.to_string(),
+        }),
     }
 }
 
@@ -948,14 +964,16 @@ pub async fn sporadic_index(
 pub async fn gap_analysis(
     _ctx: State<AppContext>,
     Path(deck): Path<String>,
-    Query(params): Query<DaysQuery>
+    Query(params): Query<DaysQuery>,
 ) -> Result<Response> {
     let reader = match forensic_reader() {
         Some(r) => r,
-        None => return format::json(ApiResponse {
-            success: false,
-            message: "ANKICOLLECTION_PATH not set".to_string(),
-        }),
+        None => {
+            return format::json(ApiResponse {
+                success: false,
+                message: "ANKICOLLECTION_PATH not set".to_string(),
+            })
+        }
     };
     let days = params.days.unwrap_or(30);
     match reader.gap_analysis(&deck, days) {
@@ -966,7 +984,10 @@ pub async fn gap_analysis(
             "gaps_over_7_days": data.gaps_over_7_days,
             "gap_list": data.gap_list,
         })),
-        Err(e) => format::json(ApiResponse { success: false, message: e.to_string() }),
+        Err(e) => format::json(ApiResponse {
+            success: false,
+            message: e.to_string(),
+        }),
     }
 }
 
@@ -988,14 +1009,16 @@ pub async fn gap_analysis(
 pub async fn deck_suitability(
     _ctx: State<AppContext>,
     Path(deck): Path<String>,
-    Query(params): Query<DaysQuery>
+    Query(params): Query<DaysQuery>,
 ) -> Result<Response> {
     let reader = match forensic_reader() {
         Some(r) => r,
-        None => return format::json(ApiResponse {
-            success: false,
-            message: "ANKICOLLECTION_PATH not set".to_string(),
-        }),
+        None => {
+            return format::json(ApiResponse {
+                success: false,
+                message: "ANKICOLLECTION_PATH not set".to_string(),
+            })
+        }
     };
     let days = params.days.unwrap_or(30);
     match reader.deck_suitability(&deck, days) {
@@ -1008,7 +1031,10 @@ pub async fn deck_suitability(
             "indicators": data.indicators,
             "struggle_points": data.struggle_points,
         })),
-        Err(e) => format::json(ApiResponse { success: false, message: e.to_string() }),
+        Err(e) => format::json(ApiResponse {
+            success: false,
+            message: e.to_string(),
+        }),
     }
 }
 

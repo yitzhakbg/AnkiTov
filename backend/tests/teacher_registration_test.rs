@@ -102,8 +102,16 @@ async fn enroll_valid_admin_creates_user_and_invite() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server
             .post(API)
-            .add_header("Authorization", format!("Bearer {}", mint(900, "admin", "a@example.edu")))
-            .json(&enroll_body("Ada Lovelace", "ada.lovelace@example.edu", "Westfield HS", "en-US"))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint(900, "admin", "a@example.edu")),
+            )
+            .json(&enroll_body(
+                "Ada Lovelace",
+                "ada.lovelace@example.edu",
+                "Westfield HS",
+                "en-US",
+            ))
             .await;
         let status = resp.status_code();
         assert!(
@@ -120,7 +128,9 @@ async fn enroll_valid_admin_creates_user_and_invite() {
             "invite must carry a future expiry"
         );
         assert!(
-            body["invite"]["token"].as_str().map_or(false, |t| !t.is_empty()),
+            body["invite"]["token"]
+                .as_str()
+                .map_or(false, |t| !t.is_empty()),
             "invite token must be non-empty"
         );
         assert_eq!(body["audit"]["event_type"], "teacher_enrolled");
@@ -134,8 +144,16 @@ async fn enroll_student_forbidden() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server
             .post(API)
-            .add_header("Authorization", format!("Bearer {}", mint(901, "student", "s@example.edu")))
-            .json(&enroll_body("Student One", "so@example.edu", "Westfield HS", "en-US"))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint(901, "student", "s@example.edu")),
+            )
+            .json(&enroll_body(
+                "Student One",
+                "so@example.edu",
+                "Westfield HS",
+                "en-US",
+            ))
             .await;
         assert_eq!(
             resp.status_code(),
@@ -154,7 +172,10 @@ async fn enroll_missing_fields_bad_request() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server
             .post(API)
-            .add_header("Authorization", format!("Bearer {}", mint(902, "admin", "a@example.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint(902, "admin", "a@example.edu")),
+            )
             .json(&json!({ "email": "x@example.edu" })) // no full_name / school
             .await;
         assert_eq!(
@@ -174,8 +195,16 @@ async fn enroll_unsupported_locale_bad_request() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server
             .post(API)
-            .add_header("Authorization", format!("Bearer {}", mint(903, "admin", "a@example.edu")))
-            .json(&enroll_body("Jane Roe", "jane@example.edu", "Roe School", "xx-YY"))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint(903, "admin", "a@example.edu")),
+            )
+            .json(&enroll_body(
+                "Jane Roe",
+                "jane@example.edu",
+                "Roe School",
+                "xx-YY",
+            ))
             .await;
         assert_eq!(
             resp.status_code(),
@@ -195,8 +224,16 @@ async fn enroll_duplicate_email_conflict() {
         seed_user(&ctx, 910, "dup.user", "teacher").await;
         let resp = server
             .post(API)
-            .add_header("Authorization", format!("Bearer {}", mint(904, "admin", "a@example.edu")))
-            .json(&enroll_body("Dup User", "dup.user@test.edu", "Dup School", "en-US"))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint(904, "admin", "a@example.edu")),
+            )
+            .json(&enroll_body(
+                "Dup User",
+                "dup.user@test.edu",
+                "Dup School",
+                "en-US",
+            ))
             .await;
         assert_eq!(
             resp.status_code(),
@@ -221,7 +258,10 @@ async fn detail_admin_sees_any_teacher() {
         let (inv, _tok) = seed_invite(&ctx, uid, false, false, false).await;
         let resp = server
             .get(&format!("{API}/{uid}"))
-            .add_header("Authorization", format!("Bearer {}", mint(921, "admin", "a@example.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint(921, "admin", "a@example.edu")),
+            )
             .await;
         assert_eq!(
             resp.status_code(),
@@ -232,7 +272,10 @@ async fn detail_admin_sees_any_teacher() {
         );
         let body = js(&resp.text());
         assert_eq!(body["user"]["id"], json!(uid));
-        assert_eq!(body["invite"]["id"], inv, "detail must echo the seeded invite");
+        assert_eq!(
+            body["invite"]["id"], inv,
+            "detail must echo the seeded invite"
+        );
     })
     .await;
 }
@@ -245,7 +288,10 @@ async fn detail_foreign_teacher_forbidden() {
         seed_invite(&ctx, target, false, false, false).await;
         let resp = server
             .get(&format!("{API}/{target}"))
-            .add_header("Authorization", format!("Bearer {}", mint(931, "teacher", "other@example.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint(931, "teacher", "other@example.edu")),
+            )
             .await;
         assert_eq!(
             resp.status_code(),
@@ -266,7 +312,10 @@ async fn detail_self_read_allowed() {
         seed_invite(&ctx, uid, false, false, false).await;
         let resp = server
             .get(&format!("{API}/{uid}"))
-            .add_header("Authorization", format!("Bearer {}", mint(940, "teacher", "self.teacher@test.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint(940, "teacher", "self.teacher@test.edu")),
+            )
             .await;
         assert_eq!(
             resp.status_code(),
@@ -287,7 +336,10 @@ async fn resend_admin_rotates_token() {
         let (inv, _tok) = seed_invite(&ctx, uid, false, false, false).await;
         let resp = server
             .post(&format!("{API}/{uid}/resend"))
-            .add_header("Authorization", format!("Bearer {}", mint(951, "admin", "a@example.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint(951, "admin", "a@example.edu")),
+            )
             .await;
         assert_eq!(
             resp.status_code(),
@@ -311,7 +363,10 @@ async fn resend_non_admin_forbidden() {
         seed_invite(&ctx, uid, false, false, false).await;
         let resp = server
             .post(&format!("{API}/{uid}/resend"))
-            .add_header("Authorization", format!("Bearer {}", mint(960, "teacher", "t@example.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint(960, "teacher", "t@example.edu")),
+            )
             .await;
         assert_eq!(
             resp.status_code(),
@@ -333,7 +388,10 @@ async fn list_admin_returns_array() {
         seed_invite(&ctx, a, false, false, false).await;
         let resp = server
             .get(API)
-            .add_header("Authorization", format!("Bearer {}", mint(971, "admin", "a@example.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint(971, "admin", "a@example.edu")),
+            )
             .await;
         assert_eq!(
             resp.status_code(),
@@ -370,7 +428,10 @@ async fn wizard_get_serves_html() {
             resp.text()
         );
         assert!(
-            resp.header("content-type").to_str().ok().map_or(false, |ct| ct.contains("html")),
+            resp.header("content-type")
+                .to_str()
+                .ok()
+                .map_or(false, |ct| ct.contains("html")),
             "wizard must be served as text/html, got content-type: {}",
             resp.header("content-type").to_str().ok().unwrap_or("?")
         );

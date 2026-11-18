@@ -63,7 +63,6 @@ pub struct GetDeckStatsParams {
     pub decks: Vec<String>,
 }
 
-
 #[derive(Debug, serde::Serialize)]
 pub struct FindCardsParams {
     pub query: String,
@@ -106,7 +105,6 @@ pub struct ExportPackageParams {
 pub struct ImportPackageParams {
     pub path: String,
 }
-
 
 #[derive(Debug, serde::Serialize)]
 pub struct ReflectParams;
@@ -153,9 +151,7 @@ impl AnkiConnectResponse {
         if let Some(err) = self.error {
             return Err(AnkiConnectError::RpcError(err));
         }
-        let result = self
-            .result
-            .ok_or(AnkiConnectError::NoResult)?;
+        let result = self.result.ok_or(AnkiConnectError::NoResult)?;
         let value: T = serde_json::from_value(result)?;
         Ok(value)
     }
@@ -246,8 +242,7 @@ impl AnkiConnectClient {
     /// running and responding with version 6. Returns `Err` otherwise.
     pub async fn health_check(&self) -> Result<(), AnkiConnectError> {
         let raw = self.invoke_raw("version", serde_json::json!({})).await?;
-        let version: i64 = serde_json::from_value(raw)
-            .map_err(AnkiConnectError::JsonError)?;
+        let version: i64 = serde_json::from_value(raw).map_err(AnkiConnectError::JsonError)?;
         if version != 6 {
             return Err(AnkiConnectError::VersionMismatch(version));
         }
@@ -261,7 +256,11 @@ impl AnkiConnectClient {
     /// `AnkiConnectError::Unreachable`.
     ///
     /// Returns the raw JSON value from the `result` field.
-    async fn invoke_raw(&self, action: &str, params: serde_json::Value) -> Result<serde_json::Value, AnkiConnectError> {
+    async fn invoke_raw(
+        &self,
+        action: &str,
+        params: serde_json::Value,
+    ) -> Result<serde_json::Value, AnkiConnectError> {
         if !self.allowed_actions.contains(action) {
             return Err(AnkiConnectError::ActionNotAllowed(action.to_string()));
         }
@@ -285,7 +284,8 @@ impl AnkiConnectClient {
             "params": params
         });
 
-        let resp = self.http
+        let resp = self
+            .http
             .post(&url)
             .json(&payload)
             .send()
@@ -293,7 +293,8 @@ impl AnkiConnectClient {
             .map_err(|e| {
                 if e.is_connect() || e.is_timeout() {
                     // Extract port from base_url for error message
-                    let port = self.base_url
+                    let port = self
+                        .base_url
                         .strip_prefix("http://localhost:")
                         .unwrap_or("8765");
                     AnkiConnectError::Unreachable(port.parse().unwrap_or(8765))
@@ -312,7 +313,9 @@ impl AnkiConnectClient {
         action: &str,
         params: P,
     ) -> Result<R, AnkiConnectError> {
-        let raw = self.invoke_raw(action, serde_json::to_value(params)?).await?;
+        let raw = self
+            .invoke_raw(action, serde_json::to_value(params)?)
+            .await?;
         serde_json::from_value(raw).map_err(AnkiConnectError::JsonError)
     }
 
@@ -329,8 +332,12 @@ impl AnkiConnectClient {
     ///
     /// AnkiConnect's `getDeckStats` returns a struct with `new`, `learn`,
     /// `review`, and `msancient` counts per deck.
-    pub async fn get_deck_stats(&self, decks: Vec<String>) -> Result<serde_json::Value, AnkiConnectError> {
-        self.invoke("getDeckStats", GetDeckStatsParams { decks }).await
+    pub async fn get_deck_stats(
+        &self,
+        decks: Vec<String>,
+    ) -> Result<serde_json::Value, AnkiConnectError> {
+        self.invoke("getDeckStats", GetDeckStatsParams { decks })
+            .await
     }
 
     /// Return IDs of all cards due in a named deck.
@@ -349,14 +356,23 @@ impl AnkiConnectClient {
     /// Supports full Anki search syntax:
     /// `"deck:Spanish" "tag:vocab" is:due is:new`
     pub async fn find_cards(&self, query: &str) -> Result<Vec<i64>, AnkiConnectError> {
-        self.invoke("findCards", FindCardsParams { query: query.to_string() }).await
+        self.invoke(
+            "findCards",
+            FindCardsParams {
+                query: query.to_string(),
+            },
+        )
+        .await
     }
 
     /// Return detailed information for a list of card IDs.
     ///
     /// Returns an array of card objects including queue, due date, interval,
     /// ease factor, and note fields.
-    pub async fn cards_info(&self, cards: Vec<i64>) -> Result<Vec<serde_json::Value>, AnkiConnectError> {
+    pub async fn cards_info(
+        &self,
+        cards: Vec<i64>,
+    ) -> Result<Vec<serde_json::Value>, AnkiConnectError> {
         self.invoke("cardsInfo", CardsInfoParams { cards }).await
     }
 
@@ -393,15 +409,27 @@ impl AnkiConnectClient {
 
     /// Unsuspend one or more cards by ID.
     pub async fn unsuspend_cards(&self, cards: Vec<i64>) -> Result<bool, AnkiConnectError> {
-        self.invoke("unsuspend", UnsuspendCardsParams { cards }).await
+        self.invoke("unsuspend", UnsuspendCardsParams { cards })
+            .await
     }
 
     /// Reschedule one or more cards to be due in N days.
     ///
     /// `days` is a string: `"0"` = today, `"1"` = tomorrow, `"7"` = in a
     /// week. Negative values are supported (`"-1"` = yesterday).
-    pub async fn set_due_date(&self, cards: Vec<i64>, days: &str) -> Result<bool, AnkiConnectError> {
-        self.invoke("setDueDate", SetDueDateParams { cards, days: days.to_string() }).await
+    pub async fn set_due_date(
+        &self,
+        cards: Vec<i64>,
+        days: &str,
+    ) -> Result<bool, AnkiConnectError> {
+        self.invoke(
+            "setDueDate",
+            SetDueDateParams {
+                cards,
+                days: days.to_string(),
+            },
+        )
+        .await
     }
 
     /// Export a named deck to an `.apkg` file on disk.

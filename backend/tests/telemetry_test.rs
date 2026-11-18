@@ -48,7 +48,10 @@ async fn ingest_card_answer_writes_audit_log() {
             .await
             .expect("find audit logs");
 
-        let card_answers = logs.iter().filter(|l| l.event_type == "card_answer").count();
+        let card_answers = logs
+            .iter()
+            .filter(|l| l.event_type == "card_answer")
+            .count();
         assert!(
             card_answers >= 1,
             "expected at least 1 card_answer event, got {card_answers} (total logs: {})",
@@ -85,8 +88,14 @@ async fn ingest_multiple_events_all_logged() {
             .await
             .expect("find audit logs");
 
-        let card_answers = logs.iter().filter(|l| l.event_type == "card_answer").count();
-        assert_eq!(card_answers, 5, "expected 5 card_answer events, got {card_answers}");
+        let card_answers = logs
+            .iter()
+            .filter(|l| l.event_type == "card_answer")
+            .count();
+        assert_eq!(
+            card_answers, 5,
+            "expected 5 card_answer events, got {card_answers}"
+        );
     })
     .await;
 }

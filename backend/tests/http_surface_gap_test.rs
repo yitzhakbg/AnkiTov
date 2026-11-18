@@ -56,7 +56,10 @@ async fn auth_login_and_change_password_flow() {
             .await;
         assert_eq!(reg.status_code(), 200, "register failed: {}", reg.text());
         let reg_json = json_body(&reg.text());
-        assert!(reg_json["token"].is_string(), "register must return a token");
+        assert!(
+            reg_json["token"].is_string(),
+            "register must return a token"
+        );
 
         // LOGIN — happy path with the registered credentials.
         let login = server
@@ -70,7 +73,10 @@ async fn auth_login_and_change_password_flow() {
         let login_json = json_body(&login.text());
         assert!(login_json["token"].is_string(), "login must return a token");
         assert!(login_json["user_id"].is_i64(), "login must return user_id");
-        let bearer = format!("Bearer {}", login_json["token"].as_str().unwrap_or_default());
+        let bearer = format!(
+            "Bearer {}",
+            login_json["token"].as_str().unwrap_or_default()
+        );
 
         // CHANGE-PASSWORD — authenticated, with the current password.
         let change = server
@@ -167,8 +173,11 @@ async fn students_scan_playground_and_create_profiles() {
             .await;
         assert_eq!(scan.status_code(), 200, "scan-playground failed");
         let scan_json = json_body(&scan.text());
-        assert!(scan_json.is_object() || scan_json.is_array(),
-            "scan-playground must return JSON, got: {}", scan.text());
+        assert!(
+            scan_json.is_object() || scan_json.is_array(),
+            "scan-playground must return JSON, got: {}",
+            scan.text()
+        );
 
         // create-profiles into an isolated temp base (never the real playground).
         let tmp = tempfile::TempDir::new().expect("tempdir");
@@ -181,9 +190,17 @@ async fn students_scan_playground_and_create_profiles() {
                 "copy_demo_collection": false
             }))
             .await;
-        assert_eq!(create.status_code(), 200, "create-profiles failed: {}", create.text());
+        assert_eq!(
+            create.status_code(),
+            200,
+            "create-profiles failed: {}",
+            create.text()
+        );
         let created = json_body(&create.text());
-        assert!(created.is_object(), "create-profiles must return a JSON object");
+        assert!(
+            created.is_object(),
+            "create-profiles must return a JSON object"
+        );
 
         // The created profile must now be visible to a scan of the same base.
         let scan2 = server
@@ -229,7 +246,12 @@ async fn tracks_id_crud_lifecycle() {
                 "n_value": 3
             }))
             .await;
-        assert_eq!(create.status_code(), 200, "track create failed: {}", create.text());
+        assert_eq!(
+            create.status_code(),
+            200,
+            "track create failed: {}",
+            create.text()
+        );
         let created = json_body(&create.text());
         let track_id = created["id"]
             .as_str()
@@ -242,7 +264,12 @@ async fn tracks_id_crud_lifecycle() {
             .get(&format!("/api/v1/management/tracks/{track_id}"))
             .add_header("Authorization", auth.clone())
             .await;
-        assert_eq!(get.status_code(), 200, "track GET :id failed: {}", get.text());
+        assert_eq!(
+            get.status_code(),
+            200,
+            "track GET :id failed: {}",
+            get.text()
+        );
 
         // PUT :id
         let put = server
@@ -256,7 +283,12 @@ async fn tracks_id_crud_lifecycle() {
                 "n_value": 4
             }))
             .await;
-        assert_eq!(put.status_code(), 200, "track PUT :id failed: {}", put.text());
+        assert_eq!(
+            put.status_code(),
+            200,
+            "track PUT :id failed: {}",
+            put.text()
+        );
 
         // DELETE :id
         let del = server
@@ -358,7 +390,12 @@ async fn classes_generate_sessions_and_code_enroll() {
                 "subject_area": "testing"
             }))
             .await;
-        assert_eq!(create.status_code(), 200, "class create failed: {}", create.text());
+        assert_eq!(
+            create.status_code(),
+            200,
+            "class create failed: {}",
+            create.text()
+        );
         let created = json_body(&create.text());
         let class_id = created["id"]
             .as_str()
@@ -374,7 +411,9 @@ async fn classes_generate_sessions_and_code_enroll() {
         // generate-sessions with a nonexistent track_profile_id — the handler
         // must degrade (empty generation / 4xx), never 5xx.
         let gen = server
-            .post(&format!("/api/v1/management/classes/{class_id}/generate-sessions"))
+            .post(&format!(
+                "/api/v1/management/classes/{class_id}/generate-sessions"
+            ))
             .add_header("Authorization", auth.clone())
             .json(&json!({
                 "track_profile_id": "00000000-0000-0000-0000-00000000tp00",
@@ -393,10 +432,17 @@ async fn classes_generate_sessions_and_code_enroll() {
             .get(&format!("/api/v1/management/classes/code/{class_code}"))
             .add_header("Authorization", auth.clone())
             .await;
-        assert_eq!(lookup.status_code(), 200, "code lookup failed: {}", lookup.text());
+        assert_eq!(
+            lookup.status_code(),
+            200,
+            "code lookup failed: {}",
+            lookup.text()
+        );
 
         let enroll = server
-            .post(&format!("/api/v1/management/classes/code/{class_code}/enroll"))
+            .post(&format!(
+                "/api/v1/management/classes/code/{class_code}/enroll"
+            ))
             .add_header("Authorization", format!("Bearer {}", student_token()))
             .json(&json!({ "display_name": "Gap Enrolled Student" }))
             .await;
@@ -469,9 +515,17 @@ async fn addons_surface() {
             .add_header("Authorization", auth.clone())
             .bytes(b"fake-addon-blob".to_vec().into())
             .await;
-        assert_eq!(install.status_code(), 200, "addon install failed: {}", install.text());
+        assert_eq!(
+            install.status_code(),
+            200,
+            "addon install failed: {}",
+            install.text()
+        );
         let addon = json_body(&install.text());
-        let addon_id = addon["id"].as_str().expect("installed addon id").to_string();
+        let addon_id = addon["id"]
+            .as_str()
+            .expect("installed addon id")
+            .to_string();
 
         // POST distribute
         let distribute = server
@@ -523,7 +577,12 @@ async fn jev_translator_routes() {
             .add_header("Authorization", auth.clone())
             .json(&json!({ "prompt": "Did the student answer correctly?" }))
             .await;
-        assert_eq!(h2j.status_code(), 200, "human-to-jev failed: {}", h2j.text());
+        assert_eq!(
+            h2j.status_code(),
+            200,
+            "human-to-jev failed: {}",
+            h2j.text()
+        );
         let h2j_json = json_body(&h2j.text());
         assert!(
             h2j_json["request"].is_object(),
@@ -552,7 +611,12 @@ async fn jev_translator_routes() {
                 }
             }))
             .await;
-        assert_eq!(j2h.status_code(), 200, "jev-to-human failed: {}", j2h.text());
+        assert_eq!(
+            j2h.status_code(),
+            200,
+            "jev-to-human failed: {}",
+            j2h.text()
+        );
 
         // evaluate — requires TYPESAFE_API_KEY; without it the handler must
         // fail loudly (4xx/5xx), never return a fake success.
@@ -596,7 +660,10 @@ async fn stats_routes() {
             .add_header("Authorization", auth.clone())
             .await;
         assert_eq!(stats.status_code(), 200, "stats failed: {}", stats.text());
-        assert!(json_body(&stats.text()).is_object(), "stats must return an object");
+        assert!(
+            json_body(&stats.text()).is_object(),
+            "stats must return an object"
+        );
 
         let exceptions = server
             .get("/api/v1/management/stats/exceptions")

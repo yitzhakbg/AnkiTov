@@ -65,8 +65,7 @@
 
 use crate::services::anki_connect::AnkiConnectClient;
 use crate::services::forensic_reader::{
-    CollectionHealth, ForensicReader, IntervalDegradation, LapseFrequency,
-    RetentionPoint,
+    CollectionHealth, ForensicReader, IntervalDegradation, LapseFrequency, RetentionPoint,
 };
 
 /// Errors from the composed deck health reporter.
@@ -316,8 +315,14 @@ impl DeckHealthReporter {
 
         let new_cards: u64 = map.get("new_count").and_then(|v| v.as_u64()).unwrap_or(0);
         let learn_cards: u64 = map.get("learn_count").and_then(|v| v.as_u64()).unwrap_or(0);
-        let review_cards: u64 = map.get("review_count").and_then(|v| v.as_u64()).unwrap_or(0);
-        let total_cards: u64 = map.get("total_in_deck").and_then(|v| v.as_u64()).unwrap_or(0);
+        let review_cards: u64 = map
+            .get("review_count")
+            .and_then(|v| v.as_u64())
+            .unwrap_or(0);
+        let total_cards: u64 = map
+            .get("total_in_deck")
+            .and_then(|v| v.as_u64())
+            .unwrap_or(0);
 
         Ok(LiveStats {
             total_cards,

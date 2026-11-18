@@ -1,0 +1,16 @@
+slug: de-core-vocabulary
+subject_tag: subject::german
+title:
+  en: AnkiTov — German Core Vocabulary
+  de: AnkiTov — Grundwortschatz Deutsch
+deck_id:
+  de: 1699412247025
+description:
+  en: Grades 7-12 German core vocabulary that runs at the student's own pace, beside teaching, not inside it. Practice previously taught words to close gaps. SRS works. Word selection follows the KMK Bildungsstandards and Länder curricula; definitions and example sentences are model-drafted and pending native-speaker review. NLM-generated, text only.
+  de: Grundwortschatz Deutsch für die Klassen 7-12, der im eigenen Tempo läuft – neben dem Unterricht, nicht darin. Bereits behandelte Wörter wiederholen, um Lücken zu schließen. SRS works. Die Wortauswahl folgt den KMK Bildungsstandards und den Lehrplänen der Länder; Definitionen und Beispielsätze sind modellentworfen und warten auf die Prüfung durch Muttersprachler. NLM-generiert, nur Text.
+  he: Grades 7-12 German core vocabulary that runs at the student's own pace, beside teaching, not inside it. Practice previously taught words to close gaps. SRS works. Word selection follows the KMK Bildungsstandards and Länder curricula; definitions and example sentences are model-drafted and pending native-speaker review. NLM-generated, text only.
+  fr: Grades 7-12 German core vocabulary that runs at the student's own pace, beside teaching, not inside it. Practice previously taught words to close gaps. SRS works. Word selection follows the KMK Bildungsstandards and Länder curricula; definitions and example sentences are model-drafted and pending native-speaker review. NLM-generated, text only.
+expected_census:
+  basic: 112
+  cloze: 48
+  type_in: 0

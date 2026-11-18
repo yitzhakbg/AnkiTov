@@ -3,7 +3,7 @@ basic,age-de-la-pierre,01,7,Âge de la Pierre,Il s'agit de la très longue péri
 basic,mesopotamie,01,7,Mésopotamie,Pays entre deux fleuves,la Mésopotamie désigne la région de l'Euphrate et du Tigre,history-dates-figures,history,core
 basic,sumeres,01,7,Sumériens,Peuplement de la basse Mésopotamie,ils fondèrent la première civilisation urbaine et mirent en œuvre le système d'écriture cunéiforme.,history-dates-figures,history,core
 basic,cuneiforme,01,7,Ecriture cunéiforme,Système d'écriture à cunéiformes,développé en Mésopotamie vers 3400-3000 av. J.-C.,history-dates-figures,history,core
-basic,ziggourat,01,7,Ziggourat,Bâtiment en gradins servant de base à un temple sumérien ou babylonien.,Exemple : la ziggourat d'Our,history-dates-figures,history,core
+cloze,ziggourat,01,7,la {{c1::ziggourat}} d'Our,ziggourat,Exemple : la ziggourat d'Our,history-dates-figures,history,core
 basic,sumeres-fondent,01,7,Uruk,Plus grande agglomération sumérienne au IIIe millénaire av. J.-C. ; centre du premier véritable État.,Elle est considérée comme la plus ancienne grande ville du monde.,history-dates-figures,history,core
 basic,hamurabi,02,8,Hammurabi,Roi babylonien qui fit rédiger l'un des plus anciens codes de lois rédigés au monde.,Son code,history-dates-figures,history,core
 basic,code-hammurabi,02,8,Code d'Hammurabi,Ensemble de lois gravées sur une stèle d'argile au XVIIIe siècle av. J.-C.,Il a survécu en grande partie et a servi de modèle pour la justice babylonienne.,history-dates-figures,history,core
@@ -31,13 +31,13 @@ basic,islam-fondation,05,9,Mahomet,Prophète de l'islam,né à La Mecque,history
 basic,coran,05,9,Le Coran,Treize livres révélés aux musulmans,recueillis après la mort de Mahomet.,history-dates-figures,history,core
 basic,califat,05,9,Califat,Pouvoir politique et religieux des musulmans,fondé après la mort de Mahomet par ses successeurs.,history-dates-figures,history,core
 basic,ottomans,05,9,Empire ottoman,Empire fondé par Osman Ier au XIVe siècle,il régna sur une partie de l'Europe,history-dates-figures,history,core
-basic,renaissance-italie,06,7,Renaissance italienne,Reprise d'un intérêt pour l'antiquité classique en Italie,à partir du XIVe siècle.,history-dates-figures,history,core
+cloze,renaissance-italie,06,7,Reprise d'un intérêt pour l'antiquité classique en {{c1::Italie}},Italie,à partir du XIVe siècle.,history-dates-figures,history,core
 basic,maecenas,06,8,Leonardo da Vinci,Peintre,sculpteur et inventeur italien,history-dates-figures,history,core
 basic,maecenas-2,06,8,Michel-Ange,Peintre,sculpteur et architecte italien,history-dates-figures,history,core
 basic,maecenas-3,06,8,Léonard da Vinci,Maître de la Renaissance,il excella aussi dans l'ingénierie,history-dates-figures,history,core
 basic,reforme-luther,06,9,Martin Luther,Pasteur allemand qui,en 1517,history-dates-figures,history,core
-basic,reforme-calvin,06,9,John Calvin,Prêche français qui a développé une théologie protestante rigoureuse à Genève.,Il inspira les calvinistes et les puritains d'Europe et d'Amérique.,history-dates-figures,history,core
-basic,reforme-fr,06,9,Huguenots,Frères protestants français qui,après la Réforme,history-dates-figures,history,core
+cloze,reforme-calvin,06,9,Il inspira les {{c1::calvin}}istes et les puritains d'Europe et d'Amérique.,calvin,Il inspira les calvinistes et les puritains d'Europe et d'Amérique.,history-dates-figures,history,core
+cloze,reforme-fr,06,9,{{c1::Fr}}ères protestants français qui,Fr,après la Réforme,history-dates-figures,history,core
 basic,grandes-decouvertes,07,7,Grandes Découvertes,Période des grandes découvertes,du XVe au XVIIe siècle,history-dates-figures,history,core
 basic,columbus,07,7,Christopher Colomb,Capitaine génois qui,en 1492,history-dates-figures,history,core
 basic,vasc-nun,07,7,Vasco de Gama,Maître portugais qui,en 1498,history-dates-figures,history,core
@@ -49,7 +49,7 @@ basic,galilee,07,8,Galileo Galilei,Astronome italien qui,au télescope,history-d
 basic,decouverte-am,07,7,Amerigo Vespucci,Capitaine italien qui,au début du XVIe siècle,history-dates-figures,history,core
 basic,decouverte-circumnavigation,07,7,Circumnavigation du globe,Feats des marins espagnols,de 1519 à 1522,history-dates-figures,history,core
 basic,edict-nantes,07,9,Édit de Nantes,Lettre de 1598,par laquelle Henri IV garantit la liberté de culte aux protestants français.,history-dates-figures,history,core
-basic,revolution-fr,08,7,14 juillet 1789,Prise de la Bastille,événement qui marqua symboliquement le début de la Révolution française.,history-dates-figures,history,core
+cloze,revolution-fr,08,7,événement qui marqua symboliquement le début de la Révolution {{c1::fr}}ançaise.,fr,événement qui marqua symboliquement le début de la Révolution française.,history-dates-figures,history,core
 basic,revolution-fr-2,08,8,La Déclaration des droits de l'homme,Document de 1789 qui affirmait les libertés individuelles et l'égalité devant la loi.,Il fut rédigé par l'Assemblée nationale constituante.,history-dates-figures,history,core
 basic,revolution-fr-3,08,8,Maximilien Robespierre,Leader politique de la Révolution,il devint la figure centrale de la Terreur.,history-dates-figures,history,core
 basic,napoleon,08,8,Napoléon Bonaparte,Officier puis empereur des Français,il régna de 1804 à 1814,history-dates-figures,history,core
@@ -67,7 +67,7 @@ basic,ww1-3,10,9,1929 - Crise des bourses,Crise financière et économique qui s
 basic,ww1-4,10,9,1933 - Hitler au pouvoir,Adolf Hitler,chef du parti nazi,history-dates-figures,history,core
 basic,ww2,10,8,1940 - Bataille de France,La France fut envahie par les forces allemandes,mai-juin 1940.,history-dates-figures,history,core
 basic,ww2-2,10,8,1944 - Débarquement en Normandie,Opération Overlord,le 6 juin 1944,history-dates-figures,history,core
-basic,ww2-4,10,9,1945 - Bombardement d'Hiroshima,L'arme nucléaire fut utilisée,le 6 août 1945,history-dates-figures,history,core
+cloze,ww2-4,10,9,le 6 août 19{{c1::4}}5,4,le 6 août 1945,history-dates-figures,history,core
 basic,ww2-5,10,9,1945 - Capitulation du Japon,Le Japon capitula le 2 septembre 1945,mettant fin à la Seconde Guerre mondiale.,history-dates-figures,history,core
 basic,shoah-2,10,9,Auschwitz,Le plus grand camp de concentration et d'extermination nazi,en Pologne.,history-dates-figures,history,core
 basic,guerre-froide,10,9,Guerre froide,Conflit politique et idéologique entre les États-Unis et l'URSS,de 1945 à 1991.,history-dates-figures,history,core

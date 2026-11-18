@@ -34,7 +34,6 @@ pub struct AuthUser {
     pub email: String,
 }
 
-
 /// Build a 401 `Response` without ambiguity over which `StatusCode` type is
 /// in scope (Loco's prelude pulls in `reqwest::StatusCode`, which shadows the
 /// `http` crate's one). Constructs the response directly from the axum `http`
@@ -59,7 +58,10 @@ fn unauthorized_response() -> Response {
 /// its rejection silently dropped in Loco's layer chain (the error is never
 /// converted via `IntoResponse`), so the real handler would run
 /// unauthenticated. Returning `Response` directly makes the 401 bullet-proof.
-pub async fn require_auth(mut req: Request, next: Next) -> Result<Response, std::convert::Infallible> {
+pub async fn require_auth(
+    mut req: Request,
+    next: Next,
+) -> Result<Response, std::convert::Infallible> {
     // Extract Bearer token
     let auth_header = req
         .headers()
@@ -123,7 +125,10 @@ pub async fn require_auth_for_management(
 
 /// Optional auth: extracts JWT if present, but does not reject unauthenticated
 /// requests. Useful for routes that behave differently for logged-in users.
-pub async fn optional_auth(mut req: Request, next: Next) -> Result<Response, std::convert::Infallible> {
+pub async fn optional_auth(
+    mut req: Request,
+    next: Next,
+) -> Result<Response, std::convert::Infallible> {
     if let Some(token) = req
         .headers()
         .get(header::AUTHORIZATION)
@@ -167,9 +172,7 @@ pub fn get_auth_user(req: &Request) -> &AuthUser {
 /// Returns a [`loco_rs::Error::CustomError`] carrying `403`, so handlers can
 /// use `?` directly — the framework converts it to an HTTP 403 response.
 pub fn ensure_role(user: &AuthUser, allowed: &[&str]) -> Result<(), loco_rs::Error> {
-    let ok = allowed
-        .iter()
-        .any(|r| r.eq_ignore_ascii_case(&user.role));
+    let ok = allowed.iter().any(|r| r.eq_ignore_ascii_case(&user.role));
     if ok {
         Ok(())
     } else {
@@ -182,5 +185,3 @@ pub fn ensure_role(user: &AuthUser, allowed: &[&str]) -> Result<(), loco_rs::Err
         ))
     }
 }
-
-

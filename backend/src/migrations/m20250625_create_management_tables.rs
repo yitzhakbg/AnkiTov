@@ -48,8 +48,18 @@ impl MigrationTrait for Migration {
                     .col(pk_auto(Decks::Id))
                     .col(ColumnDef::new(Decks::Name).string().not_null())
                     .col(text_null(Decks::Description))
-                    .col(ColumnDef::new(Decks::CardCount).integer().not_null().default(0))
-                    .col(ColumnDef::new(Decks::FileSizeBytes).big_integer().not_null().default(0))
+                    .col(
+                        ColumnDef::new(Decks::CardCount)
+                            .integer()
+                            .not_null()
+                            .default(0),
+                    )
+                    .col(
+                        ColumnDef::new(Decks::FileSizeBytes)
+                            .big_integer()
+                            .not_null()
+                            .default(0),
+                    )
                     .col(ColumnDef::new(Decks::ChecksumSha256).string().not_null())
                     .col(string(Decks::UploadedBy))
                     .col(big_integer(Decks::CreatedAt).not_null())
@@ -67,7 +77,11 @@ impl MigrationTrait for Migration {
                     .table(DeckDistributions::Table)
                     .col(pk_auto(DeckDistributions::Id))
                     .col(integer(DeckDistributions::DeckId))
-                    .col(ColumnDef::new(DeckDistributions::TargetType).string().not_null())
+                    .col(
+                        ColumnDef::new(DeckDistributions::TargetType)
+                            .string()
+                            .not_null(),
+                    )
                     .col(string(DeckDistributions::TargetId))
                     .col(string(DeckDistributions::DistributedBy))
                     .col(big_integer(DeckDistributions::DistributedAt).not_null())
@@ -92,7 +106,12 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Addons::Name).string().not_null())
                     .col(ColumnDef::new(Addons::Version).string().not_null())
                     .col(text_null(Addons::Description))
-                    .col(ColumnDef::new(Addons::FileSizeBytes).big_integer().not_null().default(0))
+                    .col(
+                        ColumnDef::new(Addons::FileSizeBytes)
+                            .big_integer()
+                            .not_null()
+                            .default(0),
+                    )
                     .col(ColumnDef::new(Addons::ChecksumSha256).string().not_null())
                     .col(text_null(Addons::ConfigJson))
                     .col(string(Addons::InstalledBy))
@@ -109,9 +128,18 @@ impl MigrationTrait for Migration {
             .create_table(
                 Table::create()
                     .table(AddonDistributions::Table)
-                    .col(ColumnDef::new(AddonDistributions::Id).string().primary_key().not_null())
+                    .col(
+                        ColumnDef::new(AddonDistributions::Id)
+                            .string()
+                            .primary_key()
+                            .not_null(),
+                    )
                     .col(string(AddonDistributions::AddonId))
-                    .col(ColumnDef::new(AddonDistributions::TargetType).string().not_null())
+                    .col(
+                        ColumnDef::new(AddonDistributions::TargetType)
+                            .string()
+                            .not_null(),
+                    )
                     .col(string(AddonDistributions::TargetId))
                     .col(string(AddonDistributions::DistributedBy))
                     .col(big_integer(AddonDistributions::DistributedAt).not_null())
@@ -132,7 +160,12 @@ impl MigrationTrait for Migration {
             .create_table(
                 Table::create()
                     .table(SyncStatuses::Table)
-                    .col(ColumnDef::new(SyncStatuses::Id).string().primary_key().not_null())
+                    .col(
+                        ColumnDef::new(SyncStatuses::Id)
+                            .string()
+                            .primary_key()
+                            .not_null(),
+                    )
                     .col(string(SyncStatuses::UserId))
                     .col(
                         ColumnDef::new(SyncStatuses::Status)
@@ -141,7 +174,12 @@ impl MigrationTrait for Migration {
                             .default("idle"),
                     )
                     .col(big_integer_null(SyncStatuses::LastSync))
-                    .col(ColumnDef::new(SyncStatuses::PendingChanges).integer().not_null().default(0))
+                    .col(
+                        ColumnDef::new(SyncStatuses::PendingChanges)
+                            .integer()
+                            .not_null()
+                            .default(0),
+                    )
                     .col(text_null(SyncStatuses::ErrorMessage))
                     .to_owned(),
             )
@@ -154,12 +192,21 @@ impl MigrationTrait for Migration {
             .create_table(
                 Table::create()
                     .table(RetentionLogs::Table)
-                    .col(ColumnDef::new(RetentionLogs::Id).string().primary_key().not_null())
+                    .col(
+                        ColumnDef::new(RetentionLogs::Id)
+                            .string()
+                            .primary_key()
+                            .not_null(),
+                    )
                     .col(string(RetentionLogs::UserId))
                     .col(string(RetentionLogs::DeckId))
                     .col(ColumnDef::new(RetentionLogs::CardId).string().not_null())
                     .col(ColumnDef::new(RetentionLogs::Grade).integer().not_null())
-                    .col(ColumnDef::new(RetentionLogs::IntervalSeconds).big_integer().not_null())
+                    .col(
+                        ColumnDef::new(RetentionLogs::IntervalSeconds)
+                            .big_integer()
+                            .not_null(),
+                    )
                     .col(double(RetentionLogs::EaseFactor))
                     .col(big_integer(RetentionLogs::ReviewTimestamp).not_null())
                     .to_owned(),
@@ -173,10 +220,19 @@ impl MigrationTrait for Migration {
             .create_table(
                 Table::create()
                     .table(RetentionExceptions::Table)
-                    .col(ColumnDef::new(RetentionExceptions::Id).string().primary_key().not_null())
+                    .col(
+                        ColumnDef::new(RetentionExceptions::Id)
+                            .string()
+                            .primary_key()
+                            .not_null(),
+                    )
                     .col(string(RetentionExceptions::UserId))
                     .col(string(RetentionExceptions::DeckId))
-                    .col(ColumnDef::new(RetentionExceptions::ExceptionType).string().not_null())
+                    .col(
+                        ColumnDef::new(RetentionExceptions::ExceptionType)
+                            .string()
+                            .not_null(),
+                    )
                     .col(double(RetentionExceptions::RetentionRate))
                     .col(double(RetentionExceptions::Threshold))
                     .col(big_integer(RetentionExceptions::DetectedAt).not_null())

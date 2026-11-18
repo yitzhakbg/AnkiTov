@@ -122,7 +122,10 @@ async fn create_producer_round_trip() {
             axum::http::StatusCode::OK,
             "create producer should succeed: {body}"
         );
-        assert!(body["id"].as_i64().unwrap_or(0) > 0, "id must be set: {body}");
+        assert!(
+            body["id"].as_i64().unwrap_or(0) > 0,
+            "id must be set: {body}"
+        );
         assert_eq!(body["name"], "AnkiTov Pilot Seed");
         assert_eq!(body["email"], "seed@ankitov.example");
 
@@ -138,7 +141,11 @@ async fn create_producer_round_trip() {
             .iter()
             .find(|p| p["name"] == "AnkiTov Pilot Seed")
             .unwrap_or_else(|| panic!("created producer missing from list: {list}"));
-        assert_eq!(found["decks"], json!([]), "fresh producer has empty catalog");
+        assert_eq!(
+            found["decks"],
+            json!([]),
+            "fresh producer has empty catalog"
+        );
     })
     .await;
 }

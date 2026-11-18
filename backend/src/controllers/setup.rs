@@ -116,12 +116,10 @@ where
 ///
 /// `setup_required` is `true` exactly when no admin account exists.
 pub async fn status(State(ctx): State<AppContext>) -> Result<Json<SetupStatusResponse>> {
-    let admins = count_admins(&ctx.db)
-        .await
-        .map_err(|e| {
-            tracing::error!("Setup status query failed: {e:?}");
-            loco_rs::Error::InternalServerError
-        })?;
+    let admins = count_admins(&ctx.db).await.map_err(|e| {
+        tracing::error!("Setup status query failed: {e:?}");
+        loco_rs::Error::InternalServerError
+    })?;
     Ok(Json(SetupStatusResponse {
         setup_required: admins == 0,
     }))
@@ -153,11 +151,10 @@ pub async fn create_admin(
         ));
     }
 
-    let password_hash = auth::hash_password(&payload.password)
-        .map_err(|e| {
-            tracing::error!("Password hashing failed during setup: {e:?}");
-            loco_rs::Error::InternalServerError
-        })?;
+    let password_hash = auth::hash_password(&payload.password).map_err(|e| {
+        tracing::error!("Password hashing failed during setup: {e:?}");
+        loco_rs::Error::InternalServerError
+    })?;
     let now = chrono::Utc::now().timestamp();
 
     // Race-safe guard: the empty-admins check and the insert run inside ONE
@@ -190,11 +187,10 @@ pub async fn create_admin(
         .map_err(map_txn_error)?;
 
     // Issue JWT (24h expiry), same contract as register/login.
-    let token = auth::encode_token(inserted.id, "admin", &inserted.email, 86400)
-        .map_err(|e| {
-            tracing::error!("JWT issuance failed during setup: {e:?}");
-            loco_rs::Error::InternalServerError
-        })?;
+    let token = auth::encode_token(inserted.id, "admin", &inserted.email, 86400).map_err(|e| {
+        tracing::error!("JWT issuance failed during setup: {e:?}");
+        loco_rs::Error::InternalServerError
+    })?;
 
     Ok(Json(crate::controllers::auth::AuthResponse {
         token,

@@ -39,9 +39,9 @@ use axum::Extension;
 use loco_rs::prelude::*;
 use sea_orm::{entity::prelude::EntityTrait, ActiveModelTrait, ActiveValue, Set};
 use serde::Serialize;
-use utoipa::ToSchema;
 use sha2::{Digest, Sha256};
 use std::path::PathBuf;
+use utoipa::ToSchema;
 
 const TAG: &str = "Management Console";
 
@@ -80,9 +80,7 @@ fn valid_package_name(name: &str) -> bool {
 /// `english-vocabulary-en.apkg` → `English Vocabulary (en)`.
 fn friendly_deck_name(stem: &str) -> String {
     let (base, lang) = match stem.rsplit_once('-') {
-        Some((b, l)) if l.len() == 2 && l.chars().all(|c| c.is_ascii_alphabetic()) => {
-            (b, Some(l))
-        }
+        Some((b, l)) if l.len() == 2 && l.chars().all(|c| c.is_ascii_alphabetic()) => (b, Some(l)),
         _ => (stem, None),
     };
     let title = base
@@ -146,7 +144,10 @@ fn seed_manifest() -> std::collections::BTreeMap<String, ManifestEntry> {
             package,
             ManifestEntry {
                 title: deck.get("title").and_then(|t| t.as_str()).map(String::from),
-                locale: deck.get("locale").and_then(|l| l.as_str()).map(String::from),
+                locale: deck
+                    .get("locale")
+                    .and_then(|l| l.as_str())
+                    .map(String::from),
                 card_count: deck.get("card_count").and_then(|c| c.as_i64()),
             },
         );
@@ -222,10 +223,7 @@ pub(crate) async fn available_decks(ctx: &AppContext) -> Result<Vec<AvailableDec
         let Some(file_name) = path.file_name().and_then(|n| n.to_str()) else {
             continue;
         };
-        let size = entry
-            .metadata()
-            .map(|m| m.len() as i64)
-            .unwrap_or(0);
+        let size = entry.metadata().map(|m| m.len() as i64).unwrap_or(0);
         packages.push((file_name.to_string(), size));
     }
     packages.sort();
@@ -233,17 +231,15 @@ pub(crate) async fn available_decks(ctx: &AppContext) -> Result<Vec<AvailableDec
     for (package, size) in packages {
         let stem = package.trim_end_matches(".apkg").to_string();
         let meta = manifest.get(&package);
-        let language = meta
-            .and_then(|m| m.locale.clone())
-            .or_else(|| {
-                stem.rsplit_once('-').and_then(|(_, l)| {
-                    if l.len() == 2 && l.chars().all(|c| c.is_ascii_alphabetic()) {
-                        Some(l.to_string())
-                    } else {
-                        None
-                    }
-                })
-            });
+        let language = meta.and_then(|m| m.locale.clone()).or_else(|| {
+            stem.rsplit_once('-').and_then(|(_, l)| {
+                if l.len() == 2 && l.chars().all(|c| c.is_ascii_alphabetic()) {
+                    Some(l.to_string())
+                } else {
+                    None
+                }
+            })
+        });
         let name = meta
             .and_then(|m| m.title.clone())
             .unwrap_or_else(|| friendly_deck_name(&stem));
@@ -413,19 +409,22 @@ pub async fn import_available_deck(
             }
         }
         Err(e) => {
-            tracing::warn!("deck library post-import deckNames failed for {name}: {:?}", e);
+            tracing::warn!(
+                "deck library post-import deckNames failed for {name}: {:?}",
+                e
+            );
             expected_name.clone()
         }
     };
 
     // Real card count from the collection after import.
-    let card_count: i32 = match client
-        .find_cards(&format!("deck:\"{deck_name}\""))
-        .await
-    {
+    let card_count: i32 = match client.find_cards(&format!("deck:\"{deck_name}\"")).await {
         Ok(cards) => cards.len() as i32,
         Err(e) => {
-            tracing::warn!("deck library post-import count failed for {deck_name}: {:?}", e);
+            tracing::warn!(
+                "deck library post-import count failed for {deck_name}: {:?}",
+                e
+            );
             0
         }
     };

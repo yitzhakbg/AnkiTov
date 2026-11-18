@@ -11,7 +11,6 @@ use axum::extract::State;
 use loco_rs::{app::AppContext, prelude::*};
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, QueryOrder, QuerySelect};
 
-
 const TAG: &str = "Management Console";
 
 pub fn routes() -> Routes {
@@ -60,15 +59,21 @@ pub async fn stats(_ctx: State<AppContext>) -> Result<Response> {
         if let Ok(stats) = client.get_deck_stats(vec![deck_name.clone()]).await {
             let (total, due) = stats
                 .as_object()
-                .and_then(|o| o.values().find(|v| {
-                    v.get("name").and_then(|n| n.as_str()) == Some(deck_name.as_str())
-                }))
+                .and_then(|o| {
+                    o.values().find(|v| {
+                        v.get("name").and_then(|n| n.as_str()) == Some(deck_name.as_str())
+                    })
+                })
                 .map(|ds| {
-                    let t = ds.get("total_in_deck").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
+                    let t = ds
+                        .get("total_in_deck")
+                        .and_then(|v| v.as_u64())
+                        .unwrap_or(0) as u32;
                     // Due = new + learn + review
                     let new = ds.get("new_count").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
                     let learn = ds.get("learn_count").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
-                    let review = ds.get("review_count").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
+                    let review =
+                        ds.get("review_count").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
                     (t, new + learn + review)
                 })
                 .unwrap_or((0, 0));
@@ -107,14 +112,16 @@ pub async fn stats(_ctx: State<AppContext>) -> Result<Response> {
             let mut trend: Vec<DailyRetention> = Vec::new();
             if let Some(first) = decks.first() {
                 match reader.retention_curve(first, 14) {
-                    Ok(pts) => trend = pts
-                        .into_iter()
-                        .map(|p| DailyRetention {
-                            date: p.date,
-                            retention_rate: p.retention_rate,
-                            review_count: p.review_count,
-                        })
-                        .collect(),
+                    Ok(pts) => {
+                        trend = pts
+                            .into_iter()
+                            .map(|p| DailyRetention {
+                                date: p.date,
+                                retention_rate: p.retention_rate,
+                                review_count: p.review_count,
+                            })
+                            .collect()
+                    }
                     Err(_) => {
                         if let Some(fb) = reader.first_deck_name() {
                             if fb.as_str() != first.as_str() {
@@ -177,7 +184,10 @@ pub async fn stats(_ctx: State<AppContext>) -> Result<Response> {
     let avg_retention = if retention_trend.is_empty() {
         0.0
     } else {
-        retention_trend.iter().map(|p| p.retention_rate).sum::<f64>()
+        retention_trend
+            .iter()
+            .map(|p| p.retention_rate)
+            .sum::<f64>()
             / retention_trend.len() as f64
     };
 
@@ -223,13 +233,8 @@ pub async fn stats(_ctx: State<AppContext>) -> Result<Response> {
 pub async fn exceptions(State(ctx): State<AppContext>) -> Result<Response> {
     // Query retention_exceptions via SeaORM
     let rows = crate::models::entities::retention_exception::Entity::find()
-        .filter(
-            crate::models::entities::retention_exception::Column::ResolvedAt
-                .is_null(),
-        )
-        .order_by_desc(
-            crate::models::entities::retention_exception::Column::DetectedAt,
-        )
+        .filter(crate::models::entities::retention_exception::Column::ResolvedAt.is_null())
+        .order_by_desc(crate::models::entities::retention_exception::Column::DetectedAt)
         .limit(50)
         .all(&ctx.db)
         .await
@@ -268,5 +273,7 @@ pub async fn list_exceptions(State(ctx): State<AppContext>) -> Result<Response> 
 }
 
 pub async fn recalculate_stats(_ctx: State<AppContext>) -> Result<Response> {
-    format::json(serde_json::json!({ "recalculated": true, "note": "Stats are live from AnkiConnect — no recalculation needed" }))
+    format::json(
+        serde_json::json!({ "recalculated": true, "note": "Stats are live from AnkiConnect — no recalculation needed" }),
+    )
 }

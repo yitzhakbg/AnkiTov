@@ -1,0 +1,30 @@
+slug: science-terms
+subject_tag: subject::science
+title:
+  en: AnkiTov Pilot — Science Terms
+  he: AnkiTov Pilot — מונחים במדעים
+  fr: AnkiTov Pilot — Termes scientifiques
+  es: AnkiTov Pilot — Términos Científicos
+deck_id:
+  en: 1699412247006
+  he: 1699412247007
+  fr: 1699412247008
+  es: 1699412247014
+description:
+  en: Grades 7-9 science terms that run at their own pace, beside teaching, not inside it. Revisit previously taught concepts to close gaps. SRS works. Self-authored Phase 0 seed; text only.
+  he: מונחים מדעיים לכיתות ז-ט שרצים בקצב עצמאי, לצד ההוראה ולא בתוכה. חזרה על מושגים שהונהגו קודם לכן כדי לסגור פערים. SRS works. פיוט פאזה 0 שנכתב על ידנו; טקסט בלבד.
+  fr: Termes scientifiques pour les classes 7-9 qui suivent leur propre rythme, à côté de l'enseignement, pas dedans. Revoyez les concepts appris auparavant pour combler les lacunes. SRS works. Graine Phase 0 auto-écrite ; texte uniquement.
+  es: Términos científicos para los grados 7-9 que avanzan a su propio ritmo, junto a la enseñanza, no dentro de ella. Repasa los conceptos ya vistos para cerrar brechas. SRS works. Semilla Phase 0 propia; solo texto. (Pack es vía NLM + compilador nlm_pack_to_csv.)
+expected_census:
+  basic: 63
+  cloze: 32
+  type_in: 10
+expected_census_by_locale:
+  fr:
+    basic: 14
+    cloze: 6
+    type_in: 0
+  es:
+    basic: 14
+    cloze: 6
+    type_in: 0

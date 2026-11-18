@@ -1,25 +1,20 @@
 //! Profile Assignments and Background Capsule Generation controllers.
 
 use axum::{
-    extract::{Path, State, Extension},
+    extract::{Extension, Path, State},
     Json,
 };
-use sea_orm::{
-    ActiveModelTrait, ActiveValue, ColumnTrait, EntityTrait, QueryFilter, QueryOrder,
-};
+use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, EntityTrait, QueryFilter, QueryOrder};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-use loco_rs::prelude::*;
-use crate::middleware::auth::AuthUser;
 use crate::middleware::auth::ensure_role;
+use crate::middleware::auth::AuthUser;
+use loco_rs::prelude::*;
 
 use crate::{
-    models::entities::{
-        profile_assignment as pa_entity,
-        generation_job as gj_entity,
-    },
+    models::entities::{generation_job as gj_entity, profile_assignment as pa_entity},
     services::audit_logger,
     services::capsule_generator_job,
 };
@@ -32,8 +27,8 @@ use super::TAG;
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct CreateAssignmentRequest {
-    pub target_type: String,       // "student" or "cohort"
-    pub target_id: String,         // user.id or subsection_id
+    pub target_type: String, // "student" or "cohort"
+    pub target_id: String,   // user.id or subsection_id
     pub track_profile_id: String,
     pub assigned_by: String,
 }
@@ -71,7 +66,10 @@ pub fn routes() -> Routes {
         .add("/profile-assignments", get(list_assignments))
         .add("/profile-assignments", post(create_assignment))
         .add("/profile-assignments/:id", delete(delete_assignment))
-        .add("/capsule-sessions/generate-all", post(generate_all_sessions))
+        .add(
+            "/capsule-sessions/generate-all",
+            post(generate_all_sessions),
+        )
         .add("/generation-jobs/latest", get(latest_generation_job))
 }
 
@@ -127,7 +125,11 @@ pub async fn create_assignment(
 ) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
     // Determine priority
-    let priority = if payload.target_type == "student" { 1 } else { 10 };
+    let priority = if payload.target_type == "student" {
+        1
+    } else {
+        10
+    };
 
     // Check if duplicate assignment exists for target
     let existing = pa_entity::Entity::find()
@@ -172,7 +174,7 @@ pub async fn create_assignment(
         &audit_actor,
         &audit_student_id,
         &audit_profile_id,
-        &audit_profile_id
+        &audit_profile_id,
     )
     .await;
 
@@ -219,7 +221,7 @@ pub async fn delete_assignment(
             "system",
             student_id,
             &assignment.track_profile_id,
-            &assignment.track_profile_id
+            &assignment.track_profile_id,
         )
         .await;
     }
@@ -260,13 +262,15 @@ pub async fn generate_all_sessions(
     // Spawn sequential worker in background
     let db_clone = ctx.db.clone();
     let job_id_clone = job_id.clone();
-    
+
     // Resolve playground base directory path
     let playground_dir = std::env::var("ANKIPLAYGROUND_PATH")
         .unwrap_or_else(|_| "/Volumes/YBG1TB4Mac/AnkiTov/AnkiPlayGround".to_string());
 
     tokio::spawn(async move {
-        let _ = capsule_generator_job::run_batch_generation(&db_clone, &job_id_clone, &playground_dir).await;
+        let _ =
+            capsule_generator_job::run_batch_generation(&db_clone, &job_id_clone, &playground_dir)
+                .await;
     });
 
     // Emits 202 Accepted status check instantly
@@ -301,8 +305,8 @@ pub async fn latest_generation_job(State(ctx): State<AppContext>) -> Result<Resp
 
     let res = match latest {
         Some(m) => {
-            let anomalies_json: Option<serde_json::Value> = m.anomalies
-                .and_then(|s| serde_json::from_str(&s).ok());
+            let anomalies_json: Option<serde_json::Value> =
+                m.anomalies.and_then(|s| serde_json::from_str(&s).ok());
 
             Some(GenerationJobResponse {
                 id: m.id,

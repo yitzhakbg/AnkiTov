@@ -134,7 +134,11 @@ pub fn media_path(student_id: &str, file_name: &str) -> Option<PathBuf> {
     }
     let col = StudentCollection::for_student(student_id);
     let p = col.media_dir.join(&clean);
-    if p.is_file() { Some(p) } else { None }
+    if p.is_file() {
+        Some(p)
+    } else {
+        None
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -182,18 +186,20 @@ pub struct CollectionCard {
 /// Anki 2 schema (schema ver 11/18): `cards(id, nid, ord, did)`,
 /// `notes(id, mid, flds)`, `models/col.models` JSON holds field names +
 /// templates. Deck names come from `col.decks` JSON.
-pub fn read_cards(col: &StudentCollection, card_ids: &[i64]) -> Result<Vec<CollectionCard>, ReadCardsError> {
+pub fn read_cards(
+    col: &StudentCollection,
+    card_ids: &[i64],
+) -> Result<Vec<CollectionCard>, ReadCardsError> {
     let conn = rusqlite::Connection::open_with_flags(
         &col.anki2,
         rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
     )?;
 
     // models + decks JSON from col
-    let col_row: (String, String) = conn.query_row(
-        "SELECT models, decks FROM col WHERE id = 1",
-        [],
-        |r| Ok((r.get(0)?, r.get(1)?)),
-    )?;
+    let col_row: (String, String) =
+        conn.query_row("SELECT models, decks FROM col WHERE id = 1", [], |r| {
+            Ok((r.get(0)?, r.get(1)?))
+        })?;
     let models: serde_json::Value = serde_json::from_str(&col_row.0)?;
     let decks: serde_json::Value = serde_json::from_str(&col_row.1)?;
 
@@ -204,16 +210,28 @@ pub fn read_cards(col: &StudentCollection, card_ids: &[i64]) -> Result<Vec<Colle
             [cid],
             |r| Ok((r.get::<_, i64>(0)?, r.get::<_, i32>(1)?, r.get::<_, i64>(2)?, r.get::<_, i64>(3)?, r.get::<_, String>(4)?)),
         );
-        let Ok((nid, ord, did, mid, flds)) = row else { continue };
-        let Some(model) = models.get(mid.to_string()) else { continue };
+        let Ok((nid, ord, did, mid, flds)) = row else {
+            continue;
+        };
+        let Some(model) = models.get(mid.to_string()) else {
+            continue;
+        };
         let field_names: Vec<String> = model["flds"]
             .as_array()
-            .map(|a| a.iter().map(|f| f["name"].as_str().unwrap_or("").to_string()).collect())
+            .map(|a| {
+                a.iter()
+                    .map(|f| f["name"].as_str().unwrap_or("").to_string())
+                    .collect()
+            })
             .unwrap_or_default();
         let is_cloze = model["type"].as_i64() == Some(1);
         let tmpls = model["tmpls"].as_array().cloned().unwrap_or_default();
         // cloze models have ONE template; standard models index by ord
-        let tmpl = if is_cloze { tmpls.first() } else { tmpls.get(ord as usize) };
+        let tmpl = if is_cloze {
+            tmpls.first()
+        } else {
+            tmpls.get(ord as usize)
+        };
         let (qfmt, afmt) = match tmpl {
             Some(t) => (
                 t["qfmt"].as_str().unwrap_or("").to_string(),

@@ -74,7 +74,10 @@ async fn settings_teacher_can_read_but_not_write() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let read = server
             .get(API)
-            .add_header("Authorization", format!("Bearer {}", mint(700, "teacher", "t@example.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint(700, "teacher", "t@example.edu")),
+            )
             .await;
         assert_eq!(
             read.status_code(),
@@ -84,13 +87,20 @@ async fn settings_teacher_can_read_but_not_write() {
             read.text()
         );
         let body = json(&read.text());
-        assert_eq!(body["school_name"], Value::Null, "fresh DB must report null school_name");
+        assert_eq!(
+            body["school_name"],
+            Value::Null,
+            "fresh DB must report null school_name"
+        );
         assert_eq!(body["locale"], Value::Null);
         assert_eq!(body["sync_url"], Value::Null);
 
         let write = server
             .put(API)
-            .add_header("Authorization", format!("Bearer {}", mint(701, "teacher", "t2@example.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint(701, "teacher", "t2@example.edu")),
+            )
             .json(&serde_json::json!({ "school_name": "Nope" }))
             .await;
         assert_eq!(
@@ -115,10 +125,7 @@ async fn settings_teacher_can_read_but_not_write() {
 async fn settings_admin_roundtrip_via_setup_token() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         // Create the admin through the real setup endpoint.
-        let created = server
-            .post("/api/v1/setup")
-            .json(&setup_payload())
-            .await;
+        let created = server.post("/api/v1/setup").json(&setup_payload()).await;
         assert_eq!(
             created.status_code(),
             axum::http::StatusCode::OK,
@@ -195,7 +202,11 @@ async fn settings_invalid_locale_rejected_writes_nothing() {
             .add_header("Authorization", format!("Bearer {}", token))
             .await;
         let body = json(&get.text());
-        assert_eq!(body["locale"], Value::Null, "a rejected write must not persist");
+        assert_eq!(
+            body["locale"],
+            Value::Null,
+            "a rejected write must not persist"
+        );
     })
     .await;
 }
@@ -206,7 +217,10 @@ async fn settings_invalid_sync_url_rejected() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let put = server
             .put(API)
-            .add_header("Authorization", format!("Bearer {}", mint(711, "admin", "a@example.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint(711, "admin", "a@example.edu")),
+            )
             .json(&serde_json::json!({ "sync_url": "ftp://example.edu/decks" }))
             .await;
         assert_eq!(
@@ -227,7 +241,10 @@ async fn settings_school_name_too_long_rejected() {
         let long_name = "a".repeat(201);
         let put = server
             .put(API)
-            .add_header("Authorization", format!("Bearer {}", mint(712, "admin", "a@example.edu")))
+            .add_header(
+                "Authorization",
+                format!("Bearer {}", mint(712, "admin", "a@example.edu")),
+            )
             .json(&serde_json::json!({ "school_name": long_name }))
             .await;
         assert_eq!(
