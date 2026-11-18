@@ -1,7 +1,7 @@
 {
     "id": "org.ankitov.AnkiTov",
     "runtime": "org.freedesktop.Platform",
-    "runtime-version": "24.08",
+    "runtime-version": "25.08",
     "sdk": "org.freedesktop.Sdk",
     "command": "ankitov-launch",
     "finish-args": [
@@ -19,6 +19,10 @@
                 "mkdir -p approot && tar xzf ankitov-linux-x86_64.tar.gz --no-same-owner -C approot --strip-components=1",
                 "install -Dm755 approot/backend /app/bin/backend",
                 "install -Dm755 approot/ankitov-launch /app/bin/ankitov-launch",
+                "mkdir -p /app/bin/config",
+                "install -Dm644 approot/config/production.yaml /app/bin/config/production.yaml",
+                "mkdir -p /app/bin/content/seed",
+                "cp -R approot/content/seed/packages /app/bin/content/seed/packages",
                 "mkdir -p /app/share/applications",
                 "printf '[Desktop Entry]\\nType=Application\\nName=AnkiTov\\nExec=ankitov-launch\\nTerminal=false\\nCategories=Education;\\n' > /app/share/applications/org.ankitov.AnkiTov.desktop"
             ],
@@ -35,8 +39,7 @@
                         "ankitov-linux-x86_64.tar.gz"
                     ]
                 }
-            ],
-            "runtime-version": "25.08"
+            ]
         }
     ]
 }

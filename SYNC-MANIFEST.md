@@ -1,13 +1,13 @@
 # SYNC-MANIFEST
 
 - monorepo ref: unknown (ANKITOV_MONOREPO_REF not set)
-- exported at: 2026-11-18T08:24:30Z
+- exported at: 2026-11-18T10:31:50Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
 ## sha256 checksums
 ```
-8e4b755adae4ee57f5011f1f7a88894dfe0d7ad3847202a7b974ba9fe2798698  .github/workflows/release.yml
+86dba2d655508cdf0a405a4827b943cb241b2b8b5f9c40aee6cb254f7d14fe51  .github/workflows/release.yml
 3255a61586bf5af874b423fb9ddf62d3da06bbbeb11365a5e1b4e0ce47c52406  .gitignore
 ada47362899add07df543de3051b80e6d9532fca7131b7fe5701fb754aa65ee2  Caddyfile
 20cb530ea08f56436ef2c1697d5c966498ba0020083024c7f60363dc47150bbc  Cargo.lock
@@ -302,13 +302,13 @@ b943b28d784bcb974a8cdced5e4973f89fef0b3d6d6c79938c1506251a83f9fc  docs/src/refer
 b6df84512a635d73d72cae6d059b9749041009b16a55d1b938741105ee697ffb  docs/src/reference/rustdoc.md
 80ce08725036c03b7068c110add1ce549e62258f80319d6d1146298b25ade225  packaging/README.md
 876da13b3501d336b328db908ab32d1a960403d2e20c4d65e21eb066b0eda339  packaging/assemble.sh
-2152003aac1d7977d6d77aa13592997c7c08cd9bd707a885cc7875d3fb8a3230  packaging/flatpak/README.md
+bd68e76391df0811acafc3b53f1d56fcf3c7f7829ed1f83d54b404f4af52481b  packaging/flatpak/README.md
 355f53c6344e307b182976d88629b373caad403b6de9c491b38c2a10aa7ac7e3  packaging/flatpak/ankitov-run
 c824d292adfcee11f16f050b1c1a478e25f51d380e46031a0f53718496042ec9  packaging/flatpak/build-flatpak.sh
 62df77c7e1d8e4682ebe20cf782a38c803f85a7dfadcca73e154e2b3a92d04a2  packaging/flatpak/org.ankitov.AnkiTov.appdata.xml
 dd107ed1eedb2a9775731386a3e632eb37d6e102e2cf6ac067b3353aba25fa5c  packaging/flatpak/org.ankitov.AnkiTov.desktop
-714d350729b5770ec6373645afa90f9bd77db82fea5069752a97db5e7eb2108d  packaging/flatpak/org.ankitov.AnkiTov.json
-cce1a19b73536878bd7187289127bee97772b91b464d88b0b41b24660e3827df  packaging/launch/ankitov-launch.sh
+2c6abb2d6375e2bf02991ed596e9f883de3d1e030ec06e32629274d8bbb9785b  packaging/flatpak/org.ankitov.AnkiTov.json
+fa872db93a9e22c0f9cee73014604e1d38346a58778a3dbcc6e002ea8534c1a6  packaging/launch/ankitov-launch.sh
 b8751ba2d302229ecf93a3ab8550fe0d0071e57a3a3821cea241e5e99c0dcb82  packaging/launch/start-ankitov.bat
 5280a42f23c24bb7f5a355814732333c202839042c3cc320b4d5be97b57ad3b4  packaging/linux/ankitov.desktop
 8bbb687d6e1c8ab55366324ac2ebc1bf10883241cd5bb8f05f1d5bdfabc62794  packaging/macos/Info.plist
