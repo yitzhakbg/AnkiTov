@@ -338,6 +338,9 @@ jobs:
         run: |
           mkdir -p stage dist
           tar -xzf artifact/ankitov-*-linux-${{ matrix.arch }}.tar.gz -C stage --strip-components=1
+          # The manifest's file source is ankitov-linux-<arch>.tar.gz relative to the
+          # manifest dir — put the release tarball there under that exact name.
+          cp artifact/ankitov-*-linux-${{ matrix.arch }}.tar.gz packaging/flatpak/ankitov-linux-${{ matrix.arch }}.tar.gz
           bash packaging/flatpak/build-flatpak.sh \
             --arch "${{ matrix.arch }}" \
             --version "${{ steps.ver.outputs.version }}" \
