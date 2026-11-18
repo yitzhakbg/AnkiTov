@@ -1,7 +1,7 @@
 {
     "id": "org.ankitov.AnkiTov",
     "runtime": "org.freedesktop.Platform",
-    "runtime-version": "25.08",
+    "runtime-version": "24.08",
     "sdk": "org.freedesktop.Sdk",
     "command": "ankitov-launch",
     "finish-args": [
@@ -16,35 +16,27 @@
             "name": "ankitov",
             "buildsystem": "simple",
             "build-commands": [
-                "tar xzf ankitov-linux-${ARCH}.tar.gz",
-                "install -Dm755 backend /app/bin/backend",
-                "install -Dm755 ankitov-launch /app/bin/ankitov-launch",
-                "install -Dm644 packaging/flatpak/org.ankitov.AnkiTov.desktop /app/share/applications/org.ankitov.AnkiTov.desktop",
-                "desktop-file-validate /app/share/applications/org.ankitov.AnkiTov.desktop",
-                "install -Dm644 packaging/linux/ankitov.desktop /app/share/applications/org.ankitov.AnkiTov.desktop"
+                "mkdir -p approot && tar xzf ankitov-linux-x86_64.tar.gz --no-same-owner -C approot --strip-components=1",
+                "install -Dm755 approot/backend /app/bin/backend",
+                "install -Dm755 approot/ankitov-launch /app/bin/ankitov-launch",
+                "mkdir -p /app/share/applications",
+                "printf '[Desktop Entry]\\nType=Application\\nName=AnkiTov\\nExec=ankitov-launch\\nTerminal=false\\nCategories=Education;\\n' > /app/share/applications/org.ankitov.AnkiTov.desktop"
             ],
             "sources": [
                 {
                     "type": "file",
-                    "only-arches": [
-                        "x86_64"
-                    ],
-                    "url": "file://ankitov-linux-x86_64.tar.gz",
+                    "path": "ankitov-linux-x86_64.tar.gz",
                     "dest-filename": "ankitov-linux-x86_64.tar.gz"
                 },
                 {
-                    "type": "file",
-                    "only-arches": [
-                        "aarch64"
-                    ],
-                    "url": "file://ankitov-linux-aarch64.tar.gz",
-                    "dest-filename": "ankitov-linux-aarch64.tar.gz"
-                },
-                {
                     "type": "dir",
-                    "path": "."
+                    "path": ".",
+                    "skip": [
+                        "ankitov-linux-x86_64.tar.gz"
+                    ]
                 }
-            ]
+            ],
+            "runtime-version": "25.08"
         }
     ]
 }
