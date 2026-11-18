@@ -302,12 +302,15 @@ jobs:
 
       - name: Install flatpak tooling
         run: |
-          sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder
+          # Self-hosted runners may lack sudo (the hetzner runner user does); flatpak
+          # and flatpak-builder are preinstalled system-wide there. Hosted runners
+          # still need the apt install.
+          command -v flatpak >/dev/null || sudo apt-get update && sudo apt-get install -y flatpak flatpak-builder
           # The builder action installs deps with --install-deps-from=flathub against
           # the SYSTEM instance; without this remote it fails with
           # "No remote refs found for 'flathub'" (6 CI runs, 2026-11-17).
-          sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo --system 2>/dev/null \
+            || sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
       - name: Resolve version
         id: ver
