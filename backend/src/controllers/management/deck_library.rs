@@ -351,6 +351,24 @@ pub async fn import_available_deck(
     let checksum = hex::encode(Sha256::digest(&file_data));
     let file_size = file_data.len() as i64;
 
+    // AnkiConnect's Anki runs OUTSIDE this process's filesystem view: inside
+    // the flatpak the seed dir lives under /app, which the host-side Anki
+    // cannot open ("Failed to open ...: No such file or directory" → 500).
+    // Stage a copy into the data dir — host-visible, because the sandbox
+    // mounts the real home — and hand AnkiConnect the staged path instead.
+    let staging_dir = std::env::current_dir()
+        .unwrap_or_else(|_| std::path::PathBuf::from("."))
+        .join("anki-import-staging");
+    std::fs::create_dir_all(&staging_dir).map_err(|e| {
+        tracing::error!("deck library staging dir {:?} create failed: {:?}", staging_dir, e);
+        loco_rs::Error::InternalServerError
+    })?;
+    let staged_path = staging_dir.join(&name);
+    std::fs::write(&staged_path, &file_data).map_err(|e| {
+        tracing::error!("deck library staging write {:?} failed: {:?}", staged_path, e);
+        loco_rs::Error::InternalServerError
+    })?;
+
     // AnkiConnect importPackage takes only the path — the deck name comes
     // from inside the package. Resolve the actual imported deck name by
     // diffing deckNames across the import.
@@ -361,7 +379,7 @@ pub async fn import_available_deck(
         .unwrap_or_default();
 
     let imported = client
-        .import_package(&path.display().to_string())
+        .import_package(&staged_path.display().to_string())
         .await
         .map_err(|e| {
             tracing::error!("deck library import {name} failed: {:?}", e);

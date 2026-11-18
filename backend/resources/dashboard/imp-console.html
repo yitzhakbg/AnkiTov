@@ -2177,6 +2177,7 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
                   <div class="wizard-complete__icon">🎉</div>
                   <h2 data-i18n="wizard.complete">You're all set!</h2>
                   <p data-i18n="wizard.complete.desc">Students can now log in. Practice will be generated automatically.</p>
+                  <div id="wizard-complete-extra"></div>
                   <button class="btn btn-primary" onclick="Home.finishWizard()" data-i18n="wizard.complete.cta">Go to Home</button>
                 </div>
               </div>
@@ -2201,6 +2202,14 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
         </div>
 
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:var(--space-4)">
+          <!-- Classroom access -->
+          <div class="card" style="padding:var(--space-5)">
+            <h3 style="margin:0 0 var(--space-2);font-size:var(--text-lg)">📡 <span data-i18n="settings.classroom.title">Classroom access</span></h3>
+            <p style="margin:0 0 var(--space-3);color:var(--text-secondary);font-size:var(--text-sm)" data-i18n="settings.classroom.desc">Let students on this network open their reviewer. Off = only this computer can reach the server.</p>
+            <div id="classroom-status" style="margin-bottom:var(--space-3);font-size:var(--text-sm);color:var(--text-secondary)">…</div>
+            <button id="classroom-toggle" class="btn btn-primary" onclick="ClassroomUI.toggle()">Enable</button>
+          </div>
+
           <!-- School -->
           <div class="card" style="padding:var(--space-5)">
             <h3 style="margin:0 0 var(--space-2);font-size:var(--text-lg)" data-i18n="settings.school.title">🏫 School</h3>
@@ -2731,6 +2740,9 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
 
   // Check class state — hides class-dependent UI when no classes exist
   AppState.checkClasses();
+
+  // Classroom access toggle (Settings): load current state once at boot
+  ClassroomUI.refresh();
 
   // Initialize Phase 4b screens
   ClassInsights.init();
@@ -3451,6 +3463,17 @@ const SessionGate = (() => {
     submit.textContent = t('auth.busy');
     try {
       const user = await Session.login(email, password);
+      if (user.role === 'student') {
+        // Students have no business in the teacher console — bounce them to
+        // the reviewer (field report: a student hitting the server root got
+        // the console login and could sign in).
+        Session.logout();
+        errEl.textContent = 'This is the teacher console. Students practice at /reviewer';
+        errEl.style.display = 'block';
+        submit.disabled = false;
+        submit.textContent = t('auth.submit');
+        return;
+      }
       _lastUser = user;
       _overlay.style.display = 'none';
       // Re-run the data-loading init now that the token exists. These ran at
@@ -3599,6 +3622,11 @@ const Home = {
         emptyEl.style.display = 'flex';
         classesEl.style.display = 'none';
         document.documentElement.setAttribute('data-class-state', 'no-classes');
+        // Keep the body-level flag in sync: the no-classes CSS gates on
+        // body[data-class-state] (set by AppState.checkClasses), and a stale
+        // body flag forced the "no classes" placeholder over freshly created
+        // class cards — the first-run wizard path never re-ran checkClasses.
+        document.body.dataset.classState = 'no-classes';
         // Check if we should show wizard
         if (this._wizardShouldShow()) {
           this.startWizard();
@@ -3609,6 +3637,7 @@ const Home = {
       emptyEl.style.display = 'none';
       classesEl.style.display = 'block';
       document.documentElement.setAttribute('data-class-state', 'has-classes');
+      document.body.dataset.classState = 'has-classes';
 
       // Render class cards, then apply translations
       this._renderClassCards(classes, grid);
@@ -3883,7 +3912,7 @@ const Home = {
     overlay.style.display = 'flex';
   },
 
-  wizardNext() {
+  async wizardNext() {
     // Validate current step before advancing
     if (this._wizardStep === 1) {
       const name = document.getElementById('wizard-class-name');
@@ -3894,9 +3923,93 @@ const Home = {
       }
     }
 
+    // Leaving step 3 → create the class and provision the student accounts
+    // NOW, so the complete screen can show the real credentials (owner
+    // directive: the teacher's class setup does it FOR the students — no
+    // self-registration, no credential juggling).
+    if (this._wizardStep === 3) {
+      const ok = await this._createClassAndProvision();
+      if (!ok) return; // stay on step 3; the toast explains why
+    }
+
     if (this._wizardStep < this._wizardTotal) {
       this._wizardStep++;
       this._showWizardStep(this._wizardStep);
+    }
+  },
+
+  async _createClassAndProvision() {
+    const nameInput = document.getElementById('wizard-class-name');
+    const name = nameInput ? nameInput.value.trim() : '';
+    if (!name) {
+      this._toast('Please enter a class name', 'error');
+      return false;
+    }
+    try {
+      const cls = await API.post('/classes', {
+        name,
+        subject_area: document.getElementById('wizard-class-subject')?.value?.trim() || null,
+        period: document.getElementById('wizard-class-period')?.value?.trim() || null,
+      });
+      this._wizardClassId = cls.id;
+
+      const studentsText = document.getElementById('wizard-students')?.value?.trim() || '';
+      const names = studentsText.split('\n').map(s => s.trim()).filter(Boolean);
+      this._wizardRoster = [];
+      this._wizardPassword = '';
+      this._wizardLanIp = window.location.hostname;
+      if (names.length) {
+        const prov = await API.post(`/classes/${cls.id}/provision-students`, { names });
+        this._wizardRoster = prov.students || [];
+        this._wizardPassword = prov.password || '';
+        if (prov.lan_ip) this._wizardLanIp = prov.lan_ip;
+      }
+      this._renderWizardComplete();
+      return true;
+    } catch (e) {
+      this._toast(t('error.unknown') + API.humanizeError(e), 'error');
+      return false;
+    }
+  },
+
+  _renderWizardComplete() {
+    const host = document.getElementById('wizard-complete-extra');
+    if (!host) return;
+    const port = window.location.port || '5150';
+    const joinUrl = `http://${this._wizardLanIp}:${port}/reviewer`;
+    if (this._wizardRoster && this._wizardRoster.length) {
+      const rows = this._wizardRoster.map(s =>
+        `<tr><td style="padding:4px">${this._escapeHtml(s.name)}</td>` +
+        `<td style="padding:4px">${this._escapeHtml(s.email)}</td></tr>`).join('');
+      host.innerHTML =
+        `<div style="margin-top:var(--space-5);text-align:left;background:var(--surface-secondary);border:1px solid var(--border-light);border-radius:8px;padding:var(--space-4)">` +
+        `<p style="margin:0 0 var(--space-2);font-weight:var(--font-semibold)">Student logins — write these on the board:</p>` +
+        `<p style="margin:0 0 var(--space-2);font-size:var(--text-sm)">Join: <strong>${joinUrl}</strong> · Password: <strong>${this._escapeHtml(this._wizardPassword)}</strong></p>` +
+        `<button class="btn btn-outline" onclick="Home._wizardEnableClassroom(this)">📡 Open to students (classroom mode)</button>` +
+        `<span id="wizard-classroom-status" style="margin-left:8px;font-size:var(--text-sm)"></span>` +
+        `<table style="width:100%;font-size:var(--text-sm);border-collapse:collapse"><thead><tr>` +
+        `<th style="text-align:left;padding:4px">Student</th><th style="text-align:left;padding:4px">Login</th>` +
+        `</tr></thead><tbody>${rows}</tbody></table></div>`;
+    } else {
+      host.innerHTML =
+        `<p style="margin-top:var(--space-4);font-size:var(--text-sm)">Students practice at <strong>${joinUrl}</strong> once they have accounts.</p>`;
+    }
+  },
+
+  async _wizardEnableClassroom(btn) {
+    if (!btn) return;
+    btn.disabled = true;
+    btn.textContent = 'Opening…';
+    try {
+      const s = await API.post('/classroom/enable', {});
+      const st = document.getElementById('wizard-classroom-status');
+      if (st) st.innerHTML = `✅ Students can join at <strong>${s.join_url}</strong>`;
+      if (btn) btn.style.display = 'none';
+      ClassroomUI._render(s); // keep the Settings card in sync
+    } catch (e) {
+      this._toast(t('error.unknown') + API.humanizeError(e), 'error');
+      btn.disabled = false;
+      btn.textContent = '📡 Open to students (classroom mode)';
     }
   },
 
@@ -3963,35 +4076,10 @@ const Home = {
   },
 
   async finishWizard() {
-    // Save the wizard completion state
+    // The class and student accounts were created when leaving step 3
+    // (_createClassAndProvision) so the complete screen could show the real
+    // credentials — finishing just records completion and refreshes.
     try { localStorage.setItem('ankitov-wizard-complete', '1'); } catch {}
-
-    // Create the class if entered
-    const nameInput = document.getElementById('wizard-class-name');
-    if (nameInput && nameInput.value.trim()) {
-      try {
-        await API.post('/classes', {
-          name: nameInput.value.trim(),
-          subject_area: document.getElementById('wizard-class-subject')?.value?.trim() || null,
-          period: document.getElementById('wizard-class-period')?.value?.trim() || null,
-        });
-
-        // Import students if entered
-        const studentsText = document.getElementById('wizard-students')?.value?.trim();
-        if (studentsText) {
-          const names = studentsText.split('\n').map(s => s.trim()).filter(Boolean);
-          if (names.length > 0) {
-            await API.post('/students/create-profiles', { names });
-          }
-        }
-      } catch (e) {
-        // Surface the failure — a silent console.error left the teacher with
-        // an empty dashboard and no idea the class was never created.
-        console.error('Wizard creation failed:', e);
-        this._toast(t('error.unknown') + API.humanizeError(e), 'error');
-      }
-    }
-
     document.getElementById('wizard-overlay').style.display = 'none';
     this.loadClasses();
   },
@@ -4003,6 +4091,54 @@ const Home = {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+  }
+};
+
+const ClassroomUI = {
+  _busy: false,
+
+  async refresh() {
+    try {
+      const s = await API.get('/classroom/status');
+      this._render(s);
+    } catch { /* not logged in yet or older backend — leave the placeholder */ }
+  },
+
+  async toggle() {
+    if (this._busy) return;
+    this._busy = true;
+    const btn = document.getElementById('classroom-toggle');
+    const wasEnabled = btn && btn.dataset.enabled === '1';
+    if (btn) { btn.disabled = true; btn.textContent = wasEnabled ? 'Disabling…' : 'Enabling…'; }
+    try {
+      const s = await API.post(wasEnabled ? '/classroom/disable' : '/classroom/enable', {});
+      this._render(s);
+    } catch (e) {
+      this._toast(t('error.unknown') + API.humanizeError(e), 'error');
+      if (btn) { btn.disabled = false; btn.textContent = wasEnabled ? 'Enable' : 'Disable'; }
+    }
+    this._busy = false;
+  },
+
+  _render(s) {
+    const status = document.getElementById('classroom-status');
+    const btn = document.getElementById('classroom-toggle');
+    if (!status || !btn) return;
+    if (s.enabled) {
+      const url = s.join_url || `http://${s.lan_ip || window.location.hostname}:${s.port || window.location.port || 5150}/reviewer`;
+      status.innerHTML = `✅ Open to students — join URL: <strong>${url}</strong>`;
+      btn.textContent = 'Disable';
+      btn.dataset.enabled = '1';
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-outline');
+    } else {
+      status.textContent = '🔒 Off — only this computer can reach the server.';
+      btn.textContent = 'Enable';
+      btn.dataset.enabled = '0';
+      btn.classList.remove('btn-outline');
+      btn.classList.add('btn-primary');
+    }
+    btn.disabled = false;
   }
 };
 

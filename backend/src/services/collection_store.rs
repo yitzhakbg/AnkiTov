@@ -186,11 +186,28 @@ pub struct CollectionCard {
 /// Anki 2 schema (schema ver 11/18): `cards(id, nid, ord, did)`,
 /// `notes(id, mid, flds)`, `models/col.models` JSON holds field names +
 /// templates. Deck names come from `col.decks` JSON.
+/// Card ids to practice from the student's own collection (solo mode —
+/// no capsule session): new cards first, then due reviews, oldest due
+/// first. Suspended/buried/filtered cards (negative queue) are excluded.
+pub fn list_card_ids(col: &StudentCollection, limit: i64) -> Result<Vec<i64>, rusqlite::Error> {
+    let conn = rusqlite::Connection::open_with_flags(
+        &col.anki2,
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
+    )?;
+    let mut stmt = conn.prepare(
+        "SELECT id FROM cards WHERE queue >= 0 \
+         ORDER BY (queue = 0) DESC, due ASC, id ASC LIMIT ?1",
+    )?;
+    let ids = stmt
+        .query_map([limit], |r| r.get::<_, i64>(0))?
+        .collect::<Result<Vec<_>, _>>()?;
+    Ok(ids)
+}
+
 pub fn read_cards(
     col: &StudentCollection,
     card_ids: &[i64],
-) -> Result<Vec<CollectionCard>, ReadCardsError> {
-    let conn = rusqlite::Connection::open_with_flags(
+) -> Result<Vec<CollectionCard>, ReadCardsError> {    let conn = rusqlite::Connection::open_with_flags(
         &col.anki2,
         rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
     )?;

@@ -1,6 +1,6 @@
 [package]
 name = "backend"
-version = "0.5.0"
+version = "0.6.1"
 edition = "2021"
 license = "AGPL-3.0-only"
 publish = false
@@ -24,6 +24,14 @@ excel = []
 
 [dependencies]
 loco-rs = { version = "0.11.0", features = ["testing", "with-db"] }
+# Startup banner (src/banner.rs): colored renders the brand palette (auto-strips
+# ANSI when stdout is not a TTY); clap mirrors loco's `start` flags in main.rs so
+# the AnkiTov banner can replace loco's art. Versions match the lock via loco.
+clap = { version = "4", features = ["derive"] }
+colored = "2"
+# main.rs init_stdout_logger (loco's logger module is private): same 0.3 line
+# the lock already resolves for loco; json feature for the format:json arm.
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 axum = { version = "0.7", features = ["ws", "multipart"] }
 tower = { version = "0.5", features = ["util"] }
 tower-http = { version = "0.5", features = ["cors"] }

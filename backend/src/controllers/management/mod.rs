@@ -17,6 +17,7 @@ pub mod anki_ops;
 pub mod ask;
 pub mod capsule_sessions;
 pub mod classes;
+pub mod classroom;
 pub mod compliance;
 pub mod deck_library;
 pub mod decks;
@@ -72,6 +73,10 @@ const TAG: &str = "Management Console";
         classes::delete_class,
         classes::list_students,
         classes::enroll_students,
+        classes::provision_students,
+        classroom::enable,
+        classroom::disable,
+        classroom::status,
         classes::transfer_student,
         classes::generate_sessions,
         // Teachers (Prong 8 — teacher registration + first-login wizard)

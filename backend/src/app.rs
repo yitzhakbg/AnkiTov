@@ -275,10 +275,15 @@ impl Hooks for App {
         // lets everything else through — so the public dashboard, `/api/v1/health`,
         // `/api/v1/auth/*`, `/api/v1/telemetry/*`, and the `/d/...` first-login routes
         // stay accessible without a token.
-        Ok(dashboard
+        let final_router = dashboard
             .nest("/", first_login_api)
             .layer(axum::middleware::from_fn(require_auth_for_management))
-            .layer(cors))
+            .layer(cors);
+        // Stash the finished router so the classroom toggle can serve the same
+        // app on a LAN listener without a process restart (see
+        // controllers/management/classroom.rs).
+        crate::controllers::management::classroom::set_router(final_router.clone());
+        Ok(final_router)
     }
 
     async fn connect_workers(_ctx: &AppContext, _queue: &Queue) -> Result<()> {

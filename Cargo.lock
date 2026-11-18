@@ -1155,7 +1155,7 @@ dependencies = [
 
 [[package]]
 name = "backend"
-version = "0.5.0"
+version = "0.6.1"
 dependencies = [
  "async-trait",
  "axum",
@@ -1164,6 +1164,8 @@ dependencies = [
  "bytes",
  "calamine",
  "chrono",
+ "clap",
+ "colored",
  "csv",
  "dotenvy",
  "fluent-syntax",
@@ -1191,6 +1193,7 @@ dependencies = [
  "tower 0.5.3",
  "tower-http 0.5.2",
  "tracing",
+ "tracing-subscriber",
  "utoipa",
  "uuid",
  "wiremock",

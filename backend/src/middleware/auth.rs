@@ -48,6 +48,16 @@ fn unauthorized_response() -> Response {
     res
 }
 
+fn forbidden_response() -> Response {
+    use axum::body::Body;
+    use axum::http::{self, Response as _};
+    let mut res: axum::http::Response<Body> = http::Response::builder()
+        .status(403)
+        .body(Body::empty())
+        .expect("building a 403 response");
+    res
+}
+
 /// Axum middleware: extract JWT from Authorization header, inject AuthUser.
 ///
 /// Returns 401 if the header is missing, the token is expired, or the
@@ -119,6 +129,24 @@ pub async fn require_auth_for_management(
     if !is_mgmt && !is_reviewer_api {
         // Public path — pass through without touching the auth header.
         return Ok(next.run(req).await);
+    }
+    // Defense in depth for the management prefix: decode the role BEFORE
+    // require_auth consumes the request. Students authenticate fine (they
+    // need /reviewer) but must not reach ANY management handler — including
+    // the ones that predate per-handler `ensure_role` (students.rs,
+    // stats.rs, compliance.rs, probe.rs, anki_ops.rs …).
+    if is_mgmt {
+        let role = req
+            .headers()
+            .get(header::AUTHORIZATION)
+            .and_then(|v| v.to_str().ok())
+            .and_then(|v| v.strip_prefix("Bearer "))
+            .and_then(|t| jwt::decode_token(t).ok())
+            .map(|c| c.role)
+            .unwrap_or_default();
+        if role != "teacher" && role != "admin" {
+            return Ok(forbidden_response());
+        }
     }
     require_auth(req, next).await
 }

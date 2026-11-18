@@ -5,6 +5,7 @@
 //!   - `main.rs` imports `App` via `use backend::App;`
 
 pub mod app;
+pub mod banner; // AnkiTov startup banner (replaces loco.rs's default art)
 pub mod controllers;
 pub mod i18n;
 pub mod middleware; // JWT auth middleware

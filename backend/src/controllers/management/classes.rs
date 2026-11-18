@@ -13,7 +13,7 @@ use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::models::entities::{class, class_enrollment};
+use crate::models::entities::{class, class_enrollment, user};
 
 /// Characters used for class codes (no ambiguous 0/O, 1/I/L).
 const CODE_CHARS: &[u8] = b"ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -40,6 +40,35 @@ pub struct CreateClassRequest {
     pub teacher_id: Option<String>,
     pub period: Option<String>,
     pub academic_year: Option<String>,
+}
+
+/// Request body for provisioning student accounts for a class.
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct ProvisionStudentsRequest {
+    /// Display names, one per student ("Maya Cohen", …).
+    pub names: Vec<String>,
+    /// Shared class password for every provisioned student. Defaults to the
+    /// class code when omitted — one line to write on the whiteboard.
+    #[serde(default)]
+    pub password: Option<String>,
+}
+
+/// One provisioned student account (shown once — passwords are stored hashed).
+#[derive(Debug, Serialize, ToSchema)]
+pub struct ProvisionedStudent {
+    pub name: String,
+    pub email: String,
+    pub user_id: String,
+    /// "created" or "exists" (re-provisioning is idempotent per name).
+    pub status: String,
+}
+
+/// Best-effort LAN IP for building the student join URL (no packets sent —
+/// a UDP connect only resolves the local address).
+pub(crate) fn lan_ip() -> Option<String> {
+    let socket = std::net::UdpSocket::bind("0.0.0.0:0").ok()?;
+    let _ = socket.connect("8.8.8.8:80");
+    socket.local_addr().ok().map(|a| a.ip().to_string())
 }
 
 /// Generate a random 6-character class code.
@@ -365,6 +394,158 @@ pub async fn enroll_students(
     }
 
     format::json(serde_json::json!({"enrolled": count, "total": payload.student_ids.len()}))
+}
+
+/// Provision student accounts for a class — the teacher's class setup does
+/// it FOR them (owner directive 2026-11-18: students must never register
+/// manually). For each name: create a student user (email
+/// `<slug>@class.local`, shared class password — default: the class code)
+/// and enroll it. Re-provisioning the same names is idempotent.
+#[utoipa::path(
+    post,
+    path = "/management/classes/{id}/provision-students",
+    request_body = ProvisionStudentsRequest,
+    responses((status = 200, description = "Students provisioned and enrolled")),
+    tag = TAG
+)]
+pub async fn provision_students(
+    Extension(user): Extension<AuthUser>,
+    State(ctx): State<AppContext>,
+    Path(id): Path<String>,
+    Json(payload): Json<ProvisionStudentsRequest>,
+) -> Result<Response> {
+    let _ = ensure_role(&user, &["teacher", "admin"])?;
+    let db = &ctx.db;
+
+    let Some(cls) = class::Entity::find_by_id(&id)
+        .one(db)
+        .await
+        .map_err(|_| loco_rs::Error::InternalServerError)?
+    else {
+        return Err(loco_rs::Error::NotFound);
+    };
+
+    // Shared class password: teacher-supplied, else the class code (already
+    // on the whiteboard-friendly CODE_CHARS alphabet).
+    let password = payload
+        .password
+        .clone()
+        .filter(|p| p.trim().len() >= 6)
+        .unwrap_or_else(|| cls.class_code.clone().unwrap_or_default());
+    if password.trim().is_empty() {
+        return Err(loco_rs::Error::BadRequest(
+            "no password available (class has no code and none was supplied)".into(),
+        ));
+    }
+    let password_hash = crate::services::auth::hash_password(password.trim())
+        .map_err(|_| loco_rs::Error::InternalServerError)?;
+
+    let now = chrono::Utc::now().timestamp();
+    let mut roster: Vec<ProvisionedStudent> = Vec::new();
+
+    for name in &payload.names {
+        let trimmed = name.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+
+        // Idempotency: a student user with this username already exists →
+        // report "exists" and make sure the enrollment is in place.
+        let existing = user::Entity::find()
+            .filter(user::Column::Username.eq(trimmed))
+            .filter(user::Column::Role.eq("student"))
+            .one(db)
+            .await
+            .map_err(|_| loco_rs::Error::InternalServerError)?;
+
+        let user_id = match existing {
+            Some(u) => {
+                let enrollment = class_enrollment::ActiveModel {
+                    id: sea_orm::ActiveValue::NotSet,
+                    class_id: sea_orm::ActiveValue::Set(id.clone()),
+                    student_id: sea_orm::ActiveValue::Set(u.id.to_string()),
+                    enrolled_at: sea_orm::ActiveValue::Set(now),
+                    active: sea_orm::ActiveValue::Set(true),
+                    display_name: sea_orm::ActiveValue::Set(Some(trimmed.to_string())),
+                    metadata_json: sea_orm::ActiveValue::Set(None),
+                };
+                if let Err(e) = enrollment.insert(db).await {
+                    tracing::warn!("provision re-enroll {} skipped: {:?}", trimmed, e);
+                }
+                roster.push(ProvisionedStudent {
+                    name: trimmed.to_string(),
+                    email: u.email.clone(),
+                    user_id: u.id.to_string(),
+                    status: "exists".to_string(),
+                });
+                continue;
+            }
+            None => {
+                // Fresh account: dedupe the email across the whole server.
+                let slug = trimmed.to_lowercase().replace(' ', "-");
+                let mut email = format!("{slug}@class.local");
+                let mut n = 2;
+                loop {
+                    let taken = user::Entity::find()
+                        .filter(user::Column::Email.eq(&email))
+                        .one(db)
+                        .await
+                        .map_err(|_| loco_rs::Error::InternalServerError)?;
+                    if taken.is_none() {
+                        break;
+                    }
+                    email = format!("{slug}{n}@class.local");
+                    n += 1;
+                }
+
+                let active = user::ActiveModel {
+                    username: Set(trimmed.to_string()),
+                    email: Set(email.clone()),
+                    full_name: Set(Some(trimmed.to_string())),
+                    role: Set("student".to_string()),
+                    subsection_id: Set(None),
+                    password_hash: Set(Some(password_hash.clone())),
+                    created_at: Set(now),
+                    updated_at: Set(now),
+                    ..Default::default()
+                };
+                let inserted = active.insert(db).await.map_err(|e| {
+                    tracing::error!("provision student {trimmed} failed: {e:?}");
+                    loco_rs::Error::InternalServerError
+                })?;
+
+                let enrollment = class_enrollment::ActiveModel {
+                    id: sea_orm::ActiveValue::NotSet,
+                    class_id: sea_orm::ActiveValue::Set(id.clone()),
+                    student_id: sea_orm::ActiveValue::Set(inserted.id.to_string()),
+                    enrolled_at: sea_orm::ActiveValue::Set(now),
+                    active: sea_orm::ActiveValue::Set(true),
+                    display_name: sea_orm::ActiveValue::Set(Some(trimmed.to_string())),
+                    metadata_json: sea_orm::ActiveValue::Set(None),
+                };
+                if let Err(e) = enrollment.insert(db).await {
+                    tracing::warn!("provision enrollment {} failed: {:?}", trimmed, e);
+                }
+
+                roster.push(ProvisionedStudent {
+                    name: trimmed.to_string(),
+                    email,
+                    user_id: inserted.id.to_string(),
+                    status: "created".to_string(),
+                });
+                inserted.id
+            }
+        };
+        let _ = user_id;
+    }
+
+    format::json(serde_json::json!({
+        "class_id": id,
+        "class_code": cls.class_code,
+        "password": password.trim(),
+        "lan_ip": lan_ip(),
+        "students": roster,
+    }))
 }
 
 /// Transfer a student out of a class (soft-delete).

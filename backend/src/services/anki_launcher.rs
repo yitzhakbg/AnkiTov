@@ -107,14 +107,46 @@ pub async fn ensure_anki_running(port: u16) -> LaunchResult {
         return LaunchResult::AlreadyRunning;
     }
 
+    // Inside a flatpak sandbox there is no Anki binary and no GUI stack, but
+    // the host is reachable via flatpak-spawn (needs the
+    // --talk-name=org.freedesktop.Flatpak permission) and the real home is
+    // mounted at $HOME — so headless Anki runs on the HOST with the
+    // teacher's standard collection, and AnkiConnect lands on the shared
+    // host network namespace where the backend can reach it.
+    let in_flatpak = std::env::var("FLATPAK_ID")
+        .map(|v| !v.is_empty())
+        .unwrap_or(false);
+
     // Resolve base directory from env or runtime state.
-    let base_dir = match resolve_base_dir() {
+    let resolved_base = match resolve_base_dir() {
+        Some(dir) => Some(dir),
+        None => {
+            if in_flatpak {
+                // Default to the host's standard Anki base so headless Anki
+                // shares the teacher's real collection.
+                std::env::var("HOME")
+                    .ok()
+                    .map(|h| format!("{h}/.local/share/Anki2"))
+                    .filter(|d| std::path::Path::new(d).exists())
+            } else {
+                None
+            }
+        }
+    };
+    let base_dir = match resolved_base {
         Some(dir) => dir,
-        None => return LaunchResult::NotConfigured {
-            reason:
-                "ANKI_BASE_DIR not set and ANKIPLAYGROUND_PATH/ANKICOLLECTION_PATH not resolvable"
-                    .to_string(),
-        },
+        None => {
+            return LaunchResult::NotConfigured {
+                reason: if in_flatpak {
+                    "no Anki base directory found at $HOME/.local/share/Anki2 \
+                     and ANKI_BASE_DIR not set"
+                        .to_string()
+                } else {
+                    "ANKI_BASE_DIR not set and ANKIPLAYGROUND_PATH/ANKICOLLECTION_PATH not resolvable"
+                        .to_string()
+                },
+            };
+        }
     };
 
     let binary = match anki_binary() {
@@ -129,13 +161,26 @@ pub async fn ensure_anki_running(port: u16) -> LaunchResult {
     tracing::info!("AnkiConnect not responding — launching Anki headless");
     tracing::info!("  binary: {binary}");
     tracing::info!("  base_dir: {base_dir}");
+    if in_flatpak {
+        tracing::info!("  mode: flatpak — executing on the host via flatpak-spawn");
+    }
 
-    // Build the launch command.
-    let mut cmd = std::process::Command::new(binary);
-    cmd.env("QT_QPA_PLATFORM", "offscreen")
-        .arg("-b")
-        .arg(&base_dir)
-        .stdin(std::process::Stdio::null())
+    // Build the launch command. Inside flatpak, route through flatpak-spawn
+    // so Anki runs on the HOST (the sandbox has neither the binary nor Qt).
+    let mut cmd = if in_flatpak {
+        let mut c = std::process::Command::new("flatpak-spawn");
+        c.arg("--host")
+            .arg("--env=QT_QPA_PLATFORM=offscreen")
+            .arg(binary)
+            .arg("-b")
+            .arg(&base_dir);
+        c
+    } else {
+        let mut c = std::process::Command::new(binary);
+        c.env("QT_QPA_PLATFORM", "offscreen").arg("-b").arg(&base_dir);
+        c
+    };
+    cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null());
 

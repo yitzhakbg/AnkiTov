@@ -106,7 +106,18 @@ fi
 # drive-letter quirks in sqlite:// URLs alike.
 is_running() {
   [ -f "$PID_FILE" ] || return 1
-  kill -0 "$(cat "$PID_FILE")" 2>/dev/null
+  pid=$(cat "$PID_FILE" 2>/dev/null) || return 1
+  [ -n "$pid" ] || return 1
+  # The recorded pid is PID-namespace-relative: under flatpak every `flatpak
+  # run` gets a fresh namespace where low pids (including this very launcher,
+  # typically pid 2) are reused, so a bare `kill -0` false-positives across
+  # sandboxes ("already running (pid 2)" with nothing listening). Only trust
+  # the pid when /proc says it is really our backend in THIS namespace.
+  # (macOS has no /proc — no pid namespaces either — so keep plain kill -0.)
+  if [ -d /proc ]; then
+    [ "$(cat "/proc/$pid/comm" 2>/dev/null)" = "backend" ] || return 1
+  fi
+  kill -0 "$pid" 2>/dev/null
 }
 
 # True when something already listens on $PORT at $1 (e.g. 127.0.0.1 or 0.0.0.0).
@@ -161,6 +172,25 @@ cmd_start() {
   fi
   cd "$DATA_DIR"
   if port_busy 127.0.0.1; then
+    # A GUI launch (Terminal=false) shows nothing when we die here — and the
+    # most common reason the port is held is that AnkiTov is ALREADY running
+    # (icon clicked twice, or an instance from another sandbox/terminal).
+    # If something answers HTTP on the URL, treat it as "already running":
+    # say so and open the browser instead of failing invisibly.
+    if command -v curl >/dev/null 2>&1; then
+      code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 2 "$URL/" 2>/dev/null || true)
+      if [ -n "$code" ] && [ "$code" != "000" ]; then
+        printf 'Already serving on port %s (HTTP %s) — opening %s\n' "$PORT" "$code" "$URL"
+        open_browser
+        exit 0
+      fi
+    fi
+    if [ -n "${FLATPAK_ID:-}" ]; then
+      die "port $PORT is held by another AnkiTov instance (another flatpak
+  sandbox — its pid cannot be signalled from here). From a host terminal run:
+    flatpak kill $FLATPAK_ID
+  or choose another port: ANKITOV_PORT=<port> $SELF start"
+    fi
     die "port $PORT is already in use by another program (another AnkiTov
   install or a different app). Stop that first, or choose another port:
     ANKITOV_PORT=<port> $SELF start"
@@ -170,8 +200,15 @@ cmd_start() {
     nohup "$BACKEND" start -e production >> "$LOG_FILE" 2>&1 &
   echo $! > "$PID_FILE"
   if wait_ready 30; then
-    printf 'AnkiTov is running at %s\n  data: %s\n  log:  %s\n  stop: %s stop\n' \
-      "$URL" "$DATA_DIR" "$LOG_FILE" "$SELF"
+    if [ -n "${FLATPAK_ID:-}" ]; then
+      # `… stop` runs in a fresh sandbox whose pid namespace cannot signal the
+      # running instance — the sandbox itself must be killed from the host.
+      printf 'AnkiTov is running at %s\n  data: %s\n  log:  %s\n  stop: flatpak kill %s\n' \
+        "$URL" "$DATA_DIR" "$LOG_FILE" "$FLATPAK_ID"
+    else
+      printf 'AnkiTov is running at %s\n  data: %s\n  log:  %s\n  stop: %s stop\n' \
+        "$URL" "$DATA_DIR" "$LOG_FILE" "$SELF"
+    fi
     if [ "${ANKITOV_BIND:-127.0.0.1}" != "127.0.0.1" ] && [ -n "$LAN_IP" ]; then
       printf '  students (same network): http://%s:%s/reviewer\n' "$LAN_IP" "$PORT"
     else
@@ -234,6 +271,11 @@ cmd_classroom() {
 cmd_stop() {
   if ! is_running; then
     rm -f "$PID_FILE"
+    if [ -n "${FLATPAK_ID:-}" ] && port_busy 127.0.0.1; then
+      die "An AnkiTov instance is running in another flatpak sandbox — its pid
+  cannot be signalled from here. From a host terminal run:
+    flatpak kill $FLATPAK_ID"
+    fi
     printf 'AnkiTov is not running\n'
     exit 0
   fi
@@ -254,6 +296,9 @@ cmd_stop() {
 cmd_status() {
   if is_running; then
     printf 'AnkiTov is running (pid %s) at %s\n' "$(cat "$PID_FILE")" "$URL"
+  elif [ -n "${FLATPAK_ID:-}" ] && port_busy 127.0.0.1; then
+    printf 'AnkiTov is running in another flatpak sandbox at %s\n  stop: flatpak kill %s\n' \
+      "$URL" "$FLATPAK_ID"
   else
     printf 'AnkiTov is not running\n'
     exit 1

@@ -31,6 +31,9 @@ use crate::services::review_ingest::{self, ReviewAnswer};
 
 const TAG: &str = "Reviewer";
 
+/// Card cap for a solo (self-serve) practice session.
+const SOLO_SESSION_LIMIT: i64 = 20;
+
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("/reviewer")
@@ -74,10 +77,44 @@ async fn current_session(
                 },
             }))
         }
-        None => format::json(serde_json::json!({
-            "status": "no_session",
-            "message": "No active practice session. Ask your teacher to assign one, or import a seed pack below.",
-        })),
+        None => match solo_card_ids(&user.id.to_string()) {
+            // Solo fallback: no teacher-assigned capsule session — serve the
+            // student's OWN collection (the seed packs the empty state invites
+            // them to import). Without this the import was a dead end: the
+            // cards landed in the collection and nothing ever served them.
+            Some(ids) => format::json(serde_json::json!({
+                "status": "ok",
+                "session": {
+                    "id": serde_json::Value::Null,
+                    "status": "solo",
+                    "cards_completed": 0,
+                    "cards_total": ids.len(),
+                    "card_ids": ids,
+                    "session_week": serde_json::Value::Null,
+                },
+            })),
+            None => format::json(serde_json::json!({
+                "status": "no_session",
+                "message": "No active practice session. Ask your teacher to assign one, or import a seed pack below.",
+            })),
+        },
+    }
+}
+
+/// Solo-mode card ids: the student's own collection (new first, then due).
+/// `None` when the student has no collection or it has no practiceable cards.
+fn solo_card_ids(user_id: &str) -> Option<Vec<i64>> {
+    let col = StudentCollection::for_student(user_id);
+    if !col.exists() {
+        return None;
+    }
+    match collection_store::list_card_ids(&col, SOLO_SESSION_LIMIT) {
+        Ok(ids) if !ids.is_empty() => Some(ids),
+        Ok(_) => None,
+        Err(e) => {
+            tracing::warn!("[{}] solo card list failed for {}: {}", TAG, user_id, e);
+            None
+        }
     }
 }
 
@@ -93,11 +130,21 @@ async fn session_cards(
         .order_by_desc(cs_entity::Column::CreatedAt)
         .one(db)
         .await?;
-    let Some(session) = session else {
-        return format::json(serde_json::json!({"status": "no_session"}));
+    // Capsule session first; solo fallback (the student's own collection)
+    // when none is assigned — mirrors current_session so the seed-pack path
+    // actually leads to practice.
+    let (session_id, cards_completed, cards_total, card_ids) = match session {
+        Some(s) => (
+            Some(s.id),
+            s.cards_completed,
+            s.cards_total,
+            serde_json::from_str::<Vec<i64>>(&s.card_ids).unwrap_or_default(),
+        ),
+        None => match solo_card_ids(&user.id.to_string()) {
+            Some(ids) => (None, 0, ids.len() as i32, ids),
+            None => return format::json(serde_json::json!({"status": "no_session"})),
+        },
     };
-    let card_ids: Vec<i64> = serde_json::from_str(&session.card_ids).unwrap_or_default();
-
     let col = StudentCollection::for_student(&user.id.to_string());
     if !col.exists() {
         return format::json(serde_json::json!({
@@ -140,9 +187,9 @@ async fn session_cards(
 
     format::json(serde_json::json!({
         "status": "ok",
-        "session_id": session.id,
-        "cards_completed": session.cards_completed,
-        "cards_total": session.cards_total,
+        "session_id": session_id,
+        "cards_completed": cards_completed,
+        "cards_total": cards_total,
         "cards": rendered,
     }))
 }
