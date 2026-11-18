@@ -9,6 +9,15 @@ A wrapper around the static-musl `tar.gz` the release already builds — no new
 compilation. `flatpak-builder` unpacks the tarball into `/app/bin` and installs
 the desktop entry.
 
+## One-command install (end users)
+
+    curl -fsSL https://github.com/yitzhakbg/AnkiTov/releases/download/v0.6.0/install-ankitov.sh | sh
+
+Installs flatpak (if missing) → flathub remote → the freedesktop runtime →
+the AnkiTov bundle, verifies the deploy, and prints the run commands
+(`classroom` / solo / `stop`). Ships as a release asset (`install-ankitov.sh`);
+safe to re-run to upgrade — class data is kept.
+
 ## Build (CI, ubuntu-24.04)
     sudo apt-get install -y flatpak flatpak-builder
     flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo --system
