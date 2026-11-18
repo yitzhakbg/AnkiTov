@@ -39,7 +39,11 @@ else
 fi
 # Primary LAN IP. Inside the flatpak the network namespace is shared with the
 # host, so this is the address students on the same network can reach.
+# hostname -I is GNU-specific (missing on e.g. Solus) and iproute2 may be absent
+# in the runtime — the python UDP-connect trick works everywhere python3 does.
 LAN_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
+[ -n "$LAN_IP" ] || LAN_IP=$(python3 -c "import socket; s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); s.connect(('8.8.8.8', 80)); print(s.getsockname()[0])" 2>/dev/null)
+[ -n "$LAN_IP" ] || LAN_IP=$(ip -4 route get 1.1.1.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p' | head -n1)
 
 case "$(uname -s)" in
   Darwin) DATA_DEFAULT="$HOME/Library/Application Support/AnkiTov" ;;
@@ -114,6 +118,9 @@ port_busy() {
 import socket, sys
 host, port = sys.argv[1], int(sys.argv[2])
 s = socket.socket()
+# SO_REUSEADDR matches the backend's own bind semantics — without it, TIME_WAIT
+# leftovers from recent connections false-positive the check.
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 try:
     s.bind((host, port))
 except OSError:
@@ -217,6 +224,8 @@ cmd_classroom() {
   printf '  laptop (then the IP above is stable), and allow port %s in the\n' "$PORT"
   printf '  firewall.\n'
   cd "$DATA_DIR"
+  # Record our pid (exec keeps it) so `stop` can manage a classroom instance.
+  printf '%s\n' "$$" > "$PID_FILE" 2>/dev/null || true
   exec env ANKITOV_JWT_SECRET="$SECRET" ANKITOV_PORT="$PORT" ANKITOV_BIND="$ANKITOV_BIND" \
     DATABASE_URL="sqlite://ankitov.db?mode=rwc" \
     "$BACKEND" start -e production
