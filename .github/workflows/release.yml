@@ -296,7 +296,7 @@ jobs:
       matrix:
         include:
           - arch: x86_64
-    runs-on: [self-hosted, linux, flatpak]
+    runs-on: [self-hosted, linux, hetzner]
     steps:
       - uses: actions/checkout@v4
 
