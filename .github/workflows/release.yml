@@ -309,6 +309,10 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y flatpak flatpak-builder
           fi
+          # The builder action wraps its build in xvfb-run; Hetzner's minimal
+          # install lacks it (run 44269286740: "Unable to locate executable
+          # file: xvfb-run").
+          command -v xvfb-run >/dev/null || sudo apt-get install -y xvfb
           # The builder action installs deps with --install-deps-from=flathub against
           # the SYSTEM instance; without this remote it fails with
           # "No remote refs found for 'flathub'" (6 CI runs, 2026-11-17).
