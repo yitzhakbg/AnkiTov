@@ -124,6 +124,7 @@ pub fn routes() -> Routes {
         .add("/:id/students", post(enroll_students))
         .add("/:id/students/:student_id", delete(transfer_student))
         .add("/:id/generate-sessions", post(generate_sessions))
+        .add("/:id/provision-students", post(provision_students))
         .add("/code/:code", get(lookup_by_code))
         .add("/code/:code/enroll", post(enroll_by_code))
 }

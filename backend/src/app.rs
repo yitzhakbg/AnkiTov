@@ -129,6 +129,7 @@ impl Hooks for App {
             .add_route(controllers::management::track_profiles::routes())
             .add_route(controllers::management::capsule_sessions::routes())
             .add_route(controllers::management::classes::routes())
+            .add_route(controllers::management::classroom::routes())
             .add_route(controllers::management::compliance::routes())
             .add_route(controllers::management::profile_assignments::routes())
             .add_route(controllers::management::ask::routes())

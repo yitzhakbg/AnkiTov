@@ -141,3 +141,11 @@ pub async fn status(Extension(user): Extension<AuthUser>) -> Result<Response> {
         None => format::json(status_json(false, None)),
     }
 }
+
+pub fn routes() -> Routes {
+    Routes::new()
+        .prefix("/management/classroom")
+        .add("/enable", post(enable))
+        .add("/disable", post(disable))
+        .add("/status", get(status))
+}
