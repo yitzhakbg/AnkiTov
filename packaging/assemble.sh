@@ -150,8 +150,13 @@ EOF
   # Selkies MPL-2.0, bwrap LGPL). The FSL text lives in scripts/oss-templates/
   # (the same file the public mirror is stamped with at export).
   TPL_DIR="$REPO_ROOT/scripts/oss-templates"
-  if [ -f "$TPL_DIR/LICENSE" ]; then
-    cp "$TPL_DIR/LICENSE" "$ROOT/usr/share/doc/ankitov/LICENSE"
+  # Fallback chain: oss-templates (private repo) → repo-root LICENSE (mirror
+  # builds — the mirror has no scripts/ but its root LICENSE is the stamped
+  # FSL text). Skipped silently if neither exists (deb still builds).
+  LICENSE_SRC="$TPL_DIR/LICENSE"
+  [ -f "$LICENSE_SRC" ] || LICENSE_SRC="$REPO_ROOT/LICENSE"
+  if [ -f "$LICENSE_SRC" ]; then
+    cp "$LICENSE_SRC" "$ROOT/usr/share/doc/ankitov/LICENSE"
   fi
   mkdir -p "$ROOT/usr/share/doc/ankitov/LICENSES"
   cp "$REPO_ROOT/packaging/LICENSES/"* "$ROOT/usr/share/doc/ankitov/LICENSES/" 2>/dev/null || true

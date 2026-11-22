@@ -1,7 +1,7 @@
 # SYNC-MANIFEST
 
-- monorepo ref: lnpwozkumusu/409bc28e9703
-- exported at: 2026-11-22T15:05:37Z
+- monorepo ref: wrtoupkookou/d6c0c6a7a795
+- exported at: 2026-11-22T16:32:35Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
@@ -306,7 +306,7 @@ b943b28d784bcb974a8cdced5e4973f89fef0b3d6d6c79938c1506251a83f9fc  docs/src/refer
 b6df84512a635d73d72cae6d059b9749041009b16a55d1b938741105ee697ffb  docs/src/reference/rustdoc.md
 0d6b777747fdd34834c97d33df63c2a1b333f764cdd49060cc1f0b03c1eb9cf5  packaging/LICENSES/THIRD-PARTY-NOTICES.md
 80ce08725036c03b7068c110add1ce549e62258f80319d6d1146298b25ade225  packaging/README.md
-ffb70885aa45bc71807474fcaed70e59fff117b0bf6f3cbde2ecb7db1f0e0c90  packaging/assemble.sh
+8523548a3337556e0521fe5dd1726c7567f4f63257dba180aa99df305722a054  packaging/assemble.sh
 a1f2814abd53758cec9acb4d9f1367c280900ab32e2e588fe375a0d54c8446dc  packaging/docker/Dockerfile.server
 48abcfc1155d78cc3c01813496c8375acf55675b9baee8baef94be6c67bc88f4  packaging/flatpak/README.md
 355f53c6344e307b182976d88629b373caad403b6de9c491b38c2a10aa7ac7e3  packaging/flatpak/ankitov-run
