@@ -1,7 +1,7 @@
 # SYNC-MANIFEST
 
-- monorepo ref: kxsuttwqlxsr/d3aef6b1537e
-- exported at: 2026-11-22T19:17:19Z
+- monorepo ref: oukpszulktpx/41212cf6202e
+- exported at: 2026-11-22T22:29:43Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
@@ -168,7 +168,7 @@ d06ad840fcdf1b2840f9a7e35327a194e44a84e4b619d0626f15bc9a7e8c3525  backend/src/se
 b65ac2fd74687b56d1338b165b54d25a20e1e5aee4d813a6895f99d8cd316d9d  backend/src/services/password_policy.rs
 5362b03eaecefe26d45a55731cd44933703334e1c59713087c99eb48f1ba71c6  backend/src/services/review_ingest.rs
 781e8d5640f2df78f6c3c386ee94e41402a4a6de35553913f73ffdcd3b758c37  backend/src/services/rig_nlu.rs
-689e4c741533087fdb4e9a339980dec0ed74191091f76b475a2206d5d4f09bee  backend/src/services/seat_manager.rs
+9e3d98a6a040ccb329b57ad2fb81ecca5691c13a79b804f1962e3f5fb6b04c63  backend/src/services/seat_manager.rs
 bad7db1dd88bc2afed8cf0769131ee6db51b795489c22b8b30f82eb674711368  backend/src/services/settings.rs
 d7f79457ea2c519fe5b3137483fc0f9dde21345fab74757cc8d63aaccf3d39e8  backend/src/services/student_import.rs
 3cbc14a5a6c362f868bfdabac12ae55897dee514cb9a05176e09a46bf7878d29  backend/src/services/sync_user.rs

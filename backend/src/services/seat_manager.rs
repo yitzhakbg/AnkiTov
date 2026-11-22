@@ -31,7 +31,8 @@
 //! | `ANKITOV_SEAT_MAX` | `64` | Concurrent seat cap |
 //! | `ANKITOV_SEAT_IDLE_SECS` | `300` | Idle seconds before a seat is reaped |
 //! | `ANKITOV_BACKEND_URL` | `http://127.0.0.1:5150` | Told to the seat for telemetry |
-//! | `ANKITOV_SEAT_PASSWD` | random per seat | Selkies basic-auth password (`ubuntu` / this) — set it to the class join code for demos |
+//! | `ANKITOV_PUBLIC_URL` | `http://127.0.0.1` | Public base URL the browser-facing `stream_url` is built from (e.g. `https://practice.ankitov.com`); the reverse proxy terminates TLS and routes `/seat/<port>/` to the seat |
+//! | `ANKITOV_SEAT_PASSWD` | random per seat | RESERVED for per-seat stream auth (product TODO). Selkies basic auth is DISABLED in seats — selkies refuses to boot with auth on and no password (EX_CONFIG 78), and the namespace + public proxy are the boundary |
 //! | `ANKITOV_SEAT_PACKS` | _(unset = none)_ | Comma-separated seed `.apkg` file names the seat imports into the student's collection on first start (resolved against `/decks` then `/stream/decks` in the rootfs). Unset = honest empty state. |
 //!
 //! The seat entry point (`/stream/start-seat.sh` inside the rootfs) starts
@@ -176,19 +177,36 @@ impl SeatManager {
             SeatError::Spawn(format!("cannot create collection dir {collection_dir:?}: {e}"))
         })?;
 
-        // Per-seat writable scratch: s6-supervise writes state NEXT TO the
-        // service dir, so /etc/service/anki must be a writable bind (the
-        // Testing Army mounted per-student svc-anki dirs for the same reason).
-        let svc_anki_dir = self.runtime_root.join(&safe).join("svc-anki");
-        std::fs::create_dir_all(&svc_anki_dir).map_err(|e| {
-            SeatError::Spawn(format!("cannot create seat scratch {svc_anki_dir:?}: {e}"))
-        })?;
-        let svc_anki_template = self.rootfs.join("etc/service/anki/run");
-        if svc_anki_template.exists() {
-            std::fs::copy(&svc_anki_template, svc_anki_dir.join("run")).map_err(|e| {
-                SeatError::Spawn(format!("cannot stage svc-anki run script: {e}"))
+        // Per-seat writable copy of the WHOLE /etc/service tree, bound
+        // wholesale at /etc/service (live-proven 2026-11-23 on Hetzner).
+        // s6-supervise writes supervise/ + event/ state INSIDE each service
+        // dir, so neither a read-only bind nor a tmpfs + template-copy split
+        // survives boot; a full writable copy is the shape that boots. Files
+        // land owned by the server user (std::fs::copy does not preserve
+        // ownership), which root-in-namespace can always write — no chown
+        // pass needed. dbus is DROPPED: bwrap (0.11) cannot map arbitrary
+        // gids, so dbus-daemon's setgid(messagebus) fails EPERM and
+        // crash-loops the seat; audio rides pipewire directly, no bus needed.
+        let svc_dir = self.runtime_root.join(&safe).join("etc-service");
+        if svc_dir.exists() {
+            std::fs::remove_dir_all(&svc_dir).map_err(|e| {
+                SeatError::Spawn(format!("cannot clear seat scratch {svc_dir:?}: {e}"))
             })?;
         }
+        std::fs::create_dir_all(&svc_dir).map_err(|e| {
+            SeatError::Spawn(format!("cannot create seat scratch {svc_dir:?}: {e}"))
+        })?;
+        let svc_template = self.rootfs.join("etc/service");
+        if !svc_template.exists() {
+            return Err(SeatError::NotConfigured(format!(
+                "seat rootfs missing etc/service at {} — build it with stream/seat-rootfs/build-rootfs.sh",
+                self.rootfs.display()
+            )));
+        }
+        Self::copy_dir_all(&svc_template, &svc_dir).map_err(|e| {
+            SeatError::Spawn(format!("cannot stage seat service tree: {e}"))
+        })?;
+        let _ = std::fs::remove_dir_all(svc_dir.join("dbus"));
 
         if !self.rootfs.join("stream").join("start-seat.sh").exists() {
             return Err(SeatError::NotConfigured(format!(
@@ -201,7 +219,7 @@ impl SeatManager {
         let gpu = Self::gpu_available();
         let password = self.seat_password();
         let mut cmd =
-            self.build_bwrap_command(&safe, &collection_dir, &svc_anki_dir, port, gpu, &password);
+            self.build_bwrap_command(&safe, &collection_dir, &svc_dir, port, gpu, &password);
 
         let child = cmd.spawn().map_err(|e| SeatError::Spawn(format!("bwrap: {e}")))?;
         let pid = child.id();
@@ -349,7 +367,7 @@ impl SeatManager {
         &self,
         safe_id: &str,
         collection_dir: &std::path::Path,
-        svc_anki_dir: &std::path::Path,
+        svc_dir: &std::path::Path,
         port: u16,
         gpu: bool,
         password: &str,
@@ -363,12 +381,6 @@ impl SeatManager {
             .arg("--tmpfs").arg("/tmp")
             // Chromium/QtWebEngine + PipeWire abort without a real /dev/shm
             .arg("--tmpfs").arg("/dev/shm")
-            // s6-supervise writes supervise/ state INSIDE each service dir and
-            // start-seat.sh copies the RO template services in — without this
-            // tmpfs the whole tree dies at s6-svscan ("unable to mkdir
-            // .s6-svscan: Read-only file system", bwrap exit 111). The
-            // svc-anki bind below lands INSIDE this tmpfs (order matters).
-            .arg("--tmpfs").arg("/etc/service")
             // The session user's home must be writable (selkies menu dirs,
             // Anki profile scratch); the collection is bound INTO it below.
             .arg("--tmpfs").arg("/home/ubuntu")
@@ -389,21 +401,29 @@ impl SeatManager {
             .arg("--unshare-ipc")
             .arg("--unshare-uts")
             .arg("--die-with-parent");
-        cmd.arg("--bind").arg(svc_anki_dir).arg("/etc/service/anki")
-            // The wrapper copies the RO template services into the writable
-            // tmpfs (s6-supervise needs writable service dirs).
-            .arg("--ro-bind")
-            .arg(self.rootfs.join("etc/service"))
-            .arg("/etc/service-template")
+        // The staged writable service tree is bound WHOLESALE at /etc/service
+        // (live-proven shape — see start_seat staging comment).
+        cmd.arg("--bind")
+            .arg(svc_dir)
+            .arg("/etc/service")
             // Seat entry point (delegates to the image s6 init).
             .arg("/stream/start-seat.sh")
             .env("ANKITOV_SEAT_PORT", port.to_string())
             .env("ANKITOV_SEAT_STUDENT", safe_id)
             .env("ANKITOV_BACKEND_URL", &self.backend_url)
-            // Selkies basic auth (army parity): the password resolves from
-            // PASSWD; the user from USER (=ubuntu, set by start-seat.sh).
-            // Without it selkies exits EX_CONFIG (78) and the finish script
-            // tears the whole tree down.
+            // Selkies config refusals (EX_CONFIG 78) seen live 2026-11-23:
+            // basic auth ON with no password env refuses to start (army
+            // docker set PASSWD per container; seats inherit backend env),
+            // and HTTPS ON makes the seat serve TLS where the reverse proxy
+            // speaks plain HTTP (502 / curl 000). Both OFF: the namespace +
+            // public proxy are the boundary; per-seat tokens are the TODO.
+            .env("SELKIES_ENABLE_BASIC_AUTH", "false")
+            .env("SELKIES_ENABLE_HTTPS", "false")
+            // Websockets transport never dials TURN; keep the coturn service
+            // out of the seat's way (live launcher parity).
+            .env("SELKIES_ENABLE_INTERNAL_TURN", "false")
+            // Reserved for per-seat stream auth (product TODO): selkies
+            // ignores PASSWD while basic auth is disabled.
             .env("PASSWD", password)
             // The seat session runs as root inside bwrap (the OS sandbox is
             // the boundary), and QtWebEngine refuses its setuid sandbox as
@@ -416,6 +436,34 @@ impl SeatManager {
         // NOTE: QT_QPA_PLATFORM is NOT forced — the seat entrypoint decides
         // Wayland vs X11 (Xvfb) from the GPU/compositor probe (army parity).
         cmd
+    }
+
+    /// Recursive copy used to stage the per-seat /etc/service tree. Unlike
+    /// `cp -a`, files created this way are OWNED BY THE SERVER USER — which
+    /// is exactly what the seat needs: root-in-the-bwrap-namespace maps to
+    /// the server user, and s6-supervise can write its state. Preserving
+    /// foreign ownership (the army image ships runner-owned files) would
+    /// recreate the "unable to mkdir .s6-svscan: Permission denied" DAC
+    /// failure inside the unmapped user namespace.
+    fn copy_dir_all(src: &std::path::Path, dst: &std::path::Path) -> std::io::Result<()> {
+        std::fs::create_dir_all(dst)?;
+        for entry in std::fs::read_dir(src)? {
+            let entry = entry?;
+            let ty = entry.file_type()?;
+            let to = dst.join(entry.file_name());
+            if ty.is_dir() {
+                Self::copy_dir_all(&entry.path(), &to)?;
+            } else if ty.is_symlink() {
+                #[cfg(unix)]
+                {
+                    let target = std::fs::read_link(entry.path())?;
+                    std::os::unix::fs::symlink(&target, &to)?;
+                }
+            } else {
+                std::fs::copy(entry.path(), &to)?;
+            }
+        }
+        Ok(())
     }
 
     fn reap_locked(seats: &mut HashMap<String, SeatRecord>, idle_timeout: Duration) {
