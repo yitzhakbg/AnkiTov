@@ -109,6 +109,9 @@ jobs:
             --backend target/x86_64-unknown-linux-musl/release/backend \
             --out dist
 
+      - name: Verify the .deb artifact (build-procedure gate)
+        run: bash packaging/verify-artifact.sh dist/ankitov-*-linux-*.deb
+
       - uses: actions/upload-artifact@v4
         with:
           name: linux-x86_64
@@ -162,6 +165,9 @@ jobs:
             --version "${{ steps.ver.outputs.version }}" \
             --backend target/aarch64-unknown-linux-musl/release/backend \
             --out dist
+
+      - name: Verify the .deb artifact (aarch64) (build-procedure gate)
+        run: bash packaging/verify-artifact.sh dist/ankitov-*-linux-*.deb
 
       - uses: actions/upload-artifact@v4
         with:

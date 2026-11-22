@@ -31,6 +31,7 @@
 //! | `ANKITOV_SEAT_MAX` | `64` | Concurrent seat cap |
 //! | `ANKITOV_SEAT_IDLE_SECS` | `300` | Idle seconds before a seat is reaped |
 //! | `ANKITOV_BACKEND_URL` | `http://127.0.0.1:5150` | Told to the seat for telemetry |
+//! | `ANKITOV_SEAT_PASSWD` | random per seat | Selkies basic-auth password (`ubuntu` / this) — set it to the class join code for demos |
 //!
 //! The seat entry point (`/stream/start-seat.sh` inside the rootfs) starts
 //! labwc + Selkies bound to `ANKITOV_SEAT_PORT` and launches Anki in kiosk
@@ -56,6 +57,11 @@ pub struct SeatInfo {
     pub started_at: Instant,
     /// Whether the seat got GPU devices bound.
     pub gpu: bool,
+    /// Selkies basic-auth password (basic-auth user is always `ubuntu`).
+    /// Operator-fixed via ANKITOV_SEAT_PASSWD, else random per seat —
+    /// the teacher hands URL + credentials to the student (the automated
+    /// student-facing flow is a follow-up).
+    pub password: String,
 }
 
 impl SeatInfo {
@@ -192,7 +198,9 @@ impl SeatManager {
 
         let port = self.free_port(&self.lock());
         let gpu = Self::gpu_available();
-        let mut cmd = self.build_bwrap_command(&safe, &collection_dir, &svc_anki_dir, port, gpu);
+        let password = self.seat_password();
+        let mut cmd =
+            self.build_bwrap_command(&safe, &collection_dir, &svc_anki_dir, port, gpu, &password);
 
         let child = cmd.spawn().map_err(|e| SeatError::Spawn(format!("bwrap: {e}")))?;
         let pid = child.id();
@@ -202,6 +210,7 @@ impl SeatManager {
             pid,
             started_at: Instant::now(),
             gpu,
+            password,
         };
 
         tracing::info!(
@@ -294,14 +303,44 @@ impl SeatManager {
         let mut used: Vec<u16> = seats.values().map(|r| r.info.port).collect();
         used.sort_unstable();
         let mut candidate = self.base_port;
-        for u in used {
-            if candidate == u {
+        loop {
+            // skip ports our own seats already hold
+            if used.contains(&candidate) {
                 candidate += 1;
-            } else {
-                break;
+                continue;
+            }
+            // skip FOREIGN listeners too (2026-11-22: headscale holds
+            // 127.0.0.1:8080 on the seat host — a seat spawning there would
+            // fight it). A probe bind is the only reliable check.
+            match std::net::TcpListener::bind(("0.0.0.0", candidate)) {
+                Ok(listener) => {
+                    drop(listener);
+                    return candidate;
+                }
+                Err(_) => {
+                    tracing::warn!("seat port {} already in use by another process — skipping", candidate);
+                    candidate += 1;
+                }
             }
         }
-        candidate
+    }
+
+    /// Seat basic-auth password: operator-fixed via ANKITOV_SEAT_PASSWD
+    /// (one shared classroom door code), else random per seat. Exposed to
+    /// teacher/admin via the management API so the demo/class flow can hand
+    /// URL + credentials to the student.
+    fn seat_password(&self) -> String {
+        if let Ok(p) = std::env::var("ANKITOV_SEAT_PASSWD") {
+            if !p.is_empty() {
+                return p;
+            }
+        }
+        use rand::Rng;
+        rand::thread_rng()
+            .sample_iter(&rand::distributions::Alphanumeric)
+            .take(16)
+            .map(char::from)
+            .collect()
     }
 
     /// The exact sandbox shape approved 2026-11-19/20 (see module docs).
@@ -312,6 +351,7 @@ impl SeatManager {
         svc_anki_dir: &std::path::Path,
         port: u16,
         gpu: bool,
+        password: &str,
     ) -> Command {
         let mut cmd = Command::new(&self.bwrap);
         cmd.arg("--ro-bind").arg(&self.rootfs).arg("/")
@@ -322,6 +362,15 @@ impl SeatManager {
             .arg("--tmpfs").arg("/tmp")
             // Chromium/QtWebEngine + PipeWire abort without a real /dev/shm
             .arg("--tmpfs").arg("/dev/shm")
+            // s6-supervise writes supervise/ state INSIDE each service dir and
+            // start-seat.sh copies the RO template services in — without this
+            // tmpfs the whole tree dies at s6-svscan ("unable to mkdir
+            // .s6-svscan: Read-only file system", bwrap exit 111). The
+            // svc-anki bind below lands INSIDE this tmpfs (order matters).
+            .arg("--tmpfs").arg("/etc/service")
+            // The session user's home must be writable (selkies menu dirs,
+            // Anki profile scratch); the collection is bound INTO it below.
+            .arg("--tmpfs").arg("/home/ubuntu")
             .arg("--proc").arg("/proc")
             .arg("--dev").arg("/dev")
             .arg("--ro-bind-try").arg("/sys").arg("/sys")
@@ -350,6 +399,17 @@ impl SeatManager {
             .env("ANKITOV_SEAT_PORT", port.to_string())
             .env("ANKITOV_SEAT_STUDENT", safe_id)
             .env("ANKITOV_BACKEND_URL", &self.backend_url)
+            // Selkies basic auth (army parity): the password resolves from
+            // PASSWD; the user from USER (=ubuntu, set by start-seat.sh).
+            // Without it selkies exits EX_CONFIG (78) and the finish script
+            // tears the whole tree down.
+            .env("PASSWD", password)
+            // The seat session runs as root inside bwrap (the OS sandbox is
+            // the boundary), and QtWebEngine refuses its setuid sandbox as
+            // root — Anki crash-loops on the zygote host check without this.
+            // Set here, not in the rootfs entrypoint, so it ships with the
+            // backend and never drifts from the deployed rootfs copy.
+            .env("QTWEBENGINE_DISABLE_SANDBOX", "1")
             // QtWebEngine needs a writable cache inside the sandbox.
             .env("XDG_CACHE_HOME", format!("/tmp/ankitov-seat-{safe_id}/cache"));
         // NOTE: QT_QPA_PLATFORM is NOT forced — the seat entrypoint decides
@@ -442,6 +502,7 @@ mod tests {
                 pid: 1,
                 started_at: Instant::now(),
                 gpu: false,
+                password: "test-pass".into(),
             },
             last_activity: Instant::now(),
         };

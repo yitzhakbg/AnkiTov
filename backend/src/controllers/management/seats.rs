@@ -20,6 +20,9 @@ fn seat_json(info: &crate::services::seat_manager::SeatInfo) -> serde_json::Valu
         "gpu": info.gpu,
         "stream_url": info.stream_url(),
         "uptime_secs": info.started_at.elapsed().as_secs(),
+        // Selkies basic auth — the browser prompts for these (user is fixed).
+        "auth_user": "ubuntu",
+        "auth_password": info.password,
     })
 }
 

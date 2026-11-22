@@ -1,13 +1,13 @@
 # SYNC-MANIFEST
 
-- monorepo ref: xmlytwlwosps/8466f7199ae6
-- exported at: 2026-11-22T17:24:51Z
+- monorepo ref: otqlyxpwwoqn/0b906f42bcd6
+- exported at: 2026-11-22T18:04:37Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
 ## sha256 checksums
 ```
-41807c1b96cf1629fd1910e63e20cb270913ad154ffdebcdb1e3e9a08aab0911  .github/workflows/release.yml
+df742df2b6ffcb1114c4716c1a893770714f69e2fce52f92704dfa629ed8fb75  .github/workflows/release.yml
 3255a61586bf5af874b423fb9ddf62d3da06bbbeb11365a5e1b4e0ce47c52406  .gitignore
 ada47362899add07df543de3051b80e6d9532fca7131b7fe5701fb754aa65ee2  Caddyfile
 79b0e4c316da8c70b5873361731a749d1ef716c146e1fe90d2b4044602efbe39  Cargo.lock
@@ -83,7 +83,7 @@ d5c766b929460c0cdb64b6f49ff8d69a687fb6b1190bbd8a099224f7bad458ad  backend/src/co
 6d385b243a9497538a6d675e357e1d36495cc10b44a4d9817c71bfd55973d1ff  backend/src/controllers/management/probe.rs
 34388ba6e961f2e784e76d67cea507f8587f467a1c1fa74a74241862ed443543  backend/src/controllers/management/producers.rs
 b5b64ee36b5ac5506a108f874c15993883d90d1272c82979f690424be9dc9adb  backend/src/controllers/management/profile_assignments.rs
-c32a6ab1d9538938541502c61c64b43a89d197ef95d7822c2d84c62167537ac5  backend/src/controllers/management/seats.rs
+58e7433ce87680c9a1dc256a145c140a85917ff6218688b2793ccc457d55d59c  backend/src/controllers/management/seats.rs
 b9852d9ad308ffaba0530af4ebec24329f111cfed7724be57f2569bcb0ab5c10  backend/src/controllers/management/settings.rs
 7e597e8e764cc3ac3931b4826c3b5efe45ef8f08e027abd78f2f33fe1a579b2d  backend/src/controllers/management/stats.rs
 799e674a7e6ee2528b540f8d1754161816d4d03fbc149d8de871185a53d5187d  backend/src/controllers/management/students.rs
@@ -168,7 +168,7 @@ d06ad840fcdf1b2840f9a7e35327a194e44a84e4b619d0626f15bc9a7e8c3525  backend/src/se
 b65ac2fd74687b56d1338b165b54d25a20e1e5aee4d813a6895f99d8cd316d9d  backend/src/services/password_policy.rs
 5362b03eaecefe26d45a55731cd44933703334e1c59713087c99eb48f1ba71c6  backend/src/services/review_ingest.rs
 781e8d5640f2df78f6c3c386ee94e41402a4a6de35553913f73ffdcd3b758c37  backend/src/services/rig_nlu.rs
-ee0bb0bfdd7dee4a38472b1cdcf41f8d3ed7e837fdd5f9f13cb6edc9cdcb17bb  backend/src/services/seat_manager.rs
+c96e5ac551ce09ecdbfe20d829959a8462687a2a116786196d9fa29e120e88bd  backend/src/services/seat_manager.rs
 bad7db1dd88bc2afed8cf0769131ee6db51b795489c22b8b30f82eb674711368  backend/src/services/settings.rs
 d7f79457ea2c519fe5b3137483fc0f9dde21345fab74757cc8d63aaccf3d39e8  backend/src/services/student_import.rs
 3cbc14a5a6c362f868bfdabac12ae55897dee514cb9a05176e09a46bf7878d29  backend/src/services/sync_user.rs
@@ -329,6 +329,7 @@ b8751ba2d302229ecf93a3ab8550fe0d0071e57a3a3821cea241e5e99c0dcb82  packaging/laun
 8bbb687d6e1c8ab55366324ac2ebc1bf10883241cd5bb8f05f1d5bdfabc62794  packaging/macos/Info.plist
 812dd8059756fbc301e337bb6d86669715c2d24075db44112f0ffa95e3b79fe8  packaging/smoke.ps1
 14ed5b59b57fa2cdccdf77fb98a4a90434659ed6f8ca473835008e1b935eb1f4  packaging/smoke.sh
+96a870f6b0c92226a8772ebab9b05f42520136be90312b97455878e6d6eddee9  packaging/verify-artifact.sh
 728bd68c0c469729a8b3b02ddb415d3c9e608e9f89e1fb96b4aca5b7b03d8c1f  rust-toolchain.toml
 cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30  session-driver/LICENSE
 41836b82a8e2bec4722f0ea46043ba80b43eb8f85f5fc8d5af69bb6b3acd43c3  session-driver/__init__.py
