@@ -78,6 +78,13 @@ def _cleanup_stale_on_open() -> None:
 
 gui_hooks.profile_did_open.append(_cleanup_stale_on_open)
 
+# Seat kiosk (owner directive 2026-11-23): land the student directly in
+# practice, lock the UI to the reviewer, level-gated. Inert outside seats
+# (no ANKITOV_SEAT_STUDENT env) and while a capsule session owns the UI.
+from .kiosk import setup_kiosk
+
+setup_kiosk(session_manager)
+
 print(
     f"[ankitov-session-driver] Initialized — listening on 127.0.0.1:{port}"
 )

@@ -82,20 +82,33 @@ fi
 # so the on-disk bytes always match what Anki will load. Add-ons other than the
 # pinned id are left alone (a student's own add-ons stay as they set them).
 ANKI_DATA="${ANKI_DATA:-/home/ubuntu/.local/share/Anki2}"
-PINNED="1532579816"
 mkdir -p "$ANKI_DATA/addons21"
-if [ -d "/stream/addons21/$PINNED" ]; then
-  dest="$ANKI_DATA/addons21/$PINNED"
+# Force-sync (not cp -an): wipe each pinned add-on's files, copy the pinned
+# copy, so the on-disk bytes always match what Anki will load. Add-ons other
+# than the pinned ids are left alone (a student's own add-ons stay as set).
+#   1532579816              Hide Menu Bar — menu bar gone from the first frame
+#   876946123               Pass/Fail 2   — answer buttons become Pass/Fail
+#   ankitov_session_driver  Session Driver — capsule commands + seat kiosk
+#                             (auto-practice start, level-gated lockdown;
+#                             owner directive 2026-11-23)
+force_sync_addon() {
+  src="/stream/addons21/$1"
+  dest="$ANKI_DATA/addons21/$1"
+  [ -d "$src" ] || { echo "[anki] pinned add-on missing: $src" >&2; return 0; }
   mkdir -p "$dest"
   # remove only the vendor-managed files we overwrite; leave an unexpected
   # student-authored file in place rather than deleting data we don't own.
-  ( cd "/stream/addons21/$PINNED" && find . -type f -printf '%P\n' ) \
+  ( cd "$src" && find . -type f -printf '%P\n' ) \
     | while IFS= read -r f; do rm -f "$dest/$f"; done
-  cp -R "/stream/addons21/$PINNED"/. "$dest"/
-  # was_hidden=true so the menu bar is gone from the very first frame.
-  printf '{\n    "shortcut": "Ctrl+Alt+T",\n    "was_hidden": true\n}\n' > "$dest/config.json"
-  echo "[anki] add-on $PINNED force-synced (pinned)" >&2
-fi
+  cp -R "$src"/. "$dest"/
+  echo "[anki] add-on $1 force-synced (pinned)" >&2
+}
+force_sync_addon "1532579816"
+force_sync_addon "876946123"
+force_sync_addon "ankitov_session_driver"
+# was_hidden=true so the menu bar is gone from the very first frame.
+printf '{\n    "shortcut": "Ctrl+Alt+T",\n    "was_hidden": true\n}\n' \
+  > "$ANKI_DATA/addons21/1532579816/config.json" 2>/dev/null || true
 
 # ── Native Appearance prefs: strip the top bar + button labels ────────────
 # Add-ons hide the menu bar, but the *deck-list top bar* (Decks/Add/Browse/Stats/

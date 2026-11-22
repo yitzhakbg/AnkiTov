@@ -422,6 +422,19 @@ impl SeatManager {
             // Websockets transport never dials TURN; keep the coturn service
             // out of the seat's way (live launcher parity).
             .env("SELKIES_ENABLE_INTERNAL_TURN", "false")
+            // Seat kiosk (owner directive 2026-11-23): 0 = practice-only
+            // (deck auto-chosen, reviewer auto-started, escapes bounced),
+            // 1 = guided (deck opened, UI free), 2 = full Anki. The backend
+            // maps student level -> env; default is the locked-down kiosk.
+            .env(
+                "ANKITOV_SEAT_KIOSK_LEVEL",
+                std::env::var("ANKITOV_SEAT_KIOSK_LEVEL").unwrap_or_else(|_| "0".into()),
+            )
+            // The session-driver addon listens on 127.0.0.1 inside the seat —
+            // and seats SHARE the host network namespace (no --unshare-net),
+            // so the default :18765 would collide across seats. Derive a
+            // per-seat port from the stream port (+500: 8100 -> 8600).
+            .env("ANKITOV_CAPSULE_PORT", (port + 500).to_string())
             // Reserved for per-seat stream auth (product TODO): selkies
             // ignores PASSWD while basic auth is disabled.
             .env("PASSWD", password)
@@ -433,6 +446,13 @@ impl SeatManager {
             .env("QTWEBENGINE_DISABLE_SANDBOX", "1")
             // QtWebEngine needs a writable cache inside the sandbox.
             .env("XDG_CACHE_HOME", format!("/tmp/ankitov-seat-{safe_id}/cache"));
+        // Optional deck override; the kiosk falls back to the first
+        // non-empty non-Default deck in the student's collection.
+        if let Ok(deck) = std::env::var("ANKITOV_SEAT_DECK") {
+            if !deck.is_empty() {
+                cmd.env("ANKITOV_SEAT_DECK", deck);
+            }
+        }
         // NOTE: QT_QPA_PLATFORM is NOT forced — the seat entrypoint decides
         // Wayland vs X11 (Xvfb) from the GPU/compositor probe (army parity).
         cmd
