@@ -176,13 +176,24 @@ pub async fn login(
 ) -> Result<Json<AuthResponse>> {
     let db = &ctx.db;
 
-    // Find user by email
-    let user_model = user::Entity::find()
+    // Resolve the identifier: an email address OR a plain login id
+    // (username). Students log in with a name-like id (e.g. "ybg4",
+    // "talmid1") — the synthetic <slug>@class.local address stays an
+    // internal key only (owner directive 2026-11-22).
+    let by_email = user::Entity::find()
         .filter(user::Column::Email.eq(&payload.email))
         .one(db)
         .await
-        .map_err(|e| loco_rs::Error::InternalServerError)?
-        .ok_or_else(|| loco_rs::Error::Unauthorized("invalid email or password".into()))?;
+        .map_err(|e| loco_rs::Error::InternalServerError)?;
+    let user_model = match by_email {
+        Some(u) => u,
+        None => user::Entity::find()
+            .filter(user::Column::Username.eq(&payload.email))
+            .one(db)
+            .await
+            .map_err(|e| loco_rs::Error::InternalServerError)?
+            .ok_or_else(|| loco_rs::Error::Unauthorized("invalid email or password".into()))?,
+    };
 
     // Verify password
     let hash = user_model

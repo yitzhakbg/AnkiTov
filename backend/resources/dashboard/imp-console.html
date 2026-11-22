@@ -3980,7 +3980,7 @@ const Home = {
     if (this._wizardRoster && this._wizardRoster.length) {
       const rows = this._wizardRoster.map(s =>
         `<tr><td style="padding:4px">${this._escapeHtml(s.name)}</td>` +
-        `<td style="padding:4px">${this._escapeHtml(s.email)}</td></tr>`).join('');
+        `<td style="padding:4px;font-weight:var(--font-semibold)">${this._escapeHtml(s.login || s.email)}</td></tr>`).join('');
       host.innerHTML =
         `<div style="margin-top:var(--space-5);text-align:left;background:var(--surface-secondary);border:1px solid var(--border-light);border-radius:8px;padding:var(--space-4)">` +
         `<p style="margin:0 0 var(--space-2);font-weight:var(--font-semibold)">Student logins — write these on the board:</p>` +

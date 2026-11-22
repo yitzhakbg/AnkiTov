@@ -57,6 +57,9 @@ pub struct ProvisionStudentsRequest {
 #[derive(Debug, Serialize, ToSchema)]
 pub struct ProvisionedStudent {
     pub name: String,
+    /// What the student actually types to log in: their name-like id
+    /// (the username), not the synthetic email (owner directive 2026-11-22).
+    pub login: String,
     pub email: String,
     pub user_id: String,
     /// "created" or "exists" (re-provisioning is idempotent per name).
@@ -475,6 +478,7 @@ pub async fn provision_students(
                 }
                 roster.push(ProvisionedStudent {
                     name: trimmed.to_string(),
+                    login: u.username.clone(),
                     email: u.email.clone(),
                     user_id: u.id.to_string(),
                     status: "exists".to_string(),
@@ -530,6 +534,7 @@ pub async fn provision_students(
 
                 roster.push(ProvisionedStudent {
                     name: trimmed.to_string(),
+                    login: trimmed.to_string(),
                     email,
                     user_id: inserted.id.to_string(),
                     status: "created".to_string(),

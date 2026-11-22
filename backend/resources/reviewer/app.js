@@ -9,25 +9,25 @@
   var LOCALES = {
     en: {
       "login.title": "Practice", "login.subtitle": "Brief daily practice, at your own pace. SRS works.",
-      "login.email": "Email", "login.password": "Password", "login.start": "Start practicing",
+      "login.email": "Email or student ID", "login.password": "Password", "login.start": "Start practicing",
       "review.show": "Show answer", "review.again": "Again", "review.hard": "Hard",
       "review.good": "Good", "review.easy": "Easy", "review.logout": "Log out",
       "review.hint": "Spaced repetition brings back only what is about to fade.",
       "empty.title": "Nothing due right now", "empty.default": "No active practice session.",
       "empty.import_title": "Try a starter pack", "empty.import_sub": "Free CC0 packs — imported straight into your practice space.",
-      "err.login": "Login failed — check email and password.", "err.load": "Could not load your session.",
+      "err.login": "Login failed — check your student ID and password.", "err.load": "Could not load your session.",
       "err.import": "Import failed.", "importing": "Importing…",
       "empty.no_match": "No packs match your search."
     },
     he: {
       "login.title": "תרגול", "login.subtitle": "תרגול יומי קצר, בקצב שלכם. SRS works.",
-      "login.email": "אימייל", "login.password": "סיסמה", "login.start": "התחילו לתרגל",
+      "login.email": "אימייל או מזהה תלמיד", "login.password": "סיסמה", "login.start": "התחילו לתרגל",
       "review.show": "הצגת תשובה", "review.again": "שוב", "review.hard": "קשה",
       "review.good": "טוב", "review.easy": "קל", "review.logout": "התנתקות",
       "review.hint": "החזרה מרווחת מחזירה רק את מה שעומד לדהות.",
       "empty.title": "אין כרטיסים לתרגול כרגע", "empty.default": "אין מפגש תרגול פעיל.",
       "empty.import_title": "נסו חבילת התחלה", "empty.import_sub": "חבילות CC0 חינמיות — מיובאות ישירות למרחב התרגול שלכם.",
-      "err.login": "ההתחברות נכשלה — בדקו אימייל וסיסמה.", "err.load": "טעינת המפגש נכשלה.",
+      "err.login": "ההתחברות נכשלה — בדקו מזהה וסיסמה.", "err.load": "טעינת המפגש נכשלה.",
       "err.import": "הייבוא נכשל.", "importing": "מייבא…",
       "empty.no_match": "אין חבילות שתואמות לחיפוש."
     }

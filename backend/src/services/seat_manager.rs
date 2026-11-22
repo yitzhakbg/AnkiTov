@@ -61,7 +61,11 @@ pub struct SeatInfo {
 impl SeatInfo {
     /// The URL the student's browser opens (Selkies WebRTC/WebSocket page).
     pub fn stream_url(&self) -> String {
-        format!("http://127.0.0.1:{}/stream", self.port)
+        // Public surface: students reach seats through the reverse proxy
+        // (Caddy) or the server's public address — never a loopback URL.
+        let base = std::env::var("ANKITOV_PUBLIC_URL")
+            .unwrap_or_else(|_| "http://127.0.0.1".to_string());
+        format!("{}/seat/{}", base.trim_end_matches('/'), self.port)
     }
 }
 
@@ -95,6 +99,8 @@ struct SeatRecord {
 
 pub struct SeatManager {
     rootfs: PathBuf,
+    /// Writable per-seat scratch root (s6 service dirs; army pattern)
+    runtime_root: PathBuf,
     bwrap: String,
     base_port: u16,
     max_seats: usize,
@@ -121,6 +127,8 @@ impl SeatManager {
                 std::env::var("ANKITOV_SEAT_ROOTFS")
                     .unwrap_or_else(|_| "/srv/ankitov-seat/rootfs".to_string()),
             ),
+            runtime_root: std::env::var("ANKITOV_SEAT_RUNTIME_DIR").map(PathBuf::from)
+                .unwrap_or_else(|_| PathBuf::from("/srv/ankitov-seat/runtime")),
             bwrap: std::env::var("ANKITOV_SEAT_BWRAP").unwrap_or_else(|_| "bwrap".to_string()),
             base_port: env_u16("ANKITOV_SEAT_BASE_PORT", 8100),
             max_seats: env_u16("ANKITOV_SEAT_MAX", 64) as usize,
@@ -161,6 +169,20 @@ impl SeatManager {
             SeatError::Spawn(format!("cannot create collection dir {collection_dir:?}: {e}"))
         })?;
 
+        // Per-seat writable scratch: s6-supervise writes state NEXT TO the
+        // service dir, so /etc/service/anki must be a writable bind (the
+        // Testing Army mounted per-student svc-anki dirs for the same reason).
+        let svc_anki_dir = self.runtime_root.join(&safe).join("svc-anki");
+        std::fs::create_dir_all(&svc_anki_dir).map_err(|e| {
+            SeatError::Spawn(format!("cannot create seat scratch {svc_anki_dir:?}: {e}"))
+        })?;
+        let svc_anki_template = self.rootfs.join("etc/service/anki/run");
+        if svc_anki_template.exists() {
+            std::fs::copy(&svc_anki_template, svc_anki_dir.join("run")).map_err(|e| {
+                SeatError::Spawn(format!("cannot stage svc-anki run script: {e}"))
+            })?;
+        }
+
         if !self.rootfs.join("stream").join("start-seat.sh").exists() {
             return Err(SeatError::NotConfigured(format!(
                 "seat rootfs missing at {} — build it with stream/seat-rootfs/build-rootfs.sh",
@@ -170,7 +192,7 @@ impl SeatManager {
 
         let port = self.free_port(&self.lock());
         let gpu = Self::gpu_available();
-        let mut cmd = self.build_bwrap_command(&safe, &collection_dir, port, gpu);
+        let mut cmd = self.build_bwrap_command(&safe, &collection_dir, &svc_anki_dir, port, gpu);
 
         let child = cmd.spawn().map_err(|e| SeatError::Spawn(format!("bwrap: {e}")))?;
         let pid = child.id();
@@ -287,6 +309,7 @@ impl SeatManager {
         &self,
         safe_id: &str,
         collection_dir: &std::path::Path,
+        svc_anki_dir: &std::path::Path,
         port: u16,
         gpu: bool,
     ) -> Command {
@@ -297,6 +320,8 @@ impl SeatManager {
             // not exist.
             .arg("--tmpfs").arg("/data")
             .arg("--tmpfs").arg("/tmp")
+            // Chromium/QtWebEngine + PipeWire abort without a real /dev/shm
+            .arg("--tmpfs").arg("/dev/shm")
             .arg("--proc").arg("/proc")
             .arg("--dev").arg("/dev")
             .arg("--ro-bind-try").arg("/sys").arg("/sys")
@@ -313,15 +338,22 @@ impl SeatManager {
             .arg("--unshare-pid")
             .arg("--unshare-ipc")
             .arg("--unshare-uts")
-            .arg("--die-with-parent")
-            // Seat entry point (labwc + Selkies + kiosk Anki).
+            .arg("--die-with-parent");
+        cmd.arg("--bind").arg(svc_anki_dir).arg("/etc/service/anki")
+            // The wrapper copies the RO template services into the writable
+            // tmpfs (s6-supervise needs writable service dirs).
+            .arg("--ro-bind")
+            .arg(self.rootfs.join("etc/service"))
+            .arg("/etc/service-template")
+            // Seat entry point (delegates to the image s6 init).
             .arg("/stream/start-seat.sh")
             .env("ANKITOV_SEAT_PORT", port.to_string())
             .env("ANKITOV_SEAT_STUDENT", safe_id)
             .env("ANKITOV_BACKEND_URL", &self.backend_url)
             // QtWebEngine needs a writable cache inside the sandbox.
-            .env("XDG_CACHE_HOME", format!("/tmp/ankitov-seat-{safe_id}/cache"))
-            .env("QT_QPA_PLATFORM", "wayland");
+            .env("XDG_CACHE_HOME", format!("/tmp/ankitov-seat-{safe_id}/cache"));
+        // NOTE: QT_QPA_PLATFORM is NOT forced — the seat entrypoint decides
+        // Wayland vs X11 (Xvfb) from the GPU/compositor probe (army parity).
         cmd
     }
 
@@ -394,6 +426,7 @@ mod tests {
     fn free_port_skips_used() {
         let mgr = SeatManager {
             rootfs: PathBuf::from("/srv/ankitov-seat/rootfs"),
+            runtime_root: PathBuf::from("/srv/ankitov-seat/runtime"),
             bwrap: "bwrap".into(),
             base_port: 8100,
             max_seats: 64,
