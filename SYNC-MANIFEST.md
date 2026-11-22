@@ -1,7 +1,7 @@
 # SYNC-MANIFEST
 
-- monorepo ref: vzlmnrwsoowv/af1324082856
-- exported at: 2026-11-22T17:10:29Z
+- monorepo ref: xmlytwlwosps/8466f7199ae6
+- exported at: 2026-11-22T17:24:51Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
@@ -37,7 +37,7 @@ fbd9edb195748d51db013f4670c2a8802a937c3998ae0387f6c1babdd0173e39  backend/i18n/h
 26a60036d4a993a570c6948e56dfd62a74d5d02565589e75db3452f3f6ce79de  backend/resources/dashboard/anki-logo.svg
 e2592cab76aedca3ef166443a8098a6f1c514b9c570b603c9cb5543395e5edaf  backend/resources/dashboard/first-login.html
 a6690326d07937814fd77dd48139e6394317da44d093fac5e46cf0ae28b7b4c3  backend/resources/dashboard/i18n.js
-0b3071ece232b1427558d50845f0d22e9177b868108c1bac55a0067c38cf5911  backend/resources/dashboard/imp-console.html
+0c2fefdb096d7cb8e8b11adbaae09ad6d3b43e7a9a94786b20bce46c44cf028c  backend/resources/dashboard/imp-console.html
 909175ad0d8abf6ae621da66b984146e0ee2a34b7cdd9032b96d5cbd1d08894e  backend/resources/dashboard/index.html
 2158dd57f9f6afa4a582aff42c0fceac6f102bbfd3223287724bdaef54dd1751  backend/resources/dashboard/locales/ar.json
 e854c24e2b079599cbf6e3c94e04cc05cae98142c8ef5e7f493beec6c41052eb  backend/resources/dashboard/locales/de.json

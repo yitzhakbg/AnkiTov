@@ -3357,7 +3357,7 @@ const Session = (() => {
     _bindActivity();
     _startIdleTimer();
     _notify();
-    return _user;
+    return Object.assign({}, _user, { token: data.token });
   }
 
   function logout() {
@@ -3464,14 +3464,13 @@ const SessionGate = (() => {
     try {
       const user = await Session.login(email, password);
       if (user.role === 'student') {
-        // Students have no business in the teacher console — bounce them to
-        // the reviewer (field report: a student hitting the server root got
-        // the console login and could sign in).
-        Session.logout();
-        errEl.textContent = 'This is the teacher console. Students practice at /reviewer';
-        errEl.style.display = 'block';
-        submit.disabled = false;
-        submit.textContent = t('auth.submit');
+        // Students have no business in the teacher console (field report: a
+        // student hitting the server root got the console login). They sign
+        // in ONCE here and continue straight into practice: stash the token
+        // under the reviewer's storage key and hand off (owner report
+        // 2026-11-22 — the bare public URL is the natural student entry).
+        try { localStorage.setItem('ankitov_reviewer_token', user.token); } catch (e) {}
+        window.location.assign('/reviewer');
         return;
       }
       _lastUser = user;
