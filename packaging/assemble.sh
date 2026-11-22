@@ -126,6 +126,12 @@ Section: education
 Priority: optional
 Architecture: $DEB_ARCH
 Maintainer: AnkiTov <yitzhakbargeva@gmail.com>
+# The backend is a static musl binary (no library deps); ca-certificates is
+# the only hard runtime need (outbound HTTPS). bubblewrap is recommended
+# because SeatManager spawns Selkies+Anki student seats through it (the
+# seat-rootfs bundle is a separate release asset).
+Depends: ca-certificates
+Recommends: bubblewrap
 Description: AnkiTov — classroom spaced-repetition practice server
  Local AnkiTov backend (dashboard + API + SQLite). Start it with
  /opt/ankitov/ankitov-launch start or from the desktop entry.
