@@ -115,6 +115,11 @@ assemble_linux() {
   esac
 
   # --- .deb ---
+  # Control deps: the backend is a static musl binary (no library deps);
+  # ca-certificates is the only hard runtime need (outbound HTTPS). bubblewrap
+  # is recommended because SeatManager spawns Selkies+Anki student seats
+  # through it (the seat-rootfs bundle is a separate release asset).
+  # NOTE: no # comments INSIDE the control stanza — dpkg-deb rejects them.
   ROOT="$OUT/deb-$ARCH"
   rm -rf "$ROOT"
   mkdir -p "$ROOT/DEBIAN" "$ROOT/opt/ankitov" \
@@ -126,10 +131,6 @@ Section: education
 Priority: optional
 Architecture: $DEB_ARCH
 Maintainer: AnkiTov <yitzhakbargeva@gmail.com>
-# The backend is a static musl binary (no library deps); ca-certificates is
-# the only hard runtime need (outbound HTTPS). bubblewrap is recommended
-# because SeatManager spawns Selkies+Anki student seats through it (the
-# seat-rootfs bundle is a separate release asset).
 Depends: ca-certificates
 Recommends: bubblewrap
 Description: AnkiTov — classroom spaced-repetition practice server
