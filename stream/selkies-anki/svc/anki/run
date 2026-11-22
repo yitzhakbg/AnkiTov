@@ -63,27 +63,112 @@ else
   for _ in $(seq 1 240); do [ -S "/tmp/.X11-unix/X${XNUM}" ] && break; sleep 0.5; done
 fi
 
+# ── Required add-ons (PINNED, force-synced) ───────────────────────────────
+# The streamed class profile must ALWAYS carry Hide Menu Bar, byte-for-byte the
+# vendor copy, *before* Anki launches — never a no-clobber "cp -an" merge, which
+# leaves a stale copy behind and makes Anki pop "restart required for upgrades to
+# take effect" because the on-disk file differs from the one it loaded.
+#
+#   1532579816  Hide Menu Bar  — hides the menu bar (setFixedHeight(0)); its
+#                                 config.json pins was_hidden=true so it hides on
+#                                 startup, i.e. no manual toggle at first launch.
+#
+# Pass/Fail 2 (876946123) is NOT force-seeded here on purpose: it only *remaps*
+# the existing native buttons' captions, and the class UI hides the buttons'
+# labels natively (below) — so the addon is redundant for the streamed profile
+# and, if a student's profile already carries it, it is left untouched.
+#
+# Force-sync (not cp -an): wipe the pinned add-on's files, copy the vendor copy,
+# so the on-disk bytes always match what Anki will load. Add-ons other than the
+# pinned id are left alone (a student's own add-ons stay as they set them).
+ANKI_DATA="${ANKI_DATA:-/home/ubuntu/.local/share/Anki2}"
+PINNED="1532579816"
+mkdir -p "$ANKI_DATA/addons21"
+if [ -d "/stream/addons21/$PINNED" ]; then
+  dest="$ANKI_DATA/addons21/$PINNED"
+  mkdir -p "$dest"
+  # remove only the vendor-managed files we overwrite; leave an unexpected
+  # student-authored file in place rather than deleting data we don't own.
+  ( cd "/stream/addons21/$PINNED" && find . -type f -printf '%P\n' ) \
+    | while IFS= read -r f; do rm -f "$dest/$f"; done
+  cp -R "/stream/addons21/$PINNED"/. "$dest"/
+  # was_hidden=true so the menu bar is gone from the very first frame.
+  printf '{\n    "shortcut": "Ctrl+Alt+T",\n    "was_hidden": true\n}\n' > "$dest/config.json"
+  echo "[anki] add-on $PINNED force-synced (pinned)" >&2
+fi
+
+# ── Native Appearance prefs: strip the top bar + button labels ────────────
+# Add-ons hide the menu bar, but the *deck-list top bar* (Decks/Add/Browse/Stats/
+# Sync) and the *button labels* are native Anki appearance preferences. We patch
+# them on the class profile's prefs21.db using Anki's OWN preference keys (see
+# /stream/patch_prefs.py) so the student sees only the review surface — natively,
+# with no heavy add-on, and with no "restart" prompt because it is a prefs edit,
+# not an on-disk add-on change.
+/opt/anki/python/bin/python3 -u /stream/patch_prefs.py "$ANKI_DATA" >&2 || \
+  echo "[anki] patch_prefs skipped (non-fatal)" >&2
+
+# ── Deck provisioning: import class/seed packs missing from the collection ──
+# The seat binds the student's collection dir as Anki's BASE dir; Anki's real
+# collection lives at <base>/<profile>/collection.anki2 (profile "User 1" —
+# Anki's default first profile, auto-created when profiles.json is absent).
+# The flat collection.anki2 that collection_store writes at the base root is
+# the HTML-reviewer stopgap layout and is NOT read by real Anki. Packs come
+# from /decks (army bind / backend per-class bind) and /stream/decks (baked
+# into the seat rootfs as the starter library). ANKITOV_SEAT_PACKS (comma-
+# separated file names) selects the set; UNSET MEANS IMPORT NOTHING — a seat
+# with no assigned packs shows the honest empty state, never a surprise
+# library. Stamps make each package import exactly once per collection.
+PROFDIR="$ANKI_DATA/User 1"
+mkdir -p "$PROFDIR"
+PACK_LIST="${ANKITOV_SEAT_PACKS:-}"
+PACK_LIST="${PACK_LIST//,/ }"
+for pkg in $PACK_LIST; do
+  case "$pkg" in /*) ;; *) pkg="$(ls /decks/"$pkg" /stream/decks/"$pkg" 2>/dev/null | head -1)" ;; esac
+  [ -f "$pkg" ] || { echo "[anki] pack not found: $pkg" >&2; continue; }
+  [ -f "$PROFDIR/.imported-$(basename "$pkg")" ] && continue
+  if /opt/anki/python/bin/python3 -u -c "
+import sys
+from anki.collection import Collection
+from anki import import_export_pb2
+pkg, colpath = sys.argv[1], sys.argv[2]
+col = Collection(colpath)
+log = col.import_anki_package(import_export_pb2.ImportAnkiPackageRequest(package_path=pkg))
+print('[anki] imported %s (%s notes)' % (pkg, getattr(log, 'found_notes', '?')))
+col.close()
+" "$pkg" "$PROFDIR/collection.anki2" >&2; then
+    touch "$PROFDIR/.imported-$(basename "$pkg")"
+  else
+    echo "[anki] import failed: $pkg (continuing)" >&2
+  fi
+done
+
 /opt/anki/python/bin/python3 -u /stream/boot.py -b /home/ubuntu/.local/share/Anki2 &
 ANKI=$!
 # make s6-svc -r / docker stop actually reap Anki (no orphans)
 trap 'kill -TERM "$ANKI" 2>/dev/null' TERM INT EXIT
 
-# X11 backend only: no window manager, so size/position the MAIN window ourselves
-# (WM_CLASS "Anki" + _NET_WM_WINDOW_TYPE_NORMAL; not popups/selection owners).
+# X11 backend only: no window manager, so keep the MAIN window fitted to the
+# CURRENT screen size (WM_CLASS "Anki" + _NET_WM_WINDOW_TYPE_NORMAL; not
+# popups/selection owners). Selkies resizes the display when a client connects
+# (SELKIES_ENABLE_RESIZE) — a window sized once at boot overflows the smaller
+# client screen (deck panel cut off at the right), so re-fit while Anki lives.
 if [ "${QT_QPA_PLATFORM:-}" != "wayland" ]; then
   (
-    for _ in $(seq 1 300); do
-      for W in $(xdotool search --name 'Anki' 2>/dev/null); do
-        xprop -id "$W" WM_CLASS 2>/dev/null | grep -q '"Anki"' || continue
-        T="$(xprop -id "$W" _NET_WM_WINDOW_TYPE 2>/dev/null)"
-        echo "$T" | grep -q '_NET_WM_WINDOW_TYPE_NORMAL' || continue
-        echo "$T" | grep -q 'POPUP_MENU' && continue
-        xdotool windowsize "$W" 1920 1080 2>/dev/null || true
-        xdotool windowmove "$W" 0 0 2>/dev/null || true
-        xdotool windowraise "$W" 2>/dev/null || true
-        break 2
-      done
-      sleep 1
+    while kill -0 "$ANKI" 2>/dev/null; do
+      SCR="$(xdpyinfo -display "${DISPLAY:-:20}" 2>/dev/null | awk '/dimensions:/ {print $2}')"
+      W="${SCR%x*}"; H="${SCR#*x}"; H="${H%%,*}"
+      if [ -n "$W" ] && [ -n "$H" ]; then
+        for WID in $(xdotool search --name 'Anki' 2>/dev/null); do
+          xprop -id "$WID" WM_CLASS 2>/dev/null | grep -q '"Anki"' || continue
+          T="$(xprop -id "$WID" _NET_WM_WINDOW_TYPE 2>/dev/null)"
+          echo "$T" | grep -q '_NET_WM_WINDOW_TYPE_NORMAL' || continue
+          echo "$T" | grep -q 'POPUP_MENU' && continue
+          xdotool windowsize "$WID" "$W" "$H" 2>/dev/null || true
+          xdotool windowmove "$WID" 0 0 2>/dev/null || true
+          break
+        done
+      fi
+      sleep 2
     done
   ) &
 fi

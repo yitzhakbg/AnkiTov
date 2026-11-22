@@ -1,7 +1,7 @@
 # SYNC-MANIFEST
 
-- monorepo ref: otqlyxpwwoqn/0b906f42bcd6
-- exported at: 2026-11-22T18:04:37Z
+- monorepo ref: kxsuttwqlxsr/d3aef6b1537e
+- exported at: 2026-11-22T19:17:19Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
@@ -168,7 +168,7 @@ d06ad840fcdf1b2840f9a7e35327a194e44a84e4b619d0626f15bc9a7e8c3525  backend/src/se
 b65ac2fd74687b56d1338b165b54d25a20e1e5aee4d813a6895f99d8cd316d9d  backend/src/services/password_policy.rs
 5362b03eaecefe26d45a55731cd44933703334e1c59713087c99eb48f1ba71c6  backend/src/services/review_ingest.rs
 781e8d5640f2df78f6c3c386ee94e41402a4a6de35553913f73ffdcd3b758c37  backend/src/services/rig_nlu.rs
-c96e5ac551ce09ecdbfe20d829959a8462687a2a116786196d9fa29e120e88bd  backend/src/services/seat_manager.rs
+689e4c741533087fdb4e9a339980dec0ed74191091f76b475a2206d5d4f09bee  backend/src/services/seat_manager.rs
 bad7db1dd88bc2afed8cf0769131ee6db51b795489c22b8b30f82eb674711368  backend/src/services/settings.rs
 d7f79457ea2c519fe5b3137483fc0f9dde21345fab74757cc8d63aaccf3d39e8  backend/src/services/student_import.rs
 3cbc14a5a6c362f868bfdabac12ae55897dee514cb9a05176e09a46bf7878d29  backend/src/services/sync_user.rs
@@ -352,7 +352,7 @@ d500f96d471ea987ec4c09a83a0fc5468f910e4b3c20df7d7afabcd8ecaeae5e  stream/selkies
 a69b3e31aa439dc490940778179d912fd5d585e1f46821d1ca9b74c3af91bcf5  stream/selkies-anki/docker-compose.anki.yml
 1c7f4a590ff24454f01a7d26ed54ee43c4fc774b50022fbedaf5f86fdd4ec947  stream/selkies-anki/launch_anki.sh
 881e0256af12e7038095bfe31e4bfa45a56f2c0e8ca505a8d0ab8d386142ad3b  stream/selkies-anki/sitecustomize.py
-b63cc75d32ed161e38e284a36166a51df9f07be3116ab8b789ff95388f3a2a81  stream/selkies-anki/svc/anki/run
+d7fa7999c556b64f317b69dc807309ee44b36108ba0231f026367336e5c06277  stream/selkies-anki/svc/anki/run
 f9d6279a9013675d6ebcff7ee441e7ea4e32e80c2b6a40d78a9eadf365d7dd8b  stream/selkies-anki/svc/labwc/rc.xml
 305699865a7c597aea8938f2bd5c101c1bc4e1812cf1024ce0b13c5cdc8e31f6  tools/propagate_locale_keys.py
 a494d65b7393c8f501fec5c8e37969369dec77efc1ec8a29e8bc2441d98a7d12  tools/validate_i18n.py

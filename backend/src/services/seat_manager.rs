@@ -32,6 +32,7 @@
 //! | `ANKITOV_SEAT_IDLE_SECS` | `300` | Idle seconds before a seat is reaped |
 //! | `ANKITOV_BACKEND_URL` | `http://127.0.0.1:5150` | Told to the seat for telemetry |
 //! | `ANKITOV_SEAT_PASSWD` | random per seat | Selkies basic-auth password (`ubuntu` / this) — set it to the class join code for demos |
+//! | `ANKITOV_SEAT_PACKS` | _(unset = none)_ | Comma-separated seed `.apkg` file names the seat imports into the student's collection on first start (resolved against `/decks` then `/stream/decks` in the rootfs). Unset = honest empty state. |
 //!
 //! The seat entry point (`/stream/start-seat.sh` inside the rootfs) starts
 //! labwc + Selkies bound to `ANKITOV_SEAT_PORT` and launches Anki in kiosk
