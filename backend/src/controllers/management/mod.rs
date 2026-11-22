@@ -20,6 +20,7 @@ pub mod classes;
 pub mod classroom;
 pub mod compliance;
 pub mod deck_library;
+pub mod seats;
 pub mod decks;
 pub mod jev;
 pub mod probe;
@@ -77,6 +78,9 @@ const TAG: &str = "Management Console";
         classroom::enable,
         classroom::disable,
         classroom::status,
+        seats::list,
+        seats::start,
+        seats::stop,
         classes::transfer_student,
         classes::generate_sessions,
         // Teachers (Prong 8 — teacher registration + first-login wizard)

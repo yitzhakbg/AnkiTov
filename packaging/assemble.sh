@@ -139,12 +139,15 @@ EOF
   copy_seed_packs "$ROOT/opt/ankitov"
   sed "s|@EXEC@|/opt/ankitov/ankitov-launch start|" "$PKG_DIR/linux/ankitov.desktop" \
     > "$ROOT/usr/share/applications/ankitov.desktop"
-  for f in LICENSE COPYRIGHT; do
-    [ -f "$PKG_DIR/../$f" ] && cp "$PKG_DIR/../$f" "$ROOT/usr/share/doc/ankitov/" && break
-  done
-  [ -f "$ROOT/usr/share/doc/ankitov/LICENSE" ] || \
-    printf 'AnkiTov — see the project repository for license terms.\n' \
-      > "$ROOT/usr/share/doc/ankitov/copyright"
+  # License set: FSL-1.1-ALv2 (AnkiTov) + third-party notices (Anki AGPL,
+  # Selkies MPL-2.0, bwrap LGPL). The FSL text lives in scripts/oss-templates/
+  # (the same file the public mirror is stamped with at export).
+  TPL_DIR="$REPO_ROOT/scripts/oss-templates"
+  if [ -f "$TPL_DIR/LICENSE" ]; then
+    cp "$TPL_DIR/LICENSE" "$ROOT/usr/share/doc/ankitov/LICENSE"
+  fi
+  mkdir -p "$ROOT/usr/share/doc/ankitov/LICENSES"
+  cp "$REPO_ROOT/packaging/LICENSES/"* "$ROOT/usr/share/doc/ankitov/LICENSES/" 2>/dev/null || true
   if command -v dpkg-deb >/dev/null 2>&1; then
     DEB="$OUT/ankitov-$VERSION-linux-$ARCH.deb"
     dpkg-deb --build --root-owner-group "$ROOT" "$DEB" >/dev/null
@@ -152,6 +155,35 @@ EOF
   else
     warn "dpkg-deb not found; skipping .deb (tarball still produced)"
   fi
+
+  # --- .rpm (same staged payload as the .deb; best-effort — fpm on PATH) ---
+  # 2026-11-21: .rpm replaces the retired .flatpak as the non-apt distro path
+  # (Fedora/RHEL/Rocky/Alma/openSUSE). Built from the identical ROOT staging so
+  # deb/rpm payloads can never drift apart.
+  if command -v fpm >/dev/null 2>&1; then
+    case "$DEB_ARCH" in
+      amd64) RPM_ARCH=x86_64 ;;
+      arm64) RPM_ARCH=aarch64 ;;
+      *)     RPM_ARCH=noarch ;;
+    esac
+    if fpm -s dir -t rpm -C "$ROOT" \
+        -n ankitov -v "$VERSION" --iteration 1 \
+        --architecture "$RPM_ARCH" \
+        --license "FSL-1.1-ALv2" \
+        --vendor "AnkiTov" \
+        --maintainer "AnkiTov <yitzhakbargeva@gmail.com>" \
+        --url "https://github.com/yitzhakbg/AnkiTov" \
+        --description "AnkiTov — classroom spaced-repetition practice server" \
+        --directories /opt/ankitov \
+        opt usr >/dev/null; then
+      note "built $OUT/ankitov-$VERSION-linux-$ARCH.rpm"
+    else
+      warn "fpm failed; skipping .rpm (tarball still produced)"
+    fi
+  else
+    note "fpm not found on PATH; skipping .rpm (tarball still produced)"
+  fi
+
   rm -rf "$ROOT"
 
   # --- .AppImage (x86_64 only; appimagetool is x86_64-only upstream) ---
@@ -192,6 +224,12 @@ EOF
   mkdir -p "$TARBALL_STAGE/ankitov-$VERSION/config"
   cp "$REPO_ROOT/backend/config/production.yaml" "$TARBALL_STAGE/ankitov-$VERSION/config/production.yaml"
   copy_seed_packs "$TARBALL_STAGE/ankitov-$VERSION"
+  # License set (FSL-1.1-ALv2 + third-party notices) — also consumed by the
+  # server Docker image build (packaging/docker/Dockerfile.server).
+  TPL_DIR="$REPO_ROOT/scripts/oss-templates"
+  [ -f "$TPL_DIR/LICENSE" ] && cp "$TPL_DIR/LICENSE" "$TARBALL_STAGE/ankitov-$VERSION/LICENSE"
+  mkdir -p "$TARBALL_STAGE/ankitov-$VERSION/LICENSES"
+  cp "$REPO_ROOT/packaging/LICENSES/"* "$TARBALL_STAGE/ankitov-$VERSION/LICENSES/" 2>/dev/null || true
   TAR="$OUT/ankitov-$VERSION-linux-$ARCH.tar.gz"
   tar -czf "$TAR" -C "$TARBALL_STAGE" "ankitov-$VERSION"
   rm -rf "$TARBALL_STAGE"

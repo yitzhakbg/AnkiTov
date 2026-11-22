@@ -1,0 +1,46 @@
+# AnkiTov server image — ghcr.io/yitzhakbg/ankitov-server
+#
+# Carries the static musl backend + launcher + config + seed packs. Student
+# practice seats (real Anki + Selkies via bwrap + seat-rootfs) are spawned at
+# runtime by the backend's SeatManager; the seat-rootfs bundle is exported
+# from the anki-base image (or downloaded as a release asset) on first
+# classroom start, so this image stays small and the seat runtime upgrades
+# independently of the server.
+#
+# Build (CI): docker/build-push-action with build-context stage=./stage
+# where stage is the extracted release tarball (ankitov-launch, backend,
+# config/, content/).
+#
+# Run:
+#   docker run -p 5150:5150 -v ankitov-data:/data \
+#     --cap-add SYS_ADMIN --security-opt seccomp=unconfined \
+#     ghcr.io/yitzhakbg/ankitov-server:latest
+# (SYS_ADMIN + unconfined seccomp are required for bwrap to mount
+#  /proc and tmpfs inside the container; drop them only if you run seats
+#  on the host instead of inside this container.)
+
+FROM debian:12-slim
+
+# bwrap: the seat sandbox engine. ca-certificates: outbound sync/telemetry.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends bubblewrap ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+# Server payload from the release tarball stage (buildx build-context).
+COPY --from=stage ankitov-launch /opt/ankitov/ankitov-launch
+COPY --from=stage backend /opt/ankitov/backend
+COPY --from=stage config/ /opt/ankitov/config/
+COPY --from=stage content/ /opt/ankitov/content/
+
+# License notices (FSL-1.1-ALv2 for AnkiTov; upstream notices in LICENSES).
+COPY --from=stage LICENSES/ /usr/share/doc/ankitov/LICENSES/
+
+RUN chmod +x /opt/ankitov/ankitov-launch /opt/ankitov/backend
+
+ENV ANKITOV_DATA_DIR=/data \
+    ANKITOV_PORT=5150
+EXPOSE 5150
+
+# The flatpak entry-point lesson (2026-11-18): the server must run in the
+# FOREGROUND so the container lifetime matches the server lifetime.
+CMD ["/opt/ankitov/ankitov-launch", "run"]

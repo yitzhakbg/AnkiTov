@@ -1,5 +1,5 @@
-# AnkiTov Phase-1 release pipeline (T-123): native per-OS artifacts + checksums
-# + GitHub Release. This is the machine behind the "download → run" promise:
+# AnkiTov release pipeline: Linux server artifacts + OCI image + checksums +
+# GitHub Release. This is the machine behind the "download → run" promise:
 # every artifact is built, smoke-gated (boot cold → GET / 200 → register 200),
 # checksummed, and attached to the Release the download page links to.
 #
@@ -12,26 +12,34 @@
 # private repo is a no-op instead of a quota burn. Flow: merge to main → mirror
 # the commit → push the v* tag on the mirror.
 #
-# ── ARTIFACT MATRIX ─────────────────────────────────────────────────────────
-#   macOS   aarch64 + x86_64  → .dmg (AnkiTov.app, ad-hoc signed)   [macos-14]
-#   Windows x86_64            → .zip (backend.exe + launcher)       [windows-2022]
-#   Linux   x86_64            → .deb + .AppImage + .tar.gz          [ubuntu-24.04, musl static]
-#   Linux   aarch64           → .deb + .tar.gz                      [ubuntu-24.04-arm, musl static]
-#   Linux   x86_64 + aarch64  → .flatpak bundle (no-apt lane)       [see build-flatpak]
+# ── ARTIFACT MATRIX (2026-11-21 strategic cut — see
+#    specs/strategy/2026-11-20-selkies-packaging-strategic-review.md) ─────────
+#   Linux x86_64  → .deb + .rpm + .tar.gz          [ubuntu-24.04, musl static]
+#   Linux aarch64 → .deb + .rpm + .tar.gz          [ubuntu-24.04-arm, musl static]
+#   OCI image     → ghcr.io/yitzhakbg/ankitov-server (tag + latest) [ubuntu-24.04]
+#
+#   DROPPED (owner decision 2026-11-21, "Selkies + bwrap + FSL-1.1-ALv2" go;
+#   flatpak cut CONFIRMED 23:29 — overrides the 23:22 keep-direct-download note):
+#   * macOS .dmg / Windows .zip — AnkiTov is a Linux *server* product; the
+#     teacher/student surface is the browser. NOTE: the Mac release watcher
+#     (ankitov-release-autolaunch.sh) must be re-pointed or retired — it can
+#     no longer find a .dmg asset on new releases.
+#   * .flatpak + Flathub — a desktop GUI sandbox is the wrong shape for a
+#     multi-tenant seat server (nested-namespace fights, pid-2 pidfile traps,
+#     sandbox path isolation all proven on ybg-1, Nov 2026). Flathub store
+#     registration dead (PR #11257 abandoned). ybg-1 migrates to .deb/Docker.
+#   * .AppImage — replaced by flatpak in v0.6.0; not coming back.
 #
 # Linux builds are static musl (the stack is rustls-only — no OpenSSL), so the
 # binaries have NO glibc floor and run on any distro; that is why the runner
-# release does not constrain compatibility.
-#
-# AppImage is x86_64-only because appimagetool is x86_64-only upstream; aarch64
-# ships .deb + .tar.gz instead (noted on the download page).
-#
-# macOS x86_64 runtime smoke runs under Rosetta when the runner has it; if not,
-# the build gate + the ub3090-style canary cover that arch (warning emitted).
+# release does not constrain compatibility. .rpm is built from the same staged
+# payload as the .deb via fpm (best-effort: skipped with a warning if fpm is
+# unavailable — the tarball always covers the distro).
 #
 # Phase 1 ships the backend only; the Anki sync-server is a documented optional
-# add-on (official Anki binary + --syncserver, verified in
-# OUTBOX/t123-packaging/syncserver-standalone-verification.md).
+# add-on (official Anki binary + --syncserver). Student seats (Selkies + Anki
+# via bwrap + seat-rootfs) are spawned by the backend's SeatManager at runtime;
+# the seat-rootfs bundle is a separate release asset, not baked into this image.
 
 name: Release
 
@@ -54,119 +62,8 @@ env:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Shared steps are inlined per job (no composite action yet — three jobs,
-  # three shapes; extract when a fourth appears).
+  # Linux x86_64: static musl backend → .deb + .rpm + .tar.gz
   # ---------------------------------------------------------------------------
-  build-macos:
-    if: github.repository == 'yitzhakbg/AnkiTov'
-    permissions:
-      contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: aarch64
-            target: aarch64-apple-darwin
-          - arch: x86_64
-            target: x86_64-apple-darwin
-    runs-on: macos-15
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          key: ${{ matrix.target }}
-
-      - name: Resolve version
-        id: ver
-        shell: bash
-        run: |
-          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
-            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Build backend
-        run: cargo build --release -p backend --target ${{ matrix.target }}
-
-      - name: Smoke the binary (boot cold + GET / + register)
-        shell: bash
-        run: |
-          if [ "${{ matrix.arch }}" = "aarch64" ] || arch -x86_64 /usr/bin/true 2>/dev/null; then
-            bash packaging/smoke.sh "target/${{ matrix.target }}/release/backend"
-          else
-            echo "::warning::Rosetta unavailable on runner — x86_64 runtime smoke skipped (build gate + canary cover it)"
-          fi
-
-      - name: Assemble .app + .dmg
-        run: |
-          bash packaging/assemble.sh macos \
-            --arch ${{ matrix.arch }} \
-            --version "${{ steps.ver.outputs.version }}" \
-            --backend "target/${{ matrix.target }}/release/backend" \
-            --out dist
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: macos-${{ matrix.arch }}
-          path: dist/ankitov-*
-          if-no-files-found: error
-
-  build-windows:
-    if: github.repository == 'yitzhakbg/AnkiTov'
-    permissions:
-      contents: read
-    runs-on: windows-2022
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: dtolnay/rust-toolchain@stable
-
-      - uses: Swatinem/rust-cache@v2
-
-      - name: Resolve version
-        id: ver
-        shell: bash
-        run: |
-          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
-            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Build backend
-        # Windows main-thread stack is 1MB (vs 8MB Unix); the Tera/pest grammar
-        # parse of production.yaml recurses deep enough to overflow it — and a
-        # Windows stack overflow kills the process with NO stderr output.
-        # Reserve 16MB to match the Unix defaults (musl/macOS smoke pass there).
-        env:
-          RUSTFLAGS: -C link-args=/STACK:16777216
-        run: cargo build --release -p backend
-
-      - name: Smoke the binary (boot cold + GET / + register)
-        shell: pwsh
-        run: ./packaging/smoke.ps1 -BinPath target/release/backend.exe
-
-      - name: Assemble .zip
-        shell: bash
-        run: |
-          bash packaging/assemble.sh windows \
-            --arch x86_64 \
-            --version "${{ steps.ver.outputs.version }}" \
-            --backend target/release/backend.exe \
-            --out dist
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: windows-x86_64
-          path: dist/ankitov-*
-          if-no-files-found: error
-
   build-linux-x86_64:
     if: github.repository == 'yitzhakbg/AnkiTov'
     permissions:
@@ -175,8 +72,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install musl toolchain
-        run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - name: Install musl toolchain + rpm tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools ruby
+          sudo gem install --no-document fpm || echo "::warning::fpm install failed — .rpm will be skipped (tarball covers it)"
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -201,14 +101,7 @@ jobs:
       - name: Smoke the binary (boot cold + GET / + register)
         run: bash packaging/smoke.sh target/x86_64-unknown-linux-musl/release/backend
 
-      - name: Install appimagetool (best effort — .AppImage is skipped if this fails)
-        run: |
-          wget -q -O /usr/local/bin/appimagetool \
-            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage \
-            && chmod +x /usr/local/bin/appimagetool \
-            || echo "::warning::appimagetool download failed — shipping .deb + .tar.gz only"
-
-      - name: Assemble .deb + .AppImage + .tar.gz
+      - name: Assemble .deb + .rpm + .tar.gz
         run: |
           bash packaging/assemble.sh linux \
             --arch x86_64 \
@@ -222,6 +115,9 @@ jobs:
           path: dist/ankitov-*
           if-no-files-found: error
 
+  # ---------------------------------------------------------------------------
+  # Linux aarch64: static musl backend → .deb + .rpm + .tar.gz
+  # ---------------------------------------------------------------------------
   build-linux-aarch64:
     if: github.repository == 'yitzhakbg/AnkiTov'
     permissions:
@@ -230,8 +126,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install musl toolchain
-        run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - name: Install musl toolchain + rpm tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools ruby
+          sudo gem install --no-document fpm || echo "::warning::fpm install failed — .rpm will be skipped (tarball covers it)"
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -256,7 +155,7 @@ jobs:
       - name: Smoke the binary (boot cold + GET / + register)
         run: bash packaging/smoke.sh target/aarch64-unknown-linux-musl/release/backend
 
-      - name: Assemble .deb + .tar.gz
+      - name: Assemble .deb + .rpm + .tar.gz
         run: |
           bash packaging/assemble.sh linux \
             --arch aarch64 \
@@ -271,53 +170,21 @@ jobs:
           if-no-files-found: error
 
   # ---------------------------------------------------------------------------
-  # Flatpak lane — the no-apt path. A .deb needs dpkg, so Fedora, Arch, openSUSE,
-  # NixOS and immutable distros have no way in. A .flatpak bundle installs on any
-  # distro that has flatpak, with no root and no package manager.
-  #
-  # The manifest copies files rather than compiling (the backend is a static musl
-  # binary, so the runtime is only the sandbox shell), so this job reuses the
-  # binaries the Linux jobs already built and smoke-gated instead of rebuilding.
-  # It runs on the native arch runner: an aarch64 bundle assembled on an x86_64
-  # runner would be labelled x86_64 and contain the wrong binary.
-  #
-  # Best-effort by design (like the AppImage step): a runner without user
-  # namespaces, or a flathub fetch failure, warns and exits 0 so the release
-  # still publishes. The download page links the bundle, so a skipped build means
-  # that link 404s for that release — the warning in the job log is the signal.
+  # OCI image: ghcr.io/yitzhakbg/ankitov-server — the self-hoster / partner
+  # deployment shape (docker compose up → teacher dashboard + SeatManager).
+  # The image carries the backend + launcher + config + seed packs; the
+  # seat-rootfs (Selkies + Anki) is pulled/exported at runtime by SeatManager
+  # so the image stays small and the seat runtime can be upgraded independently.
   # ---------------------------------------------------------------------------
-  build-flatpak:
+  build-docker:
     if: github.repository == 'yitzhakbg/AnkiTov'
-    needs: [build-linux-x86_64, build-linux-aarch64]
+    needs: [build-linux-x86_64]
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: x86_64
-    runs-on: [self-hosted, linux, flatpak]
+      packages: write
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install flatpak tooling
-        run: |
-          # Self-hosted runners may lack sudo (the hetzner runner user does); flatpak
-          # and flatpak-builder are preinstalled system-wide there. Hosted runners
-          # still need the apt install.
-          if ! command -v flatpak >/dev/null; then
-            sudo apt-get update
-            sudo apt-get install -y flatpak flatpak-builder
-          fi
-          # The builder action wraps its build in xvfb-run. On the self-hosted
-          # runners it is preinstalled (Hetzner: apt-get install -y xvfb as root,
-          # 2026-11-18); hosted runners get it via the apt branch above.
-          command -v xvfb-run >/dev/null || echo "::warning::xvfb-run missing — the builder action will fail" 
-          # The builder action installs deps with --install-deps-from=flathub against
-          # the SYSTEM instance; without this remote it fails with
-          # "No remote refs found for 'flathub'" (6 CI runs, 2026-11-17).
-          flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo --system 2>/dev/null \
-            || sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
       - name: Resolve version
         id: ver
@@ -331,68 +198,38 @@ jobs:
       - name: Fetch the built Linux stage (binary + launcher + config + seed packs)
         uses: actions/download-artifact@v4
         with:
-          name: linux-${{ matrix.arch }}
+          name: linux-x86_64
           path: artifact
 
-      - name: Stage the /app tree + source tarball (the manifest copies files, it does not compile)
+      - name: Stage the server root for the image build
         run: |
-          mkdir -p stage dist
-          tar -xzf artifact/ankitov-*-linux-${{ matrix.arch }}.tar.gz -C stage --strip-components=1
-          # The manifest's file source is ankitov-linux-<arch>.tar.gz relative to the
-          # manifest dir — put the release tarball there under that exact name.
-          cp artifact/ankitov-*-linux-${{ matrix.arch }}.tar.gz packaging/flatpak/ankitov-linux-${{ matrix.arch }}.tar.gz
-          bash packaging/flatpak/build-flatpak.sh \
-            --arch "${{ matrix.arch }}" \
-            --version "${{ steps.ver.outputs.version }}" \
-            --stage stage \
-            --out dist \
-            --stage-only
+          mkdir -p stage
+          tar -xzf artifact/ankitov-*-linux-x86_64.tar.gz -C stage --strip-components=1
+          ls -la stage
 
-      # GitHub-hosted runners cannot fetch the flathub runtime summary: three
-      # dispatch runs failed with "Nothing matches org.freedesktop.Platform in
-      # remote flathub" even though dl.flathub.org answers HTTP 200. flatpak's own
-      # builder action owns runtime installation and is the standard path. If it
-      # also cannot fetch the runtime, the bundle cannot be built on hosted runners
-      # at all — it would need a self-hosted runner with flatpak or Flathub's own CI.
-      # (Repo is flatpak/flatpak-github-actions, plural; the input is manifest-path.)
-      - uses: flatpak/flatpak-github-actions/flatpak-builder@master
-        continue-on-error: true
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
         with:
-          bundle: dist/ankitov-${{ steps.ver.outputs.version }}-linux-${{ matrix.arch }}.flatpak
-          manifest-path: packaging/flatpak/org.ankitov.AnkiTov.json
-          arch: ${{ matrix.arch }}
-          cache: false
-          # upload-artifact defaults to true; we upload ourselves so the artifact
-          # name matches what the release alias loop expects.
-          upload-artifact: false
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
 
-      - name: Smoke the bundle (install, boot from the sandbox, GET /)
-        continue-on-error: true
-        run: |
-          bundle=$(ls dist/ankitov-*-linux-${{ matrix.arch }}.flatpak 2>/dev/null) || exit 0
-          flatpak --user install -y "$bundle" || { echo "::warning::bundle install failed (runner may lack user namespaces) — shipping unverified"; exit 0; }
-          ANKITOV_NO_BROWSER=1 flatpak run --command=ankitov-launch org.ankitov.AnkiTov run >/tmp/flatpak-smoke.log 2>&1 &
-          pid=$!
-          code=0
-          for i in $(seq 1 40); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5150/ || true)
-            [ "$code" = "200" ] && break
-            sleep 1
-          done
-          if [ "$code" = "200" ]; then
-            echo "flatpak bundle smoke: GET / 200"
-          else
-            echo "::warning::bundle did not answer GET / (code $code) — shipping unverified"
-            tail -n 20 /tmp/flatpak-smoke.log || true
-          fi
-          kill "$pid" 2>/dev/null || true
-
-      - uses: actions/upload-artifact@v4
+      - name: Build and push ankitov-server image
+        uses: docker/build-push-action@v6
         with:
-          name: flatpak-${{ matrix.arch }}
-          path: dist/ankitov-*.flatpak
-          # warn, not error: a skipped bundle must not fail the release.
-          if-no-files-found: warn
+          context: .
+          file: packaging/docker/Dockerfile.server
+          push: ${{ github.event_name == 'push' }}
+          tags: |
+            ghcr.io/yitzhakbg/ankitov-server:${{ steps.ver.outputs.version }}
+            ghcr.io/yitzhakbg/ankitov-server:latest
+          build-contexts: |
+            stage=./stage
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   # ---------------------------------------------------------------------------
   # Publish: checksums over the built artifacts (never hand-written) + Release.
@@ -400,7 +237,7 @@ jobs:
   # ---------------------------------------------------------------------------
   release:
     if: github.event_name == 'push' && github.repository == 'yitzhakbg/AnkiTov'
-    needs: [build-macos, build-windows, build-linux-x86_64, build-linux-aarch64, build-flatpak]
+    needs: [build-linux-x86_64, build-linux-aarch64]
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -426,16 +263,12 @@ jobs:
           cd dist
           for f in ankitov-*; do
             case "$f" in
-              ankitov-*-macos-aarch64.dmg)    alias="AnkiTov-macos-aarch64.dmg" ;;
-              ankitov-*-macos-x86_64.dmg)     alias="AnkiTov-macos-x86_64.dmg" ;;
-              ankitov-*-windows-x86_64.zip)   alias="AnkiTov-windows-x86_64.zip" ;;
               ankitov-*-linux-x86_64.deb)     alias="AnkiTov-linux-x86_64.deb" ;;
               ankitov-*-linux-aarch64.deb)    alias="AnkiTov-linux-aarch64.deb" ;;
+              ankitov-*-linux-x86_64.rpm)     alias="AnkiTov-linux-x86_64.rpm" ;;
+              ankitov-*-linux-aarch64.rpm)    alias="AnkiTov-linux-aarch64.rpm" ;;
               ankitov-*-linux-x86_64.tar.gz)  alias="AnkiTov-linux-x86_64.tar.gz" ;;
               ankitov-*-linux-aarch64.tar.gz) alias="AnkiTov-linux-aarch64.tar.gz" ;;
-              ankitov-*-linux-x86_64.AppImage) alias="AnkiTov-linux-x86_64.AppImage" ;;
-              ankitov-*-linux-x86_64.flatpak)  alias="AnkiTov-linux-x86_64.flatpak" ;;
-              ankitov-*-linux-aarch64.flatpak) alias="AnkiTov-linux-aarch64.flatpak" ;;
               *) alias="" ;;
             esac
             if [ -n "$alias" ]; then

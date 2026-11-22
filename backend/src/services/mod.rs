@@ -78,3 +78,6 @@ pub mod card_renderer;
 pub mod collection_store;
 pub mod jev_translator;
 pub mod review_ingest;
+
+// Selkies + bwrap seat runtime (Product Law 2026-11-18: practice = real Anki)
+pub mod seat_manager;
