@@ -1,13 +1,13 @@
 # SYNC-MANIFEST
 
-- monorepo ref: ploqsuzlnzmy/88a1baaf5060
-- exported at: 2026-11-23T10:04:18Z
+- monorepo ref: znznowyxulxs/1487a9bf1978
+- exported at: 2026-11-23T14:09:11Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
 ## sha256 checksums
 ```
-df742df2b6ffcb1114c4716c1a893770714f69e2fce52f92704dfa629ed8fb75  .github/workflows/release.yml
+b928c3c07db585f44949933dfb62d49ae43f87c82f94613c2383413d88caca3e  .github/workflows/release.yml
 3255a61586bf5af874b423fb9ddf62d3da06bbbeb11365a5e1b4e0ce47c52406  .gitignore
 ada47362899add07df543de3051b80e6d9532fca7131b7fe5701fb754aa65ee2  Caddyfile
 98daea103a8212f495a4a0defa11b951c4f7443fc26c246168d7ce6e727bf331  Cargo.lock
@@ -313,7 +313,7 @@ b943b28d784bcb974a8cdced5e4973f89fef0b3d6d6c79938c1506251a83f9fc  docs/src/refer
 b6df84512a635d73d72cae6d059b9749041009b16a55d1b938741105ee697ffb  docs/src/reference/rustdoc.md
 0d6b777747fdd34834c97d33df63c2a1b333f764cdd49060cc1f0b03c1eb9cf5  packaging/LICENSES/THIRD-PARTY-NOTICES.md
 80ce08725036c03b7068c110add1ce549e62258f80319d6d1146298b25ade225  packaging/README.md
-8523548a3337556e0521fe5dd1726c7567f4f63257dba180aa99df305722a054  packaging/assemble.sh
+a9ab6f52184eddbd902e6c031e8586ca032884a103d5bc862776826b6917cf64  packaging/assemble.sh
 a1f2814abd53758cec9acb4d9f1367c280900ab32e2e588fe375a0d54c8446dc  packaging/docker/Dockerfile.server
 48abcfc1155d78cc3c01813496c8375acf55675b9baee8baef94be6c67bc88f4  packaging/flatpak/README.md
 355f53c6344e307b182976d88629b373caad403b6de9c491b38c2a10aa7ac7e3  packaging/flatpak/ankitov-run
@@ -333,7 +333,11 @@ faedebc41dd9ebe6728517a7babc09348cd5a842bca55661438654d4a58fa1f1  packaging/flat
 1ae86ae4a39c09f7558b30863209e94fbb69af846eef82c01cd9c777cd530505  packaging/launch/ankitov-launch.sh
 b8751ba2d302229ecf93a3ab8550fe0d0071e57a3a3821cea241e5e99c0dcb82  packaging/launch/start-ankitov.bat
 5280a42f23c24bb7f5a355814732333c202839042c3cc320b4d5be97b57ad3b4  packaging/linux/ankitov.desktop
+d5520de4cb3f8f10e8010b66dbfa4af4462288f722fe7e80a03a9bc66d43ad98  packaging/linux/ankitov.service
+67a843e88efd4e343458ff768083a192771cc18e3e79067892e5d798a895446b  packaging/linux/postinst
+4426079798fc2b752f7217a80e222f64f884fcfe2a34cfb2615a8033b053acb2  packaging/linux/postrm
 8bbb687d6e1c8ab55366324ac2ebc1bf10883241cd5bb8f05f1d5bdfabc62794  packaging/macos/Info.plist
+77a7774858912d00aafa71b2e2796cdd514a6ba2d4d5e2ddec59f8169502114d  packaging/smoke-deb.sh
 812dd8059756fbc301e337bb6d86669715c2d24075db44112f0ffa95e3b79fe8  packaging/smoke.ps1
 14ed5b59b57fa2cdccdf77fb98a4a90434659ed6f8ca473835008e1b935eb1f4  packaging/smoke.sh
 96a870f6b0c92226a8772ebab9b05f42520136be90312b97455878e6d6eddee9  packaging/verify-artifact.sh

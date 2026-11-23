@@ -112,6 +112,9 @@ jobs:
       - name: Verify the .deb artifact (build-procedure gate)
         run: bash packaging/verify-artifact.sh dist/ankitov-*-linux-*.deb
 
+      - name: Smoke the .deb on pristine Debian 12 (one-step commissioning)
+        run: bash packaging/smoke-deb.sh dist/ankitov-*-linux-x86_64.deb
+
       - uses: actions/upload-artifact@v4
         with:
           name: linux-x86_64
@@ -168,6 +171,9 @@ jobs:
 
       - name: Verify the .deb artifact (aarch64) (build-procedure gate)
         run: bash packaging/verify-artifact.sh dist/ankitov-*-linux-*.deb
+
+      - name: Smoke the .deb on pristine Debian 12 (one-step commissioning, arm64)
+        run: bash packaging/smoke-deb.sh dist/ankitov-*-linux-aarch64.deb
 
       - uses: actions/upload-artifact@v4
         with:

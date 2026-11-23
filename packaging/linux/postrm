@@ -1,0 +1,22 @@
+#!/bin/sh
+# AnkiTov .deb postrm — purge-time cleanup (T-207).
+# `dpkg -r` (remove, keep config): touches nothing — /etc/ankitov and
+# /var/lib/ankitov survive so a reinstall recommissions in place.
+# `dpkg -P` (purge): drop the generated secret env and the system user.
+# /var/lib/ankitov (databases, uploads, logs) is NOT removed on purge — it is
+# operator data; delete by hand if truly wanted.
+set -eu
+
+SERVICE=ankitov
+ENV_DIR=/etc/ankitov
+
+if [ "$1" = purge ]; then
+    rm -rf "$ENV_DIR"
+    if getent passwd "$SERVICE" >/dev/null 2>&1; then
+        deluser --system "$SERVICE" 2>/dev/null \
+            || userdel "$SERVICE" 2>/dev/null \
+            || true
+    fi
+fi
+
+exit 0

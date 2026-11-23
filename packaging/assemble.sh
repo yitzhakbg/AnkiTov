@@ -123,6 +123,7 @@ assemble_linux() {
   ROOT="$OUT/deb-$ARCH"
   rm -rf "$ROOT"
   mkdir -p "$ROOT/DEBIAN" "$ROOT/opt/ankitov" \
+           "$ROOT/usr/lib/systemd/system" \
            "$ROOT/usr/share/applications" "$ROOT/usr/share/doc/ankitov"
   cat > "$ROOT/DEBIAN/control" <<EOF
 Package: ankitov
@@ -131,11 +132,13 @@ Section: education
 Priority: optional
 Architecture: $DEB_ARCH
 Maintainer: AnkiTov <yitzhakbargeva@gmail.com>
-Depends: ca-certificates
+Depends: ca-certificates, openssl
 Recommends: bubblewrap
 Description: AnkiTov — classroom spaced-repetition practice server
- Local AnkiTov backend (dashboard + API + SQLite). Start it with
- /opt/ankitov/ankitov-launch start or from the desktop entry.
+ Local AnkiTov backend (dashboard + API + SQLite). Installs a systemd
+ service that auto-starts and survives reboots (data in /var/lib/ankitov,
+ secret in /etc/ankitov). The desktop launcher (/opt/ankitov/ankitov-launch)
+ remains available; pick another port if the service already holds 5150.
 Homepage: https://github.com/yitzhakbg/AnkiTov
 EOF
   cp "$PKG_DIR/launch/ankitov-launch.sh" "$ROOT/opt/ankitov/ankitov-launch"
@@ -143,6 +146,13 @@ EOF
   chmod +x "$ROOT/opt/ankitov/ankitov-launch" "$ROOT/opt/ankitov/backend"
   mkdir -p "$ROOT/opt/ankitov/config"
   cp "$REPO_ROOT/backend/config/production.yaml" "$ROOT/opt/ankitov/config/production.yaml"
+  # T-207 one-step commissioning: systemd unit + shared deb/rpm maintainer
+  # scripts. The unit lands in /usr/lib/systemd/system (merged-usr Debian 12 +
+  # Fedora alike); postinst doubles as the rpm %post via fpm --after-install.
+  cp "$PKG_DIR/linux/ankitov.service" "$ROOT/usr/lib/systemd/system/ankitov.service"
+  cp "$PKG_DIR/linux/postinst" "$ROOT/DEBIAN/postinst"
+  cp "$PKG_DIR/linux/postrm" "$ROOT/DEBIAN/postrm"
+  chmod 755 "$ROOT/DEBIAN/postinst" "$ROOT/DEBIAN/postrm"
   copy_seed_packs "$ROOT/opt/ankitov"
   sed "s|@EXEC@|/opt/ankitov/ankitov-launch start|" "$PKG_DIR/linux/ankitov.desktop" \
     > "$ROOT/usr/share/applications/ankitov.desktop"
@@ -186,6 +196,7 @@ EOF
         --maintainer "AnkiTov <yitzhakbargeva@gmail.com>" \
         --url "https://github.com/yitzhakbg/AnkiTov" \
         --description "AnkiTov — classroom spaced-repetition practice server" \
+        --after-install "$PKG_DIR/linux/postinst" \
         --directories /opt/ankitov \
         opt usr >/dev/null; then
       note "built $OUT/ankitov-$VERSION-linux-$ARCH.rpm"

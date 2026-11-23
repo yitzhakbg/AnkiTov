@@ -1,0 +1,33 @@
+[Unit]
+Description=AnkiTov — classroom spaced-repetition practice server
+Documentation=https://github.com/yitzhakbg/AnkiTov
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=exec
+User=ankitov
+Group=ankitov
+ExecStart=/opt/ankitov/backend start -e production
+WorkingDirectory=/var/lib/ankitov
+StateDirectory=ankitov
+# Defaults mirror the proven launcher shape (packaging/launch/ankitov-launch.sh):
+# SQLite at the state-dir root, seed packs from the package payload. The
+# EnvironmentFile (below) overrides any of these per deployment.
+Environment=DATABASE_URL=sqlite://ankitov.db?mode=rwc
+Environment=ANKITOV_SEED_DIR=/opt/ankitov/content/seed
+EnvironmentFile=-/etc/ankitov/ankitov.env
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+# Moderate sandboxing for the bare-install shape. Seat hosts (bwrap rootfs,
+# /srv/ankitov-seat, device binds) need a drop-in that relaxes these — see
+# packaging/README.md "Seat-host drop-in".
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/ankitov
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
