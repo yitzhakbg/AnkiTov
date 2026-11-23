@@ -347,6 +347,7 @@ pub async fn create(
         role: sea_orm::ActiveValue::Set("teacher".into()),
         subsection_id: sea_orm::ActiveValue::Set(None),
         password_hash: sea_orm::ActiveValue::Set(None),
+        kiosk_level: sea_orm::ActiveValue::Set(0),
         created_at: sea_orm::ActiveValue::Set(now),
         updated_at: sea_orm::ActiveValue::Set(now),
     };

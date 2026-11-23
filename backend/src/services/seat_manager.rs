@@ -64,6 +64,15 @@ pub struct SeatInfo {
     /// the teacher hands URL + credentials to the student (the automated
     /// student-facing flow is a follow-up).
     pub password: String,
+    /// Per-seat stream token for proxy-level auth (owner decision
+    /// 2026-11-23): Caddy `forward_auth` validates this token (cookie or
+    /// query param) against the live seat table before proxying
+    /// `/seat/<port>/`. Random per seat — one student's token must never
+    /// open another student's seat.
+    pub token: String,
+    /// Kiosk level this seat was spawned with (0 practice-only / 1 guided /
+    /// 2 full Anki) — resolved from `users.kiosk_level` at start.
+    pub kiosk_level: i32,
 }
 
 impl SeatInfo {
@@ -71,9 +80,13 @@ impl SeatInfo {
     pub fn stream_url(&self) -> String {
         // Public surface: students reach seats through the reverse proxy
         // (Caddy) or the server's public address — never a loopback URL.
+        // Trailing slash is REQUIRED: Caddy routes `handle_path /seat/<port>/*`
+        // (a slashless /seat/<port> falls through to the backend and 404s).
+        // The stream token is appended by the caller (`?seat_token=…`) —
+        // kept out of here so logs/URL displays don't carry the credential.
         let base = std::env::var("ANKITOV_PUBLIC_URL")
             .unwrap_or_else(|_| "http://127.0.0.1".to_string());
-        format!("{}/seat/{}", base.trim_end_matches('/'), self.port)
+        format!("{}/seat/{}/", base.trim_end_matches('/'), self.port)
     }
 }
 
@@ -153,7 +166,17 @@ impl SeatManager {
     }
 
     /// Start (or return the already-running) seat for a student.
-    pub async fn start_seat(&self, student_id: &str) -> Result<SeatInfo, SeatError> {
+    ///
+    /// `kiosk_level` and `student_email` come from the caller's DB lookup
+    /// (owner decision 2026-11-23: the level lives on `users.kiosk_level`;
+    /// SeatManager itself stays DB-free). `student_email` feeds the seat's
+    /// telemetry attribution (`ANKITOV_SEAT_EMAIL`).
+    pub async fn start_seat(
+        &self,
+        student_id: &str,
+        kiosk_level: i32,
+        student_email: Option<&str>,
+    ) -> Result<SeatInfo, SeatError> {
         let safe = sanitize_student_id(student_id)
             .ok_or_else(|| SeatError::NotConfigured(format!("invalid student id {student_id:?}")))?;
 
@@ -218,8 +241,17 @@ impl SeatManager {
         let port = self.free_port(&self.lock());
         let gpu = Self::gpu_available();
         let password = self.seat_password();
-        let mut cmd =
-            self.build_bwrap_command(&safe, &collection_dir, &svc_dir, port, gpu, &password);
+        let token = Self::random_secret(32);
+        let mut cmd = self.build_bwrap_command(
+            &safe,
+            &collection_dir,
+            &svc_dir,
+            port,
+            gpu,
+            &password,
+            kiosk_level,
+            student_email,
+        );
 
         let child = cmd.spawn().map_err(|e| SeatError::Spawn(format!("bwrap: {e}")))?;
         let pid = child.id();
@@ -230,6 +262,8 @@ impl SeatManager {
             started_at: Instant::now(),
             gpu,
             password,
+            token,
+            kiosk_level: kiosk_level.clamp(0, 2),
         };
 
         tracing::info!(
@@ -354,10 +388,16 @@ impl SeatManager {
                 return p;
             }
         }
+        Self::random_secret(16)
+    }
+
+    /// Random alphanumeric secret (per-seat stream tokens, fallback
+    /// basic-auth passwords). Always random per call — never operator-shared.
+    fn random_secret(len: usize) -> String {
         use rand::Rng;
         rand::thread_rng()
             .sample_iter(&rand::distributions::Alphanumeric)
-            .take(16)
+            .take(len)
             .map(char::from)
             .collect()
     }
@@ -371,6 +411,8 @@ impl SeatManager {
         port: u16,
         gpu: bool,
         password: &str,
+        kiosk_level: i32,
+        student_email: Option<&str>,
     ) -> Command {
         let mut cmd = Command::new(&self.bwrap);
         cmd.arg("--ro-bind").arg(&self.rootfs).arg("/")
@@ -424,11 +466,18 @@ impl SeatManager {
             .env("SELKIES_ENABLE_INTERNAL_TURN", "false")
             // Seat kiosk (owner directive 2026-11-23): 0 = practice-only
             // (deck auto-chosen, reviewer auto-started, escapes bounced),
-            // 1 = guided (deck opened, UI free), 2 = full Anki. The backend
-            // maps student level -> env; default is the locked-down kiosk.
+            // 1 = guided (deck opened, UI free), 2 = full Anki. The level
+            // is PER-STUDENT (users.kiosk_level, resolved by the caller —
+            // owner decision 2026-11-23); clamped defensively.
             .env(
                 "ANKITOV_SEAT_KIOSK_LEVEL",
-                std::env::var("ANKITOV_SEAT_KIOSK_LEVEL").unwrap_or_else(|_| "0".into()),
+                kiosk_level.clamp(0, 2).to_string(),
+            )
+            // Telemetry attribution: the session driver prefers this over
+            // "unknown" when posting card answers (session.py).
+            .env(
+                "ANKITOV_SEAT_EMAIL",
+                student_email.unwrap_or(""),
             )
             // The session-driver addon listens on 127.0.0.1 inside the seat —
             // and seats SHARE the host network namespace (no --unshare-net),
@@ -572,6 +621,8 @@ mod tests {
                 started_at: Instant::now(),
                 gpu: false,
                 password: "test-pass".into(),
+                token: "test-token".into(),
+                kiosk_level: 0,
             },
             last_activity: Instant::now(),
         };

@@ -3,8 +3,9 @@
 //! Validates the `/api/v1/management/settings` surface introduced with the
 //! Settings view and guided setup wizard (T-126):
 //!
-//! 1. **Auth gate** — `GET` without a token is `401`; a teacher may read but
-//!    not write (`PUT` → `403`); only admins write.
+//! 1. **Auth gate** — `GET` without a token is `403` (the management
+//!    middleware requires a teacher/admin role, 8bbe64b09); a teacher may
+//!    read but not write (`PUT` → `403`); only admins write.
 //! 2. **Wizard roundtrip** — the JWT minted by `POST /api/v1/setup` works on
 //!    `PUT /management/settings`, and values persist across `GET`s.
 //! 3. **Validate-all-then-write** — an invalid locale / sync URL / oversized
@@ -52,15 +53,15 @@ fn setup_payload() -> Value {
 // ---------------------------------------------------------------------------
 
 /// `GET /management/settings` without a token is rejected by the management
-/// auth middleware.
+/// auth middleware (no teacher/admin role → 403).
 #[tokio::test]
-async fn settings_get_without_token_is_401() {
+async fn settings_get_without_token_is_403() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server.get(API).await;
         assert_eq!(
             resp.status_code(),
-            axum::http::StatusCode::UNAUTHORIZED,
-            "GET settings without a token must be 401, got {} (body: {})",
+            axum::http::StatusCode::FORBIDDEN,
+            "GET settings without a token must be 403, got {} (body: {})",
             resp.status_code(),
             resp.text()
         );

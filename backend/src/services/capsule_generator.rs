@@ -38,6 +38,7 @@ use crate::models::entities::{
 use crate::services::audit_logger;
 use crate::services::capsule_slicer;
 use crate::services::fsrs_sort;
+use crate::services::schedule_triage;
 
 // ---------------------------------------------------------------------------
 // Error types
@@ -50,6 +51,9 @@ pub enum GeneratorError {
 
     #[error("fsrs sort error: {0}")]
     FsrsSort(#[from] fsrs_sort::FsrsSortError),
+
+    #[error("schedule triage error: {0}")]
+    Triage(#[from] schedule_triage::TriageError),
 
     #[error("no track profile assigned for student: {0}")]
     NoProfileForStudent(String),
@@ -266,6 +270,37 @@ pub async fn generate_capsule(
         return Err(GeneratorError::NoDueCards);
     }
 
+    // ── Step 3.5 (B-0035): schedule triage — deferral-overlay filter ──
+    // Active overrides drop cards whose deferral window has not elapsed.
+    // The budget (Step 4) deliberately stays computed from the PRE-filter
+    // pool: deferred cards must not shrink the session budget, or the
+    // tranche plan (budget-sized sessions) would collapse. With triage
+    // disabled the eligible list equals the ranked list, so every step
+    // below behaves exactly as before the feature existed.
+    let triage_cfg = schedule_triage::load_config(db).await;
+    let triage_on = schedule_triage::feature_enabled(&triage_cfg);
+    let (eligible_ranked, eligible_counts) = if triage_on {
+        let overrides = schedule_triage::load_active_overrides(db, &request.student_id).await?;
+        let eligible = schedule_triage::filter_by_overrides(
+            &sort_result.ranked,
+            &overrides,
+            schedule_triage::unix_now_ms(),
+        );
+        let counts = schedule_triage::recompute_track_counts(&eligible);
+        (eligible, counts)
+    } else {
+        (
+            sort_result.ranked.clone(),
+            sort_result.track_counts.clone(),
+        )
+    };
+    if eligible_ranked.is_empty() {
+        // Every due card is deferred to a future session — nothing to
+        // practice now. (Early-review fill alone does not justify opening a
+        // session while the deferred backlog is still pending.)
+        return Err(GeneratorError::NoDueCards);
+    }
+
     // ── Step 4: Compute capsule size ─────────────────────────────────
     let n_value = request
         .n_value
@@ -296,18 +331,41 @@ pub async fn generate_capsule(
     );
 
     // ── Step 5: Slice ────────────────────────────────────────────────
-    let ranked_pairs: Vec<(i64, String)> = sort_result
-        .ranked
+    let ranked_pairs: Vec<(i64, String)> = eligible_ranked
         .iter()
         .map(|c| (c.card_id, c.track_tag.clone()))
         .collect();
 
-    let slice =
-        capsule_slicer::slice_capsule(&ranked_pairs, &sort_result.track_counts, target_size);
+    let slice = capsule_slicer::slice_capsule(&ranked_pairs, &eligible_counts, target_size);
+
+    // ── Step 5.5 (B-0035): defer overflow + early-review fill ────────
+    let triage_outcome = if triage_on {
+        schedule_triage::post_slice_triage(
+            db,
+            &request.student_id,
+            anki2_path,
+            &track_tags,
+            &sort_result,
+            &slice,
+            target_size,
+            &triage_cfg,
+        )
+        .await?
+    } else {
+        schedule_triage::TriageOutcome {
+            due_count: sort_result.ranked.len(),
+            budget: target_size,
+            deferred_count: 0,
+            k: 0,
+            filled_card_ids: Vec::new(),
+        }
+    };
 
     // ── Step 6: Persist CapsuleSession ───────────────────────────────
     let session_id = uuid::Uuid::new_v4().to_string();
-    let card_ids_json = serde_json::to_string(&slice.selected)?;
+    let mut final_card_ids = slice.selected.clone();
+    final_card_ids.extend(triage_outcome.filled_card_ids.iter().copied());
+    let card_ids_json = serde_json::to_string(&final_card_ids)?;
     let ts = now_ts();
 
     let session = cs_entity::ActiveModel {
@@ -320,7 +378,7 @@ pub async fn generate_capsule(
         status: ActiveValue::Set("pending".to_string()),
         session_week: ActiveValue::Set(session_week.clone()),
         cards_completed: ActiveValue::Set(0),
-        cards_total: ActiveValue::Set(slice.selected.len() as i32),
+        cards_total: ActiveValue::Set(final_card_ids.len() as i32),
         created_at: ActiveValue::Set(ts),
         completed_at: ActiveValue::Set(None),
     }
@@ -339,19 +397,33 @@ pub async fn generate_capsule(
     )
     .await;
 
+    // Telemetry (B-0035): one triage event per session assembly — emitted
+    // even when the feature is disabled (those events are the A/B baseline).
+    schedule_triage::log_triage_event(
+        db,
+        student_id,
+        &session.id,
+        &triage_outcome,
+        triage_on,
+    )
+    .await;
+
     tracing::info!(
-        "Capsule generated: session={}, student={}, cards={}, N={}, duration={}min",
+        "Capsule generated: session={}, student={}, cards={}, N={}, duration={}min, deferred={}, filled={}",
         session.id,
         student_id,
         session.cards_total,
         n_value,
         session_duration,
+        triage_outcome.deferred_count,
+        triage_outcome.filled_card_ids.len(),
     );
 
+    let capsule_size = final_card_ids.len();
     Ok(GenerateResponse {
         session_id: session.id.clone(),
-        card_ids: slice.selected,
-        capsule_size: slice.actual_size,
+        card_ids: final_card_ids,
+        capsule_size,
         n_value,
         session_duration_minutes: session_duration,
         status: session.status.clone(),

@@ -25,6 +25,7 @@ All methods return a dict suitable for JSON serialization in the HTTP response.
 """
 
 import json
+import os
 import threading
 import time
 import urllib.request
@@ -148,7 +149,12 @@ class SessionManager:
                     deck_name = ""
 
             payload = {
-                "student_id": self.track_profile_name or "unknown",
+                # Identity precedence: capsule-session profile name → the
+                # seat's resolved student email (SeatManager passes
+                # ANKITOV_SEAT_EMAIL from users.email, 2026-11-23) → unknown.
+                "student_id": self.track_profile_name
+                or os.environ.get("ANKITOV_SEAT_EMAIL", "").strip()
+                or "unknown",
                 "card_id": int(card.id),
                 "deck_name": deck_name,
                 "ease": int(ease),

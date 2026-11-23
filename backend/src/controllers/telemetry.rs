@@ -101,6 +101,21 @@ pub async fn ingest_card_answer(
     )
     .await;
 
+    // ── B-0035: answering a card clears its active deferral override ──
+    // Best-effort (same rationale as the web-reviewer hook in
+    // review_ingest.rs): the overlay is self-healing at the next assembly.
+    if let Err(e) =
+        crate::services::schedule_triage::clear_override(db, &payload.student_id, payload.card_id)
+            .await
+    {
+        tracing::warn!(
+            "schedule_override clear failed (student {}, card {}): {}",
+            payload.student_id,
+            payload.card_id,
+            e
+        );
+    }
+
     // ── Update capsule session progress ──
     let progress = if let Some(ref session_uuid) = payload.session_uuid {
         match update_session_progress(db, session_uuid).await {

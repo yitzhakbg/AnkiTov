@@ -4,12 +4,16 @@
 //! endpoint surface introduced in `specs/plans/2026-08-28-nl-ops-chatbox.md`
 //! Phase 0:
 //!
-//! 1. **`/management/*` requires auth** — a request with no bearer token is
-//!    rejected with `401 Unauthorized`.
+//! 1. **`/management/*` requires teacher/admin** — since 8bbe64b09
+//!    (2026-11-18, field report ybg-1) the management middleware decodes the
+//!    JWT role BEFORE `require_auth`: any caller without a teacher/admin role
+//!    — no token, garbage token, or student token — is rejected with
+//!    `403 Forbidden` (never reaching the handlers).
 //! 2. **Teacher / admin can read** — a valid teacher (or admin) JWT is
 //!    accepted by `/management/*` read endpoints.
-//! 3. **Student is read-only** — a valid student JWT is *accepted* by read
-//!    endpoints but rejected with `403 Forbidden` on write endpoints.
+//! 3. **Student is blocked from management** — a valid student JWT gets
+//!    `403 Forbidden` on every `/management/*` endpoint (reads included);
+//!    the student surface is `/reviewer`.
 //! 4. **Public endpoints stay open** — `/health` and `/auth/*` work without a
 //!    token (they are deliberately NOT behind `require_auth`).
 //! 5. **Logout** — `POST /auth/logout` with a valid token returns `200`.
@@ -50,7 +54,8 @@ fn mint_token(user_id: i64, role: &str, email: &str) -> String {
 }
 
 /// A tampered token: a structurally valid JWT but signed with a *different*
-/// secret, so signature verification fails → the middleware must return 401.
+/// secret, so signature verification fails → the middleware must return 403
+/// on the management prefix (role cannot be decoded → not teacher/admin).
 fn mint_garbage_token() -> String {
     use backend::services::auth::Claims;
     use jsonwebtoken::{encode, EncodingKey, Header};
@@ -72,37 +77,38 @@ fn mint_garbage_token() -> String {
 }
 
 // ---------------------------------------------------------------------------
-// 1. /management/* requires auth (no token → 401)
+// 1. /management/* requires teacher/admin (no/garbage/student token → 403)
 // ---------------------------------------------------------------------------
 
-/// No Authorization header → 401 on a `/management/*` read endpoint.
+/// No Authorization header → 403 on a `/management/*` read endpoint (the
+/// management middleware requires a teacher/admin role; no role → 403).
 #[tokio::test]
-async fn management_read_without_token_is_401() {
+async fn management_read_without_token_is_403() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server.get("/api/v1/management/decks").await;
         assert_eq!(
             resp.status_code(),
-            axum::http::StatusCode::UNAUTHORIZED,
-            "GET /management/decks without a token must be 401, got {}",
+            axum::http::StatusCode::FORBIDDEN,
+            "GET /management/decks without a token must be 403, got {}",
             resp.status_code()
         );
     })
     .await;
 }
 
-/// A different `/management/*` controller also enforces auth.
+/// A different `/management/*` controller also enforces the role gate.
 #[tokio::test]
-async fn management_classes_without_token_is_401() {
+async fn management_classes_without_token_is_403() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server.get("/api/v1/management/classes").await;
-        assert_eq!(resp.status_code(), axum::http::StatusCode::UNAUTHORIZED);
+        assert_eq!(resp.status_code(), axum::http::StatusCode::FORBIDDEN);
     })
     .await;
 }
 
-/// A garbage (wrong-secret) token is treated the same as no token → 401.
+/// A garbage (wrong-secret) token is treated the same as no token → 403.
 #[tokio::test]
-async fn management_read_with_garbage_token_is_401() {
+async fn management_read_with_garbage_token_is_403() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server
             .get("/api/v1/management/decks")
@@ -110,8 +116,8 @@ async fn management_read_with_garbage_token_is_401() {
             .await;
         assert_eq!(
             resp.status_code(),
-            axum::http::StatusCode::UNAUTHORIZED,
-            "a token signed with the wrong secret must be 401, got {}",
+            axum::http::StatusCode::FORBIDDEN,
+            "a token signed with the wrong secret must be 403 on management, got {}",
             resp.status_code()
         );
     })
@@ -161,12 +167,14 @@ async fn management_read_as_admin_is_200() {
 }
 
 // ---------------------------------------------------------------------------
-// 3. Student is read-only
+// 3. Student is blocked from management
 // ---------------------------------------------------------------------------
 
-/// A valid student JWT is accepted by a *read* endpoint (200).
+/// A valid student JWT is rejected with 403 on a *read* endpoint too — the
+/// management middleware requires teacher/admin before any handler runs
+/// (8bbe64b09); the student surface is `/reviewer`.
 #[tokio::test]
-async fn management_read_as_student_is_200() {
+async fn management_read_as_student_is_403() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server
             .get("/api/v1/management/decks")
@@ -177,8 +185,9 @@ async fn management_read_as_student_is_200() {
             .await;
         assert_eq!(
             resp.status_code(),
-            axum::http::StatusCode::OK,
-            "student GET /management/decks must be 200 (reads are allowed), got {} (body: {})",
+            axum::http::StatusCode::FORBIDDEN,
+            "student GET /management/decks must be 403 (students are blocked \
+             from the management API), got {} (body: {})",
             resp.status_code(),
             resp.text()
         );

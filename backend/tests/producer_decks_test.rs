@@ -151,6 +151,8 @@ async fn create_producer_round_trip() {
 }
 
 /// Teacher and student are forbidden to create producers (admin-only write).
+/// The student leg is stopped by the management middleware (8bbe64b09) with
+/// an empty-body 403, so only the status is asserted here.
 #[tokio::test]
 #[serial]
 async fn create_producer_requires_admin() {
@@ -158,9 +160,14 @@ async fn create_producer_requires_admin() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let payload = json!({"name": "Nope", "email": "nope@x.example", "contact_note": null});
         for (role, token) in [("teacher", teacher_token()), ("student", student_token())] {
-            let (status, _) = post_create_producer(&server, &token, &payload).await;
+            let resp = server
+                .post("/api/v1/management/producers")
+                .add_header("Authorization", format!("Bearer {token}"))
+                .content_type("application/json")
+                .bytes(axum::body::Bytes::from(payload.to_string()))
+                .await;
             assert_eq!(
-                status,
+                resp.status_code(),
                 axum::http::StatusCode::FORBIDDEN,
                 "{role} must be 403 on POST /producers"
             );
@@ -467,17 +474,18 @@ async fn upload_producer_deck_missing_producer_404() {
     .await;
 }
 
-/// Missing credentials → 401 on both the read and write surfaces.
+/// Missing credentials → 403 on both the read and write surfaces (the
+/// management middleware requires a teacher/admin role; no token → 403).
 #[tokio::test]
 #[serial]
 async fn producers_require_authentication() {
     use_stub_verifier();
     testing::request::<backend::App, _, _>(|server, _ctx| async move {
         let resp = server.get("/api/v1/management/producers").await;
-        assert_eq!(resp.status_code(), axum::http::StatusCode::UNAUTHORIZED);
+        assert_eq!(resp.status_code(), axum::http::StatusCode::FORBIDDEN);
 
         let resp = server.post("/api/v1/management/producers").await;
-        assert_eq!(resp.status_code(), axum::http::StatusCode::UNAUTHORIZED);
+        assert_eq!(resp.status_code(), axum::http::StatusCode::FORBIDDEN);
     })
     .await;
 }

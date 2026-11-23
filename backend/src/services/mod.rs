@@ -53,6 +53,7 @@ pub mod capsule_generator_job;
 pub mod capsule_slicer;
 pub mod fsrs_sort;
 pub mod fsrs_state;
+pub mod schedule_triage;
 
 // Interleaved Mastery Pipeline — Phase 4 (Telemetry, Analytics, Audit)
 pub mod admin_bootstrap;

@@ -320,7 +320,9 @@ struct PreparedSort {
 
 /// Open the `.anki2` collection read-only (immutable mode) and read the
 /// snapshot clock context.
-fn open_collection(anki2_path: impl AsRef<Path>) -> Result<(Connection, RecallCtx), FsrsSortError> {
+pub(crate) fn open_collection(
+    anki2_path: impl AsRef<Path>,
+) -> Result<(Connection, RecallCtx), FsrsSortError> {
     let path_str = anki2_path.as_ref().display().to_string();
     let uri = format!("file:{}?immutable=1", path_str);
     let conn = Connection::open_with_flags(
@@ -336,7 +338,7 @@ fn open_collection(anki2_path: impl AsRef<Path>) -> Result<(Connection, RecallCt
 }
 
 /// Read the snapshot clock context from an open collection.
-fn snapshot_ctx(conn: &Connection) -> Result<RecallCtx, FsrsSortError> {
+pub(crate) fn snapshot_ctx(conn: &Connection) -> Result<RecallCtx, FsrsSortError> {
     let crt: i64 = conn
         .query_row("SELECT crt FROM col LIMIT 1", [], |row| row.get(0))
         .map_err(|e| FsrsSortError::QueryFailed("col.crt".into(), e))?;
@@ -425,6 +427,90 @@ fn query_due_cards(
     Ok(cards)
 }
 
+/// Scheduling facts for an early-review fill candidate (B-0035 §3).
+///
+/// Not-yet-due review cards only: fillers are ordinary early reviews, so new
+/// cards (type 0) and learning cards (type 1) are excluded at the query level.
+/// The last-review timestamp used by the interval-fraction gate comes from the
+/// derived memory states (`fsrs_state::ensure_states`), which merge the
+/// `.anki2` revlog with the student's `web_review_log` answers — so the gate
+/// sees web-reviewer answers too and blocks same-day repeats on both paths.
+pub(crate) struct FillFacts {
+    pub card_id: i64,
+    pub note_id: i64,
+    pub note_tags: String,
+    pub ivl: i64,
+    pub due: i64,
+}
+
+/// Fetch not-yet-due review cards as early-review fill candidates (B-0035 §3).
+///
+/// Selection: `queue >= 0`, `type = 2` (review), `due > today_day` (not yet
+/// due), tag-matched. The caller applies the R floor and the
+/// interval-fraction gate (`elapsed >= fill.interval_fraction × ivl`) using
+/// the derived memory states.
+///
+/// Bounded at [`FILL_CANDIDATE_LIMIT`] rows: the fill cap is at most the
+/// capsule budget (≤ hard cap 25), so a bounded candidate pool is ample
+/// headroom after the gates.
+pub(crate) const FILL_CANDIDATE_LIMIT: i64 = 1000;
+
+pub(crate) fn query_fill_candidates(
+    conn: &Connection,
+    tags: &[String],
+    ctx: RecallCtx,
+) -> Result<Vec<FillFacts>, FsrsSortError> {
+    let escaped_tags: Vec<String> = tags
+        .iter()
+        .map(|t| format!("n.tags LIKE '%{}%'", t.replace('\'', "''")))
+        .collect();
+    let tag_filter = escaped_tags.join(" OR ");
+
+    let sql = format!(
+        "SELECT c.id, c.nid, n.tags, c.ivl, c.due \
+         FROM cards c \
+         JOIN notes n ON c.nid = n.id \
+         WHERE c.queue >= 0 \
+           AND ({tag_filter}) \
+           AND c.type = 2 \
+           AND c.due > {today_day} \
+         ORDER BY c.id \
+         LIMIT {limit}",
+        today_day = ctx.today_day,
+        limit = FILL_CANDIDATE_LIMIT,
+    );
+
+    let mut stmt = conn
+        .prepare(&sql)
+        .map_err(|e| FsrsSortError::QueryFailed("fill candidates query prep".into(), e))?;
+
+    let rows = stmt
+        .query_map([], |row| {
+            Ok((
+                row.get::<_, i64>(0)?,    // c.id
+                row.get::<_, i64>(1)?,    // c.nid
+                row.get::<_, String>(2)?, // n.tags
+                row.get::<_, i64>(3)?,    // c.ivl
+                row.get::<_, i64>(4)?,    // c.due
+            ))
+        })
+        .map_err(|e| FsrsSortError::QueryFailed("fill candidates query exec".into(), e))?;
+
+    let mut cards = Vec::new();
+    for row in rows {
+        let (card_id, note_id, note_tags, ivl, due) =
+            row.map_err(|e| FsrsSortError::QueryFailed("fill row read".into(), e))?;
+        cards.push(FillFacts {
+            card_id,
+            note_id,
+            note_tags,
+            ivl,
+            due,
+        });
+    }
+    Ok(cards)
+}
+
 /// Apply the recall function, assign track tags, and sort by urgency.
 /// Pure — no I/O; the per-track time estimate is passed in precomputed.
 fn rank_and_sort(
@@ -486,7 +572,7 @@ fn rank_and_sort(
 // ---------------------------------------------------------------------------
 
 /// In-house half-life recall (rollback path + property-suite anchor).
-fn in_house_recall(facts: &CardFacts, ctx: &RecallCtx) -> f64 {
+pub(crate) fn in_house_recall(facts: &CardFacts, ctx: &RecallCtx) -> f64 {
     let overdue_days = compute_overdue_days(
         facts.card_type,
         facts.due,
@@ -504,7 +590,11 @@ fn in_house_recall(facts: &CardFacts, ctx: &RecallCtx) -> f64 {
 ///   elapsed = days since last review (fractional when the review timestamp
 ///   is known, day-precision otherwise).
 /// * Cards missing from `states` → in-house recall (defensive fallback).
-fn fsrs_recall(facts: &CardFacts, ctx: &RecallCtx, states: &HashMap<i64, DerivedState>) -> f64 {
+pub(crate) fn fsrs_recall(
+    facts: &CardFacts,
+    ctx: &RecallCtx,
+    states: &HashMap<i64, DerivedState>,
+) -> f64 {
     if facts.card_type == 0 {
         return NEW_CARD_SENTINEL_RECALL;
     }

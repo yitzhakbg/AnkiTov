@@ -18,6 +18,13 @@ use crate::services;
 
 const TAG: &str = "Management Console";
 
+/// Payload for the seat kiosk-level endpoint.
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct SetKioskLevelRequest {
+    /// 0 = practice-only kiosk, 1 = guided, 2 = full Anki. Clamped.
+    pub kiosk_level: i32,
+}
+
 /// Resolve the student-profiles root directory ("playground").
 ///
 /// Order: explicit request value → `ANKITOV_PROFILES_ROOT` env var →
@@ -78,6 +85,43 @@ pub struct BulkEnrollRequest {
     pub display_names: Option<Vec<String>>,
 }
 
+/// Set a student's seat kiosk level (owner decision 2026-11-23).
+///
+/// The level is read by SeatManager at the student's NEXT seat start
+/// (users.kiosk_level → ANKITOV_SEAT_KIOSK_LEVEL → kiosk.py). A running
+/// seat keeps its current level until restarted.
+#[utoipa::path(
+    put,
+    path = "/management/students/{id}/kiosk-level",
+    request_body = SetKioskLevelRequest,
+    params(("id" = i64, Path, description = "Student user id")),
+    responses((status = 200, description = "Kiosk level updated")),
+    tag = TAG
+)]
+pub async fn set_kiosk_level(
+    State(ctx): State<AppContext>,
+    axum::extract::Path(id): axum::extract::Path<i64>,
+    Json(payload): Json<SetKioskLevelRequest>,
+) -> Result<Response> {
+    let db = &ctx.db;
+    let level = payload.kiosk_level.clamp(0, 2);
+
+    let mut active: user::ActiveModel = user::Entity::find_by_id(id)
+        .one(db)
+        .await
+        .map_err(|_| loco_rs::Error::InternalServerError)?
+        .ok_or(loco_rs::Error::NotFound)?
+        .into();
+    active.kiosk_level = sea_orm::ActiveValue::Set(level);
+    active.updated_at = sea_orm::ActiveValue::Set(chrono::Utc::now().timestamp());
+    user::Entity::update(active).exec(db).await.map_err(|e| {
+        tracing::error!("Failed to set kiosk level for user {id}: {:?}", e);
+        loco_rs::Error::InternalServerError
+    })?;
+
+    format::json(serde_json::json!({ "status": "ok", "kiosk_level": level }))
+}
+
 /// Routes for student import.
 pub fn routes() -> Routes {
     Routes::new()
@@ -89,6 +133,10 @@ pub fn routes() -> Routes {
         )
         .add("/management/students/populate-decks", post(populate_decks))
         .add("/management/students/import-file", post(import_file))
+        .add(
+            "/management/students/:id/kiosk-level",
+            put(set_kiosk_level),
+        )
 }
 
 /// Scan AnkiPlayGround directory and return all student profiles found.

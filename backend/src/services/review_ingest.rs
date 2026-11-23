@@ -18,6 +18,7 @@ use serde::Serialize;
 
 use crate::models::entities::web_review_log as wrl_entity;
 use crate::services::audit_logger;
+use crate::services::schedule_triage;
 
 #[derive(Debug, serde::Deserialize)]
 pub struct ReviewAnswer {
@@ -103,6 +104,22 @@ pub async fn ingest_answer(
         answer.session_id.as_deref(),
     )
     .await;
+
+    // 2b) B-0035: answering a card clears its active deferral override
+    // (spec §2: "answering a card clears its active override — hook at the
+    // same point where review state is recorded"). Best-effort: a failed
+    // clear must not fail the answer ingest; the next session assembly
+    // recomputes the overlay anyway (self-healing).
+    if let Err(e) =
+        schedule_triage::clear_override(db, &student_id.to_string(), answer.card_id).await
+    {
+        tracing::warn!(
+            "web reviewer: schedule_override clear failed (student {}, card {}): {}",
+            student_id,
+            answer.card_id,
+            e
+        );
+    }
 
     // 3) capsule progress (shared with the telemetry path)
     let session_progress = if let Some(ref sid) = answer.session_id {

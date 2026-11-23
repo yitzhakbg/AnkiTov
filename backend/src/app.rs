@@ -116,6 +116,7 @@ impl Hooks for App {
             .add_route(controllers::setup::routes())
             .add_route(controllers::telemetry::routes())
             .add_route(controllers::reviewer::routes())
+            .add_route(controllers::seats_stream::routes())
             .add_route(controllers::sync::routes())
             .add_route(controllers::management::decks::routes())
             .add_route(controllers::management::stats::routes())
@@ -509,6 +510,7 @@ impl Hooks for App {
                 role: Set(role.to_string()),
                 subsection_id: Set(subsection_id.map(|s| s.to_string())),
                 password_hash: Set(None),
+                kiosk_level: Set(0),
                 created_at: Set(now),
                 updated_at: Set(now),
             };

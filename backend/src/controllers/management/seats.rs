@@ -20,9 +20,15 @@ fn seat_json(info: &crate::services::seat_manager::SeatInfo) -> serde_json::Valu
         "gpu": info.gpu,
         "stream_url": info.stream_url(),
         "uptime_secs": info.started_at.elapsed().as_secs(),
+        // Kiosk level this seat runs at (users.kiosk_level at start).
+        "kiosk_level": info.kiosk_level,
         // Selkies basic auth — the browser prompts for these (user is fixed).
         "auth_user": "ubuntu",
         "auth_password": info.password,
+        // Proxy-level stream auth (owner decision 2026-11-23): append
+        // ?seat_token=<stream_token> to stream_url — the authz endpoint
+        // exchanges it for a scoped cookie on first load.
+        "stream_token": info.token,
     })
 }
 
@@ -36,10 +42,18 @@ fn seat_json(info: &crate::services::seat_manager::SeatInfo) -> serde_json::Valu
 )]
 pub async fn start(
     Extension(user): Extension<AuthUser>,
+    State(ctx): State<AppContext>,
     axum::extract::Path(student): axum::extract::Path<String>,
 ) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
-    match SeatManager::global().start_seat(&student).await {
+    // Per-student seat profile (owner decision 2026-11-23): kiosk level
+    // lives on users.kiosk_level; the email feeds telemetry attribution.
+    // SeatManager itself stays DB-free — the controller resolves and passes.
+    let (kiosk_level, email) = resolve_student_seat_profile(&ctx, &student).await;
+    match SeatManager::global()
+        .start_seat(&student, kiosk_level, email.as_deref())
+        .await
+    {
         Ok(info) => format::json(serde_json::json!({ "status": "running", "seat": seat_json(&info) })),
         Err(crate::services::seat_manager::SeatError::AlreadyRunning) => {
             // Idempotent: report the existing seat.
@@ -100,4 +114,24 @@ pub fn routes() -> Routes {
         .add("/", get(list))
         .add("/:student/start", post(start))
         .add("/:student", delete(stop))
+}
+
+/// Resolve a student's seat settings from the DB: `(kiosk_level, email)`.
+///
+/// Lenient by design — unknown or non-numeric ids (army-style synthetic
+/// students, legacy seats) fall back to the locked-down kiosk (level 0)
+/// rather than failing the start. The seat is keyed by the same id either
+/// way, so the proxy authz binding is unaffected.
+async fn resolve_student_seat_profile(ctx: &AppContext, student: &str) -> (i32, Option<String>) {
+    const DEFAULT_LEVEL: i32 = 0;
+    let Ok(id) = student.parse::<i64>() else {
+        return (DEFAULT_LEVEL, None);
+    };
+    match crate::models::entities::user::Entity::find_by_id(id)
+        .one(&ctx.db)
+        .await
+    {
+        Ok(Some(u)) => (u.kiosk_level.clamp(0, 2), Some(u.email)),
+        _ => (DEFAULT_LEVEL, None),
+    }
 }
