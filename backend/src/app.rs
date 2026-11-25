@@ -117,7 +117,6 @@ impl Hooks for App {
             .add_route(controllers::telemetry::routes())
             .add_route(controllers::reviewer::routes())
             .add_route(controllers::seats_stream::routes())
-            .add_route(controllers::drill::routes())
             .add_route(controllers::sync::routes())
             .add_route(controllers::management::decks::routes())
             .add_route(controllers::management::stats::routes())
@@ -260,10 +259,16 @@ impl Hooks for App {
             // while zero admin accounts exist — see controllers/setup.rs).
             .route("/setup", get(controllers::dashboard::setup_page));
 
-        // The first-login handlers need `State<AppContext>` but the dashboard router is
-        // `Router<()>`, so we attach state to a nested sub-router. Their absolute `/d/...`
-        // paths land on the public (non-gated) branch of the outer router.
-        let first_login_api = Router::new()
+        // Handlers that need `State<AppContext>` but must live at the ROOT
+        // (outside the /api/v1 prefix — the dashboard router is `Router<()>`,
+        // so we attach state to a nested sub-router). Their absolute paths land
+        // on the public (non-gated) branch of the outer router:
+        // - /d/... first-login wizard (the invite token is the credential)
+        // - /drill/:id drill-link front door (T-215; the token IS the
+        //   credential — the shareable URL is ANKITOV_PUBLIC_URL/drill/<token>
+        //   and must NOT carry the /api/v1 prefix, which Loco's
+        //   AppRoutes::prefix prepends to every controller route).
+        let public_state_api = Router::new()
             .route(
                 "/d/teachers/first-login-status/:invite_id/:token",
                 get(controllers::management::teachers::first_login_status),
@@ -272,6 +277,7 @@ impl Hooks for App {
                 "/d/teachers/first-login/:invite_id/:token",
                 post(controllers::management::teachers::first_login),
             )
+            .route("/drill/:id", get(controllers::drill::drill))
             .with_state(ctx.clone());
 
         // Gate `/api/v1/management/*` with the JWT middleware, applied as a
@@ -281,7 +287,7 @@ impl Hooks for App {
         // `/api/v1/auth/*`, `/api/v1/telemetry/*`, and the `/d/...` first-login routes
         // stay accessible without a token.
         let final_router = dashboard
-            .nest("/", first_login_api)
+            .nest("/", public_state_api)
             .layer(axum::middleware::from_fn(require_auth_for_management))
             .layer(cors);
         // Stash the finished router so the classroom toggle can serve the same

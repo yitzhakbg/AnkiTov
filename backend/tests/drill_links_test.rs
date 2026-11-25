@@ -18,7 +18,7 @@ use sea_orm::{entity::prelude::EntityTrait, ActiveValue, Set};
 use serde_json::{json, Value};
 
 const MGMT: &str = "/api/v1/management/drill-links";
-const PUBLIC: &str = "/api/v1/drill";
+const PUBLIC: &str = "/drill";
 
 /// A pack name shaped for the allowlist; whether it "exists on disk" is
 /// controlled by pointing `ANKITOV_SEED_DIR` at the temp fixture.

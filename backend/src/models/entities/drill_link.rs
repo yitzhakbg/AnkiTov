@@ -1,7 +1,7 @@
 use sea_orm::entity::prelude::*;
 
 /// A shareable Anki-less drill link (T-215 First-60-Seconds): clicking
-/// `GET /api/v1/drill/<id>` spawns an ephemeral preview seat with this
+/// `GET /drill/<id>` spawns an ephemeral preview seat with this
 /// link's pack imported and its deck auto-opened (kiosk 0), then 302s the
 /// browser to the Selkies stream. Design record:
 /// `specs/design/2026-11-23-first-60-seconds-drill-link.md`.
@@ -9,7 +9,7 @@ use sea_orm::entity::prelude::*;
 #[sea_orm(table_name = "drill_links")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
-    /// The random urlsafe token — it IS the `/api/v1/drill/<id>` path segment.
+    /// The random urlsafe token — it IS the `/drill/<id>` path segment.
     pub id: String,
     /// Seed `.apkg` file name the seat imports (ANKITOV_SEAT_PACKS value).
     pub pack: String,

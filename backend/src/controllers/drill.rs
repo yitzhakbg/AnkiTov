@@ -55,9 +55,12 @@ const SEAT_READY_POLL: Duration = Duration::from_millis(250);
 
 static RATE_LIMITER: OnceLock<Mutex<HashMap<String, (Instant, u32)>>> = OnceLock::new();
 
-pub fn routes() -> Routes {
-    Routes::new().prefix("/drill").add("/:id", get(drill))
-}
+// NOTE: this controller has no `routes()` — the public door is mounted at the
+// ROOT (`/drill/:id`) in `app.rs::after_routes`, NOT under the `/api/v1`
+// prefix. Loco's `AppRoutes::prefix` prepends the API prefix to every
+// controller route, which would turn the shareable URL
+// `ANKITOV_PUBLIC_URL/drill/<token>` into `/api/v1/drill/<token>` (the bug
+// that shipped the first prod drill link as a 404).
 
 /// GET /drill/:id — the drill link (public; token is the credential).
 #[utoipa::path(

@@ -1,7 +1,7 @@
 //! Migration — T-215 First-60-Seconds drill links.
 //!
 //! Creates the `drill_links` table: one row per shareable Anki-less drill
-//! link (`GET /api/v1/drill/<id>` → seat start with the link's pack/deck →
+//! link (`GET /drill/<id>` → seat start with the link's pack/deck →
 //! 302 to the seat stream). Purely additive — it does not touch any existing
 //! table, so rollback cost is zero.
 //!
