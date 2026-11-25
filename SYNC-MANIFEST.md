@@ -1,7 +1,7 @@
 # SYNC-MANIFEST
 
-- monorepo ref: slkouzwkswsr/55ca153f26b0
-- exported at: 2026-11-25T20:40:20Z
+- monorepo ref: vyqrtzoomkpv/5c6c6d7cbabb
+- exported at: 2026-11-25T20:55:52Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
@@ -382,7 +382,7 @@ add27fd38c2c1723df4cbaa1d1f231bbe9a6eb2aa9121b2bb7b2c22b3c79644b  specs/oss/2026
 44771a24b8452ef9baf71476258ba7d1bccfd65252a58e3b362e55ac19084a0e  stream/selkies-anki/Dockerfile.anki-base
 f0c2a6f3fc247e54b29a72143833a9c54cd02e2056d3333aaaf6c957c8423056  stream/selkies-anki/README.md
 003ec5d9aec23cde5fadae3c1e0e7ac7c833bcada104ff6b52490bb4142b8231  stream/selkies-anki/bench/seat_loadtest.sh
-0f6a2d40712446c5ce6dc5ff51a0420076f328133e388b4e839e736f7317c228  stream/selkies-anki/boot.py
+b2356966a53f4eb69b64e0bd22da24a0e515a7bc132d6dc062a02785f33c50c1  stream/selkies-anki/boot.py
 a69b3e31aa439dc490940778179d912fd5d585e1f46821d1ca9b74c3af91bcf5  stream/selkies-anki/docker-compose.anki.yml
 1c7f4a590ff24454f01a7d26ed54ee43c4fc774b50022fbedaf5f86fdd4ec947  stream/selkies-anki/launch_anki.sh
 e9c14592171f52492a1fd40d7354294116eecc7a3503c4cf2d86829b134a4ef4  stream/selkies-anki/patch_prefs.py
