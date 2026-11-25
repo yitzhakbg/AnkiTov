@@ -1,7 +1,7 @@
 # SYNC-MANIFEST
 
-- monorepo ref: ntoxrmzywmtm/71cf2bbb2082
-- exported at: 2026-11-25T07:03:16Z
+- monorepo ref: slkouzwkswsr/55ca153f26b0
+- exported at: 2026-11-25T20:40:20Z
 - export tool: scripts/oss/export-ankitov-core.sh
 - boundary spec: specs/oss/2026-09-03-ankitov-core-boundary-map.md
 
@@ -67,7 +67,7 @@ e810914479f25e9d28affa3cc996124453c192031db30f6d27d48ce01565ce05  backend/src/ap
 7aa17932e73648baccd55fe637ee460c361a27290fbdceb76e53be928b5f0948  backend/src/banner.rs
 f33105a3b4425144ccc8738d5f78858520c2bbbcf6d95dcae048876fcec3c23f  backend/src/controllers/auth.rs
 408a60aaf4319e69412f4766eeaa9eca2559b81c43a0d7c0c7463cfbe555a09f  backend/src/controllers/dashboard.rs
-8308f40414322fe18ad010d48f596939ed16682dbe015b466ecdb23f869de3ed  backend/src/controllers/drill.rs
+338503696edfe6a8e111e181f87a4b768ba395702c2f79baf974bfbc141358d2  backend/src/controllers/drill.rs
 de7ac55124c2c1c4d92400b96a79876830f87c31703970755331a5fd4295a9c0  backend/src/controllers/health.rs
 205a1ef974fe1429dd3e8f44e321077dcbd657c8eaae292ee3eabd31a218ccbe  backend/src/controllers/locale.rs
 d0e096d14b76912fe6c22e09715d0320c19ef28b23e3dcfd25866f3f488c1bc5  backend/src/controllers/management/addons.rs
@@ -177,7 +177,7 @@ b65ac2fd74687b56d1338b165b54d25a20e1e5aee4d813a6895f99d8cd316d9d  backend/src/se
 bf39cfe1a66b19c0c60be993f4caf704cfcb84bb8d68d82666a7cf0c2ce5bfed  backend/src/services/review_ingest.rs
 781e8d5640f2df78f6c3c386ee94e41402a4a6de35553913f73ffdcd3b758c37  backend/src/services/rig_nlu.rs
 79ba8e3ab935eeda17e285b10590425bf9a2885452acde1b104fc369f6d1efc4  backend/src/services/schedule_triage.rs
-8e83725ae6480c84f700e32fca849bdca8b36b30dec96f5f025d49818ade81f6  backend/src/services/seat_manager.rs
+e1dad1f3b2bf3c12f473ef445c8890a01ee79e8a3df12e9cd95840952328497c  backend/src/services/seat_manager.rs
 bad7db1dd88bc2afed8cf0769131ee6db51b795489c22b8b30f82eb674711368  backend/src/services/settings.rs
 d7f79457ea2c519fe5b3137483fc0f9dde21345fab74757cc8d63aaccf3d39e8  backend/src/services/student_import.rs
 3cbc14a5a6c362f868bfdabac12ae55897dee514cb9a05176e09a46bf7878d29  backend/src/services/sync_user.rs
@@ -381,10 +381,11 @@ a254b24243d1c87d00669fa723deed57376fd1a7581bcf350903534bf6260991  specs/design/2
 add27fd38c2c1723df4cbaa1d1f231bbe9a6eb2aa9121b2bb7b2c22b3c79644b  specs/oss/2026-09-03-ankitov-core-boundary-map.md
 44771a24b8452ef9baf71476258ba7d1bccfd65252a58e3b362e55ac19084a0e  stream/selkies-anki/Dockerfile.anki-base
 f0c2a6f3fc247e54b29a72143833a9c54cd02e2056d3333aaaf6c957c8423056  stream/selkies-anki/README.md
-d500f96d471ea987ec4c09a83a0fc5468f910e4b3c20df7d7afabcd8ecaeae5e  stream/selkies-anki/bench/seat_loadtest.sh
+003ec5d9aec23cde5fadae3c1e0e7ac7c833bcada104ff6b52490bb4142b8231  stream/selkies-anki/bench/seat_loadtest.sh
 0f6a2d40712446c5ce6dc5ff51a0420076f328133e388b4e839e736f7317c228  stream/selkies-anki/boot.py
 a69b3e31aa439dc490940778179d912fd5d585e1f46821d1ca9b74c3af91bcf5  stream/selkies-anki/docker-compose.anki.yml
 1c7f4a590ff24454f01a7d26ed54ee43c4fc774b50022fbedaf5f86fdd4ec947  stream/selkies-anki/launch_anki.sh
+e9c14592171f52492a1fd40d7354294116eecc7a3503c4cf2d86829b134a4ef4  stream/selkies-anki/patch_prefs.py
 881e0256af12e7038095bfe31e4bfa45a56f2c0e8ca505a8d0ab8d386142ad3b  stream/selkies-anki/sitecustomize.py
 37c7167c0841373ad092761360e7b58961854b91d04b7477ffb209fbf858c9c2  stream/selkies-anki/svc/anki/run
 f9d6279a9013675d6ebcff7ee441e7ea4e32e80c2b6a40d78a9eadf365d7dd8b  stream/selkies-anki/svc/labwc/rc.xml

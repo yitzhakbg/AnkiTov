@@ -28,6 +28,7 @@ use loco_rs::prelude::*;
 use rand::Rng;
 use sea_orm::entity::prelude::EntityTrait;
 use sea_orm::{ActiveModelTrait, Set};
+use tokio::net::TcpStream;
 
 use crate::models::entities::drill_link;
 use crate::services::seat_manager::{SeatLaunch, SeatManager, SeatTier};
@@ -42,6 +43,15 @@ const RATE_MAX_HITS: u32 = 20;
 /// After a spawn failure give the (likely misconfigured) backend a breather
 /// before the next anonymous click retries the spawn.
 const BUSY_RETRY_HINT_SECS: u64 = 30;
+/// How long the drill redirect waits for the freshly spawned seat's Selkies
+/// to accept TCP connections before 302ing anyway (T-222 fix (a)). Without
+/// this wait the browser can hit the seat port during the spawn gap and get
+/// a 502 from the reverse proxy — the "first click lands on an error page"
+/// window. The cap bounds worst-case click latency; on timeout we redirect
+/// anyway (degrade to the old behavior, never fail the click because a box
+/// is slow).
+const SEAT_READY_WAIT: Duration = Duration::from_secs(15);
+const SEAT_READY_POLL: Duration = Duration::from_millis(250);
 
 static RATE_LIMITER: OnceLock<Mutex<HashMap<String, (Instant, u32)>>> = OnceLock::new();
 
@@ -120,6 +130,7 @@ pub async fn drill(
             if let Err(e) = am.update(&ctx.db).await {
                 tracing::error!("drill use_count bump failed (seat already up): {e}");
             }
+            wait_seat_http_ready(info.port).await;
             redirect_to_seat(&info.stream_url(), &info.token)
         }
         Err(e) => {
@@ -165,6 +176,28 @@ fn rand_suffix(len: usize) -> String {
     (0..len)
         .map(|_| ALPHABET[rng.gen_range(0..ALPHABET.len())] as char)
         .collect()
+}
+
+/// Wait until the seat's Selkies port accepts TCP connections (bounded).
+/// Caddy 502s any request that arrives before Selkies binds its port, and a
+/// 502 on the very first click reads as a broken link — so we hold the 302
+/// briefly until the port answers. Degrades to a plain redirect on timeout
+/// (the seat may still come up; the visitor can refresh).
+async fn wait_seat_http_ready(port: u16) {
+    let deadline = tokio::time::Instant::now() + SEAT_READY_WAIT;
+    loop {
+        if tokio::time::Instant::now() >= deadline {
+            tracing::warn!(
+                "seat port {port} not ready after {:?}; redirecting anyway",
+                SEAT_READY_WAIT
+            );
+            return;
+        }
+        if TcpStream::connect(("127.0.0.1", port)).await.is_ok() {
+            return;
+        }
+        tokio::time::sleep(SEAT_READY_POLL).await;
+    }
 }
 
 /// 302 to the seat stream, handing the per-seat token for the cookie

@@ -16,8 +16,13 @@
 //!   container images; measured numbers pending the ub3090 load benchmark).
 //! * `--dev-bind-try` gives automatic GPU passthrough when present and a
 //!   silent llvmpipe/CPU-encode fallback when not — one code path for both.
-//! * `--die-with-parent` + `--unshare-pid` guarantees the whole seat
-//!   process tree dies with the backend handle (no zombie Anki seats).
+//! * `--die-with-parent` + `--unshare-pid` tears the seat process tree
+//!   down with the sandbox handle — but it CANNOT survive the backend
+//!   process being restarted around a running seat (T-220, found live
+//!   2026-11-25: the Nov-23 deploy left seat 8100 orphaned and serving
+//!   while every student was authz-locked out). So start_seat also
+//!   records a `seat.pid` file, and every fresh manager boot reaps
+//!   pidfile-documented orphans (`reconcile_orphans`).
 //! * Runs identically on bare metal (.deb/.rpm hosts), inside Docker
 //!   (`--ro-bind / /`), and — never — inside Flatpak (dropped 2026-11-21).
 //!
@@ -30,6 +35,7 @@
 //! | `ANKITOV_SEAT_BASE_PORT` | `8100` | First Selkies stream port |
 //! | `ANKITOV_SEAT_MAX` | `64` | Concurrent seat cap |
 //! | `ANKITOV_SEAT_IDLE_SECS` | `300` | Idle seconds before a seat is reaped |
+//! | `ANKITOV_SEAT_RUNTIME_DIR` | `/srv/ankitov-seat/runtime` | Per-seat writable scratch root (s6 service dirs) + the `seat.pid` files the boot-time orphan reconcile scans (T-220) |
 //! | `ANKITOV_BACKEND_URL` | `http://127.0.0.1:5150` | Told to the seat for telemetry |
 //! | `ANKITOV_PUBLIC_URL` | `http://127.0.0.1` | Public base URL the browser-facing `stream_url` is built from (e.g. `https://practice.ankitov.com`); the reverse proxy terminates TLS and routes `/seat/<port>/` to the seat |
 //! | `ANKITOV_SEAT_PASSWD` | random per seat | RESERVED for per-seat stream auth (product TODO). Selkies basic auth is DISABLED in seats — selkies refuses to boot with auth on and no password (EX_CONFIG 78), and the namespace + public proxy are the boundary |
@@ -187,14 +193,29 @@ impl SeatManager {
         let env_u16 = |k: &str, d: u16| {
             std::env::var(k).ok().and_then(|v| v.parse().ok()).unwrap_or(d)
         };
+        let runtime_root = std::env::var("ANKITOV_SEAT_RUNTIME_DIR").map(PathBuf::from)
+            .unwrap_or_else(|_| PathBuf::from("/srv/ankitov-seat/runtime"));
+        let bwrap = std::env::var("ANKITOV_SEAT_BWRAP").unwrap_or_else(|_| "bwrap".to_string());
+        // T-220: before the first seat action, reap sandboxes a backend
+        // restart left orphaned (seat state is in-memory; --die-with-parent
+        // protects the seat from ITS parent dying, not from the backend
+        // being restarted around it). Only processes whose kernel command
+        // name matches our bwrap binary are ever touched.
+        let expected_comm = PathBuf::from(&bwrap)
+            .file_name()
+            .map(|f| f.to_string_lossy().into_owned())
+            .unwrap_or_else(|| "bwrap".to_string());
+        let reaped_orphans = reconcile_orphans(&runtime_root, &expected_comm);
+        if reaped_orphans > 0 {
+            tracing::info!("seat orphan reconcile at boot: reaped {reaped_orphans} orphaned seat(s)");
+        }
         Self {
             rootfs: PathBuf::from(
                 std::env::var("ANKITOV_SEAT_ROOTFS")
                     .unwrap_or_else(|_| "/srv/ankitov-seat/rootfs".to_string()),
             ),
-            runtime_root: std::env::var("ANKITOV_SEAT_RUNTIME_DIR").map(PathBuf::from)
-                .unwrap_or_else(|_| PathBuf::from("/srv/ankitov-seat/runtime")),
-            bwrap: std::env::var("ANKITOV_SEAT_BWRAP").unwrap_or_else(|_| "bwrap".to_string()),
+            runtime_root,
+            bwrap,
             base_port: env_u16("ANKITOV_SEAT_BASE_PORT", 8100),
             max_seats: env_u16("ANKITOV_SEAT_MAX", 64) as usize,
             preview_max: env_u16("ANKITOV_SEAT_PREVIEW_MAX", 4) as usize,
@@ -311,6 +332,11 @@ impl SeatManager {
         );
         let child = cmd.spawn().map_err(|e| SeatError::Spawn(format!("bwrap: {e}")))?;
         let pid = child.id();
+        // T-220: record the spawn for the boot-time orphan reconcile —
+        // written BEFORE the seat becomes visible so even a seat started
+        // moments before a restart is findable. Best effort: the write
+        // must never fail a seat that already spawned.
+        write_pidfile(&self.runtime_root, &safe, pid, preview);
         let info = SeatInfo {
             student_id: safe.clone(),
             port,
@@ -355,6 +381,9 @@ impl SeatManager {
                 // Preview scratch is wiped whether or not the kill reported
                 // success — the seat is leaving the table either way.
                 wipe_preview_scratch(&rec.info, &self.runtime_root);
+                // Drop the boot-reconcile pidfile (wiped with the whole
+                // scratch dir for preview seats; explicit for full seats).
+                let _ = std::fs::remove_file(pidfile_path(&self.runtime_root, &safe));
                 match kill {
                     Ok(_) => {
                         tracing::info!("seat stopped: student={} pid={}", safe, rec.info.pid);
@@ -391,6 +420,7 @@ impl SeatManager {
             let rec = seats.remove(&id);
             if let Some(rec) = rec {
                 wipe_preview_scratch(&rec.info, &self.runtime_root);
+                let _ = std::fs::remove_file(pidfile_path(&self.runtime_root, &id));
                 let _ = Command::new("kill")
                     .arg("-TERM")
                     .arg(rec.info.pid.to_string())
@@ -629,6 +659,7 @@ impl SeatManager {
         for id in stale {
             if let Some(rec) = seats.remove(&id) {
                 wipe_preview_scratch(&rec.info, runtime_root);
+                let _ = std::fs::remove_file(pidfile_path(runtime_root, &id));
                 let _ = Command::new("kill")
                     .arg("-TERM")
                     .arg(rec.info.pid.to_string())
@@ -654,6 +685,168 @@ fn pid_alive(pid: u32) -> bool {
         let rc = unsafe { libc::kill(pid as libc::pid_t, 0) };
         rc == 0 || std::io::Error::last_os_error().raw_os_error() == Some(libc::EPERM)
     }
+}
+
+// ── T-220: boot-time orphan reconcile ────────────────────────────────────
+//
+// SeatManager's seat table is in-memory, so a backend restart leaves
+// every running seat sandbox orphaned: still holding its port + RAM/GPU
+// while the live seat table — and with it the stream-auth token↔port
+// bindings — is empty. No student can re-enter an orphaned seat anyway
+// (`/api/v1/seats/authz` validates against the LIVE table), so
+// reap-then-fresh-start is the honest minimal fix (T-220, filed
+// 2026-11-25; adoption cannot recover per-seat tokens, and sqlite seat
+// persistence is deferred until the student-facing seat flow settles).
+//
+// The reconcile is pidfile-driven: start_seat records `{pid} {preview}`
+// in `<runtime_root>/<student>/seat.pid`, and every fresh manager boot
+// reaps what is PROVABLY still a seat sandbox — alive AND whose kernel
+// command name matches our bwrap binary (pid-reuse guard; headscale
+// holding 127.0.0.1:8080 on the seat host is the standing reminder that
+// foreign pids must never be touched). Dirs without a pidfile are
+// skipped: pre-T-220 orphans keep the documented manual recovery path.
+
+/// How long the reconcile waits after SIGTERM before escalating to
+/// SIGKILL (bwrap teardown is normally sub-100 ms).
+const ORPHAN_TERM_WAIT: Duration = Duration::from_secs(2);
+
+/// `{pid} {preview_flag}` — the seat.pid content start_seat records
+/// (1 = preview-tier).
+fn parse_pidfile(text: &str) -> Option<(u32, bool)> {
+    let mut parts = text.split_whitespace();
+    let pid = parts.next()?.parse().ok()?;
+    let preview = parts.next().is_some_and(|f| f == "1");
+    Some((pid, preview))
+}
+
+/// `<runtime_root>/<student>/seat.pid` — the reconcile's only handle on a
+/// spawned seat.
+fn pidfile_path(runtime_root: &std::path::Path, safe_id: &str) -> PathBuf {
+    runtime_root.join(safe_id).join("seat.pid")
+}
+
+/// Record a spawn in the per-seat runtime dir (T-220). Best effort: the
+/// pidfile only powers boot-time reaping, and a failed write must NOT
+/// fail a seat that already spawned — that would orphan exactly the
+/// sandbox we were trying to account for.
+fn write_pidfile(runtime_root: &std::path::Path, safe_id: &str, pid: u32, preview: bool) {
+    let path = pidfile_path(runtime_root, safe_id);
+    let write = std::fs::create_dir_all(path.parent().unwrap_or(std::path::Path::new(".")))
+        .and_then(|_| std::fs::write(&path, format!("{pid} {}\n", preview as u8)));
+    if let Err(e) = write {
+        tracing::warn!("seat pidfile write failed {}: {e}", path.display());
+    }
+}
+
+/// Kernel-reported command name for `pid` (best effort): Linux reads
+/// /proc/<pid>/comm directly; elsewhere `ps -o comm=`. None = unknown.
+fn process_comm(pid: u32) -> Option<String> {
+    #[cfg(target_os = "linux")]
+    {
+        std::fs::read_to_string(format!("/proc/{pid}/comm"))
+            .ok()
+            .map(|comm| comm.trim().to_string())
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        Command::new("ps")
+            .arg("-o")
+            .arg("comm=")
+            .arg("-p")
+            .arg(pid.to_string())
+            .output()
+            .ok()
+            .filter(|out| out.status.success())
+            .map(|out| String::from_utf8_lossy(&out.stdout).trim().to_string())
+            .filter(|comm| !comm.is_empty())
+    }
+}
+
+/// True when `pid` exists AND still runs the expected binary — the
+/// pid-reuse guard: a pidfile can outlive its process, and the pid may
+/// have been reused by an unrelated process (never touch one).
+fn pid_matches(pid: u32, expected_comm: &str) -> bool {
+    pid_alive(pid) && process_comm(pid).is_some_and(|comm| comm == expected_comm)
+}
+
+/// Poll `pid` up to `budget` so a normal shutdown is allowed to finish
+/// before escalating to SIGKILL.
+fn wait_for_death(pid: u32, budget: Duration) {
+    let deadline = Instant::now() + budget;
+    while Instant::now() < deadline {
+        if !pid_alive(pid) {
+            return;
+        }
+        std::thread::sleep(Duration::from_millis(50));
+    }
+}
+
+/// Reap orphaned seat sandboxes recorded by pidfiles under
+/// `runtime_root` (see the block comment above). Returns how many were
+/// reaped.
+fn reconcile_orphans(runtime_root: &std::path::Path, expected_comm: &str) -> usize {
+    let Ok(entries) = std::fs::read_dir(runtime_root) else {
+        return 0; // fresh host / no seat runtime yet — nothing to do
+    };
+    let mut reaped = 0;
+    for entry in entries.flatten() {
+        if !entry.file_type().is_ok_and(|ty| ty.is_dir()) {
+            continue;
+        }
+        let pidfile = entry.path().join("seat.pid");
+        let Ok(text) = std::fs::read_to_string(&pidfile) else {
+            // No pidfile: a pre-T-220 orphan (manual recovery path) or a
+            // non-seat dir. Leave it alone.
+            continue;
+        };
+        let safe = entry.file_name().to_string_lossy().into_owned();
+        let Some((pid, preview)) = parse_pidfile(&text) else {
+            // Corrupt pidfile — unusable by construction; drop the file so
+            // a fresh start records a clean one.
+            let _ = std::fs::remove_file(&pidfile);
+            tracing::warn!("seat pidfile corrupt, dropped: {}", pidfile.display());
+            continue;
+        };
+        if pid_matches(pid, expected_comm) {
+            // Same shape as stop_seat: SIGTERM the bwrap root —
+            // --die-with-parent tears the tree down.
+            let _ = Command::new("kill").arg("-TERM").arg(pid.to_string()).output();
+            wait_for_death(pid, ORPHAN_TERM_WAIT);
+            if pid_matches(pid, expected_comm) {
+                let _ = Command::new("kill").arg("-KILL").arg(pid.to_string()).output();
+                wait_for_death(pid, ORPHAN_TERM_WAIT);
+            }
+            tracing::info!("seat orphan reaped at boot: student={safe} pid={pid}");
+            reaped += 1;
+        } else if pid_alive(pid) {
+            // A live pid whose comm is NOT ours: the pidfile is stale and
+            // the slot was reused — never kill; just drop the stale file.
+            tracing::info!(
+                "seat pidfile pid {pid} reused by a foreign process — pidfile dropped, process untouched"
+            );
+        }
+        // The pidfile's process is gone or foreign — either way the file
+        // is stale: drop it so a fresh start records a clean one.
+        let _ = std::fs::remove_file(&pidfile);
+        if preview {
+            // Preview orphan: nothing student-specific survives the tier
+            // (T-215) — wipe the scratch dirs. Stub info carries only the
+            // fields wipe_preview_scratch reads.
+            let info = SeatInfo {
+                student_id: safe,
+                port: 0,
+                pid,
+                started_at: Instant::now(),
+                gpu: false,
+                password: String::new(),
+                token: String::new(),
+                kiosk_level: 0,
+                preview: true,
+            };
+            wipe_preview_scratch(&info, runtime_root);
+        }
+    }
+    reaped
 }
 
 /// Seat collection dir — mirrors `collection_store`'s layout
@@ -898,5 +1091,119 @@ mod tests {
         // Nothing was created for either attempt.
         assert!(!std::path::Path::new("data/collections/drill-captest-aa01").exists());
         assert!(!std::path::Path::new("data/collections/student-captest").exists());
+    }
+
+    // ── T-220 boot-time orphan reconcile ────────────────────────────────
+
+    #[test]
+    fn parse_pidfile_roundtrip() {
+        assert_eq!(parse_pidfile("123 1\n"), Some((123, true)));
+        assert_eq!(parse_pidfile("456 0"), Some((456, false)));
+        assert_eq!(parse_pidfile("789"), Some((789, false)));
+        assert_eq!(parse_pidfile(""), None);
+        assert_eq!(parse_pidfile("x 1"), None);
+    }
+
+    /// A pidfile recording a LIVE seat-like process gets reaped: TERM'd,
+    /// pidfile dropped, full-tier runtime dir preserved for restaging.
+    /// `sleep` has a stable kernel command name ("sleep") on macOS dev and
+    /// Linux CI alike, so it stands in for bwrap with expected_comm="sleep".
+    #[test]
+    fn reconcile_orphans_live_orphan_killed() {
+        let mut child = Command::new("sleep").arg("30").spawn().unwrap();
+        let pid = child.id();
+        let tmp = std::env::temp_dir().join("ankitov-seat-reconcile-live");
+        let _ = std::fs::remove_dir_all(&tmp);
+        std::fs::create_dir_all(tmp.join("talmid-1")).unwrap();
+        std::fs::write(tmp.join("talmid-1/seat.pid"), format!("{pid} 0\n")).unwrap();
+
+        reconcile_orphans(&tmp, "sleep");
+
+        // try_wait also reaps the zombie, so pid_alive goes false.
+        let deadline = Instant::now() + Duration::from_secs(5);
+        let exited = loop {
+            match child.try_wait() {
+                Ok(Some(_)) => break true,
+                Ok(None) if Instant::now() < deadline => {
+                    std::thread::sleep(Duration::from_millis(50))
+                }
+                _ => break false,
+            }
+        };
+        assert!(exited, "live orphan must be reaped by the reconcile");
+        assert!(
+            !tmp.join("talmid-1/seat.pid").exists(),
+            "pidfile must be dropped after reap"
+        );
+        assert!(
+            tmp.join("talmid-1").exists(),
+            "full-tier runtime dir is preserved (restaged on next start)"
+        );
+        let _ = std::fs::remove_dir_all(&tmp);
+    }
+
+    /// A pidfile recording a DEAD pid is cleaned without any kill, and a
+    /// preview-tier orphan additionally gets its scratch dirs wiped
+    /// (nothing student-specific survives the tier, T-215).
+    #[test]
+    fn reconcile_orphans_dead_pid_and_preview_wiped() {
+        let tmp = std::env::temp_dir().join("ankitov-seat-reconcile-dead");
+        let _ = std::fs::remove_dir_all(&tmp);
+        std::fs::create_dir_all(tmp.join("runtime/drill-abc12345-x1")).unwrap();
+        std::fs::create_dir_all(tmp.join("preview/drill-abc12345-x1")).unwrap();
+        std::fs::write(
+            tmp.join("runtime/drill-abc12345-x1/seat.pid"),
+            "999999999 1\n",
+        )
+        .unwrap();
+        // wipe_preview_scratch resolves the collection root from the env —
+        // point it at the fixture (nextest isolates per test).
+        std::env::set_var("ANKITOV_COLLECTION_ROOT", &tmp);
+
+        reconcile_orphans(&tmp.join("runtime"), "sleep");
+
+        assert!(!tmp.join("runtime/drill-abc12345-x1/seat.pid").exists());
+        assert!(
+            !tmp.join("preview/drill-abc12345-x1").exists(),
+            "preview orphan scratch collection must be wiped"
+        );
+        assert!(
+            !tmp.join("runtime/drill-abc12345-x1").exists(),
+            "preview runtime scratch dir is wiped with it"
+        );
+        let _ = std::fs::remove_dir_all(&tmp);
+    }
+
+    /// A pidfile whose pid was REUSED by a foreign process (comm != ours)
+    /// must never be killed — the stale pidfile is dropped, the foreign
+    /// process keeps running (headscale-on-8080 lesson).
+    #[test]
+    fn reconcile_orphans_foreign_pid_untouched() {
+        let mut child = Command::new("sleep").arg("30").spawn().unwrap();
+        let pid = child.id();
+        let tmp = std::env::temp_dir().join("ankitov-seat-reconcile-foreign");
+        let _ = std::fs::remove_dir_all(&tmp);
+        std::fs::create_dir_all(tmp.join("talmid-2")).unwrap();
+        std::fs::write(tmp.join("talmid-2/seat.pid"), format!("{pid} 0\n")).unwrap();
+
+        // Expected comm "bwrap" != the spawned sleep — the identity check
+        // must refuse to kill.
+        reconcile_orphans(&tmp, "bwrap");
+
+        std::thread::sleep(Duration::from_millis(200));
+        match child.try_wait() {
+            Ok(Some(_)) => panic!("foreign process must NOT be killed"),
+            Ok(None) => {}
+            Err(e) => panic!("try_wait failed: {e}"),
+        }
+        assert!(
+            !tmp.join("talmid-2/seat.pid").exists(),
+            "stale pidfile must still be dropped"
+        );
+        assert!(tmp.join("talmid-2").exists());
+        // Cleanup the sleeper so the test leaks nothing.
+        let _ = child.kill();
+        let _ = child.wait();
+        let _ = std::fs::remove_dir_all(&tmp);
     }
 }
