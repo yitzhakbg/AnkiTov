@@ -26,6 +26,7 @@ use crate::controllers;
 #[openapi(
     paths(
         controllers::auth::logout,
+        controllers::drill::drill,
         controllers::locale::get_locale,
         controllers::locale::get_locale_info,
         controllers::locale::list_locales,
@@ -34,6 +35,7 @@ use crate::controllers;
     tags(
         (name = "Auth", description = "Registration, login, and session teardown"),
         (name = "Locale", description = "i18n data served to the frontend"),
+        (name = "Drill", description = "Anonymous drill-link front door (T-215)"),
     )
 )]
 pub struct PublicOpenApi;

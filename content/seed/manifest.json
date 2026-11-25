@@ -5,6 +5,21 @@
   "source_url": null,
   "decks": [
     {
+      "locale": "ar",
+      "slug": "gat-prep",
+      "file": "packages/gat-prep-ar.apkg",
+      "title": "AnkiTov — التدريب على اختبار القدرات العامة: اللفظي والكمي",
+      "card_count": 116,
+      "note_type_census": {
+        "basic": 72,
+        "cloze": 32,
+        "type_in": 12
+      },
+      "sha256": "20029cd6d93e07aa1580d6a79986941a8a6527999104dd4cc3dbbb7c997df975",
+      "rtl": true,
+      "rules_version": 1
+    },
+    {
       "locale": "de",
       "slug": "de-core-vocabulary",
       "file": "packages/de-core-vocabulary-de.apkg",
@@ -15,7 +30,7 @@
         "cloze": 48,
         "type_in": 0
       },
-      "sha256": "47646d43957e311eca00eac351c601f2cca550d2844ab5f710c966ededdf1922",
+      "sha256": "5262f481d0dc415a80aa7daf68921fb06183280deca8e54d644b814d810a6b3f",
       "rtl": false,
       "rules_version": 1
     },
@@ -30,7 +45,67 @@
         "cloze": 36,
         "type_in": 0
       },
-      "sha256": "82769fe29b313f61da64d502b5bd33f71b7a0f94904d3917c08961416d83ae57",
+      "sha256": "b709caddc8dc85efec36faec765437402c1feaadea87163faf770b7b963637fa",
+      "rtl": false,
+      "rules_version": 1
+    },
+    {
+      "locale": "de",
+      "slug": "english-vocabulary",
+      "file": "packages/english-vocabulary-de.apkg",
+      "title": "AnkiTov Pilot — Englisch-Vokabular",
+      "card_count": 105,
+      "note_type_census": {
+        "basic": 47,
+        "cloze": 32,
+        "type_in": 26
+      },
+      "sha256": "1dec53b00a04b48de8ae0accff5f8a9c2cc32edf2df04a2381215361bf42d9db",
+      "rtl": false,
+      "rules_version": 1
+    },
+    {
+      "locale": "de",
+      "slug": "history-dates-figures",
+      "file": "packages/history-dates-figures-de.apkg",
+      "title": "AnkiTov Pilot — Geschichte: Daten und Persönlichkeiten",
+      "card_count": 105,
+      "note_type_census": {
+        "basic": 73,
+        "cloze": 32,
+        "type_in": 0
+      },
+      "sha256": "ae6b91511cbb68b50ca37dc6bb53e7c59b18c00f03ef796100dd5e757532120b",
+      "rtl": false,
+      "rules_version": 1
+    },
+    {
+      "locale": "de",
+      "slug": "math-definitions",
+      "file": "packages/math-definitions-de.apkg",
+      "title": "AnkiTov Pilot — Mathematische Definitionen",
+      "card_count": 105,
+      "note_type_census": {
+        "basic": 47,
+        "cloze": 47,
+        "type_in": 11
+      },
+      "sha256": "5f4fb74571115f5c4ec6e5f5b80da010049f16a46af619be4ead0ae2072ed141",
+      "rtl": false,
+      "rules_version": 1
+    },
+    {
+      "locale": "de",
+      "slug": "science-terms",
+      "file": "packages/science-terms-de.apkg",
+      "title": "AnkiTov Pilot — Naturwissenschaftliche Begriffe",
+      "card_count": 105,
+      "note_type_census": {
+        "basic": 63,
+        "cloze": 32,
+        "type_in": 10
+      },
+      "sha256": "b1143fc603e925ef0214169e5f37d096316a301656dc6ea51e26cd29f243ee2c",
       "rtl": false,
       "rules_version": 1
     },
@@ -45,7 +120,7 @@
         "cloze": 9,
         "type_in": 0
       },
-      "sha256": "4a43838218dc2ff29c160f8807d881e5815825cbdabf893a0455ed3f1fd89751",
+      "sha256": "47d05ed30cd8f028ab3466e991726e1a5747f577b0ce12701188df23c3dac666",
       "rtl": false,
       "rules_version": 1
     },
@@ -60,7 +135,7 @@
         "cloze": 7,
         "type_in": 6
       },
-      "sha256": "3c19ed5f80f19b1f59bdf6277edf8c7408dfbbdd0def5799bbe6be7aae663332",
+      "sha256": "5edc007acedde7f627bef09edcbd35f34f56d4abe6ed0cfbf3af64e685df0e9e",
       "rtl": false,
       "rules_version": 1
     },
@@ -75,7 +150,7 @@
         "cloze": 32,
         "type_in": 26
       },
-      "sha256": "15fbcf4d88e14103747352090da3742b803fcd990de13247a05c86ba608b6e81",
+      "sha256": "eda1c9c2555130010d897fa60a3d9be00e1f5759c9eb17631907d35dc8c168a0",
       "rtl": false,
       "rules_version": 1
     },
@@ -90,7 +165,7 @@
         "cloze": 32,
         "type_in": 0
       },
-      "sha256": "54208cd3c0e94039322e3fcd23e1c09da005ee64e55e316c1ac881978e0020a8",
+      "sha256": "35da23bc056766335bfb6cdf43109d516692edd45aa41042c751ce198c9b2e54",
       "rtl": false,
       "rules_version": 1
     },
@@ -105,7 +180,7 @@
         "cloze": 47,
         "type_in": 11
       },
-      "sha256": "7ecb2c1de4eb24e2161267d189ac8e32495368b348131eb393032a0e222997a0",
+      "sha256": "3c109a8a62dc96ff2d5cd296d117b0bfcf52c5830d50abd89b3787c51becb431",
       "rtl": false,
       "rules_version": 1
     },
@@ -120,7 +195,7 @@
         "cloze": 32,
         "type_in": 10
       },
-      "sha256": "42aa6e9afbb6e6c39a76b40a1acda4cda93dd0646fce86cb14514db6bb4bd446",
+      "sha256": "c2d0e87bdf286ad094ec4b56718d73d049102bc2c6ec5ec07be92d1a39e4d4d8",
       "rtl": false,
       "rules_version": 1
     },
@@ -129,13 +204,13 @@
       "slug": "english-vocabulary",
       "file": "packages/english-vocabulary-es.apkg",
       "title": "AnkiTov Pilot — Vocabulario Inglés",
-      "card_count": 20,
+      "card_count": 105,
       "note_type_census": {
-        "basic": 14,
-        "cloze": 6,
-        "type_in": 0
+        "basic": 47,
+        "cloze": 32,
+        "type_in": 26
       },
-      "sha256": "e416514f70220c9e3213db214ec86c3b0873f3fdb4e256fc1d548e586bbed620",
+      "sha256": "a522fa5ee37d35044dcbf71ce7a3ce4ffa09f64a0a168bb3bb8bebf4c91a77b9",
       "rtl": false,
       "rules_version": 1
     },
@@ -144,13 +219,13 @@
       "slug": "history-dates-figures",
       "file": "packages/history-dates-figures-es.apkg",
       "title": "AnkiTov Pilot — Historia: Fechas y Cifras",
-      "card_count": 20,
+      "card_count": 105,
       "note_type_census": {
-        "basic": 10,
-        "cloze": 10,
+        "basic": 73,
+        "cloze": 32,
         "type_in": 0
       },
-      "sha256": "43fe7d3c7c3fa1aef249f582fc19fe15355ed3b543368eb3e667b038a7c32920",
+      "sha256": "d8a5608b683fe21ad7167d4ffa6e00a0dd85c403e48423316835bf1169cdd59a",
       "rtl": false,
       "rules_version": 1
     },
@@ -159,13 +234,13 @@
       "slug": "math-definitions",
       "file": "packages/math-definitions-es.apkg",
       "title": "AnkiTov Pilot — Definiciones de Matemáticas",
-      "card_count": 20,
+      "card_count": 105,
       "note_type_census": {
-        "basic": 13,
-        "cloze": 6,
-        "type_in": 1
+        "basic": 47,
+        "cloze": 47,
+        "type_in": 11
       },
-      "sha256": "1dfce245de6459252f77277a80d267a9eaa0fbe14fd22ef2b21425efb896dc87",
+      "sha256": "99a7ecb6db59ecd8bc54387e6a84793b54dd2059738f95a469d6df0e56aba87e",
       "rtl": false,
       "rules_version": 1
     },
@@ -174,13 +249,13 @@
       "slug": "science-terms",
       "file": "packages/science-terms-es.apkg",
       "title": "AnkiTov Pilot — Términos Científicos",
-      "card_count": 20,
+      "card_count": 105,
       "note_type_census": {
-        "basic": 14,
-        "cloze": 6,
-        "type_in": 0
+        "basic": 63,
+        "cloze": 32,
+        "type_in": 10
       },
-      "sha256": "969bb1b81e5fc7f127a0e4781e99aeaf887ff5fa0f38400f2264b1373ee9ffe5",
+      "sha256": "67dd36b7fa44da6e2dfb3ea6f0e701a8dcd173060ef702723a00cbbb97447d5b",
       "rtl": false,
       "rules_version": 1
     },
@@ -189,13 +264,13 @@
       "slug": "english-vocabulary",
       "file": "packages/english-vocabulary-fr.apkg",
       "title": "AnkiTov Pilot — Vocabulaire anglais",
-      "card_count": 20,
+      "card_count": 105,
       "note_type_census": {
-        "basic": 14,
-        "cloze": 6,
-        "type_in": 0
+        "basic": 47,
+        "cloze": 32,
+        "type_in": 26
       },
-      "sha256": "dd39c06cbc46391722b809a3a2d591f45def5eb2902823c54c2424a17b3170fa",
+      "sha256": "356bdc818efe60b35909b49131a5c48f9987e77fca4ecc16d8c3c41c07d566a6",
       "rtl": false,
       "rules_version": 1
     },
@@ -210,7 +285,7 @@
         "cloze": 32,
         "type_in": 0
       },
-      "sha256": "6cab91a4e20b0b4b5f10ca4711f85ff42a404195662b5b9dadec057d91828dbc",
+      "sha256": "e3e7062c881bfef729d0284b47b882524bdae8fc04cef36f81cfcb4ba49e5296",
       "rtl": false,
       "rules_version": 1
     },
@@ -219,13 +294,13 @@
       "slug": "math-definitions",
       "file": "packages/math-definitions-fr.apkg",
       "title": "AnkiTov Pilot — Définitions de maths",
-      "card_count": 20,
+      "card_count": 105,
       "note_type_census": {
-        "basic": 12,
-        "cloze": 8,
-        "type_in": 0
+        "basic": 47,
+        "cloze": 47,
+        "type_in": 11
       },
-      "sha256": "431eb2acc1df50e0dac8da0047490e66e32efbad92005e7beb8b36fbc9cc760f",
+      "sha256": "9ed88e2eb19bc59a1e16bb92876f8bafcd9e7479cbf858caedcca3a198b8b9c6",
       "rtl": false,
       "rules_version": 1
     },
@@ -234,13 +309,13 @@
       "slug": "science-terms",
       "file": "packages/science-terms-fr.apkg",
       "title": "AnkiTov Pilot — Termes scientifiques",
-      "card_count": 20,
+      "card_count": 105,
       "note_type_census": {
-        "basic": 14,
-        "cloze": 6,
-        "type_in": 0
+        "basic": 63,
+        "cloze": 32,
+        "type_in": 10
       },
-      "sha256": "2f0cd08c871c3d0d902a2f45c23ea66d9d6dd52e08e512cfa923d651e5cfde26",
+      "sha256": "33cf40aba13ab52a6c78e10114bf74523d1a0830293afdff6728de926c12a0d3",
       "rtl": false,
       "rules_version": 1
     },
@@ -255,7 +330,7 @@
         "cloze": 54,
         "type_in": 0
       },
-      "sha256": "a2d7c1da8d76692469252b35020b6d6fb1973937a7469a0f487e4f021c6a19dd",
+      "sha256": "c0d430eef98e0f9d60dcc75b511d843aac25b133f85c8cd23d7f3210a81f0927",
       "rtl": true,
       "rules_version": 1
     },
@@ -270,7 +345,7 @@
         "cloze": 6,
         "type_in": 0
       },
-      "sha256": "65af871854ddb53f09e28de59068a1d784efac74f4659781c61e13383f552a6c",
+      "sha256": "e3edd544c4ee36b3d4a3db684d39715ef69ffb3021e552c9b8c132b48dc85b60",
       "rtl": true,
       "rules_version": 1
     },
@@ -285,7 +360,7 @@
         "cloze": 10,
         "type_in": 0
       },
-      "sha256": "5f26ac84cd2a6b1c81c59b231f21a59d79c57747b1b40c8bd998d3460602a465",
+      "sha256": "00a5717e93535cf964e45407dcae6ac0128f4243620c4f5a4b30dc59cf311286",
       "rtl": true,
       "rules_version": 1
     },
@@ -300,7 +375,22 @@
         "cloze": 47,
         "type_in": 11
       },
-      "sha256": "4ab4daf91be49d49a981f2471c7bf22c69931f25edca4359921d849ad2b37ebe",
+      "sha256": "0ab435ff0f2b02007386ef121cde290ecd623bfa13498f87738f8ae7930fb76a",
+      "rtl": true,
+      "rules_version": 1
+    },
+    {
+      "locale": "he",
+      "slug": "psychometric-prep",
+      "file": "packages/psychometric-prep-he.apkg",
+      "title": "AnkiTov — הכנה לפסיכומטרי: מבנה, מילולי וכמותי",
+      "card_count": 121,
+      "note_type_census": {
+        "basic": 72,
+        "cloze": 34,
+        "type_in": 15
+      },
+      "sha256": "63f95f1e2228a39504369eab44e098237c53b783776e0e9718a8ccaec0e81f82",
       "rtl": true,
       "rules_version": 1
     },
@@ -315,7 +405,7 @@
         "cloze": 32,
         "type_in": 10
       },
-      "sha256": "4d8b5e474323e262f3ba5d77642c1520b4cb926909af0bc4ff15b13d43ffe341",
+      "sha256": "7f3a97af12c0cbf1c9ed606d85dc478c9dca66f2b5c62498b903a9504b65d3d5",
       "rtl": true,
       "rules_version": 1
     },
@@ -330,7 +420,7 @@
         "cloze": 61,
         "type_in": 0
       },
-      "sha256": "c55540804a1251a93b0e1e12ab524348fd076156292308d90968d8dd002bf1d9",
+      "sha256": "3cf6486283bf70b1c8bf148b6addb2fb93f1d12908106201ce510599125bee63",
       "rtl": false,
       "rules_version": 1
     },
@@ -345,7 +435,7 @@
         "cloze": 60,
         "type_in": 0
       },
-      "sha256": "a0c9454ffdc701c3a9f8595ee7c0b7b3a2cd7ee8286d758570586d0e5d84bc07",
+      "sha256": "85d625b13e47cd5dfdfb003d535ba15521c8d853fe1c2804f6c17e1e50a659b5",
       "rtl": false,
       "rules_version": 1
     },
@@ -360,7 +450,7 @@
         "cloze": 78,
         "type_in": 0
       },
-      "sha256": "b2d800d25a422a6a66cbae00bc18a412a232e8273b80e4939ab463eb2306afa7",
+      "sha256": "788912ff67c3923c2d4ba263051f0fa7d277ec2b188b132b4308e1746f27c520",
       "rtl": false,
       "rules_version": 1
     },
@@ -375,7 +465,7 @@
         "cloze": 66,
         "type_in": 0
       },
-      "sha256": "1e0a3ebc36acc9b5ab51c5d268f5c54a40eafd3cafba64c7ac258045716e7c98",
+      "sha256": "7141c645fa61a4f757169dc27a01c5ae1546caf01554a1e84858fb445470b8b9",
       "rtl": false,
       "rules_version": 1
     },
@@ -390,7 +480,7 @@
         "cloze": 48,
         "type_in": 0
       },
-      "sha256": "5b386846fd8e6d218078b4545060238736e4e90765de68587100307396dd5a69",
+      "sha256": "e38d0efbfd8e3cc6d5c5aeb9e3fa14509f66ba6e466346d9b03c8d67cb569421",
       "rtl": false,
       "rules_version": 1
     },
@@ -405,7 +495,7 @@
         "cloze": 72,
         "type_in": 0
       },
-      "sha256": "218193c89d94d9bd8a5ed1e351ffdf96fc0a4a20265fdad70870b06d53d2958f",
+      "sha256": "b2ffd08a7b6fe9fbe47b20c1ac1a033b59113fb8ba3246408d8e431a7064318e",
       "rtl": false,
       "rules_version": 1
     },
@@ -420,10 +510,10 @@
         "cloze": 84,
         "type_in": 0
       },
-      "sha256": "ac06053348f2dd0f97dd26eeaeac230484d4bde50c506dd086c8a58dd4eb4ce6",
+      "sha256": "8df09463ba18bf79dd6f5361cdb36f57283c589c4213ae3422e0603826fb1064",
       "rtl": false,
       "rules_version": 1
     }
   ],
-  "generated_at": "2026-11-23T07:50:55Z"
+  "generated_at": "2026-11-23T21:38:51Z"
 }

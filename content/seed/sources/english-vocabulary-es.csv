@@ -1,21 +1,106 @@
 note_type,concept_id,unit,grades,front,back,extra,pack_id,track,difficulty
-cloze,homework,01,7 8 9,deberes / tareas Please finish your {{c1::homework}} before tomorrow's class.,homework,In Spain 'deberes' is standard for school tasks; 'tareas' is widely used across Latin America.,english-vocabulary,languages,core
-cloze,textbook,01,7 8 9,Directly aligns with {{c1::textbook}}-bound learning materials in the factory.,textbook,Directly aligns with textbook-bound learning materials in the factory.,english-vocabulary,languages,core
-cloze,classroom,01,7 8 9,aula / salón de clases Students must remain quiet inside the {{c1::classroom}}.,classroom,'Aula' is standard in secondary school settings.,english-vocabulary,languages,core
-basic,schedule,01,7 8 9,schedule,horario Check your class schedule for the new semester.,Type-in prompt tests spelling of schedule organization vocabulary.,english-vocabulary,languages,core
-basic,assignment,01,7 8 9,assignment,tarea / trabajo asignado The history teacher gave us a reading assignment.,Refers to specific coursework assigned for evaluation.,english-vocabulary,languages,core
-basic,teacher,01,7 8 9,teacher,profesor / profesora The math teacher explained the equation clearly.,Gendered noun in Spanish depending on the instructor.,english-vocabulary,languages,core
-basic,student,01,7 8 9,student,estudiante / alumno Every student must bring a notebook to class.,'Alumno/a' is commonly used in formal academic records.,english-vocabulary,languages,core
-basic,grade,02,7 8 9,grade,nota / calificación She received a good grade on her science exam.,'Nota' is common in spoken school context; 'calificación' in official transcripts.,english-vocabulary,languages,core
-basic,exam,02,7 8 9,exam,examen We have a biology exam next Tuesday.,Spanish 'examen' takes an accent in plural ('exámenes').,english-vocabulary,languages,core
-basic,library,02,7 8 9,library,biblioteca Students can borrow books from the school library.,"False friend: 'library' translates to 'biblioteca', not 'librería'.",english-vocabulary,languages,core
-cloze,subject,02,7 8 9,English is my favorite school {{c1::subject}}.,,English is my favorite school subject.,english-vocabulary,languages,core
-basic,blackboard,02,7 8 9,blackboard,pizarra / pizarrón The teacher wrote the instructions on the blackboard.,'Pizarra' is standard in Spain; 'pizarrón' in Latin America.,english-vocabulary,languages,core
-basic,notebook,02,7 8 9,notebook,cuaderno Write the answers in your exercise notebook.,Essential individual supply for taking daily class notes.,english-vocabulary,languages,core
-basic,dictionary,02,7 8 9,dictionary,diccionario You can look up unknown words in the dictionary.,Key reference tool for language learning.,english-vocabulary,languages,core
-cloze,attendance,03,7 8 9,The teacher takes {{c1::attendance}} at the start of every lesson.,,The teacher takes attendance at the start of every lesson.,english-vocabulary,languages,core
-basic,project,03,7 8 9,project,proyecto We are working on a group project for geography.,Cognate term widely used in project-based learning.,english-vocabulary,languages,core
-basic,research,03,7 8 9,research,investigación Students must conduct research before writing the report.,Key academic skill term for secondary coursework.,english-vocabulary,languages,core
-cloze,deadline,03,7 8 9,The {{c1::deadline}} for submitting the essay is next Monday.,,The deadline for submitting the essay is next Monday.,english-vocabulary,languages,core
-basic,classmate,03,7 8 9,classmate,compañero/a de clase I studied for the test with my classmate.,Refers to peers within the classroom group.,english-vocabulary,languages,core
-basic,presentation,03,7 8 9,presentation,presentación Each group will give a short oral presentation.,Academic oral expression skill term.,english-vocabulary,languages,core
+basic,classroom,01,7,classroom,el aula / la clase Our classroom has twelve desks and one large window.,«Aula» es el aula propiamente dicha; «clase» también nombra el espacio del colegio.,english-vocabulary,languages,core
+basic,blackboard,01,7,blackboard,la pizarra Write the date on the blackboard every morning.,La pizarra del aula; la pizarra digital es interactive whiteboard.,english-vocabulary,languages,core
+cloze,notebook,01,7,el cuaderno Please open your {{c1::notebook}} to page ten.,notebook,"En inglés, un notebook es un cuaderno; el portátil se dice laptop.",english-vocabulary,languages,core
+basic,textbook,01,7,textbook,el libro de texto Our textbook has twelve units and many exercises.,El libro de texto del curso; no confundir con las lecturas graduadas (readers).,english-vocabulary,languages,core
+type_in,pencil,01,7,Escribe la palabra inglesa: un lápiz de madera para escribir y dibujar.,pencil,,english-vocabulary,languages,core
+type_in,pen,01,7,Escribe la palabra inglesa: un instrumento con tinta para escribir.,pen,,english-vocabulary,languages,core
+cloze,paper,01,7 8,"una hoja de papel Pass me a sheet of {{c1::paper}}, please.",paper,«Paper» es el material o la hoja; el periódico es newspaper y el documento es document.,english-vocabulary,languages,core
+type_in,eraser,01,7,Escribe la palabra inglesa: la goma que borra lo escrito a lápiz.,eraser,,english-vocabulary,languages,core
+type_in,ruler,01,7,Escribe la palabra inglesa: la regla graduada para medir y trazar líneas.,ruler,,english-vocabulary,languages,core
+basic,school,02,7,school,la escuela I walk to school every morning.,«School» cubre primaria y secundaria; la universidad es university (o college en EE. UU.).,english-vocabulary,languages,core
+basic,library,02,7,library,la biblioteca You can borrow books from the school library.,"Falso amigo: librería es bookshop, no library.",english-vocabulary,languages,core
+basic,laboratory,02,7 8,laboratory,el laboratorio We do chemistry experiments in the laboratory.,En el habla cotidiana se abrevia lab.,english-vocabulary,languages,core
+basic,playground,02,7,playground,el patio The children play football in the playground at recess.,El patio con juegos del colegio; el descanso del recreo es break.,english-vocabulary,languages,core
+basic,break,02,7,break,el recreo We chat and eat a snack during the morning break.,"En España, el recreo de media mañana; coffee break se usa también en el trabajo.",english-vocabulary,languages,core
+cloze,schedule,02,7 8,el horario Check the {{c1::schedule}} to see when your lessons start.,schedule,El horario semanal de clases; timetable es el sinónimo británico.,english-vocabulary,languages,core
+basic,lesson,02,7,lesson,la lección Today's lesson is about the water cycle.,Una lección concreta; la asignatura es subject y el curso es course.,english-vocabulary,languages,core
+cloze,course,02,7 8,el curso This {{c1::course}} covers basic English grammar.,course,"Un curso es un programa de estudio; en España, el año escolar también se llama curso.",english-vocabulary,languages,core
+type_in,semester,02,8,Escribe la palabra inglesa: cada una de las dos mitades del año académico.,semester,,english-vocabulary,languages,core
+cloze,learn,03,7,aprender We {{c1::learn}} ten new words every week.,learn,Aprender; enseñar (lo hace el docente) es teach.,english-vocabulary,languages,core
+cloze,understand,03,7 8,entender I don't {{c1::understand}} this exercise — can you help me?,understand,Entender o comprender; ambos son válidos.,english-vocabulary,languages,core
+basic,study,03,7,study,estudiar I study for two hours after dinner.,Estudiar en general; repasar lo ya visto es revise.,english-vocabulary,languages,core
+type_in,memorize,03,7 8,"Escribe la palabra inglesa: aprender de memoria, fijar algo en la memoria.",memorize,,english-vocabulary,languages,core
+basic,revise,03,8,revise,repasar I revise my notes before every exam.,"En británico, revise es repasar antes de un examen; en EE. UU. se dice review.",english-vocabulary,languages,core
+cloze,practice,03,7 8,la práctica You need more {{c1::practice}} with the past tense.,practice,"Como verbo, practise en británico y practice en americano; como sustantivo, siempre practice.",english-vocabulary,languages,core
+basic,summary,03,8,summary,el resumen Write a short summary of the chapter in five lines.,Resumen breve; sinopsis se usa para películas y obras.,english-vocabulary,languages,core
+cloze,mistake,03,7 8,el error Everyone makes a {{c1::mistake}} from time to time.,mistake,"Error o fallo; by mistake es «por error, sin querer».",english-vocabulary,languages,core
+type_in,answer,03,8,Escribe la palabra inglesa: la respuesta que das a una pregunta.,answer,,english-vocabulary,languages,core
+cloze,listen,04,7,escuchar We {{c1::listen}} to the recording and repeat the sentences.,listen,"Listen to lleva to; hear es oír, sin intención de escuchar.",english-vocabulary,languages,core
+cloze,write,04,7,escribir Please {{c1::write}} your name at the top of the page.,write,Pasado wrote; participio written.,english-vocabulary,languages,core
+basic,question,04,7 8,question,la pregunta Raise your hand if you have a question.,"Pregunta; como verbo, question es cuestionar.",english-vocabulary,languages,core
+basic,explain,04,8,explain,explicar Can you explain the difference between these two words?,"Explain something to someone: lleva to, no «explain me it».",english-vocabulary,languages,core
+type_in,describe,04,8,Escribe la palabra inglesa: decir cómo es algo o alguien con detalle.,describe,,english-vocabulary,languages,core
+cloze,discuss,04,8,debatir We {{c1::discuss}} the results of the experiment in small groups.,discuss,Debatir o comentar; discussion es el debate o la conversación.,english-vocabulary,languages,core
+type_in,mention,04,8,"Escribe la palabra inglesa: referirse a algo brevemente, sin desarrollarlo.",mention,,english-vocabulary,languages,core
+basic,agree,04,8,agree,estar de acuerdo I agree with your first point.,"I agree va sin verbo auxiliar; en pasado, agreed.",english-vocabulary,languages,core
+basic,disagree,04,8 9,disagree,no estar de acuerdo Politely disagree and give your reasons.,Lo contrario de agree; disagreement es el desacuerdo.,english-vocabulary,languages,core
+cloze,homework,05,7 8,los deberes Please finish your {{c1::homework}} before tomorrow's lesson.,homework,"En España, deberes; en gran parte de Latinoamérica, tareas. Siempre singular en inglés.",english-vocabulary,languages,core
+basic,assignment,05,8,assignment,la tarea Hand in the history assignment on Friday.,Tarea encomendada; homework son los deberes de casa.,english-vocabulary,languages,core
+cloze,deadline,05,8,la fecha límite The {{c1::deadline}} for the essay is next Monday.,deadline,Fecha límite de entrega; meet a deadline es cumplir el plazo.,english-vocabulary,languages,core
+basic,project,05,8,project,el proyecto We are working on a group project for geography.,Proyecto escolar o de trabajo; science project es proyecto de ciencias.,english-vocabulary,languages,core
+cloze,research,05,8 9,la investigación You must do {{c1::research}} before writing the report.,research,Investigación; también verbo: research a topic.,english-vocabulary,languages,core
+basic,presentation,05,8,presentation,la presentación Each group will give a short oral presentation.,"Presentación oral; el verbo es give a presentation, no «make».",english-vocabulary,languages,core
+basic,essay,05,8 9,essay,la redacción Write an essay of about 150 words on your town.,"En el ámbito escolar, redacción; ensayo para textos académicos argumentativos.",english-vocabulary,languages,core
+type_in,chapter,05,8,Escribe la palabra inglesa: cada una de las partes principales de un libro.,chapter,,english-vocabulary,languages,core
+basic,book,05,7,book,el libro I borrowed three books from the library.,Libro; to book también es reservar una mesa o un billete.,english-vocabulary,languages,core
+basic,teacher,06,7 8,teacher,el docente / el profesor Our math teacher explained the equation clearly.,Docente es el término general; profesor o profesora es lo habitual en el aula.,english-vocabulary,languages,core
+basic,student,06,7 8,student,el estudiante Every student must bring a notebook to every lesson.,"Estudiante o alumno, alumna; en la universidad, estudiante es lo normal.",english-vocabulary,languages,core
+cloze,classmate,06,7,el compañero de clase My {{c1::classmate}} lent me a pencil.,classmate,Compañero o compañera de clase; en inglés la forma no cambia por género.,english-vocabulary,languages,core
+cloze,friend,06,7,el amigo My best {{c1::friend}} sits next to me in English lessons.,friend,"Amigo o amiga; el género lo marca el contexto, no la forma.",english-vocabulary,languages,core
+basic,class,06,7,class,la clase The English class starts at nine o'clock.,La clase como grupo o como sesión; también «la clase de inglés».,english-vocabulary,languages,core
+cloze,group,06,7 8,el grupo Work in a {{c1::group}} of four for this task.,group,Grupo de trabajo; group work es el trabajo en grupo.,english-vocabulary,languages,core
+type_in,partner,06,8,Escribe la palabra inglesa: la persona con la que trabajas en un ejercicio por parejas.,partner,,english-vocabulary,languages,core
+type_in,guest,06,8 9,Escribe la palabra inglesa: la persona invitada a un acto o a una casa.,guest,,english-vocabulary,languages,core
+cloze,exam,07,8,el examen We have a biology {{c1::exam}} next Tuesday.,exam,Examen importante; las pruebas cortas son quiz y test.,english-vocabulary,languages,core
+type_in,test,07,8,Escribe la palabra inglesa: prueba para medir conocimientos o aptitudes.,test,,english-vocabulary,languages,core
+basic,quiz,07,8,quiz,el test We did a five-minute quiz at the start of the lesson.,Prueba corta y rápida; en España se usa también «test» a secas.,english-vocabulary,languages,core
+basic,grade,07,8,grade,la nota I received a good grade on my science exam.,"Nota o calificación; en España, nota; en Latinoamérica también calificación.",english-vocabulary,languages,core
+type_in,mark,07,8 9,Escribe la palabra inglesa: la calificación numérica de un ejercicio o examen.,mark,,english-vocabulary,languages,core
+cloze,pass,07,8 9,aprobar Did you {{c1::pass}} the driving test?,pass,"Aprobar un examen; lo contrario es fail, suspender.",english-vocabulary,languages,core
+cloze,fail,07,8 9,"suspender If you {{c1::fail}} the exam, you can retake it in June.",fail,"Suspender en España, reprobar en Latinoamérica; el sustantivo es failure.",english-vocabulary,languages,core
+type_in,attendance,07,9,Escribe la palabra inglesa: la lista de presentes que se comprueba cada mañana.,attendance,,english-vocabulary,languages,core
+basic,subject,08,8,subject,la asignatura My favorite subject is biology.,Asignatura o materia; school subjects son las asignaturas del curso.,english-vocabulary,languages,core
+type_in,mathematics,08,8 9,"Escribe la palabra inglesa: la ciencia de los números, las formas y las magnitudes.",mathematics,,english-vocabulary,languages,core
+type_in,science,08,8 9,Escribe la palabra inglesa: el estudio de la naturaleza basado en experimentos.,science,,english-vocabulary,languages,core
+cloze,history,08,8,la historia In {{c1::history}} we study ancient civilizations.,history,"La historia, asignatura o pasado; story es un relato o cuento, no history.",english-vocabulary,languages,core
+basic,geography,08,8 9,geography,la geografía We learn about rivers and mountains in geography.,Geografía; en inglés el acento recae en la primera sílaba.,english-vocabulary,languages,core
+basic,language,08,8,language,el idioma How many languages do you speak?,Idioma o lengua; foreign language es lengua extranjera.,english-vocabulary,languages,core
+cloze,vocabulary,08,8 9,el vocabulario Learn five items of {{c1::vocabulary}} every day.,vocabulary,"Vocabulario; incontable en inglés, no «vocabularies».",english-vocabulary,languages,core
+basic,dictionary,08,8,dictionary,el diccionario Look up unknown words in the dictionary.,Diccionario; look up a word es buscar una palabra.,english-vocabulary,languages,core
+cloze,today,09,7 8 9,hoy We have a chemistry lesson {{c1::today}}.,today,Hoy; today's homework es «los deberes de hoy».,english-vocabulary,languages,core
+cloze,always,09,7 8 9,siempre I {{c1::always}} check my work before handing it in.,always,"Siempre; va antes del verbo principal: always check, no check always.",english-vocabulary,languages,core
+basic,time,09,8,time,el tiempo There is no time to lose before the exam.,Tiempo o hora; times son las veces.,english-vocabulary,languages,core
+basic,breakfast,09,8,breakfast,el desayuno I have breakfast at half past seven.,Desayuno; have breakfast va sin artículo.,english-vocabulary,languages,core
+basic,water,09,8,water,el agua Drink water instead of sugary drinks.,"Agua; incontable en inglés, normalmente sin artículo.",english-vocabulary,languages,core
+basic,morning,09,8,morning,la mañana Good morning! Our first lesson starts at eight.,"Mañana, hasta el mediodía; in the morning es por la mañana.",english-vocabulary,languages,core
+type_in,evening,09,9,"Escribe la palabra inglesa: la parte final del día, después del trabajo o de las clases.",evening,,english-vocabulary,languages,core
+basic,habit,09,8 9,habit,el hábito Reading before bed is a good habit.,Hábito o costumbre; break a habit es dejar un hábito.,english-vocabulary,languages,core
+basic,busy,09,8,busy,ocupado I am busy with homework this week.,Ocupado; busy day es un día ajetreado.,english-vocabulary,languages,core
+cloze,house,10,8,la casa Our {{c1::house}} has a small garden and two floors.,house,"Casa, el edificio; home es el hogar, el lugar donde uno vive.",english-vocabulary,languages,core
+basic,city,10,8 9,city,la ciudad Valencia is a city by the Mediterranean Sea.,Ciudad grande; town es el pueblo o la ciudad pequeña.,english-vocabulary,languages,core
+basic,family,10,8,family,"la familia My family has four members: my parents, my sister and me.",Familia; en inglés suele llevar verbo en singular: my family lives.,english-vocabulary,languages,core
+basic,weather,10,8 9,weather,el clima What is the weather like in your region?,El clima o el tiempo meteorológico; weather forecast es la predicción del tiempo.,english-vocabulary,languages,core
+basic,neighbor,10,8 9,neighbor,el vecino Our neighbor waters the plants when we travel.,"Vecino, grafía americana; la británica es neighbour.",english-vocabulary,languages,core
+type_in,chore,10,9,"Escribe la palabra inglesa: una tarea doméstica de la casa, como fregar o barrer.",chore,,english-vocabulary,languages,core
+type_in,grocery,10,9,Escribe la palabra inglesa: la compra de alimentos; también la tienda de ultramarinos.,grocery,,english-vocabulary,languages,core
+cloze,errand,10,9,el recado I have one more {{c1::errand}} to run after school.,errand,Recado o gestión fuera de casa; run errands es hacer recados.,english-vocabulary,languages,core
+type_in,commute,10,9,Escribe la palabra inglesa: el trayecto diario de casa al trabajo o al instituto.,commute,,english-vocabulary,languages,core
+cloze,happy,11,8,feliz I am {{c1::happy}} with my results this term.,happy,Feliz o contento; happy birthday es feliz cumpleaños.,english-vocabulary,languages,core
+basic,honest,11,8 9,honest,honesto Be honest about what you did not understand.,"Honesto, sincero; la h es muda.",english-vocabulary,languages,core
+basic,patient,11,8 9,patient,paciente Be patient with yourself when learning new words.,"Paciente, adjetivo; como sustantivo es el paciente de un médico.",english-vocabulary,languages,core
+type_in,reliable,11,9,"Escribe la palabra inglesa: en quien se puede confiar, que nunca falla.",reliable,,english-vocabulary,languages,core
+cloze,curious,11,8 9,curioso Children are naturally {{c1::curious}} about the world.,curious,Curioso; curious about es curioso por algo.,english-vocabulary,languages,core
+basic,diligent,11,9,diligent,diligente Revise your notes every week if you are diligent.,"Diligente, aplicado, trabajador.",english-vocabulary,languages,core
+cloze,polite,11,8 9,educado It is {{c1::polite}} to say thank you when someone helps you.,polite,"Educado o cortés; lo contrario es rude, grosero.",english-vocabulary,languages,core
+basic,courage,11,9,courage,el valor It takes courage to speak in front of the whole school.,Valor o coraje; courageous es valiente.,english-vocabulary,languages,core
+type_in,empathy,11,9,Escribe la palabra inglesa: la capacidad de ponerse en el lugar de otra persona.,empathy,,english-vocabulary,languages,core
+cloze,achieve,12,9,lograr You can {{c1::achieve}} your goals with steady work.,achieve,"Lograr, conseguir; achievement es el logro.",english-vocabulary,languages,core
+basic,improve,12,8 9,improve,mejorar Read every day to improve your pronunciation.,Mejorar; transitivo: improve your skills.,english-vocabulary,languages,core
+cloze,encourage,12,9,animar My parents {{c1::encourage}} me to keep trying.,encourage,"Animar, alentar; encouragement es el ánimo o el estímulo.",english-vocabulary,languages,core
+basic,effort,12,9,effort,el esfuerzo With a little effort you will finish the project.,"Esfuerzo; make an effort es hacer un esfuerzo, no «do».",english-vocabulary,languages,core
+type_in,succeed,12,9,Escribe la palabra inglesa: tener éxito en lo que te propones.,succeed,,english-vocabulary,languages,core
+basic,confidence,12,9,confidence,la confianza Speaking every day builds your confidence.,Confianza en uno mismo; self-confidence es la autoconfianza.,english-vocabulary,languages,core
+type_in,obstacle,12,9,Escribe la palabra inglesa: algo que bloquea el camino y dificulta avanzar.,obstacle,,english-vocabulary,languages,core
+type_in,perseverance,12,9,Escribe la palabra inglesa: seguir intentándolo sin rendirse aunque cueste.,perseverance,,english-vocabulary,languages,core
+cloze,goal,12,9,la meta Set a {{c1::goal}} for each week and check your progress.,goal,Meta u objetivo; set a goal es fijarse una meta.,english-vocabulary,languages,core

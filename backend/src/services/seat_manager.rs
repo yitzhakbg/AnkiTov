@@ -34,6 +34,7 @@
 //! | `ANKITOV_PUBLIC_URL` | `http://127.0.0.1` | Public base URL the browser-facing `stream_url` is built from (e.g. `https://practice.ankitov.com`); the reverse proxy terminates TLS and routes `/seat/<port>/` to the seat |
 //! | `ANKITOV_SEAT_PASSWD` | random per seat | RESERVED for per-seat stream auth (product TODO). Selkies basic auth is DISABLED in seats — selkies refuses to boot with auth on and no password (EX_CONFIG 78), and the namespace + public proxy are the boundary |
 //! | `ANKITOV_SEAT_PACKS` | _(unset = none)_ | Comma-separated seed `.apkg` file names the seat imports into the student's collection on first start (resolved against `/decks` then `/stream/decks` in the rootfs). Unset = honest empty state. |
+//! | `ANKITOV_SEAT_PREVIEW_MAX` | `4` | Concurrent preview-tier seats (drill links, T-215) allowed on top of `ANKITOV_SEAT_MAX`. |
 //!
 //! The seat entry point (`/stream/start-seat.sh` inside the rootfs) starts
 //! labwc + Selkies bound to `ANKITOV_SEAT_PORT` and launches Anki in kiosk
@@ -47,6 +48,10 @@ use std::time::{Duration, Instant};
 
 /// How often the lazy reaper runs (checked on every list/start call).
 const REAP_CHECK: Duration = Duration::from_secs(30);
+
+/// Preview-tier idle budget (T-215): anonymous drill seats reap faster
+/// than the manager default (300 s) so scratch collections don't linger.
+const PREVIEW_IDLE: Duration = Duration::from_secs(120);
 
 /// A running seat.
 #[derive(Debug, Clone)]
@@ -73,8 +78,10 @@ pub struct SeatInfo {
     /// Kiosk level this seat was spawned with (0 practice-only / 1 guided /
     /// 2 full Anki) — resolved from `users.kiosk_level` at start.
     pub kiosk_level: i32,
+    /// True for preview-tier seats (drill links, T-215): scratch collection
+    /// under the preview root, wiped when the seat stops/reaps.
+    pub preview: bool,
 }
-
 impl SeatInfo {
     /// The URL the student's browser opens (Selkies WebRTC/WebSocket page).
     pub fn stream_url(&self) -> String {
@@ -88,6 +95,38 @@ impl SeatInfo {
             .unwrap_or_else(|_| "http://127.0.0.1".to_string());
         format!("{}/seat/{}/", base.trim_end_matches('/'), self.port)
     }
+}
+
+/// Seat tier (T-215 First-60-Seconds): what kind of seat a launch creates.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum SeatTier {
+    /// Logged-in student seat: persistent collection, standard idle reap.
+    #[default]
+    Full,
+    /// Anonymous drill/preview seat (T-215): scratch collection under the
+    /// preview root wiped on stop/reap, kiosk forced to 0, short idle reap,
+    /// its own concurrent cap (`ANKITOV_SEAT_PREVIEW_MAX`).
+    Preview,
+}
+
+/// Per-launch seat configuration, resolved by the CALLER — SeatManager
+/// itself stays DB-free (same principle as the kiosk-level handoff).
+#[derive(Debug, Clone, Default)]
+pub struct SeatLaunch {
+    /// Kiosk level for the seat (0/1/2); forced to 0 for preview tier.
+    pub kiosk_level: i32,
+    /// Telemetry attribution email (session driver prefers it over
+    /// "unknown").
+    pub student_email: Option<String>,
+    /// Per-seat deck override (`ANKITOV_SEAT_DECK`). `None` inherits the
+    /// backend's environment — the pre-T-215 global fallback, so
+    /// management-started seats keep their existing behavior.
+    pub deck: Option<String>,
+    /// Per-seat pack list (`ANKITOV_SEAT_PACKS`, comma-separated .apkg
+    /// names). `None` inherits the backend's environment (global fallback).
+    pub packs: Option<String>,
+    /// Seat tier (see [`SeatTier`]); default `Full`.
+    pub tier: SeatTier,
 }
 
 #[derive(Debug)]
@@ -116,6 +155,9 @@ impl std::fmt::Display for SeatError {
 struct SeatRecord {
     info: SeatInfo,
     last_activity: Instant,
+    /// Per-seat idle budget (preview seats reap at 120 s, full seats at
+    /// the manager default).
+    idle_timeout: Duration,
 }
 
 pub struct SeatManager {
@@ -125,6 +167,8 @@ pub struct SeatManager {
     bwrap: String,
     base_port: u16,
     max_seats: usize,
+    /// Concurrent preview-tier cap (drill seats; T-215).
+    preview_max: usize,
     idle_timeout: Duration,
     backend_url: String,
     seats: Mutex<HashMap<String, SeatRecord>>,
@@ -153,6 +197,7 @@ impl SeatManager {
             bwrap: std::env::var("ANKITOV_SEAT_BWRAP").unwrap_or_else(|_| "bwrap".to_string()),
             base_port: env_u16("ANKITOV_SEAT_BASE_PORT", 8100),
             max_seats: env_u16("ANKITOV_SEAT_MAX", 64) as usize,
+            preview_max: env_u16("ANKITOV_SEAT_PREVIEW_MAX", 4) as usize,
             idle_timeout: Duration::from_secs(env_u16("ANKITOV_SEAT_IDLE_SECS", 300) as u64),
             backend_url: std::env::var("ANKITOV_BACKEND_URL")
                 .unwrap_or_else(|_| "http://127.0.0.1:5150".to_string()),
@@ -167,18 +212,22 @@ impl SeatManager {
 
     /// Start (or return the already-running) seat for a student.
     ///
-    /// `kiosk_level` and `student_email` come from the caller's DB lookup
-    /// (owner decision 2026-11-23: the level lives on `users.kiosk_level`;
-    /// SeatManager itself stays DB-free). `student_email` feeds the seat's
-    /// telemetry attribution (`ANKITOV_SEAT_EMAIL`).
+    /// All seat policy comes from the caller via [`SeatLaunch`] —
+    /// SeatManager itself stays DB-free (same principle as the kiosk-level
+    /// handoff, owner decision 2026-11-23). `None` deck/packs inherit the
+    /// backend's environment (pre-T-215 global fallback; per-link values
+    /// come from drill links).
     pub async fn start_seat(
         &self,
         student_id: &str,
-        kiosk_level: i32,
-        student_email: Option<&str>,
+        launch: &SeatLaunch,
     ) -> Result<SeatInfo, SeatError> {
         let safe = sanitize_student_id(student_id)
             .ok_or_else(|| SeatError::NotConfigured(format!("invalid student id {student_id:?}")))?;
+        let preview = launch.tier == SeatTier::Preview;
+        // Preview seats are anonymous drill clicks — the practice-only
+        // kiosk (level 0) is the only level they may run (T-215).
+        let kiosk_level = if preview { 0 } else { launch.kiosk_level };
 
         self.reap_idle().await;
 
@@ -190,12 +239,18 @@ impl SeatManager {
             if seats.len() >= self.max_seats {
                 return Err(SeatError::CapReached);
             }
+            // Preview cap is ON TOP of the global cap (T-215).
+            if preview
+                && seats.values().filter(|r| r.info.preview).count() >= self.preview_max
+            {
+                return Err(SeatError::CapReached);
+            }
         }
 
         // The seat mounts ONLY this student's collection — the tmpfs /data
         // mask below hides the server's data dir and every other student's
         // collection from inside the sandbox.
-        let collection_dir = collection_dir_for(&safe);
+        let collection_dir = collection_dir_for(&safe, preview);
         std::fs::create_dir_all(&collection_dir).map_err(|e| {
             SeatError::Spawn(format!("cannot create collection dir {collection_dir:?}: {e}"))
         })?;
@@ -250,9 +305,10 @@ impl SeatManager {
             gpu,
             &password,
             kiosk_level,
-            student_email,
+            launch.student_email.as_deref(),
+            launch.deck.as_deref(),
+            launch.packs.as_deref(),
         );
-
         let child = cmd.spawn().map_err(|e| SeatError::Spawn(format!("bwrap: {e}")))?;
         let pid = child.id();
         let info = SeatInfo {
@@ -264,6 +320,7 @@ impl SeatManager {
             password,
             token,
             kiosk_level: kiosk_level.clamp(0, 2),
+            preview,
         };
 
         tracing::info!(
@@ -275,6 +332,7 @@ impl SeatManager {
             SeatRecord {
                 info: info.clone(),
                 last_activity: Instant::now(),
+                idle_timeout: if preview { PREVIEW_IDLE } else { self.idle_timeout },
             },
         );
         Ok(info)
@@ -294,6 +352,9 @@ impl SeatManager {
                     .arg("-TERM")
                     .arg(rec.info.pid.to_string())
                     .output();
+                // Preview scratch is wiped whether or not the kill reported
+                // success — the seat is leaving the table either way.
+                wipe_preview_scratch(&rec.info, &self.runtime_root);
                 match kill {
                     Ok(_) => {
                         tracing::info!("seat stopped: student={} pid={}", safe, rec.info.pid);
@@ -309,26 +370,34 @@ impl SeatManager {
     /// All live seats (reaps stale ones first).
     pub fn list(&self) -> Vec<SeatInfo> {
         let mut seats = self.lock();
-        Self::reap_locked(&mut seats, self.idle_timeout);
+        Self::reap_locked(&mut seats, &self.runtime_root);
         let mut out: Vec<SeatInfo> = seats.values().map(|r| r.info.clone()).collect();
         out.sort_by(|a, b| a.student_id.cmp(&b.student_id));
         out
     }
 
-    /// Stop seats idle beyond the timeout. Returns how many were reaped.
+    /// Stop seats idle beyond their own timeout (preview seats reap at
+    /// `PREVIEW_IDLE`, full seats at `ANKITOV_SEAT_IDLE_SECS`). Returns how
+    /// many were reaped.
     pub async fn reap_idle(&self) -> usize {
         let mut seats = self.lock();
-        let stale: Vec<(String, u32)> = seats
+        let stale: Vec<String> = seats
             .iter()
-            .filter(|(_, r)| r.last_activity.elapsed() > self.idle_timeout)
-            .map(|(k, r)| (k.clone(), r.info.pid))
+            .filter(|(_, r)| r.last_activity.elapsed() > r.idle_timeout)
+            .map(|(k, _)| k.clone())
             .collect();
         let mut reaped = 0;
-        for (id, pid) in stale {
-            let _ = Command::new("kill").arg("-TERM").arg(pid.to_string()).output();
-            seats.remove(&id);
-            tracing::info!("seat reaped (idle): student={id} pid={pid}");
-            reaped += 1;
+        for id in stale {
+            let rec = seats.remove(&id);
+            if let Some(rec) = rec {
+                wipe_preview_scratch(&rec.info, &self.runtime_root);
+                let _ = Command::new("kill")
+                    .arg("-TERM")
+                    .arg(rec.info.pid.to_string())
+                    .output();
+                tracing::info!("seat reaped (idle): student={} pid={}", id, rec.info.pid);
+                reaped += 1;
+            }
         }
         reaped
     }
@@ -413,6 +482,8 @@ impl SeatManager {
         password: &str,
         kiosk_level: i32,
         student_email: Option<&str>,
+        deck: Option<&str>,
+        packs: Option<&str>,
     ) -> Command {
         let mut cmd = Command::new(&self.bwrap);
         cmd.arg("--ro-bind").arg(&self.rootfs).arg("/")
@@ -495,11 +566,18 @@ impl SeatManager {
             .env("QTWEBENGINE_DISABLE_SANDBOX", "1")
             // QtWebEngine needs a writable cache inside the sandbox.
             .env("XDG_CACHE_HOME", format!("/tmp/ankitov-seat-{safe_id}/cache"));
-        // Optional deck override; the kiosk falls back to the first
-        // non-empty non-Default deck in the student's collection.
-        if let Ok(deck) = std::env::var("ANKITOV_SEAT_DECK") {
+        // Per-launch deck/packs binding (T-215): drill links pass the
+        // link's values here; management-started seats pass `None`, which
+        // inherits the backend's environment (the pre-T-215 global env
+        // fallback — Command inherits the parent env by default).
+        if let Some(deck) = deck {
             if !deck.is_empty() {
                 cmd.env("ANKITOV_SEAT_DECK", deck);
+            }
+        }
+        if let Some(packs) = packs {
+            if !packs.is_empty() {
+                cmd.env("ANKITOV_SEAT_PACKS", packs);
             }
         }
         // NOTE: QT_QPA_PLATFORM is NOT forced — the seat entrypoint decides
@@ -535,18 +613,22 @@ impl SeatManager {
         Ok(())
     }
 
-    fn reap_locked(seats: &mut HashMap<String, SeatRecord>, idle_timeout: Duration) {
+    fn reap_locked(
+        seats: &mut HashMap<String, SeatRecord>,
+        runtime_root: &std::path::Path,
+    ) {
         let now = Instant::now();
         let stale: Vec<String> = seats
             .iter()
             .filter(|(_, r)| {
-                now.duration_since(r.last_activity) > idle_timeout.max(REAP_CHECK)
+                now.duration_since(r.last_activity) > r.idle_timeout.max(REAP_CHECK)
                     || (now.duration_since(r.last_activity) > REAP_CHECK && !pid_alive(r.info.pid))
             })
             .map(|(k, _)| k.clone())
             .collect();
         for id in stale {
             if let Some(rec) = seats.remove(&id) {
+                wipe_preview_scratch(&rec.info, runtime_root);
                 let _ = Command::new("kill")
                     .arg("-TERM")
                     .arg(rec.info.pid.to_string())
@@ -558,17 +640,51 @@ impl SeatManager {
 }
 
 fn pid_alive(pid: u32) -> bool {
-    // /proc is authoritative on Linux; on other targets assume alive (the
-    // idle timeout still reaps).
-    PathBuf::from(format!("/proc/{pid}")).exists()
+    // /proc is authoritative on Linux. Elsewhere (macOS dev) /proc does not
+    // exist, so fall back to a kill(pid, 0) existence probe: rc 0 = can
+    // signal, EPERM = exists but not ours — BOTH mean alive. A missing /proc
+    // must never read as "dead", or the dead-pid reap branch would kill every
+    // seat REAP_CHECK after boot on non-Linux hosts (T-215 test catch).
+    #[cfg(target_os = "linux")]
+    {
+        PathBuf::from(format!("/proc/{pid}")).exists()
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        let rc = unsafe { libc::kill(pid as libc::pid_t, 0) };
+        rc == 0 || std::io::Error::last_os_error().raw_os_error() == Some(libc::EPERM)
+    }
 }
 
 /// Seat collection dir — mirrors `collection_store`'s layout
 /// ({collection_root}/{student_id}) without importing its private sanitizer.
-fn collection_dir_for(safe_id: &str) -> PathBuf {
+fn collection_dir_for(safe_id: &str, preview: bool) -> PathBuf {
     let root = std::env::var("ANKITOV_COLLECTION_ROOT")
         .unwrap_or_else(|_| "./data/collections".to_string());
-    PathBuf::from(root).join(safe_id)
+    if preview {
+        // Preview (drill) seats get a scratch collection under preview/ —
+        // wiped on stop/reap (T-215).
+        PathBuf::from(root).join("preview").join(safe_id)
+    } else {
+        PathBuf::from(root).join(safe_id)
+    }
+}
+
+/// Remove a preview seat's scratch collection + staged service tree
+/// (T-215): the whole point of a preview seat is that NOTHING student
+/// specific survives the session. No-op for full-tier seats.
+fn wipe_preview_scratch(info: &SeatInfo, runtime_root: &std::path::Path) {
+    if !info.preview {
+        return;
+    }
+    let collection = collection_dir_for(&info.student_id, true);
+    if collection.exists() {
+        let _ = std::fs::remove_dir_all(&collection);
+    }
+    let svc = runtime_root.join(&info.student_id);
+    if svc.exists() {
+        let _ = std::fs::remove_dir_all(&svc);
+    }
 }
 
 /// Allow only [A-Za-z0-9._-], reject "." / ".." / traversal — the same class
@@ -608,6 +724,7 @@ mod tests {
             bwrap: "bwrap".into(),
             base_port: 8100,
             max_seats: 64,
+            preview_max: 4,
             idle_timeout: Duration::from_secs(300),
             backend_url: "http://127.0.0.1:5150".into(),
             seats: Mutex::new(HashMap::new()),
@@ -623,11 +740,163 @@ mod tests {
                 password: "test-pass".into(),
                 token: "test-token".into(),
                 kiosk_level: 0,
+                preview: false,
             },
             last_activity: Instant::now(),
+            idle_timeout: Duration::from_secs(300),
         };
         seats.insert("a".into(), mk(8100));
         seats.insert("b".into(), mk(8101));
         assert_eq!(mgr.free_port(&seats), 8102);
+    }
+
+    /// Drill seat ids (`drill-<id8>-<rand4>`, T-215) must pass the sanitizer.
+    /// rand_suffix is alnum-only, so real ids never contain dots; the
+    /// rejection arm proves traversal characters are refused.
+    #[test]
+    fn drill_seat_ids_pass_sanitize() {
+        assert!(sanitize_student_id("drill-abc12345-Xy3z").is_some());
+        assert!(sanitize_student_id("drill-../escape").is_none());
+    }
+
+    /// Preview scratch dirs are wiped; full-tier seats are untouched.
+    #[test]
+    fn wipe_preview_scratch_only_touches_preview() {
+        let tmp = std::env::temp_dir().join("ankitov-seat-wipe-test");
+        let _ = std::fs::remove_dir_all(&tmp);
+        std::fs::create_dir_all(tmp.join("preview/drill-abc12345-x1")).unwrap();
+        std::fs::create_dir_all(tmp.join("drill-abc12345-x1")).unwrap();
+        std::fs::create_dir_all(tmp.join("runtime/drill-abc12345-x1")).unwrap();
+        // collection_dir_for reads ANKITOV_COLLECTION_ROOT — point it at the
+        // fixture (nextest isolates per test; same pattern as the caps test).
+        std::env::set_var("ANKITOV_COLLECTION_ROOT", &tmp);
+
+        let preview = SeatInfo {
+            student_id: "drill-abc12345-x1".into(),
+            port: 8100,
+            pid: 1,
+            started_at: Instant::now(),
+            gpu: false,
+            password: "p".into(),
+            token: "t".into(),
+            kiosk_level: 0,
+            preview: true,
+        };
+        wipe_preview_scratch(&preview, &tmp.join("runtime"));
+        assert!(!tmp.join("preview/drill-abc12345-x1").exists());
+        assert!(!tmp.join("runtime/drill-abc12345-x1").exists());
+        // The full-tier collection dir under the same root is untouched.
+        assert!(tmp.join("drill-abc12345-x1").exists());
+
+        let full = SeatInfo {
+            preview: false,
+            ..preview
+        };
+        wipe_preview_scratch(&full, &tmp.join("runtime"));
+        assert!(tmp.join("drill-abc12345-x1").exists());
+        let _ = std::fs::remove_dir_all(&tmp);
+    }
+
+    /// Reap honors EACH seat's own idle budget: a preview seat idle past
+    /// 120 s goes while a full seat idle the same time stays (300 s budget),
+    /// and the reaped preview seat's scratch dirs are wiped.
+    #[test]
+    fn reap_locked_uses_per_seat_idle_and_wipes_preview() {
+        let tmp = std::env::temp_dir().join("ankitov-seat-reap-test");
+        let _ = std::fs::remove_dir_all(&tmp);
+        std::fs::create_dir_all(tmp.join("preview/drill-abc12345-x1")).unwrap();
+        std::fs::create_dir_all(tmp.join("runtime/drill-abc12345-x1")).unwrap();
+        // wipe_preview_scratch resolves the collection root from the env —
+        // point it at the fixture (nextest isolates per test).
+        std::env::set_var("ANKITOV_COLLECTION_ROOT", &tmp);
+
+        let ago = |secs: u64| Instant::now() - Duration::from_secs(secs);
+        let mut seats = HashMap::new();
+        seats.insert(
+            "drill-abc12345-x1".to_string(),
+            SeatRecord {
+                info: SeatInfo {
+                    student_id: "drill-abc12345-x1".into(),
+                    port: 8100,
+                    // pid 1 is alive on every target (launchd/init) — the
+                    // dead-pid branch must not fire; the idle branch does.
+                    pid: 1,
+                    started_at: ago(400),
+                    gpu: false,
+                    password: "p".into(),
+                    token: "t".into(),
+                    kiosk_level: 0,
+                    preview: true,
+                },
+                last_activity: ago(200),
+                idle_timeout: PREVIEW_IDLE,
+            },
+        );
+        seats.insert(
+            "student-1".to_string(),
+            SeatRecord {
+                info: SeatInfo {
+                    student_id: "student-1".into(),
+                    port: 8101,
+                    pid: 1,
+                    started_at: ago(400),
+                    gpu: false,
+                    password: "p".into(),
+                    token: "t".into(),
+                    kiosk_level: 1,
+                    preview: false,
+                },
+                last_activity: ago(200),
+                idle_timeout: Duration::from_secs(300),
+            },
+        );
+
+        SeatManager::reap_locked(&mut seats, &tmp.join("runtime"));
+        assert!(
+            !seats.contains_key("drill-abc12345-x1"),
+            "preview seat idle 200s > 120s budget must be reaped"
+        );
+        assert!(
+            seats.contains_key("student-1"),
+            "full seat idle 200s < 300s budget must stay"
+        );
+        assert!(!tmp.join("preview/drill-abc12345-x1").exists());
+        assert!(!tmp.join("runtime/drill-abc12345-x1").exists());
+        let _ = std::fs::remove_dir_all(&tmp);
+    }
+
+    /// Caps trip BEFORE any filesystem/spawn work: with the caps at zero,
+    /// both tiers fail with CapReached and no collection dir is created.
+    /// Runs first-touch on `SeatManager::global()` in this process, so the
+    /// env must be set before the first `global()` call (nextest isolates
+    /// per test; this file's other tests never touch `global()`).
+    #[tokio::test]
+    async fn caps_trip_before_spawn() {
+        std::env::set_var("ANKITOV_SEAT_PREVIEW_MAX", "0");
+        std::env::set_var("ANKITOV_SEAT_MAX", "0");
+        let mgr = SeatManager::global();
+        let preview = SeatLaunch {
+            tier: SeatTier::Preview,
+            kiosk_level: 0,
+            student_email: Some("drill-test@drill.local".into()),
+            deck: Some("D".into()),
+            packs: Some("p.apkg".into()),
+        };
+        match mgr.start_seat("drill-captest-aa01", &preview).await {
+            Err(SeatError::CapReached) => {}
+            other => panic!("preview cap must trip before spawn, got {other:?}"),
+        }
+        let full = SeatLaunch {
+            tier: SeatTier::Full,
+            kiosk_level: 1,
+            ..SeatLaunch::default()
+        };
+        match mgr.start_seat("student-captest", &full).await {
+            Err(SeatError::CapReached) => {}
+            other => panic!("global cap must trip before spawn, got {other:?}"),
+        }
+        // Nothing was created for either attempt.
+        assert!(!std::path::Path::new("data/collections/drill-captest-aa01").exists());
+        assert!(!std::path::Path::new("data/collections/student-captest").exists());
     }
 }

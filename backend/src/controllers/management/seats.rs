@@ -10,7 +10,7 @@ use loco_rs::prelude::*;
 
 use crate::middleware::auth::ensure_role;
 use crate::middleware::auth::AuthUser;
-use crate::services::seat_manager::SeatManager;
+use crate::services::seat_manager::{SeatLaunch, SeatManager};
 
 fn seat_json(info: &crate::services::seat_manager::SeatInfo) -> serde_json::Value {
     serde_json::json!({
@@ -50,10 +50,13 @@ pub async fn start(
     // lives on users.kiosk_level; the email feeds telemetry attribution.
     // SeatManager itself stays DB-free — the controller resolves and passes.
     let (kiosk_level, email) = resolve_student_seat_profile(&ctx, &student).await;
-    match SeatManager::global()
-        .start_seat(&student, kiosk_level, email.as_deref())
-        .await
-    {
+    let launch = SeatLaunch {
+        kiosk_level,
+        student_email: email,
+        // deck/packs unset → inherit the backend env (pre-T-215 behavior).
+        ..SeatLaunch::default()
+    };
+    match SeatManager::global().start_seat(&student, &launch).await {
         Ok(info) => format::json(serde_json::json!({ "status": "running", "seat": seat_json(&info) })),
         Err(crate::services::seat_manager::SeatError::AlreadyRunning) => {
             // Idempotent: report the existing seat.

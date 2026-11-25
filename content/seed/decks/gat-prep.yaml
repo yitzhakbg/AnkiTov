@@ -1,0 +1,14 @@
+slug: gat-prep
+subject_tag: subject::gat
+title:
+  ar: 'AnkiTov — التدريب على اختبار القدرات العامة: اللفظي والكمي'
+  en: 'AnkiTov — GAT (Qiyas) Prep: Verbal & Quantitative (Arabic)'
+deck_id:
+  ar: 1699412247035
+description:
+  ar: 'حزمة تدريب للتحضير لاختبار القدرات العامة (GAT) في المملكة العربية السعودية: بنية الاختبار، القسم اللفظي (التناظر اللفظي، إكمال الجمل، الخطأ السياقي، استيعاب المقروء)، القسم الكمي (الحساب، الهندسة، الجبر، تفسير البيانات)، والدرجات. خمس دقائق يوميًا على بطاقات التدريب تكفي. الحقائق منقولة بصياغة أصلية من المعلومات العامة للمركز الوطني للقياس والتقويم؛ البطاقات صيغت بصياغة أصلية وتنتظر مراجعة متحدث عربي أصلي. SRS works.'
+  en: 'Study pack for the Saudi GAT (General Aptitude Test, Qiyas): exam structure, the verbal section (verbal analogy, sentence completion, contextual error, reading comprehension), the quantitative section (arithmetic, geometry, algebra, data interpretation), and scoring. Five minutes a day on practice cards is enough. Facts paraphrased from public ETEC/Qiyas guidance; cards drafted originally and pending native Arabic-speaker review. SRS works.'
+expected_census:
+  basic: 72
+  cloze: 32
+  type_in: 12

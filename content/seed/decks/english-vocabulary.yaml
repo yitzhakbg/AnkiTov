@@ -5,16 +5,19 @@ title:
   he: AnkiTov Pilot — אוצר מילים באנגלית
   fr: AnkiTov Pilot — Vocabulaire anglais
   es: AnkiTov Pilot — Vocabulario Inglés
+  de: AnkiTov Pilot — Englisch-Vokabular
 deck_id:
   en: 1699412247003
   he: 1699412247004
   fr: 1699412247005
   es: 1699412247016
+  de: 1699412247033
 description:
   en: Grades 7-9 English vocabulary that runs at its own pace, beside teaching, not inside it. Revisit previously taught words to close gaps. SRS works. Self-authored Phase 0 seed; text only.
   he: אוצר מילים באנגלית לכיתות ז-ט שרץ בקצב עצמאי, לצד ההוראה ולא בתוכה. חזרה על מילים שהונהגו קודם לכן כדי לסגור פערים. SRS works. פיוט פאזה 0 שנכתב על ידנו; טקסט בלבד.
   fr: Vocabulaire anglais pour les classes 7-9 qui suit son propre rythme, à côté de l'enseignement, pas dedans. Revoyez les mots appris auparavant pour combler les lacunes. SRS works. Graine Phase 0 auto-écrite ; texte uniquement.
-  es: Vocabulario inglés para los grados 7-9 que avanza a su propio ritmo, junto a la enseñanza, no dentro de ella. Repasa las palabras ya vistas para cerrar brechas. SRS works. Semilla Phase 0 propia; solo texto. (Pack es vía NLM + compilador nlm_pack_to_csv.)
+  es: Vocabulario inglés para los grados 7-9 que avanza a su propio ritmo, junto a la enseñanza, no dentro de ella. Repasa las palabras ya vistas para cerrar brechas. SRS works. Semilla Phase 0 propia; solo texto.
+  de: Englisch-Vokabular für die Klassen 7-9, das in seinem eigenen Tempo läuft, neben dem Unterricht, nicht darin. Bereits behandelte Wörter wiederholen, um Lücken zu schließen. SRS works. Phase-0-Seed, selbst verfasst; nur Text.
 expected_census:
   basic: 47
   cloze: 32
@@ -25,12 +28,16 @@ expected_census_by_locale:
     cloze: 6
     type_in: 0
   fr:
-    basic: 14
-    cloze: 6
-    type_in: 0
+    basic: 47
+    cloze: 32
+    type_in: 26
   es:
-    basic: 14
-    cloze: 6
-    type_in: 0
+    basic: 47
+    cloze: 32
+    type_in: 26
+  de:
+    basic: 47
+    cloze: 32
+    type_in: 26
 directions_by_locale:
   he: true

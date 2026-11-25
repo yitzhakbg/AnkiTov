@@ -50,7 +50,7 @@ const TAG: &str = "Management Console";
 /// Order: `ANKITOV_SEED_DIR` env override → `/app/ankitov/content/seed`
 /// (container layout) → `content/seed` relative to the working directory
 /// (local `cargo run` development).
-fn seed_packages_dir() -> PathBuf {
+pub(super) fn seed_packages_dir() -> PathBuf {
     if let Ok(dir) = std::env::var("ANKITOV_SEED_DIR") {
         let p = PathBuf::from(&dir).join("packages");
         if p.is_dir() {
@@ -66,7 +66,7 @@ fn seed_packages_dir() -> PathBuf {
 }
 
 /// Validate a requested package filename: strict allowlist, no traversal.
-fn valid_package_name(name: &str) -> bool {
+pub(super) fn valid_package_name(name: &str) -> bool {
     !name.is_empty()
         && name.len() <= 128
         && name.ends_with(".apkg")

@@ -36,6 +36,7 @@ async fn seed_user(ctx: &loco_rs::app::AppContext, id: i64, username: &str, role
         email: sea_orm::ActiveValue::Set(email),
         full_name: sea_orm::ActiveValue::Set(Some(format!("{} Name", username))),
         role: sea_orm::ActiveValue::Set(role.to_string()),
+        kiosk_level: sea_orm::ActiveValue::Set(0),
         subsection_id: sea_orm::ActiveValue::Set(None),
         password_hash: sea_orm::ActiveValue::Set(None),
         created_at: sea_orm::ActiveValue::Set(now),

@@ -124,7 +124,11 @@ MODEL_IDS = {
     "pt": {"basic": 1607392318601, "cloze": 1607392318602, "type_in": 1607392318603},
     "ru": {"basic": 1607392318701, "cloze": 1607392318702, "type_in": 1607392318703},
     "ko": {"basic": 1607392318801, "cloze": 1607392318802, "type_in": 1607392318803},
+    # T-217 pack #2 (2026-11-23): Arabic RTL model-ID block
+    "ar": {"basic": 1607392318901, "cloze": 1607392318902, "type_in": 1607392318903},
 }
+# Locales whose card templates get the RTL wrapper + CSS scope (plan section 3.6).
+RTL_LOCALES = ("he", "ar")
 NOTE_TYPE_NAMES = {"basic": "AnkiTovBasic", "cloze": "AnkiTovCloze", "type_in": "AnkiTovTypeIn"}
 
 # Shared CSS. The .ankitov-he rules are the plan section 3.6 RTL scope: inert
@@ -142,20 +146,26 @@ hr#answer { border: 0; border-top: 1px solid #c8c8c8; margin: 16px 0; }
 .card.ankitov-he { direction: rtl; text-align: right; }
 .ankitov-he { direction: rtl; text-align: right; }
 .ankitov-he .ltr { direction: ltr; unicode-bidi: isolate; }
+.card.ankitov-ar { direction: rtl; text-align: right; }
+.ankitov-ar { direction: rtl; text-align: right; }
+.ankitov-ar .ltr { direction: ltr; unicode-bidi: isolate; }
 """
 
 
 def _wrap(fmt: str, locale: str) -> str:
     """Per-locale template wrapper (plan section 3.6).
 
-    he: ``dir="rtl"`` + ``class="ankitov-he"`` so the CSS scope applies even
-    before the .card class is attached; formula spans stay LTR-isolated.
+    RTL locales (he, ar): ``dir="rtl"`` + ``class="ankitov-<locale>"`` so the
+    CSS scope applies even before the .card class is attached; formula spans
+    stay LTR-isolated. The he output string is unchanged from the pre-ar
+    compiler, so the he rebuild stays byte-identical apart from genanki
+    timestamps.
     en (and other LTR locales): no wrapper — byte-identical to the existing
     committed model, so the en rebuild stays bit-for-bit reproducible.
     """
-    if locale != "he":
+    if locale not in RTL_LOCALES:
         return fmt
-    return '<div dir="rtl" class="ankitov-he">' + fmt + "</div>"
+    return f'<div dir="rtl" class="ankitov-{locale}">' + fmt + "</div>"
 
 
 def build_models(locale: str) -> dict:
@@ -330,12 +340,13 @@ def verify_apkg(path: Path, expected_cards: int, expected_models: list, locale: 
         expected_typein = _wrap("{{Front}}<br>{{type:Back}}", locale)
         if typein_qfmt != expected_typein:
             raise RuntimeError(f"{path.name}: AnkiTovTypeIn qfmt is {typein_qfmt!r}, expected {expected_typein!r} (plan sections 3.8/3.6)")
-    if locale == "he":
+    if locale in RTL_LOCALES:
+        wrapper = f'<div dir="rtl" class="ankitov-{locale}">'
         for m in models_iter:
-            if '<div dir="rtl" class="ankitov-he">' not in m["tmpls"][0]["qfmt"]:
+            if wrapper not in m["tmpls"][0]["qfmt"]:
                 raise RuntimeError(f"{path.name}: {m['name']} question template missing dir=rtl wrapper (plan section 3.6)")
-        if not any(".ankitov-he" in m.get("css", "") for m in models_iter):
-            raise RuntimeError(f"{path.name}: no .ankitov-he CSS scope in models (plan section 3.6)")
+        if not any(f".ankitov-{locale}" in m.get("css", "") for m in models_iter):
+            raise RuntimeError(f"{path.name}: no .ankitov-{locale} CSS scope in models (plan section 3.6)")
     if cards != expected_cards or notes != expected_cards:
         raise RuntimeError(f"{path.name}: apkg has notes={notes} cards={cards}, expected {expected_cards}")
     return {"notes": notes, "cards": cards}
@@ -425,7 +436,7 @@ def build_deck(csv_path: Path, slug: str, locale: str, cfg: dict) -> tuple:
         "card_count": v["cards"],
         "note_type_census": actual,
         "sha256": sha,
-        "rtl": locale == "he",
+        "rtl": locale in RTL_LOCALES,
         "rules_version": _rules_version(),
     }
     return out, actual, v, entry, samples

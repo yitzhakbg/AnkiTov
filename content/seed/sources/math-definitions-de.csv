@@ -1,0 +1,106 @@
+note_type,concept_id,unit,grades,front,back,extra,pack_id,track,difficulty
+basic,primzahl,01,7 8,Was ist eine Primzahl?,"Eine ganze Zahl größer als 1, die genau zwei Teiler hat: 1 und sich selbst. Die ersten Primzahlen sind 2, 3, 5, 7 und 11.",,math-definitions,math,core
+basic,zusammengesetzte-zahl,01,7,Was ist eine zusammengesetzte Zahl?,"Eine ganze Zahl größer als 1 mit mehr als zwei Teilern. Beispiel: 12 hat die Teiler 1, 2, 3, 4, 6 und 12.",,math-definitions,math,core
+basic,negative-zahlen,01,7,Was sind negative Zahlen?,Zahlen kleiner als 0; sie stehen links der Null auf der Zahlengerade und bekommen das Vorzeichen minus. Beispiel: minus 5.,,math-definitions,math,core
+basic,ggt,01,7 8,Was ist der größte gemeinsame Teiler (ggT)?,"Der größte Teiler, den zwei Zahlen gemeinsam haben. Beispiel: der ggT von 12 und 18 ist 6.",,math-definitions,math,core
+basic,kgv,01,7 8,Was ist das kleinste gemeinsame Vielfache (kgV)?,"Das kleinste positive Vielfache, das zwei Zahlen gemeinsam haben. Beispiel: das kgV von 4 und 6 ist 12.",,math-definitions,math,core
+basic,betrag,01,7 8,Was ist der Betrag einer Zahl?,"Der Abstand der Zahl zur Null auf der Zahlengerade, immer ohne Vorzeichen. Beispiel: der Betrag von minus 7 ist 7.",,math-definitions,math,core
+cloze,teilbarkeitsregel,01,7,"Eine {{c1::Teilbarkeitsregel}} gibt an, wann eine Zahl ohne Rest durch eine andere teilbar ist.",,"Beispiel: Eine Zahl ist durch 3 teilbar, wenn ihre Quersumme durch 3 teilbar ist.",math-definitions,math,core
+cloze,primfaktorzerlegung,01,7 8,Bei der {{c1::Primfaktorzerlegung}} schreibt man eine Zahl als Produkt von Primzahlen.,,Beispiel: 60 = 2 · 2 · 3 · 5.,math-definitions,math,core
+cloze,teiler,01,7,Ein {{c1::Teiler}} einer Zahl teilt sie ohne Rest.,,"Beispiel: 3 ist ein Teiler von 12, denn 12 : 3 = 4.",math-definitions,math,core
+cloze,vielfaches,01,7,"Ein {{c1::Vielfaches}} einer Zahl entsteht, wenn man sie mit einer ganzen Zahl multipliziert.",,"Beispiel: 15 ist ein Vielfaches von 5, denn 5 · 3 = 15.",math-definitions,math,core
+cloze,gerade-zahl,01,7,Eine {{c1::gerade Zahl}} ist durch 2 ohne Rest teilbar.,,"Beispiele: 2, 8, 14 und 240.",math-definitions,math,core
+cloze,ungerade-zahl,01,7,Eine {{c1::ungerade Zahl}} lässt sich nicht durch 2 ohne Rest teilen.,,"Beispiele: 1, 7, 15 und 233.",math-definitions,math,core
+cloze,zahlengerade,01,7,Die {{c1::Zahlengerade}} ordnet alle Zahlen der Größe nach an.,,"Negative Zahlen liegen links von der Null, positive rechts.",math-definitions,math,core
+cloze,vorzeichen,01,7,"Das {{c1::Vorzeichen}} gibt an, ob eine Zahl positiv oder negativ ist.",,Beispiel: die Zahl minus 5 hat das Vorzeichen minus.,math-definitions,math,core
+type_in,quersumme,01,7,"Schreiben Sie den Fachbegriff: Die Summe der Ziffern einer Zahl, zum Beispiel 1 + 7 = 8 bei der Zahl 17.",Quersumme,,math-definitions,math,core
+basic,bruch,02,7,Was ist ein Bruch?,"Eine Zahl aus Zähler, Bruchstrich und Nenner, die einen Teil eines Ganzen beschreibt. Beispiel: drei Viertel einer Torte.",,math-definitions,math,core
+basic,echtes-bruch,02,7,Was ist ein echter Bruch?,"Ein Bruch, dessen Zähler kleiner als sein Nenner ist; sein Wert liegt unter 1. Beispiel: 2/5.",,math-definitions,math,core
+basic,unechter-bruch,02,7,Was ist ein unechter Bruch?,"Ein Bruch, dessen Zähler größer als oder gleich dem Nenner ist; sein Wert ist 1 oder größer. Beispiel: 7/5.",,math-definitions,math,core
+basic,dezimalzahl,02,7,Was ist eine Dezimalzahl?,"Eine Zahl mit Nachkommastellen, geschrieben mit Dezimalkomma. Beispiel: 3,75 liest man drei Komma sieben fünf.",,math-definitions,math,core
+basic,kuerzen-eines-bruchs,02,7,Was bedeutet einen Bruch kürzen?,"Zähler und Nenner durch denselben Teiler dividieren, ohne den Wert zu ändern. Beispiel: vier Achtel werden zu einem Halbem.",,math-definitions,math,core
+basic,erweitern-eines-bruchs,02,7,Was bedeutet einen Bruch erweitern?,"Zähler und Nenner mit derselben Zahl multiplizieren, ohne den Wert zu ändern. Beispiel: ein Halbem wird zu zwei Vierteln.",,math-definitions,math,core
+cloze,gemischte-zahl,02,7,Eine {{c1::gemischte Zahl}} verbindet eine ganze Zahl mit einem echten Bruch.,,Beispiel: zwei ganze und ein halbes Kuchenstück.,math-definitions,math,core
+cloze,periodische-zahl,02,8,"Eine {{c1::periodische Dezimalzahl}} hat Nachkommastellen, die sich endlos wiederholen.",,"Beispiel: 1 : 3 = 0,333… Die Wiederholung beginnt hinter dem Komma.",math-definitions,math,core
+cloze,gleichnamig-machen,02,7,Beim {{c1::Gleichnamigmachen}} bringt man zwei Brüche auf denselben Nenner.,,Beispiel: ein Halbem und ein Drittel bekommen den gemeinsamen Nenner Sechstel.,math-definitions,math,core
+cloze,bruch-mal-zahl,02,7,Beim Multiplizieren eines Bruchs mit einer Zahl multipliziert man den {{c1::Zähler}} mit der Zahl.,,Beispiel: das Doppelte von drei Vierteln sind sechs Viertel.,math-definitions,math,core
+cloze,bruch-durch-bruch,02,8,Beim Dividieren durch einen Bruch multipliziert man mit dem {{c1::Kehrwert}} des Bruchs.,,Beispiel: geteilt durch ein Halbem heißt mal zwei.,math-definitions,math,core
+cloze,bruch-in-dezimalzahl,02,7,"Um einen Bruch in eine Dezimalzahl zu verwandeln, teilt man {{c1::Zähler durch Nenner}}.",,"Beispiel: ein Viertel als Dezimalzahl ist 0,25.",math-definitions,math,core
+cloze,dezimalzahl-addieren,02,7,Beim Addieren von Dezimalzahlen schreibt man die {{c1::Kommas}} untereinander.,,"So kommen Stelle zu Stelle: Einer zu Einer, Zehntel zu Zehntel.",math-definitions,math,core
+type_in,zaehler,02,7,"Schreiben Sie den Fachbegriff: Die Zahl über dem Bruchstrich, die angibt, wie viele Teile genommen werden.",Zähler,,math-definitions,math,core
+type_in,nenner,02,7,"Schreiben Sie den Fachbegriff: Die Zahl unter dem Bruchstrich, die angibt, in wie viele gleiche Teile geteilt wurde.",Nenner,,math-definitions,math,core
+basic,potenz,03,8,Was ist eine Potenz?,Eine Kurzschreibweise für wiederholtes Multiplizieren derselben Zahl. Beispiel: 2 hoch 4 bedeutet 2 · 2 · 2 · 2 = 16.,,math-definitions,math,core
+basic,exponent,03,8,Was ist der Exponent einer Potenz?,"Die hochgestellte Zahl, die angibt, wie oft die Basis mit sich selbst multipliziert wird. Beispiel: bei 2 hoch 4 ist er 4.",,math-definitions,math,core
+basic,basis-einer-potenz,03,8,Was ist die Basis einer Potenz?,"Die Zahl, die wiederholt mit sich selbst multipliziert wird. Beispiel: bei 3 hoch 2 ist die Basis 3.",,math-definitions,math,core
+basic,quadratzahl,03,7 8,Was ist eine Quadratzahl?,"Das Produkt einer Zahl mit sich selbst. Beispiele: 1, 4, 9, 16 und 25.",,math-definitions,math,core
+basic,wissenschaftliche-schreibweise,03,8 9,Was ist die wissenschaftliche Schreibweise?,Eine Schreibweise großer oder kleiner Zahlen als Produkt einer Zahl und einer Zehnerpotenz. Beispiel: 3000 = 3 · 10 hoch 3.,,math-definitions,math,core
+basic,kubikwurzel,03,9,Was ist die Kubikwurzel?,"Der Wert, der dreimal mit sich selbst multipliziert die gegebene Zahl ergibt. Beispiel: die Kubikwurzel aus 27 ist 3.",,math-definitions,math,core
+cloze,potenzgesetze,03,8,"Die {{c1::Potenzgesetze}} beschreiben, wie man Potenzen mit gleicher Basis multipliziert und dividiert.",,"Beispiel: gleiche Basis beim Multiplizieren bedeutet, die Exponenten zu addieren.",math-definitions,math,core
+cloze,zehnerpotenz,03,8,Eine {{c1::Zehnerpotenz}} ist eine Potenz mit der Basis 10.,,Beispiel: 10 hoch 3 ist 1000. Zehnerpotenzen verkürzen große Zahlen.,math-definitions,math,core
+cloze,wurzel,03,8,"Die {{c1::Wurzel}} einer Zahl ist der Wert, der mit sich selbst multipliziert diese Zahl ergibt.",,"Beispiel: die Wurzel aus 49 ist 7, denn 7 · 7 = 49.",math-definitions,math,core
+cloze,negative-exponenten,03,8,"Ein {{c1::negativer Exponent}} bedeutet, den Kehrwert der Potenz zu bilden.",,"Beispiel: 2 hoch minus 3 ist der Kehrwert von 8, also ein Achtel.",math-definitions,math,core
+type_in,quadratwurzel,03,8,"Schreiben Sie den Fachbegriff: Der Wert, der mit sich selbst multipliziert die gegebene Zahl ergibt.",Quadratwurzel,,math-definitions,math,core
+basic,verhaeltnis,04,7,Was ist ein Verhältnis?,Ein Vergleich zweier Mengen über ihren Quotienten. Beispiel: das Verhältnis von 3 zu 4 liest man drei zu vier.,,math-definitions,math,core
+basic,proportionale-zuordnung,04,7 8,Was ist eine proportionale Zuordnung?,"Eine Zuordnung, bei der beide Größen im gleichen Verhältnis wachsen; der Quotient der Werte bleibt konstant.",,math-definitions,math,core
+basic,antiproportionale-zuordnung,04,8,Was ist eine antiproportionale Zuordnung?,"Eine Zuordnung, bei der das Produkt beider Größen konstant bleibt. Beispiel: je mehr Arbeiter, desto kürzer die Bauzeit.",,math-definitions,math,core
+basic,dreisatz,04,7 8,Was ist der Dreisatz?,"Ein Rechenweg mit drei Schritten: erst der Wert für eine Einheit, dann der Schluss auf den gesuchten Wert.",,math-definitions,math,core
+basic,prozentwert,04,7,Was ist der Prozentwert?,"Der Teil einer Grundmenge, der dem Prozentsatz entspricht. Beispiel: 20 Prozent von 50 sind der Prozentwert 10.",,math-definitions,math,core
+basic,grundwert,04,7,Was ist der Grundwert?,"Die ganze Menge, auf die sich der Prozentsatz bezieht. Beispiel: bei 20 Prozent von 50 ist der Grundwert 50.",,math-definitions,math,core
+cloze,prozentsatz,04,7,"Der {{c1::Prozentsatz}} gibt an, wie viele Hundertteile der Grundwert ausmachen.",,Beispiel: 15 Prozent bedeuten 15 von 100 gleichen Teilen.,math-definitions,math,core
+cloze,massstab,04,7,Der {{c1::Maßstab}} gibt das Verhältnis zwischen einer Zeichnung und der Wirklichkeit an.,,"Beispiel: Maßstab 1 zu 100 bedeutet, 1 Zentimeter Zeichnung entspricht 100 Zentimetern Wirklichkeit.",math-definitions,math,core
+cloze,rabatt-berechnen,04,7,"Ein {{c1::Rabatt}} ist eine Preisermäßigung, angegeben in Prozent des Originalpreises.",,Beispiel: 10 Prozent Rabatt auf 40 Euro sind 4 Euro Ermäßigung.,math-definitions,math,core
+cloze,mehrwertsteuer,04,8,"Die {{c1::Mehrwertsteuer}} ist eine Steuer, die in Deutschland auf den Nettopreis aufgeschlagen wird.",,Beispiel: 19 Prozent auf 100 Euro Nettopreis ergeben 119 Euro Bruttopreis.,math-definitions,math,core
+cloze,prozentformel,04,7,"Die {{c1::Prozentformel}} verbindet Grundwert, Prozentwert und Prozentsatz.",,Prozentwert geteilt durch Grundwert mal 100 ergibt den Prozentsatz.,math-definitions,math,core
+cloze,prozent-von-zahl,04,7,"Um einen Prozentsatz von einer Zahl zu nehmen, multipliziert man die Zahl mit dem {{c1::Prozentsatz}} als Dezimalzahl.",,"Beispiel: 25 Prozent von 80 sind 80 mal 0,25, also 20.",math-definitions,math,core
+basic,variable,05,7,Was ist eine Variable?,"Ein Buchstabe, der für eine veränderliche oder noch unbekannte Zahl steht. Beispiel: in a + 5 steht a für eine beliebige Zahl.",,math-definitions,math,core
+basic,term,05,7,Was ist ein Term?,"Ein Rechenausdruck aus Zahlen, Variablen und Rechenzeichen. Beispiel: 3a + 2b ist ein Term.",,math-definitions,math,core
+basic,gleichung,05,7,Was ist eine Gleichung?,Eine mathematische Aussage mit einem Gleichheitszeichen und mindestens einer Variablen. Beispiel: x + 3 = 10.,,math-definitions,math,core
+basic,loesungsmenge,05,8,Was ist die Lösungsmenge?,"Die Menge aller Werte, die eine Gleichung erfüllen. Beispiel: bei x + 3 = 10 enthält sie nur die 7.",,math-definitions,math,core
+basic,aequivalenzumformung,05,8,Was ist eine Äquivalenzumformung?,"Eine Umformung, die den Wahrheitsgehalt einer Gleichung erhält, zum Beispiel beidseitiges Addieren derselben Zahl.",,math-definitions,math,core
+basic,ungleichung,05,8,Was ist eine Ungleichung?,"Eine mathematische Aussage mit einem Vergleichszeichen wie kleiner, größer oder kleiner gleich. Beispiel: x + 2 kleiner als 5.",,math-definitions,math,core
+cloze,lineare-gleichung,05,8,Eine {{c1::lineare Gleichung}} enthält die Variable nur in der ersten Potenz.,,Beispiel: 2x + 5 = 17. Die Variable x kommt ohne Quadrat vor.,math-definitions,math,core
+cloze,term-vereinfachen,05,7,Beim {{c1::Vereinfachen}} eines Terms fasst man gleichartige Glieder zusammen.,,Beispiel: 3a + 2a wird zu 5a.,math-definitions,math,core
+cloze,gleichung-loesen,05,7,"Beim {{c1::Lösen}} einer Gleichung sucht man den Wert der Variablen, der die Gleichung erfüllt.",,Beispiel: x + 3 = 10 wird durch x = 7 gelöst.,math-definitions,math,core
+cloze,probe-einer-loesung,05,7,Bei der {{c1::Probe}} setzt man die gefundene Lösung in die Gleichung ein und prüft sie.,,Beispiel: für x = 7 ergibt 7 + 3 = 10 eine wahre Aussage.,math-definitions,math,core
+cloze,klammer-aufloesen,05,7,Beim {{c1::Auflösen}} einer Klammer multipliziert man den Faktor vor der Klammer mit jedem Glied darin.,,Beispiel: 3(a + b) = 3a + 3b.,math-definitions,math,core
+cloze,formel-umstellen,05,8,Beim {{c1::Umstellen}} einer Formel löst man sie nach einer anderen Größe auf.,,Beispiel: aus Weg gleich Geschwindigkeit mal Zeit wird Zeit gleich Weg durch Geschwindigkeit.,math-definitions,math,core
+cloze,unbekannte,05,7,"Die {{c1::Unbekannte}} ist die Variable, deren Wert eine Gleichung erfüllen soll.",,In Schulaufgaben heißt sie meistens x.,math-definitions,math,core
+basic,funktion,06,8,Was ist eine Funktion?,"Eine Zuordnung, die jedem Wert der einen Größe genau einen Wert der anderen Größe zuordnet. Beispiel: Seitenlänge zu Flächeninhalt eines Quadrats.",,math-definitions,math,core
+basic,lineare-funktion,06,8,Was ist eine lineare Funktion?,Eine Funktion der Form y = m · x + b; ihr Graph ist eine Gerade mit der Steigung m.,,math-definitions,math,core
+basic,y-achsenabschnitt,06,8,Was ist der y-Achsenabschnitt?,"Der Punkt, an dem der Graph einer Funktion die y-Achse schneidet. In der Form y = m · x + b ist er das b.",,math-definitions,math,core
+basic,funktionsgraph,06,8,Was ist der Graph einer Funktion?,"Die Menge aller Punkte, die die Zuordnung der Funktion darstellen, gezeichnet im Koordinatensystem.",,math-definitions,math,core
+cloze,wertetabelle,06,7,Eine {{c1::Wertetabelle}} ordnet x-Werte und die zugehörigen y-Werte nebeneinander an.,,"Sie hilft, Punkte für den Graphen einer Funktion zu finden.",math-definitions,math,core
+cloze,nullstelle,06,8,"Die {{c1::Nullstelle}} einer linearen Funktion ist der x-Wert, bei dem y gleich 0 ist.",,Beispiel: bei y = 2x − 4 liegt die Nullstelle bei x = 2.,math-definitions,math,core
+cloze,funktionsgleichung-aufstellen,06,9,"Eine {{c1::Funktionsgleichung}} stellt man auf, indem man Steigung und y-Achsenabschnitt aus dem Graphen abliest.",,"Zwei Punkte der Geraden genügen, um beide Werte zu bestimmen.",math-definitions,math,core
+type_in,steigung,06,8,"Schreiben Sie den Fachbegriff: Die Zahl m in der Geradengleichung, die angibt, wie steil die Gerade ansteigt.",Steigung,,math-definitions,math,core
+basic,winkel,07,7,Was ist ein Winkel?,"Der Öffnungsbereich zwischen zwei Strahlen mit gemeinsamem Anfangspunkt, gemessen in Grad.",,math-definitions,math,core
+basic,rechtwinkliges-dreieck,07,8,Was ist ein rechtwinkliges Dreieck?,Ein Dreieck mit einem rechten Winkel von 90 Grad. Die Seite gegenüber dem rechten Winkel ist die Hypotenuse.,,math-definitions,math,core
+basic,gleichseitiges-dreieck,07,7,Was ist ein gleichseitiges Dreieck?,Ein Dreieck mit drei gleich langen Seiten und drei Winkeln von je 60 Grad.,,math-definitions,math,core
+basic,vieleck,07,7,Was ist ein Vieleck?,"Eine ebene Figur, die von geraden Seiten begrenzt wird. Beispiele: Dreieck, Viereck, Fünfeck, Sechseck.",,math-definitions,math,core
+basic,parallelogramm,07,8,Was ist ein Parallelogramm?,Ein Viereck mit paarweise parallelen und gleich langen Gegenüberseiten.,,math-definitions,math,core
+basic,kreis,07,7,Was ist ein Kreis?,"Die Menge aller Punkte, die von einem Mittelpunkt denselben Abstand haben; dieser Abstand ist der Radius.",,math-definitions,math,core
+basic,flaeche,07,7,Was ist der Flächeninhalt?,"Das Maß für die Größe einer ebenen Fläche, gemessen in Quadratzentimetern oder Quadratmetern.",,math-definitions,math,core
+basic,volumen,07,8,Was ist das Volumen?,"Das Maß für den Rauminhalt eines Körpers, gemessen in Kubikzentimetern oder Litern.",,math-definitions,math,core
+basic,kongruente-figuren,07,8,Was sind kongruente Figuren?,"Figuren, die in Form und Größe übereinstimmen; sie gehen durch Verschiebung, Spiegelung oder Drehung auseinander hervor.",,math-definitions,math,core
+cloze,winkelsumme-im-dreieck,07,7,Die {{c1::Winkelsumme}} im Dreieck beträgt immer 180 Grad.,,Beispiel: bei zwei Winkeln von 60 und 70 Grad ist der dritte Winkel 50 Grad.,math-definitions,math,core
+cloze,pythagoras-formel,07,8,Der {{c1::Satz des Pythagoras}} gilt im rechtwinkligen Dreieck: Kathetenquadrate ergeben zusammen das Hypotenusenquadrat.,,"Beispiel: bei den Katheten 3 und 4 ist die Hypotenuse 5, denn 9 + 16 = 25.",math-definitions,math,core
+cloze,durchmesser,07,7,Der {{c1::Durchmesser}} eines Kreises verläuft durch den Mittelpunkt und ist doppelt so lang wie der Radius.,,Beispiel: bei einem Radius von 5 Zentimetern ist der Durchmesser 10 Zentimeter.,math-definitions,math,core
+cloze,achsenspiegelung,07,7,Bei der {{c1::Achsenspiegelung}} wird jede Figur an einer Geraden gespiegelt.,,Ursprungsfigur und Bildfigur sind kongruent und liegen symmetrisch zur Achse.,math-definitions,math,core
+cloze,verschiebung,07,8,Bei einer {{c1::Verschiebung}} wird jede Figur um dieselbe Strecke in dieselbe Richtung bewegt.,,"Form und Größe bleiben unverändert, nur die Lage ändert sich.",math-definitions,math,core
+type_in,hypotenuse,07,8,"Schreiben Sie den Fachbegriff: Die längste Seite im rechtwinkligen Dreieck, gegenüber dem rechten Winkel.",Hypotenuse,,math-definitions,math,core
+type_in,radius,07,7,Schreiben Sie den Fachbegriff: Der Abstand zwischen dem Mittelpunkt eines Kreises und seinem Rand.,Radius,,math-definitions,math,core
+type_in,umfang,07,7,Schreiben Sie den Fachbegriff: Die Gesamtlänge der Begrenzungslinie einer ebenen Figur.,Umfang,,math-definitions,math,core
+basic,modalwert,08,7,Was ist der Modalwert?,"Der Wert, der in einer Datenreihe am häufigsten vorkommt. Beispiel: bei 2, 3, 3, 5 ist der Modalwert 3.",,math-definitions,math,core
+basic,spannweite,08,7,Was ist die Spannweite?,Der Abstand zwischen dem größten und dem kleinsten Wert einer Datenreihe. Beispiel: bei 3 bis 15 sind es 12.,,math-definitions,math,core
+basic,haeufigkeit,08,7,Was ist die Häufigkeit?,"Die Anzahl, mit der ein Wert in einer Datenreihe auftritt; relativ angegeben als Anteil an der Gesamtzahl.",,math-definitions,math,core
+basic,ereignis,08,8,Was ist ein Ereignis?,Eine Menge von Ergebnissen eines Zufallsexperiments. Beispiel: beim Würfelwurf das Ereignis eine gerade Zahl zu würfeln.,,math-definitions,math,core
+cloze,saeulendiagramm,08,7,Im {{c1::Säulendiagramm}} stellt man Häufigkeiten als gleich breite Säulen dar.,,"Je höher die Säule, desto größer die Häufigkeit des Wertes.",math-definitions,math,core
+cloze,kreisdiagramm,08,7,"Im {{c1::Kreisdiagramm}} zeigt jeder Kreissektor, welchen Anteil ein Wert an der Gesamtmenge hat.",,Ein ganzer Kreis entspricht 100 Prozent.,math-definitions,math,core
+cloze,zufallsexperiment,08,8,"Ein {{c1::Zufallsexperiment}} ist ein Versuch mit mehreren möglichen Ausgängen, deren Eintreten nicht vorherbestimmbar ist.",,Beispiel: das Werfen eines Würfels.,math-definitions,math,core
+cloze,ergebnismenge,08,8,Die {{c1::Ergebnismenge}} eines Zufallsexperiments umfasst alle möglichen Ausgänge.,,Beim Würfelwurf besteht sie aus den Zahlen 1 bis 6.,math-definitions,math,core
+cloze,regel-von-laplace,08,8,Nach der {{c1::Regel von Laplace}} ist die Wahrscheinlichkeit gleich günstige Ergebnisse geteilt durch mögliche Ergebnisse.,,Beispiel: beim Würfelwurf ist die Wahrscheinlichkeit für eine 6 ein Sechstel.,math-definitions,math,core
+cloze,stichprobe,08,9,"Eine {{c1::Stichprobe}} ist eine Teilmenge einer Gesamtheit, aus der auf das Ganze geschlossen wird.",,Beispiel: 100 Befragte stehen für alle Wähler einer Stadt.,math-definitions,math,core
+cloze,relative-haeufigkeit,08,8,Die {{c1::relative Häufigkeit}} ist die Anzahl der Treffer geteilt durch die Gesamtzahl der Versuche.,,Sie liegt immer zwischen 0 und 1 und wird oft in Prozent angegeben.,math-definitions,math,core
+type_in,mittelwert,08,7,"Schreiben Sie den Fachbegriff: Der Durchschnitt einer Datenreihe, berechnet aus Summe geteilt durch Anzahl.",Mittelwert,,math-definitions,math,core
+type_in,median,08,7,Schreiben Sie den Fachbegriff: Der mittlere Wert einer der Größe nach geordneten Datenreihe.,Median,,math-definitions,math,core
+type_in,wahrscheinlichkeit,08,8,"Schreiben Sie den Fachbegriff: Das Maß zwischen 0 und 1 dafür, wie sicher ein Ereignis eintritt.",Wahrscheinlichkeit,,math-definitions,math,core

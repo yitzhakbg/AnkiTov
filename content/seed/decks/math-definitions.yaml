@@ -5,26 +5,33 @@ title:
   he: AnkiTov Pilot — הגדרות מתמטיקה
   fr: AnkiTov Pilot — Définitions de maths
   es: AnkiTov Pilot — Definiciones de Matemáticas
+  de: AnkiTov Pilot — Mathematische Definitionen
 deck_id:
   en: 1699412247001
   he: 1699412247002
   fr: 1699412247012
   es: 1699412247013
+  de: 1699412247030
 description:
   en: Grades 7-9 math definitions that run at their own pace, beside teaching, not inside it. Practice previously taught material to close gaps. SRS works. Self-authored Phase 0 seed; text only.
   he: גדרות מתמטיקה לכיתות ז-ט שרצות בקצב עצמאי, לצד ההוראה ולא בתוכה. תרגול של חומר שהונהג קודם לכן כדי לסגור פערים. SRS works. פיוט פאזה 0 שנכתב על ידנו; טקסט בלבד.
   fr: Définitions mathématiques pour les classes 7-9 qui suivent leur propre rythme, à côté de l'enseignement, pas dedans. Revoyez les concepts appris auparavant pour combler les lacunes. SRS works. Graine Phase 0 auto-écrite ; texte uniquement.
-  es: Definiciones de matemáticas para los grados 7-9 que avanzan a su propio ritmo, junto a la enseñanza, no dentro de ella. Practica el material ya visto para cerrar brechas. SRS works. Semilla Phase 0 propia; solo texto. (Pack fr/es generado vía NLM + compilador nlm_pack_to_csv.)
+  es: Definiciones de matemáticas para los grados 7-9 que avanzan a su propio ritmo, junto a la enseñanza, no dentro de ella. Practica el material ya visto para cerrar brechas. SRS works. Semilla Phase 0 propia; solo texto.
+  de: Mathematische Definitionen für die Klassen 7-9, die in ihrem eigenen Tempo laufen, neben dem Unterricht, nicht darin. Bereits behandelten Stoff üben, um Lücken zu schließen. SRS works. Phase-0-Seed, selbst verfasst; nur Text.
 expected_census:
   basic: 47
   cloze: 47
   type_in: 11
 expected_census_by_locale:
   fr:
-    basic: 12
-    cloze: 8
-    type_in: 0
+    basic: 47
+    cloze: 47
+    type_in: 11
   es:
-    basic: 13
-    cloze: 6
-    type_in: 1
+    basic: 47
+    cloze: 47
+    type_in: 11
+  de:
+    basic: 47
+    cloze: 47
+    type_in: 11

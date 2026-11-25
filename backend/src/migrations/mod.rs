@@ -44,8 +44,10 @@ mod m20261015_create_app_settings;
 mod m20261030_create_web_review_log;
 mod m20261115_create_schedule_overrides;
 mod m20261123_add_kiosk_level;
+mod m20261124_create_drill_links;
 pub use m20261015_create_app_settings::Migration as CreateAppSettings;
 pub use m20261115_create_schedule_overrides::Migration as CreateScheduleOverrides;
+pub use m20261124_create_drill_links::Migration as CreateDrillLinks;
 /// The Loco application migrator — lists all database migrations in time order.
 pub struct Migrator;
 #[async_trait::async_trait]
@@ -68,6 +70,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20261030_create_web_review_log::Migration),
             Box::new(CreateScheduleOverrides),
             Box::new(m20261123_add_kiosk_level::Migration),
+            Box::new(CreateDrillLinks),
         ]
     }
 }

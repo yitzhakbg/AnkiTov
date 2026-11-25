@@ -1,21 +1,106 @@
 note_type,concept_id,unit,grades,front,back,extra,pack_id,track,difficulty
-cloze,school,01,7 8 9,école (f.) I go to {{c1::school}} every morning at eight o'clock.,school,School Environment,english-vocabulary,languages,core
-cloze,teacher,01,7 8 9,"professeur (m./f.), enseignant(e) Our English {{c1::teacher}} explains the lesson clearly.",teacher,School Staff,english-vocabulary,languages,core
-cloze,homework,01,7 8 9,pl.) I always do my {{c1::homework}} before dinner.,homework,Study Habits,english-vocabulary,languages,core
-basic,book,01,7 8 9,book,livre (m.) Please open your book on page twenty.,School Supplies,english-vocabulary,languages,core
-basic,friend,01,7 8 9,friend,"ami (m.), amie (f.) She plays soccer with her best friend at lunch.",Interpersonal Relationships,english-vocabulary,languages,core
-basic,family,01,7 8 9,family,famille (f.) My family lives in a small house near Paris.,Family Life,english-vocabulary,languages,core
-cloze,today,01,7 8 9,We have a math test {{c1::today}}.,,We have a math test today.,english-vocabulary,languages,core
-basic,always,02,7 8 9,always,toujours He always arrives on time for class.,Adverbs of Frequency,english-vocabulary,languages,core
-basic,learn,02,7 8 9,learn,apprendre Students learn new words every week.,Verbs of Learning,english-vocabulary,languages,core
-basic,write,02,7 8 9,write,écrire Write your answers in your notebook.,Classroom Actions,english-vocabulary,languages,core
-cloze,listen,02,7 8 9,{{c1::Listen}} carefully to the recording.,,Listen carefully to the recording.,english-vocabulary,languages,core
-basic,question,02,7 8 9,question,"question (f.) If you do not understand, raise your hand and ask a question.",Classroom Communication,english-vocabulary,languages,core
-basic,happy,02,7 8 9,happy,"heureux (m.), heureuse (f.), content(e) The students were very happy after the school holidays.",Feelings & Emotions,english-vocabulary,languages,core
-basic,water,02,7 8 9,water,eau (f.) Drink some water during the sports break.,Everyday Items,english-vocabulary,languages,core
-basic,house,03,7 8 9,house,maison (f.) Our house has a garden behind it.,Home Environment,english-vocabulary,languages,core
-basic,city,03,7 8 9,city,ville (f.) London is a very large city.,Places & Geography,english-vocabulary,languages,core
-cloze,weather,03,7 8 9,The {{c1::weather}} is warm and sunny today.,,The weather is warm and sunny today.,english-vocabulary,languages,core
-basic,time,03,7 8 9,time,"heure (f.), temps (m.) What time does the lesson start?",Daily Schedule,english-vocabulary,languages,core
-basic,breakfast,03,7 8 9,breakfast,petit-déjeuner (m.) I eat bread and fruit for breakfast.,Meals & Routine,english-vocabulary,languages,core
-basic,understand,03,7 8 9,understand,comprendre Do you understand the exercise instructions?,Cognition & Comprehension,english-vocabulary,languages,core
+basic,classroom,01,7,classroom,la salle de classe Our classroom has twelve desks.,«Salle de classe» désigne la pièce ; «classe» nomme aussi le groupe d'élèves.,english-vocabulary,english,core
+basic,blackboard,01,7,blackboard,le tableau noir Write the date on the blackboard every morning.,Un tableau blanc se dit whiteboard ; le tableau interactif est smartboard.,english-vocabulary,english,core
+cloze,notebook,01,7,le cahier Please open your {{c1::notebook}} to page twelve.,notebook,"En anglais, un notebook est un cahier ; l'ordinateur portable se dit laptop.",english-vocabulary,english,core
+basic,textbook,01,7,textbook,le manuel scolaire Our textbook has twelve units.,Manuel se dit aussi coursebook dans certaines méthodes.,english-vocabulary,english,core
+type_in,pencil,01,7,Écrivez le mot anglais : un crayon de bois pour écrire ou dessiner.,pencil,,english-vocabulary,english,core
+type_in,pen,01,7,Écrivez le mot anglais : un instrument avec de l'encre pour écrire.,pen,,english-vocabulary,english,core
+cloze,paper,01,7,"une feuille de papier Pass me a sheet of {{c1::paper}}, please.",paper,Paper est indénomable : une feuille se dit a sheet of paper.,english-vocabulary,english,core
+type_in,eraser,01,7,Écrivez le mot anglais : la gomme qui efface ce qui est écrit au crayon.,eraser,,english-vocabulary,english,core
+type_in,ruler,01,7,Écrivez le mot anglais : la règle graduée pour mesurer et tracer des lignes droites.,ruler,,english-vocabulary,english,core
+basic,school,02,7,school,l'école I walk to school every morning.,«School» couvre l'école primaire et le secondaire ; l'université se dit university.,english-vocabulary,english,core
+basic,library,02,7,library,la bibliothèque You can borrow books from the school library.,"En anglais, la bibliothèque et la librairie se distinguent : library et bookshop.",english-vocabulary,english,core
+basic,laboratory,02,7,laboratory,le laboratoire We do chemistry experiments in the laboratory.,"Dans le langage courant, on dit souvent lab.",english-vocabulary,english,core
+basic,playground,02,7,playground,la cour de récréation The children play football in the playground.,Playground désigne la cour d'école ; l'aire de jeux publique se dit play area.,english-vocabulary,english,core
+basic,break,02,7,break,la récréation We chat and eat a snack during the morning break.,La pause déjeuner de midi se dit lunch break.,english-vocabulary,english,core
+cloze,schedule,02,7,l'emploi du temps Check the {{c1::schedule}} to see when your next lesson starts.,schedule,"En anglais britannique, l'emploi du temps se dit aussi timetable.",english-vocabulary,english,core
+basic,lesson,02,7,lesson,le cours Today's lesson is about the water cycle.,Lesson désigne une séance de cours ; subject nomme la matière.,english-vocabulary,english,core
+cloze,course,02,7,le cours This {{c1::course}} covers basic English grammar over ten weeks.,course,Course désigne un enseignement complet ; lesson est la séance.,english-vocabulary,english,core
+type_in,semester,02,8,"Écrivez le mot anglais : chaque moitié de l'année universitaire, d'environ six mois.",semester,,english-vocabulary,english,core
+cloze,learn,03,7,apprendre We {{c1::learn}} ten new words every week.,learn,Apprendre ; enseigner (ce que fait l'enseignant) se dit teach.,english-vocabulary,english,core
+cloze,understand,03,7,comprendre I don't {{c1::understand}} this exercise — can you help me?,understand,Comprendre ; l'adjectif understandable signifie facile à comprendre.,english-vocabulary,english,core
+basic,study,03,7,study,étudier I study for two hours after dinner.,Study s'emploie pour un travail suivi ; revise signifie réviser avant un contrôle.,english-vocabulary,english,core
+type_in,memorize,03,7,"Écrivez le mot anglais : apprendre par cœur, fixer dans la mémoire.",memorize,,english-vocabulary,english,core
+basic,revise,03,7,revise,réviser I revise my notes before every exam.,"En anglais américain, on dit plutôt review ; une révision du cours se dit aussi a review.",english-vocabulary,english,core
+cloze,practice,03,7,la pratique You need more {{c1::practice}} with the past tense.,practice,"Comme verbe, practise en britannique et practice en américain ; comme nom, toujours practice.",english-vocabulary,english,core
+basic,summary,03,7,summary,le résumé Write a short summary of the chapter in five sentences.,Résumer un texte se dit to summarise (UK) ou to summarize (US).,english-vocabulary,english,core
+cloze,mistake,03,7,l'erreur Everyone makes a {{c1::mistake}} from time to time.,mistake,"Faire une erreur se dit to make a mistake, jamais to do.",english-vocabulary,english,core
+type_in,answer,03,7,Écrivez le mot anglais : la réponse que tu donnes à une question posée.,answer,,english-vocabulary,english,core
+cloze,listen,04,7,écouter We {{c1::listen}} to the recording and repeat the sentences.,listen,"Écouter quelque chose se dit listen to something, avec la préposition to.",english-vocabulary,english,core
+cloze,write,04,7,écrire Please {{c1::write}} your name at the top of the page.,write,"Passer un contrôle se dit to take a test, pas to write a test.",english-vocabulary,english,core
+basic,question,04,7,question,la question Raise your hand if you have a question.,Poser une question se dit to ask a question ; la réponse est answer.,english-vocabulary,english,core
+basic,explain,04,7,explain,expliquer Can you explain the difference between these two words?,Expliquer quelque chose à quelqu'un : explain something to someone.,english-vocabulary,english,core
+type_in,describe,04,7,Écrivez le mot anglais : dire comment est quelque chose ou quelqu'un en détail.,describe,,english-vocabulary,english,core
+cloze,discuss,04,7,débattre We {{c1::discuss}} the results of the experiment during the lesson.,discuss,"Discuss s'emploie sans préposition : discuss the plan, pas discuss about.",english-vocabulary,english,core
+type_in,mention,04,7,"Écrivez le mot anglais : se référer à quelque chose brièvement, en passant.",mention,,english-vocabulary,english,core
+basic,agree,04,7,agree,être d'accord I agree with your first point.,Être d'accord avec : agree with someone ou agree with an idea.,english-vocabulary,english,core
+basic,disagree,04,7,disagree,ne pas être d'accord Politely disagree and give your reasons.,I disagree s'emploie seul ; on peut aussi dire I don't agree.,english-vocabulary,english,core
+cloze,homework,05,7,les devoirs Please finish your {{c1::homework}} before dinner.,homework,Homework est toujours singulier en anglais ; un devoir précis se dit an assignment.,english-vocabulary,english,core
+basic,assignment,05,7,assignment,le devoir Hand in the history assignment on Friday.,Assignment désigne un travail à rendre ; homework est l'ensemble des devoirs.,english-vocabulary,english,core
+cloze,deadline,05,7,la date limite The {{c1::deadline}} for the essay is next Monday.,deadline,Respecter une date limite se dit to meet a deadline.,english-vocabulary,english,core
+basic,project,05,7,project,le projet We are working on a group project about renewable energy.,Travailler sur un projet : to work on a project.,english-vocabulary,english,core
+cloze,research,05,7,la recherche You must do {{c1::research}} before writing your report.,research,Research est indénomable : des recherches se dit some research.,english-vocabulary,english,core
+basic,presentation,05,7,presentation,l'exposé Each group will give a short presentation to the class.,Faire un exposé devant la classe se dit to give a presentation.,english-vocabulary,english,core
+basic,essay,05,7,essay,la rédaction Write an essay of about 150 words on your favorite season.,"En anglais américain, un devoir long s'appelle aussi paper.",english-vocabulary,english,core
+type_in,chapter,05,7,Écrivez le mot anglais : chacune des parties principales d'un livre.,chapter,,english-vocabulary,english,core
+basic,book,05,7,book,le livre I borrowed three books from the library.,Book est aussi un verbe : réserver (book a room).,english-vocabulary,english,core
+basic,teacher,06,7,teacher,l'enseignant Our math teacher explains everything clearly.,"Enseignant est le terme général ; en classe, on dit aussi professeur ou prof.",english-vocabulary,english,core
+basic,student,06,7,student,l'élève Every student must bring a notebook and a pen.,Élève au collège ; pupil désigne un écolier en anglais britannique.,english-vocabulary,english,core
+cloze,classmate,06,7,le camarade de classe My {{c1::classmate}} lent me a pen during the test.,classmate,Camarade de classe ; la classe entière se dit the whole class.,english-vocabulary,english,core
+cloze,friend,06,7,l'ami My best {{c1::friend}} sits next to me during English lessons.,friend,Ami proche : close friend ; se faire des amis : to make friends.,english-vocabulary,english,core
+basic,class,06,7,class,la classe The English class starts at nine o'clock.,Classe désigne le groupe et la salle ; le niveau scolaire se dit year (UK) ou grade (US).,english-vocabulary,english,core
+cloze,group,06,7,le groupe Work in a {{c1::group}} of four for this task.,group,Travail de groupe : group work.,english-vocabulary,english,core
+type_in,partner,06,7,Écrivez le mot anglais : la personne avec qui on travaille en binôme.,partner,,english-vocabulary,english,core
+type_in,guest,06,7,Écrivez le mot anglais : la personne invitée à un événement ou à une émission.,guest,,english-vocabulary,english,core
+cloze,exam,07,7,l'examen We have a biology {{c1::exam}} next Tuesday.,exam,Examen important ; les contrôles courts se disent quiz et test.,english-vocabulary,english,core
+type_in,test,07,7,Écrivez le mot anglais : épreuve pour mesurer des connaissances ou des compétences.,test,,english-vocabulary,english,core
+basic,quiz,07,7,quiz,le quiz We did a five-minute quiz at the start of the lesson.,"Quiz est invariable en anglais : two quiz, pas two quizs.",english-vocabulary,english,core
+basic,grade,07,7,grade,la note I received a good grade on my science project.,"En anglais britannique, la note scolaire se dit plutôt mark.",english-vocabulary,english,core
+type_in,mark,07,7,Écrivez le mot anglais : la note chiffrée attribuée à un travail scolaire (anglais britannique).,mark,,english-vocabulary,english,core
+cloze,pass,07,7,réussir Did you {{c1::pass}} the driving test?,pass,Réussir un examen : to pass ; échouer : to fail.,english-vocabulary,english,core
+cloze,fail,07,7,"échouer If you {{c1::fail}} the exam, you can retake it in June.",fail,Échouer à un examen : to fail an exam.,english-vocabulary,english,core
+type_in,attendance,07,7,Écrivez le mot anglais : la liste des présences que l'enseignant appelle chaque matin.,attendance,,english-vocabulary,english,core
+basic,subject,08,7,subject,la matière My favorite subject is biology.,Subject désigne la matière enseignée ; course désigne l'enseignement suivi.,english-vocabulary,english,core
+type_in,mathematics,08,7,"Écrivez le mot anglais : la science des nombres, des formes et des grandeurs (avec un s).",mathematics,,english-vocabulary,english,core
+type_in,science,08,7,Écrivez le mot anglais : l'étude de la nature et du monde physique par l'expérience.,science,,english-vocabulary,english,core
+cloze,history,08,7,l'histoire In {{c1::history}} we study ancient civilizations.,history,L'histoire événementielle et le récit du passé se disent history ; le récit inventé est story.,english-vocabulary,english,core
+basic,geography,08,7,geography,la géographie We learn about rivers and mountains in geography.,Géographie physique : physical geography ; géographie humaine : human geography.,english-vocabulary,english,core
+basic,language,08,7,language,la langue How many languages do you speak?,Langue vivante : modern language ; langue maternelle : mother tongue.,english-vocabulary,english,core
+cloze,vocabulary,08,7,le vocabulaire Learn five items of {{c1::vocabulary}} every day.,vocabulary,Vocabulary est indénomable : un mot se dit a word ou an item of vocabulary.,english-vocabulary,english,core
+basic,dictionary,08,7,dictionary,le dictionnaire Look up unknown words in the dictionary.,Consulter un mot : to look up a word.,english-vocabulary,english,core
+cloze,today,09,7,aujourd'hui We have a chemistry lesson {{c1::today}}.,today,Aujourd'hui ; les devoirs du jour se disent today's homework.,english-vocabulary,english,core
+cloze,always,09,7,toujours I {{c1::always}} check my work before handing it in.,always,"Always se place avant le verbe : I always check, pas I check always.",english-vocabulary,english,core
+basic,time,09,7,time,le temps There is no time to lose before the exam.,Une fois : once (UK) ou one time (US) ; deux fois : twice.,english-vocabulary,english,core
+basic,breakfast,09,7,breakfast,le petit-déjeuner I have breakfast at half past seven.,"Prendre le petit-déjeuner : to have breakfast, sans article.",english-vocabulary,english,core
+basic,water,09,7,water,l'eau Drink water instead of sugary drinks.,Water est indénomable : un verre d'eau se dit a glass of water.,english-vocabulary,english,core
+basic,morning,09,7,morning,le matin Good morning! Our first lesson starts at eight.,Good morning s'emploie jusqu'à midi ; l'après-midi se dit afternoon.,english-vocabulary,english,core
+type_in,evening,09,7,"Écrivez le mot anglais : la partie finale de la journée, après le travail ou les cours.",evening,,english-vocabulary,english,core
+basic,habit,09,7,habit,l'habitude Reading before bed is a good habit.,Prendre l'habitude de : to get into the habit of.,english-vocabulary,english,core
+basic,busy,09,7,busy,occupé I am busy with homework this week.,Être occupé à : to be busy with something ou busy doing something.,english-vocabulary,english,core
+cloze,house,10,7,la maison Our {{c1::house}} has a small garden and two floors.,house,"Maison, le bâtiment ; home désigne le foyer, le lieu où l'on vit.",english-vocabulary,english,core
+basic,city,10,7,city,la ville Lyon is a city famous for its food.,Grande ville : city ; petite ville ou bourg : town.,english-vocabulary,english,core
+basic,family,10,7,family,"la famille My family has four members: my parents, my sister and me.",Family s'accorde au singulier en anglais américain : my family is big.,english-vocabulary,english,core
+basic,weather,10,7,weather,le temps What is the weather like in your region?,Demander le temps qu'il fait : What is the weather like? — weather est indénomable.,english-vocabulary,english,core
+basic,neighbor,10,7,neighbor,le voisin Our neighbor waters the plants when we travel.,"En anglais britannique, on écrit neighbour avec un eu.",english-vocabulary,english,core
+type_in,chore,10,7,"Écrivez le mot anglais : une tâche domestique de la maison, comme faire la vaisselle.",chore,,english-vocabulary,english,core
+type_in,grocery,10,7,Écrivez le mot anglais : la course d'alimentation ; aussi le magasin d'alimentation.,grocery,,english-vocabulary,english,core
+cloze,errand,10,7,la course I have one more {{c1::errand}} to run after school.,errand,Faire des courses en ville : to run errands.,english-vocabulary,english,core
+type_in,commute,10,7,Écrivez le mot anglais : le trajet quotidien de la maison au travail ou à l'école.,commute,,english-vocabulary,english,core
+cloze,happy,11,7,heureux I am {{c1::happy}} with my results this term.,happy,Heureux ou content ; joyeux anniversaire se dit happy birthday.,english-vocabulary,english,core
+basic,honest,11,7,honest,honnête Be honest about what you did not understand.,Être honnête avec quelqu'un : to be honest with someone.,english-vocabulary,english,core
+basic,patient,11,7,patient,patient Be patient with yourself when learning a language.,Patient (adjectif) et patient (personne soignée) s'écrivent de la même façon.,english-vocabulary,english,core
+type_in,reliable,11,7,"Écrivez le mot anglais : en qui on peut avoir confiance, qui tient ses promesses.",reliable,,english-vocabulary,english,core
+cloze,curious,11,7,curieux Children are naturally {{c1::curious}} about the world around them.,curious,Curieux de savoir : curious about something.,english-vocabulary,english,core
+basic,diligent,11,7,diligent,appliqué Revise your notes every week if you want to be diligent.,Un élève appliqué se dit a diligent student.,english-vocabulary,english,core
+cloze,polite,11,7,poli It is {{c1::polite}} to say thank you when someone helps you.,polite,Le contraire se dit impolite ou rude.,english-vocabulary,english,core
+basic,courage,11,7,courage,le courage It takes courage to speak in front of the whole class.,Avoir le courage de parler devant la classe : to have the courage to speak up.,english-vocabulary,english,core
+type_in,empathy,11,7,Écrivez le mot anglais : la capacité de se mettre à la place de l'autre et de comprendre ses émotions.,empathy,,english-vocabulary,english,core
+cloze,achieve,12,7,réussir You can {{c1::achieve}} your goals with steady work.,achieve,"Réussir, accomplir ; le résultat obtenu se dit achievement.",english-vocabulary,english,core
+basic,improve,12,7,improve,améliorer Read every day to improve your pronunciation.,S'améliorer se dit to improve ou to get better.,english-vocabulary,english,core
+cloze,encourage,12,7,encourager My parents {{c1::encourage}} me to keep trying.,encourage,Encourager quelqu'un à faire : to encourage someone to do something.,english-vocabulary,english,core
+basic,effort,12,7,effort,l'effort With a little effort you will finish the project on time.,Faire des efforts : to make an effort.,english-vocabulary,english,core
+type_in,succeed,12,7,"Écrivez le mot anglais : avoir du succès dans ce qu'on entreprend, y parvenir.",succeed,,english-vocabulary,english,core
+basic,confidence,12,7,confidence,la confiance Speaking every day builds your confidence.,Avoir confiance en soi : to have self-confidence.,english-vocabulary,english,core
+type_in,obstacle,12,7,"Écrivez le mot anglais : ce qui bloque le chemin vers un but, une difficulté à surmonter.",obstacle,,english-vocabulary,english,core
+type_in,perseverance,12,7,Écrivez le mot anglais : le fait de continuer à essayer sans renoncer malgré les difficultés.,perseverance,,english-vocabulary,english,core
+cloze,goal,12,7,l'objectif Set a {{c1::goal}} for each week and check your progress.,goal,Objectif ; marquer un but au football se dit aussi to score a goal.,english-vocabulary,english,core

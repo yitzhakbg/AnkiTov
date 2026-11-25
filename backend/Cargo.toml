@@ -59,6 +59,9 @@ uuid = { version = "1.0", features = ["v4", "serde"] }
 tracing = "0.1"
 bytes = "1"
 sha2 = "0.10"
+# seat_manager::pid_alive — kill(pid, 0) existence probe on non-Linux hosts
+# (macOS dev has no /proc; a missing /proc must not read as "seat dead").
+libc = "0.2"
 
 # Auth
 bcrypt = "0.16"

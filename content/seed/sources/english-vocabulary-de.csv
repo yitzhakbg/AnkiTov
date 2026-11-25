@@ -1,0 +1,106 @@
+note_type,concept_id,unit,grades,front,back,extra,pack_id,track,difficulty
+basic,classroom,01,7,classroom,"das Klassenzimmer Our classroom has twelve desks and one large window.","Klassenzimmer oder Klassenraum; zusammengesetzt aus class + room.",english-vocabulary,languages,core
+basic,blackboard,01,7 8,blackboard,"die Tafel The teacher writes the new words on the blackboard.","Im britischen Englisch heißt eine Tafel auch chalkboard.",english-vocabulary,languages,core
+cloze,notebook,01,7,"das Heft Please open your {{c1::notebook}} to page ten.",notebook,"Im Englischen ist ein notebook ein Heft, kein Laptop; der Laptop heißt laptop.",english-vocabulary,languages,core
+basic,textbook,01,7,textbook,"das Schulbuch We use the same textbook for every lesson this year.","Zusammensetzung: text + book wie im deutschen Schulbuch.",english-vocabulary,languages,core
+type_in,pencil,01,7,Schreiben Sie das englische Wort: ein Holzstift zum Schreiben mit Graphit.,pencil,,english-vocabulary,languages,core
+type_in,pen,01,7,"Schreiben Sie das englische Wort: ein Schreibgerät, das mit Tinte schreibt.",pen,,english-vocabulary,languages,core
+cloze,paper,01,7,"das Blatt Papier May I have a sheet of {{c1::paper}}, please?",paper,"Zählbar: a sheet of paper; zwei Blätter heißen two sheets of paper.",english-vocabulary,languages,core
+type_in,eraser,01,7,Schreiben Sie das englische Wort: der Gummi zum Ausradieren von Bleistiftspuren.,eraser,,english-vocabulary,languages,core
+type_in,ruler,01,8,Schreiben Sie das englische Wort: das Messwerkzeug zum Zeichnen gerader Linien.,ruler,,english-vocabulary,languages,core
+basic,school,02,7,school,"die Schule My school starts at half past eight.","Feste Verbindungen: schoolbag, school year, after school.",english-vocabulary,languages,core
+basic,library,02,7,library,"die Bibliothek We borrow books from the school library.","library = Bibliothek; ein Buch ausleihen heißt to borrow.",english-vocabulary,languages,core
+basic,laboratory,02,8,laboratory,"das Labor In the laboratory we mix safe chemicals.","Umgangssprachliche Kurzform: lab.",english-vocabulary,languages,core
+basic,playground,02,7,playground,"der Schulhof The children meet on the playground during break.","playground bezeichnet meist den Schulhof oder Spielplatz.",english-vocabulary,languages,core
+basic,break,02,7,break,"die Pause We have a ten-minute break after the second lesson.","to take a break = eine Pause machen.",english-vocabulary,languages,core
+cloze,schedule,02,7,"der Stundenplan Our {{c1::schedule}} shows five lessons on Monday.",schedule,"Britisches Gegenstück: timetable.",english-vocabulary,languages,core
+basic,lesson,02,7,lesson,"die Unterrichtsstunde Today's lesson is about the water cycle.","Auch eine Lektion in einem Buch: a history lesson.",english-vocabulary,languages,core
+cloze,course,02,8,"der Kurs She signed up for a {{c1::course}} in first aid.",course,"Ein Schulfach heißt subject; ein angebotener Kurs heißt course.",english-vocabulary,languages,core
+type_in,semester,02,8 9,Schreiben Sie das englische Wort: das halbe Schuljahr an Universitäten.,semester,,english-vocabulary,languages,core
+cloze,learn,03,7,"lernen Children {{c1::learn}} new languages quickly.",learn,"Gegensatzpaar: to learn = lernen, to teach = lehren.",english-vocabulary,languages,core
+cloze,understand,03,7,"verstehen I did not {{c1::understand}} the last question.",understand,"Unregelmäßig: understand – understood – understood.",english-vocabulary,languages,core
+basic,study,03,7,study,"lernen, studieren She studies every evening for her exams.","study meint gezieltes Lernen; allgemeines Lernen heißt to learn.",english-vocabulary,languages,core
+type_in,memorize,03,8,Schreiben Sie das englische Wort: etwas auswendig lernen.,memorize,,english-vocabulary,languages,core
+basic,revise,03,8 9,revise,"wiederholen, überarbeiten He revises his notes before every test.","Britisch gebräuchlich; amerikanisch sagt man eher review.",english-vocabulary,languages,core
+cloze,practice,03,7,"das Üben {{c1::practice}} makes perfect, the English saying goes.",practice,"Britisch schreibt man das Verb practise, amerikanisch immer practice.",english-vocabulary,languages,core
+basic,summary,03,8,summary,"die Zusammenfassung Write a short summary of the chapter.","Verbformen: to summarize (US), to summarise (UK).",english-vocabulary,languages,core
+cloze,mistake,03,7,"der Fehler Everyone makes a {{c1::mistake}} sometimes.",mistake,"Kollokation: to make a mistake, nicht to do a mistake.",english-vocabulary,languages,core
+type_in,answer,03,7,Schreiben Sie das englische Wort: die Antwort auf eine Frage.,answer,,english-vocabulary,languages,core
+cloze,listen,04,7,"zuhören {{c1::listen}} carefully to the instructions.",listen,"Feste Präposition: to listen to something.",english-vocabulary,languages,core
+cloze,write,04,7,"schreiben {{c1::write}} your name at the top of the page.",write,"Unregelmäßig: write – wrote – written.",english-vocabulary,languages,core
+basic,question,04,7,question,"die Frage Ask a question if something is unclear.","Kollokation: to ask a question = eine Frage stellen.",english-vocabulary,languages,core
+basic,explain,04,7 8,explain,"erklären Can you explain the rule again, please?","explain folgt dem Objekt direkt: explain the rule to me.",english-vocabulary,languages,core
+type_in,describe,04,8,Schreiben Sie das englische Wort: etwas mit Worten schildern.,describe,,english-vocabulary,languages,core
+cloze,discuss,04,8 9,"besprechen The class will {{c1::discuss}} the novel on Friday.",discuss,"discuss braucht kein about: to discuss a topic.",english-vocabulary,languages,core
+type_in,mention,04,8,Schreiben Sie das englische Wort: etwas kurz erwähnen.,mention,,english-vocabulary,languages,core
+basic,agree,04,7,agree,"zustimmen I agree with your first argument.","to agree with einer Person; to agree on einer Lösung.",english-vocabulary,languages,core
+basic,disagree,04,8,disagree,"widersprechen It is okay to disagree politely in a debate.","Gegenteil von to agree; Muster: to disagree with someone.",english-vocabulary,languages,core
+cloze,homework,05,7,"die Hausaufgaben Please finish your {{c1::homework}} before tomorrow's class.",homework,"Unverzählbar: much homework; die einzelne Aufgabe heißt an exercise.",english-vocabulary,languages,core
+basic,assignment,05,7,assignment,"die Aufgabe The teacher collected the assignment on Monday.","Im Schulgebrauch auch homework assignment.",english-vocabulary,languages,core
+cloze,deadline,05,8,"die Frist The {{c1::deadline}} for the project is next Friday.",deadline,"to meet a deadline = eine Frist einhalten.",english-vocabulary,languages,core
+basic,project,05,7,project,"das Projekt We are working on a science project about bees.","Auch Verb: to project = projizieren.",english-vocabulary,languages,core
+cloze,research,05,8,"die Recherche She did {{c1::research}} for her history essay.",research,"Unverzählbar; eine Forscherin heißt researcher.",english-vocabulary,languages,core
+basic,presentation,05,8,presentation,"der Vortrag Her presentation about renewable energy was excellent.","Kollokation: to give a presentation.",english-vocabulary,languages,core
+basic,essay,05,8 9,essay,"der Aufsatz We have to write an essay of 300 words.","US-Schulsprache auch composition.",english-vocabulary,languages,core
+type_in,chapter,05,8,Schreiben Sie das englische Wort: ein Abschnitt in einem Buch.,chapter,,english-vocabulary,languages,core
+basic,book,05,7,book,"das Buch I borrowed two books from the library.","Auch Verb: to book = buchen (Zimmer, Ticket).",english-vocabulary,languages,core
+basic,teacher,06,7,teacher,"die Lehrkraft Our teacher explains grammar very clearly.","Lehrkraft ist der Glossar-Begriff für teacher.",english-vocabulary,languages,core
+basic,student,06,7,student,"der Schüler Every student needs a quiet place to study.","Das Wort deckt Schüler und Studierende ab.",english-vocabulary,languages,core
+cloze,classmate,06,7,"der Mitschüler My {{c1::classmate}} shares his notes with me.",classmate,"Gilt für Mitschülerinnen und Mitschüler.",english-vocabulary,languages,core
+cloze,friend,06,7,"der Freund A good {{c1::friend}} listens to your problems.",friend,"Freundschaft heißt friendship.",english-vocabulary,languages,core
+basic,class,06,7,class,"die Klasse Our class has twenty-five students this year.","Klassenzimmer heißt classroom, nicht class.",english-vocabulary,languages,core
+cloze,group,06,8,"die Gruppe Work in a {{c1::group}} of four for this task.",group,"to work in a group = in einer Gruppe arbeiten.",english-vocabulary,languages,core
+type_in,partner,06,8,"Schreiben Sie das englische Wort: die Person, mit der man zusammenarbeitet.",partner,,english-vocabulary,languages,core
+type_in,guest,06,8 9,Schreiben Sie das englische Wort: die eingeladene Person zu Besuch.,guest,,english-vocabulary,languages,core
+cloze,exam,07,8,"die Prüfung She passed her final {{c1::exam}} with a good result.",exam,"Kurzform von examination.",english-vocabulary,languages,core
+type_in,test,07,7,Schreiben Sie das englische Wort: die kurze schriftliche Kontrolle.,test,,english-vocabulary,languages,core
+basic,quiz,07,7,quiz,"das Quiz The teacher gave us a short quiz on vocabulary.","Kleiner Kurztest, oft ungekündigt.",english-vocabulary,languages,core
+basic,grade,07,7,grade,"die Note She got the best grade in the class.","US-Englisch grade; britisch mark.",english-vocabulary,languages,core
+type_in,mark,07,8,Schreiben Sie das englische Wort: die Bewertung einer Arbeit (britisch).,mark,,english-vocabulary,languages,core
+cloze,pass,07,8,"bestehen He hopes to {{c1::pass}} the driving exam in June.",pass,"Gegenteil: to fail = durchfallen.",english-vocabulary,languages,core
+cloze,fail,07,8,"durchfallen If you do not study, you may {{c1::fail}} the test.",fail,"to fail a test = eine Prüfung nicht bestehen.",english-vocabulary,languages,core
+type_in,attendance,07,8 9,Schreiben Sie das englische Wort: die Anwesenheit im Unterricht.,attendance,,english-vocabulary,languages,core
+basic,subject,08,7,subject,"das Schulfach My favorite subject is English.","US-Schreibung favorite; britisch favourite.",english-vocabulary,languages,core
+type_in,mathematics,08,8,"Schreiben Sie das englische Wort: das Schulfach mit Zahlen und Formeln (Langform).",mathematics,,english-vocabulary,languages,core
+type_in,science,08,7,Schreiben Sie das englische Wort: das Schulfach über Natur und Experimente.,science,,english-vocabulary,languages,core
+cloze,history,08,7,"Geschichte In {{c1::history}} we learned about ancient Rome.",history,"Das Schulfach heißt im Deutschen Geschichte.",english-vocabulary,languages,core
+basic,geography,08,7,geography,"Erdkunde We study rivers and mountains in geography.","Wörtlich Erdbeschreibung, aus dem Griechischen.",english-vocabulary,languages,core
+basic,language,08,8,language,"die Sprache English is a global language with many dialects.","Fremdsprache heißt foreign language.",english-vocabulary,languages,core
+cloze,vocabulary,08,8,"der Wortschatz Learning {{c1::vocabulary}} every day builds fluency.",vocabulary,"Kurzform im Klassenzimmer: vocab.",english-vocabulary,languages,core
+basic,dictionary,08,8,dictionary,"das Wörterbuch Look up the new word in a dictionary.","Plural: dictionaries.",english-vocabulary,languages,core
+cloze,today,09,7,"heute {{c1::today}} we start a new unit in class.",today,"Am Satzanfang groß, sonst kleingeschrieben.",english-vocabulary,languages,core
+cloze,always,09,7,"immer She {{c1::always}} sits in the front row.",always,"Häufigkeitsadverb; steht vor dem Hauptverb.",english-vocabulary,languages,core
+basic,time,09,7,time,"die Zeit There is no time to waste before the exam.","Auch Mal: three times = drei Mal.",english-vocabulary,languages,core
+basic,breakfast,09,7,breakfast,"das Frühstück We have breakfast at seven o'clock.","Wörtlich das Fasten brechen: break + fast.",english-vocabulary,languages,core
+basic,water,09,7,water,"das Wasser Drink enough water during the school day.","Unverzählbar; a glass of water = ein Glas Wasser.",english-vocabulary,languages,core
+basic,morning,09,7,morning,"der Vormittag In the morning the classroom is quiet.","Grußformel: good morning = guten Morgen.",english-vocabulary,languages,core
+type_in,evening,09,8,Schreiben Sie das englische Wort: die Tageszeit nach dem Nachmittag.,evening,,english-vocabulary,languages,core
+basic,habit,09,8 9,habit,"die Gewohnheit Reading every night is a good habit.","Muster: to get into the habit of doing something.",english-vocabulary,languages,core
+basic,busy,09,8,busy,"beschäftigt The teacher is busy preparing the lesson.","Muster: to be busy with something.",english-vocabulary,languages,core
+cloze,house,10,7,"das Haus Their {{c1::house}} has a small garden behind it.",house,"Zu Hause heißt at home, nicht at house.",english-vocabulary,languages,core
+basic,city,10,7,city,"die Stadt Berlin is a large city with many museums.","Große Stadt = city, Kleinstadt = town.",english-vocabulary,languages,core
+basic,family,10,7,family,"die Familie My family visits grandmother every Sunday.","Verwandte heißen relatives.",english-vocabulary,languages,core
+basic,weather,10,7,weather,"das Wetter The weather is cold in January.","Wetterbericht heißt weather forecast.",english-vocabulary,languages,core
+basic,neighbor,10,8,neighbor,"der Nachbar Our neighbor waters the plants when we travel.","US neighbor, britisch neighbour.",english-vocabulary,languages,core
+type_in,chore,10,8,Schreiben Sie das englische Wort: eine kleine Arbeit im Haushalt.,chore,,english-vocabulary,languages,core
+type_in,grocery,10,8,Schreiben Sie das englische Wort: der Laden für Lebensmittel des Alltags.,grocery,,english-vocabulary,languages,core
+cloze,errand,10,8 9,"die Besorgung Mom sent me on an {{c1::errand}} to the post office.",errand,"Besorgungen machen heißt to run errands.",english-vocabulary,languages,core
+type_in,commute,10,9,Schreiben Sie das englische Wort: der tägliche Weg zur Arbeit oder Schule.,commute,,english-vocabulary,languages,core
+cloze,happy,11,7,"glücklich The whole class was {{c1::happy}} about the result.",happy,"Gegenteile: sad und unhappy.",english-vocabulary,languages,core
+basic,honest,11,8,honest,"ehrlich An honest answer is worth more than a clever one.","Ehrlichkeit heißt honesty.",english-vocabulary,languages,core
+basic,patient,11,8,patient,"geduldig A patient listener learns more in class.","Auch der Patient im Krankenhaus heißt patient.",english-vocabulary,languages,core
+type_in,reliable,11,8 9,Schreiben Sie das englische Wort: zuverlässig und verlässlich.,reliable,,english-vocabulary,languages,core
+cloze,curious,11,8,"neugierig {{c1::curious}} students ask a lot of questions.",curious,"Neugier heißt curiosity.",english-vocabulary,languages,core
+basic,diligent,11,8 9,diligent,"fleißig Diligent students check their homework twice.","Fleiß heißt diligence.",english-vocabulary,languages,core
+cloze,polite,11,8,"höflich {{c1::polite}} learners say please and thank you.",polite,"Höflichkeit heißt politeness.",english-vocabulary,languages,core
+basic,courage,11,9,courage,"der Mut It takes courage to speak in front of the class.","mutig heißt courageous oder brave.",english-vocabulary,languages,core
+type_in,empathy,11,9,"Schreiben Sie das englische Wort: die Fähigkeit, sich in andere hineinzuversetzen.",empathy,,english-vocabulary,languages,core
+cloze,achieve,12,9,"erreichen Set small goals and you will {{c1::achieve}} them.",achieve,"Feste Verbindung: to achieve a goal.",english-vocabulary,languages,core
+basic,improve,12,8,improve,"verbessern Practice helps you improve your spelling.","Auch reflexiv gedacht: sich verbessern = to improve.",english-vocabulary,languages,core
+cloze,encourage,12,8,"ermutigen Good teachers {{c1::encourage}} their students to try.",encourage,"Ermutigung heißt encouragement.",english-vocabulary,languages,core
+basic,effort,12,8,effort,"die Anstrengung Success takes more effort than talent.","to make an effort = sich anstrengen.",english-vocabulary,languages,core
+type_in,succeed,12,9,Schreiben Sie das englische Wort: Erfolg haben bei etwas.,succeed,,english-vocabulary,languages,core
+basic,confidence,12,9,confidence,"das Selbstvertrauen Confidence grows with every try.","selbstsicher heißt confident.",english-vocabulary,languages,core
+type_in,obstacle,12,9,Schreiben Sie das englische Wort: das Hindernis auf dem Weg zum Ziel.,obstacle,,english-vocabulary,languages,core
+type_in,perseverance,12,9,Schreiben Sie das englische Wort: das Durchhaltevermögen bei langen Aufgaben.,perseverance,,english-vocabulary,languages,core
+cloze,goal,12,8,"das Ziel Write down your {{c1::goal}} for this school year.",goal,"Auch im Sport: ein Tor heißt goal.",english-vocabulary,languages,core

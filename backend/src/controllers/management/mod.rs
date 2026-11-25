@@ -20,6 +20,7 @@ pub mod classes;
 pub mod classroom;
 pub mod compliance;
 pub mod deck_library;
+pub mod drill_links;
 pub mod seats;
 pub mod decks;
 pub mod jev;
@@ -81,6 +82,10 @@ const TAG: &str = "Management Console";
         seats::list,
         seats::start,
         seats::stop,
+        // Drill links (T-215 — First-60-Seconds front door)
+        drill_links::create,
+        drill_links::list,
+        drill_links::revoke,
         classes::transfer_student,
         classes::generate_sessions,
         // Teachers (Prong 8 — teacher registration + first-login wizard)
