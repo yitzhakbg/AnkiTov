@@ -13,6 +13,7 @@ use crate::models::management::{
     ListDeckQuery,
 };
 use crate::services::anki_connect::AnkiConnectError;
+use crate::services::deck_paths::upload_dir;
 use axum::{
     body::Bytes,
     extract::{DefaultBodyLimit, Multipart, Path, Query, State},
@@ -120,18 +121,6 @@ fn max_upload_bytes() -> usize {
         .ok()
         .and_then(|s| s.parse::<usize>().ok())
         .unwrap_or(DEFAULT_MAX_UPLOAD_BYTES)
-}
-
-/// Resolve the directory uploaded `.apkg` packages are persisted to.
-///
-/// Order: `ANKITOV_UPLOAD_DIR` env override → `uploads/decks` relative to
-/// the working directory (the backend's CWD is the data dir in container
-/// and release layouts, matching the seed-dir convention).
-fn upload_dir() -> std::path::PathBuf {
-    if let Ok(dir) = std::env::var("ANKITOV_UPLOAD_DIR") {
-        return std::path::PathBuf::from(dir);
-    }
-    std::path::PathBuf::from("uploads/decks")
 }
 
 /// Reduce a filename stem to a safe on-disk component
@@ -261,7 +250,8 @@ pub async fn upload_deck(
         tracing::error!("upload_deck create_dir_all {:?} failed: {:?}", dir, e);
         loco_rs::Error::InternalServerError
     })?;
-    let path = dir.join(format!("{}-{}.apkg", &checksum[..8], sanitize_stem(stem)));
+    let package_file = format!("{}-{}.apkg", &checksum[..8], sanitize_stem(stem));
+    let path = dir.join(&package_file);
     std::fs::write(&path, &file_data).map_err(|e| {
         tracing::error!("upload_deck write {:?} failed: {:?}", path, e);
         loco_rs::Error::InternalServerError
@@ -386,6 +376,9 @@ pub async fn upload_deck(
         created_at: Set(now_ts),
         updated_at: Set(now_ts),
         track_id: ActiveValue::NotSet,
+        // T-234: record the persisted bare file name so drill links and
+        // seat staging can recover the on-disk package from the row.
+        package_file: Set(Some(package_file)),
     }
     .insert(&ctx.db)
     .await
@@ -412,6 +405,72 @@ pub async fn upload_deck(
         track_id: deck.track_id.clone(),
     })
 }
+
+/// Resolve an uploaded deck's on-disk package file name (T-234).
+///
+/// Looks up the `decks` row and returns the BARE persisted file name:
+///
+/// 1. `decks.package_file` when recorded (post-T-234 uploads) and the
+///    file still exists in the upload dir;
+/// 2. otherwise a checksum-prefix glob `<checksum8>-*.apkg` over the
+///    upload dir (rows created before the column existed — the sanitized
+///    stem of the original filename is not recoverable, so exactly one
+///    match is required);
+/// 3. else an error naming both lookup paths.
+///
+/// Returns `Err(message)` — the caller maps it onto its own error shape
+/// (drill-link creation turns it into a 400).
+pub(super) async fn resolve_uploaded_package(
+    ctx: &AppContext,
+    deck_id: i32,
+) -> Result<String, String> {
+    let deck = deck_entity::Entity::find_by_id(deck_id)
+        .one(&ctx.db)
+        .await
+        .map_err(|e| {
+            tracing::error!("resolve_uploaded_package lookup {deck_id} failed: {:?}", e);
+            "deck lookup failed".to_string()
+        })?;
+    let deck = deck.ok_or_else(|| format!("no uploaded deck with id {deck_id}"))?;
+
+    // 1. Direct hit: the row records the persisted file name.
+    if let Some(pf) = &deck.package_file {
+        if upload_dir().join(pf).is_file() {
+            return Ok(pf.clone());
+        }
+        tracing::warn!(
+            "resolve_uploaded_package: deck {deck_id} records package_file {pf:?} but the file is missing from the upload dir"
+        );
+    }
+
+    // 2. Fallback for pre-column rows: exactly one checksum-prefix match.
+    let prefix = deck
+        .checksum_sha256
+        .get(..8)
+        .unwrap_or(&deck.checksum_sha256)
+        .to_string();
+    let mut matches: Vec<String> = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(upload_dir()) {
+        for entry in entries.flatten() {
+            let name = entry.file_name().to_string_lossy().to_string();
+            if name.starts_with(&prefix) && name.ends_with(".apkg") {
+                matches.push(name);
+            }
+        }
+    }
+    matches.sort();
+    match matches.len() {
+        1 => Ok(matches.remove(0)),
+        0 => Err(format!(
+            "uploaded package file for deck {deck_id} is missing from the upload directory — re-upload the deck"
+        )),
+        _ => Err(format!(
+            "uploaded package for deck {deck_id} is ambiguous ({} checksum-prefix matches) — re-upload the deck",
+            matches.len()
+        )),
+    }
+}
+
 #[utoipa::path(
     post,
     path = "/management/decks/{deck_id}/distribute",

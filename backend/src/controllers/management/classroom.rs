@@ -4,7 +4,11 @@
 //! The primary listener keeps its private bind (127.0.0.1 by default, set by
 //! the launcher). Enabling classroom mode binds an ADDITIONAL listener on the
 //! LAN IP serving the exact same router, so students on the same network can
-//! reach `/reviewer`. Disabling drops that listener. The localhost listener
+//! reach the server and join the seat flow (T-237 Product Law: practice is
+//! real Anki streamed via Selkies — students open the drill links the teacher
+//! hands out, each link spawns a seat and redirects to its stream). There is
+//! no per-class join URL anymore; the status reports the server base URL.
+//! Disabling drops that listener. The localhost listener
 //! is never touched — the teacher's own access is unaffected either way.
 //!
 //! The router is stashed by `App::after_routes` (see `set_router`); a handler
@@ -44,7 +48,9 @@ fn status_json(enabled: bool, lan_ip: Option<String>) -> serde_json::Value {
     match (enabled, lan_ip) {
         (true, Some(ip)) => serde_json::json!({
             "enabled": true, "lan_ip": ip, "port": port,
-            "join_url": format!("http://{ip}:{port}/reviewer"),
+            // T-237: students join via drill links → streamed seats at this
+            // base URL; the retired /reviewer path no longer exists.
+            "server_url": format!("http://{ip}:{port}"),
         }),
         (true, None) => serde_json::json!({"enabled": true, "port": port}),
         (false, _) => serde_json::json!({"enabled": false, "port": port}),
@@ -60,6 +66,14 @@ fn status_json(enabled: bool, lan_ip: Option<String>) -> serde_json::Value {
 )]
 pub async fn enable(Extension(user): Extension<AuthUser>) -> Result<Response> {
     let _ = ensure_role(&user, &["teacher", "admin"])?;
+
+    // T-237 Product Law gate: classroom mode hands students the seat flow,
+    // and a rootfs-less install cannot spawn seats. Fail LOUD at enable time
+    // with the build instructions instead of silently offering a surface
+    // whose only student path is dead.
+    if let Err(e) = crate::services::seat_manager::SeatManager::global().rootfs_ready() {
+        return Err(loco_rs::Error::BadRequest(e.to_string()));
+    }
 
     {
         let guard = CLASSROOM.lock().unwrap();
@@ -104,7 +118,9 @@ pub async fn enable(Extension(user): Extension<AuthUser>) -> Result<Response> {
         shutdown: shutdown_tx,
         handle,
     });
-    tracing::info!("classroom mode ON — students join at http://{lan_ip}:{port}/reviewer");
+    tracing::info!(
+        "classroom mode ON — students join at http://{lan_ip}:{port} via drill links (streamed Anki seats)"
+    );
     format::json(status_json(true, Some(lan_ip)))
 }
 

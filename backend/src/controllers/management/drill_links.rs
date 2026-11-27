@@ -16,7 +16,7 @@ use sea_orm::{ActiveModelTrait, QueryOrder, QuerySelect, Set};
 use crate::middleware::auth::{ensure_role, AuthUser};
 use crate::models::entities::drill_link;
 
-use super::deck_library::{seed_packages_dir, valid_package_name};
+use crate::services::deck_paths::{seed_packages_dir, valid_package_name};
 
 const TAG: &str = "Management Console";
 /// Drill links are class-trial-adjacent: 30 days is a generous ceiling, and
@@ -50,7 +50,9 @@ pub fn routes() -> Routes {
 
 #[derive(Debug, serde::Deserialize, utoipa::ToSchema)]
 pub struct CreateDrillLinkRequest {
-    /// Seed pack file name (e.g. `english-vocab-he.apkg`) — must exist on disk.
+    /// Seed pack file name (e.g. `english-vocab-he.apkg`) or an uploaded
+    /// deck id (e.g. `42`) whose persisted package the link binds (T-234);
+    /// the stored link resolves to a bare .apkg file name either way.
     pub pack: String,
     /// Deck name auto-opened on the seat (passed to the session driver).
     pub deck: String,
@@ -94,20 +96,28 @@ pub async fn create(
 ) -> Result<Response> {
     ensure_role(&user, &["teacher", "admin"])?;
 
-    // Pack must be a sane file name AND actually exist in the seed dir — a
-    // link minted against a missing pack would degrade to an empty seat.
-    if !valid_package_name(&payload.pack) {
-        return Err(bad_request(
-            "pack must be an existing seed .apkg file name (letters, digits, dot, dash, underscore)"
-                .to_string(),
-        ));
-    }
-    if !seed_packages_dir().join(&payload.pack).is_file() {
+    // T-234: `pack` binds either a SEED library file name or an UPLOADED
+    // deck (its numeric deck id). Seed wins when both could match — the
+    // stored pack value is always a bare file name resolvable at spawn
+    // time (seed-relative or the upload dir's persisted name).
+    let pack = if valid_package_name(&payload.pack)
+        && seed_packages_dir().join(&payload.pack).is_file()
+    {
+        payload.pack.clone()
+    } else if let Ok(deck_id) = payload.pack.parse::<i32>() {
+        // Uploaded deck: resolve to the persisted bare file name now so a
+        // typo'd/missing deck id fails at mint time, not on the visitor's
+        // first click (the resolver's checksum fallback covers rows that
+        // predate the package_file column).
+        super::decks::resolve_uploaded_package(&ctx, deck_id)
+            .await
+            .map_err(bad_request)?
+    } else {
         return Err(bad_request(format!(
-            "pack '{}' not found in the seed library",
+            "pack '{}' not found in the seed library and not an uploaded deck id",
             payload.pack
         )));
-    }
+    };
     let deck = payload.deck.trim().to_string();
     if deck.is_empty() || deck.len() > 128 {
         return Err(bad_request("deck must be 1-128 characters".to_string()));
@@ -130,7 +140,7 @@ pub async fn create(
     let now = chrono::Utc::now().timestamp();
     let model = drill_link::ActiveModel {
         id: Set(id.clone()),
-        pack: Set(payload.pack),
+        pack: Set(pack),
         deck: Set(deck),
         title: Set(title),
         created_by: Set(user.email.clone()),

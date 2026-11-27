@@ -13,7 +13,7 @@
 //!    accepted by `/management/*` read endpoints.
 //! 3. **Student is blocked from management** — a valid student JWT gets
 //!    `403 Forbidden` on every `/management/*` endpoint (reads included);
-//!    the student surface is `/reviewer`.
+//!    student practice rides the seat flow (T-237), not the console.
 //! 4. **Public endpoints stay open** — `/health` and `/auth/*` work without a
 //!    token (they are deliberately NOT behind `require_auth`).
 //! 5. **Logout** — `POST /auth/logout` with a valid token returns `200`.
@@ -172,7 +172,7 @@ async fn management_read_as_admin_is_200() {
 
 /// A valid student JWT is rejected with 403 on a *read* endpoint too — the
 /// management middleware requires teacher/admin before any handler runs
-/// (8bbe64b09); the student surface is `/reviewer`.
+/// (8bbe64b09); student practice rides the seat flow (T-237).
 #[tokio::test]
 async fn management_read_as_student_is_403() {
     testing::request::<backend::App, _, _>(|server, _ctx| async move {

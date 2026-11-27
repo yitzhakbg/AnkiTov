@@ -709,3 +709,65 @@ async fn distribute_deck_returns_error_for_invalid_target_id() {
     })
     .await;
 }
+
+// ---------------------------------------------------------------------------
+// T-234: persisted package file name
+// ---------------------------------------------------------------------------
+
+/// A successful upload records the persisted bare file name in
+/// decks.package_file so drill links (T-234) and seat staging can recover
+/// the on-disk package from the row alone.
+#[tokio::test]
+async fn upload_deck_records_package_file() {
+    let mock = start_anki_mock().await;
+    testing::request::<backend::App, _, _>(|server, ctx| async move {
+        set_anki_port(&mock);
+        set_unique_upload_dir();
+        let payload: Vec<u8> = (0u8..64).cycle().take(2048).collect();
+        let resp = post_upload(&server, "test-deck.apkg", &payload).await;
+        let status = resp.status_code();
+        let body = resp.text();
+        assert_eq!(
+            status,
+            axum::http::StatusCode::OK,
+            "upload should return 200, got {status}: {body}"
+        );
+
+        // Exactly one persisted package, checksum-prefixed.
+        let dir = std::env::var("ANKITOV_UPLOAD_DIR").expect("upload dir env is set");
+        let mut entries: Vec<String> = std::fs::read_dir(&dir)
+            .expect("reading the upload dir must succeed")
+            .filter_map(|e| e.ok())
+            .map(|e| e.file_name().to_string_lossy().to_string())
+            .filter(|n| n.ends_with(".apkg"))
+            .collect();
+        entries.sort();
+        assert_eq!(
+            entries.len(),
+            1,
+            "exactly one persisted package expected, got {entries:?}"
+        );
+        let persisted = entries.remove(0);
+        assert!(
+            persisted.len() > 9
+                && persisted[..8].chars().all(|c| c.is_ascii_hexdigit())
+                && persisted.as_bytes()[8] == b'-',
+            "persisted name must be <8hex>-<stem>.apkg, got: {persisted}"
+        );
+
+        // The row carries the same bare name.
+        use sea_orm::{entity::prelude::EntityTrait, ColumnTrait, QueryFilter};
+        let deck = backend::models::entities::deck::Entity::find()
+            .filter(backend::models::entities::deck::Column::Name.eq("Test Deck".to_string()))
+            .one(&ctx.db)
+            .await
+            .expect("deck lookup must succeed")
+            .expect("the uploaded deck row must exist");
+        assert_eq!(
+            deck.package_file.as_deref(),
+            Some(persisted.as_str()),
+            "decks.package_file must record the persisted file name"
+        );
+    })
+    .await;
+}

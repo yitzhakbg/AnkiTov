@@ -28,7 +28,6 @@ use backend::models::entities::track_profile::ActiveModel as TrackProfileActiveM
 use backend::models::entities::track_profile_track::ActiveModel as TrackProfileTrackActiveModel;
 use backend::models::entities::web_review_log::{self};
 use backend::services::capsule_generator::{generate_capsule, GenerateRequest};
-use backend::services::review_ingest::{ingest_answer, ReviewAnswer};
 use backend::services::schedule_triage;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, Database, DatabaseConnection, EntityTrait, QueryFilter, Set,
@@ -451,70 +450,7 @@ async fn reentry_after_tranche_elapses() {
 }
 
 // ---------------------------------------------------------------------------
-// 3. Answering a card clears its active override (web-reviewer hook)
-// ---------------------------------------------------------------------------
-
-#[tokio::test]
-async fn web_answer_clears_active_override() {
-    let db = fresh_db().await;
-    make_profile(&db).await;
-    let dir = tempfile::TempDir::new().expect("tempdir");
-    let (path, _) = build_fixture(dir.path(), 30, 0);
-
-    let resp = generate_capsule(&db, gen_request(&path))
-        .await
-        .expect("session 1");
-    assert_eq!(resp.card_ids.len(), 24);
-    let rows = active_overrides(&db).await;
-    assert_eq!(rows.len(), 6, "30 due, budget 24 → 6 deferred");
-    let cleared_target = rows[0].card_id;
-
-    ingest_answer(
-        &db,
-        777_001,
-        "student-triage@example.test",
-        &ReviewAnswer {
-            answer_id: "clear-hook-test-answer-0001".into(),
-            card_id: cleared_target,
-            ease: 3,
-            time_ms: 4_000,
-            session_id: Some("clear-hook-sess".into()),
-        },
-    )
-    .await
-    .expect("ingest");
-
-    assert_eq!(active_overrides(&db).await.len(), 5);
-    // The row is retired (audit trail), not deleted.
-    let cleared = ScheduleOverride::find()
-        .filter(OverrideCol::StudentId.eq(STUDENT))
-        .filter(OverrideCol::CardId.eq(cleared_target))
-        .all(&db)
-        .await
-        .expect("query cleared row");
-    assert_eq!(cleared.len(), 1);
-    assert!(cleared[0].cleared_at.is_some(), "row retired, not deleted");
-
-    // Duplicate ingest (same answer_id) is idempotent and harmless.
-    ingest_answer(
-        &db,
-        777_001,
-        "student-triage@example.test",
-        &ReviewAnswer {
-            answer_id: "clear-hook-test-answer-0001".into(),
-            card_id: cleared_target,
-            ease: 3,
-            time_ms: 4_000,
-            session_id: Some("clear-hook-sess".into()),
-        },
-    )
-    .await
-    .expect("duplicate ingest");
-    assert_eq!(active_overrides(&db).await.len(), 5);
-}
-
-// ---------------------------------------------------------------------------
-// 4. Thin-day early fill — gates: r_min floor + interval fraction + state
+// 3. Thin-day early fill — gates: r_min floor + interval fraction + state
 // ---------------------------------------------------------------------------
 
 #[tokio::test]

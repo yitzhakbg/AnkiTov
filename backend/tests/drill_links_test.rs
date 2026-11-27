@@ -355,3 +355,196 @@ async fn exhaustion_counts_only_successful_spawns() {
     })
     .await;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// T-234: uploaded-deck pack binding
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Empty temp upload dir (to point `ANKITOV_UPLOAD_DIR` at).
+fn make_upload_fixture() -> String {
+    let dir = std::env::temp_dir().join(format!(
+        "ankitov-drill-upload-{}",
+        uuid::Uuid::new_v4().simple()
+    ));
+    std::fs::create_dir_all(&dir).expect("creating upload fixture dir must succeed");
+    dir.to_string_lossy().to_string()
+}
+
+fn set_upload_dir(dir: &str) {
+    std::env::set_var("ANKITOV_UPLOAD_DIR", dir);
+}
+
+/// Insert a decks row directly (the uploaded-deck stand-in for drill-link
+/// binding tests). `checksum` must be 64 hex chars; `package_file` mirrors
+/// the column (None = pre-T-234 row exercising the checksum fallback).
+async fn seed_deck(
+    ctx: &loco_rs::app::AppContext,
+    id: i32,
+    checksum: &str,
+    package_file: Option<&str>,
+) {
+    use backend::models::entities::deck;
+    let now = chrono::Utc::now().timestamp();
+    let m = deck::ActiveModel {
+        id: ActiveValue::Set(id),
+        name: ActiveValue::Set(format!("Uploaded Deck {id}")),
+        description: ActiveValue::Set(None),
+        card_count: ActiveValue::Set(3),
+        file_size_bytes: ActiveValue::Set(1024),
+        checksum_sha256: ActiveValue::Set(checksum.to_string()),
+        uploaded_by: ActiveValue::Set("t@example.edu".to_string()),
+        track_id: ActiveValue::Set(None),
+        package_file: package_file
+            .map(|s| ActiveValue::Set(Some(s.to_string())))
+            .unwrap_or(ActiveValue::NotSet),
+        created_at: ActiveValue::Set(now),
+        updated_at: ActiveValue::Set(now),
+    };
+    deck::Entity::insert(m)
+        .exec(&ctx.db)
+        .await
+        .expect("inserting a seeded deck row must succeed");
+}
+
+fn hex_checksum(prefix: &str) -> String {
+    format!("{prefix}{}", "0".repeat(64 - prefix.len()))
+}
+
+/// `pack` = uploaded deck id → the link binds the deck's PERSISTED bare
+/// package file name (decks.package_file), so the seat spawn can stage it
+/// from the upload dir without touching the DB again.
+#[tokio::test]
+async fn create_binds_uploaded_deck_and_stores_persisted_name() {
+    testing::request::<backend::App, _, _>(|server, ctx| async move {
+        set_seed_dir(&make_seed_fixture());
+        let upload = make_upload_fixture();
+        set_upload_dir(&upload);
+        std::fs::write(
+            std::path::Path::new(&upload).join("abcd1234-uploaded-pack.apkg"),
+            b"not-a-real-apkg",
+        )
+        .expect("writing the staged upload must succeed");
+        seed_deck(&ctx, 442, &hex_checksum("abcd1234"), Some("abcd1234-uploaded-pack.apkg"))
+            .await;
+
+        let resp = server
+            .post(MGMT)
+            .add_header("Authorization", bearer(&mint(885, "teacher", "t@example.edu")))
+            .json(&create_body("442"))
+            .await;
+        assert_eq!(resp.status_code(), axum::http::StatusCode::OK, "{}", resp.text());
+        let body = js(&resp.text());
+        assert_eq!(
+            body["pack"].as_str(),
+            Some("abcd1234-uploaded-pack.apkg"),
+            "link.pack must store the persisted bare file name: {body}"
+        );
+    })
+    .await;
+}
+
+/// A numeric pack that names no deck row → 400 with the resolver's message.
+#[tokio::test]
+async fn create_rejects_unknown_uploaded_deck() {
+    testing::request::<backend::App, _, _>(|server, _ctx| async move {
+        set_seed_dir(&make_seed_fixture());
+        set_upload_dir(&make_upload_fixture());
+        let resp = server
+            .post(MGMT)
+            .add_header("Authorization", bearer(&mint(886, "teacher", "t@example.edu")))
+            .json(&create_body("999999"))
+            .await;
+        assert_eq!(resp.status_code(), axum::http::StatusCode::BAD_REQUEST);
+        let body = resp.text();
+        assert!(
+            body.contains("no uploaded deck with id 999999"),
+            "error must name the missing deck, got: {body}"
+        );
+    })
+    .await;
+}
+
+/// Deck row exists but its recorded package is gone from the upload dir
+/// (and the checksum fallback finds nothing) → 400, never a silent empty
+/// seat on the visitor's first click.
+#[tokio::test]
+async fn create_rejects_uploaded_deck_missing_file() {
+    testing::request::<backend::App, _, _>(|server, ctx| async move {
+        set_seed_dir(&make_seed_fixture());
+        set_upload_dir(&make_upload_fixture()); // deliberately empty
+        seed_deck(&ctx, 443, &hex_checksum("ef567890"), Some("gone-pack.apkg")).await;
+
+        let resp = server
+            .post(MGMT)
+            .add_header("Authorization", bearer(&mint(887, "teacher", "t@example.edu")))
+            .json(&create_body("443"))
+            .await;
+        assert_eq!(resp.status_code(), axum::http::StatusCode::BAD_REQUEST);
+        let body = resp.text();
+        assert!(
+            body.contains("missing from the upload directory"),
+            "error must name the missing file, got: {body}"
+        );
+    })
+    .await;
+}
+
+/// Two upload-dir files share the row's checksum prefix (pre-T-234 rows
+/// can't be disambiguated) → 400 rather than binding a guess.
+#[tokio::test]
+async fn create_rejects_ambiguous_uploaded_package() {
+    testing::request::<backend::App, _, _>(|server, ctx| async move {
+        set_seed_dir(&make_seed_fixture());
+        let upload = make_upload_fixture();
+        set_upload_dir(&upload);
+        for name in ["ba091234-a.apkg", "ba091234-b.apkg"] {
+            std::fs::write(std::path::Path::new(&upload).join(name), b"pack")
+                .expect("writing the staged upload must succeed");
+        }
+        seed_deck(&ctx, 444, &hex_checksum("ba091234"), None).await;
+
+        let resp = server
+            .post(MGMT)
+            .add_header("Authorization", bearer(&mint(888, "teacher", "t@example.edu")))
+            .json(&create_body("444"))
+            .await;
+        assert_eq!(resp.status_code(), axum::http::StatusCode::BAD_REQUEST);
+        let body = resp.text();
+        assert!(
+            body.contains("ambiguous"),
+            "error must name the ambiguity, got: {body}"
+        );
+    })
+    .await;
+}
+
+/// Pre-T-234 rows (package_file NULL) resolve through the checksum-prefix
+/// fallback when exactly one upload-dir file matches.
+#[tokio::test]
+async fn create_resolves_uploaded_deck_via_checksum_fallback() {
+    testing::request::<backend::App, _, _>(|server, ctx| async move {
+        set_seed_dir(&make_seed_fixture());
+        let upload = make_upload_fixture();
+        set_upload_dir(&upload);
+        std::fs::write(
+            std::path::Path::new(&upload).join("cd345678-solo.apkg"),
+            b"not-a-real-apkg",
+        )
+        .expect("writing the staged upload must succeed");
+        seed_deck(&ctx, 445, &hex_checksum("cd345678"), None).await;
+
+        let resp = server
+            .post(MGMT)
+            .add_header("Authorization", bearer(&mint(889, "teacher", "t@example.edu")))
+            .json(&create_body("445"))
+            .await;
+        assert_eq!(resp.status_code(), axum::http::StatusCode::OK, "{}", resp.text());
+        let body = js(&resp.text());
+        assert_eq!(
+            body["pack"].as_str(),
+            Some("cd345678-solo.apkg"),
+            "fallback must resolve to the single checksum match: {body}"
+        );
+    })
+    .await;
+}

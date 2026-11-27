@@ -39,7 +39,7 @@
 //! | `ANKITOV_BACKEND_URL` | `http://127.0.0.1:5150` | Told to the seat for telemetry |
 //! | `ANKITOV_PUBLIC_URL` | `http://127.0.0.1` | Public base URL the browser-facing `stream_url` is built from (e.g. `https://practice.ankitov.com`); the reverse proxy terminates TLS and routes `/seat/<port>/` to the seat |
 //! | `ANKITOV_SEAT_PASSWD` | random per seat | RESERVED for per-seat stream auth (product TODO). Selkies basic auth is DISABLED in seats — selkies refuses to boot with auth on and no password (EX_CONFIG 78), and the namespace + public proxy are the boundary |
-//! | `ANKITOV_SEAT_PACKS` | _(unset = none)_ | Comma-separated seed `.apkg` file names the seat imports into the student's collection on first start (resolved against `/decks` then `/stream/decks` in the rootfs). Unset = honest empty state. |
+//! | `ANKITOV_SEAT_PACKS` | _(unset = none)_ | Comma-separated pack entries: seed `.apkg` file names (resolved against `/decks` then `/stream/decks` in the rootfs) or uploaded persisted file names (staged by the backend under `runtime/<id>/packs` and re-anchored to `/packs/<name>`, T-234). Unset = honest empty state. |
 //! | `ANKITOV_SEAT_PREVIEW_MAX` | `4` | Concurrent preview-tier seats (drill links, T-215) allowed on top of `ANKITOV_SEAT_MAX`. |
 //!
 //! The seat entry point (`/stream/start-seat.sh` inside the rootfs) starts
@@ -52,6 +52,7 @@ use std::process::Command;
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant};
 
+use crate::services::deck_paths;
 /// How often the lazy reaper runs (checked on every list/start call).
 const REAP_CHECK: Duration = Duration::from_secs(30);
 
@@ -231,6 +232,27 @@ impl SeatManager {
         PathBuf::from("/dev/dri").exists()
     }
 
+    /// Rootfs readiness gate (T-237): both required trees present.
+    ///
+    /// Shared by [`Self::start_seat`] and the classroom-mode enable handler
+    /// so a rootfs-less install fails LOUD — with the build command — before
+    /// any student-facing surface that depends on seats is offered.
+    pub fn rootfs_ready(&self) -> Result<(), SeatError> {
+        if !self.rootfs.join("etc").join("service").exists() {
+            return Err(SeatError::NotConfigured(format!(
+                "seat rootfs missing etc/service at {} — build it with stream/seat-rootfs/build-rootfs.sh",
+                self.rootfs.display()
+            )));
+        }
+        if !self.rootfs.join("stream").join("start-seat.sh").exists() {
+            return Err(SeatError::NotConfigured(format!(
+                "seat rootfs missing at {} — build it with stream/seat-rootfs/build-rootfs.sh",
+                self.rootfs.display()
+            )));
+        }
+        Ok(())
+    }
+
     /// Start (or return the already-running) seat for a student.
     ///
     /// All seat policy comes from the caller via [`SeatLaunch`] —
@@ -276,6 +298,9 @@ impl SeatManager {
             SeatError::Spawn(format!("cannot create collection dir {collection_dir:?}: {e}"))
         })?;
 
+        // Rootfs readiness gate (T-237): fail LOUD before any staging work.
+        self.rootfs_ready()?;
+
         // Per-seat writable copy of the WHOLE /etc/service tree, bound
         // wholesale at /etc/service (live-proven 2026-11-23 on Hetzner).
         // s6-supervise writes supervise/ + event/ state INSIDE each service
@@ -296,28 +321,18 @@ impl SeatManager {
             SeatError::Spawn(format!("cannot create seat scratch {svc_dir:?}: {e}"))
         })?;
         let svc_template = self.rootfs.join("etc/service");
-        if !svc_template.exists() {
-            return Err(SeatError::NotConfigured(format!(
-                "seat rootfs missing etc/service at {} — build it with stream/seat-rootfs/build-rootfs.sh",
-                self.rootfs.display()
-            )));
-        }
         Self::copy_dir_all(&svc_template, &svc_dir).map_err(|e| {
             SeatError::Spawn(format!("cannot stage seat service tree: {e}"))
         })?;
         let _ = std::fs::remove_dir_all(svc_dir.join("dbus"));
 
-        if !self.rootfs.join("stream").join("start-seat.sh").exists() {
-            return Err(SeatError::NotConfigured(format!(
-                "seat rootfs missing at {} — build it with stream/seat-rootfs/build-rootfs.sh",
-                self.rootfs.display()
-            )));
-        }
-
         let port = self.free_port(&self.lock());
         let gpu = Self::gpu_available();
         let password = self.seat_password();
         let token = Self::random_secret(32);
+        // T-234: staged uploaded packs land under runtime/<id>/packs and
+        // are ro-bound at /packs; seed names pass through unchanged.
+        let (packs, packs_dir) = self.stage_packs(&safe, launch.packs.as_deref())?;
         let mut cmd = self.build_bwrap_command(
             &safe,
             &collection_dir,
@@ -328,7 +343,8 @@ impl SeatManager {
             kiosk_level,
             launch.student_email.as_deref(),
             launch.deck.as_deref(),
-            launch.packs.as_deref(),
+            packs.as_deref(),
+            packs_dir.as_deref(),
         );
         let child = cmd.spawn().map_err(|e| SeatError::Spawn(format!("bwrap: {e}")))?;
         let pid = child.id();
@@ -501,9 +517,74 @@ impl SeatManager {
             .collect()
     }
 
-    /// The exact sandbox shape approved 2026-11-19/20 (see module docs).
-    fn build_bwrap_command(
+    /// Resolve a launch's pack list for staging (T-234).
+    ///
+    /// Entries come from drill links and are either SEED pack names
+    /// (resolved inside the rootfs against `/decks` then `/stream/decks`)
+    /// or UPLOADED persisted file names (e.g. `a1b2c3d4-my-deck.apkg`)
+    /// living in the backend's upload dir. Uploaded entries are copied
+    /// per-seat under `runtime/<id>/packs/` and re-anchored to
+    /// `/packs/<name>` so the sandbox sees them without binding the whole
+    /// upload dir (which also holds decks not bound to this seat).
+    ///
+    /// Returns the rewritten comma list plus the staging dir to ro-bind at
+    /// `/packs` (Some only when at least one entry was staged). Unknown
+    /// names pass through untouched — the in-seat importer logs-and-skips
+    /// missing packs (existing graceful degradation).
+    fn stage_packs(
         &self,
+        safe_id: &str,
+        packs: Option<&str>,
+    ) -> Result<(Option<String>, Option<std::path::PathBuf>), SeatError> {
+        let Some(packs) = packs else {
+            return Ok((None, None));
+        };
+        if packs.trim().is_empty() {
+            return Ok((Some(packs.to_string()), None));
+        }
+        let mut staged: Vec<String> = Vec::new();
+        let mut packs_dir: Option<std::path::PathBuf> = None;
+        for name in packs.split(',') {
+            let name = name.trim();
+            if name.is_empty() {
+                continue;
+            }
+            // Absolute paths and anything that is not a bare `.apkg` file
+            // name (operator-staged paths, `/packs/...` re-entries) pass
+            // through untouched — the importer resolves them as-is.
+            if !deck_paths::valid_package_name(name) {
+                staged.push(name.to_string());
+                continue;
+            }
+            let upload_file = deck_paths::upload_dir().join(name);
+            if upload_file.is_file() {
+                let dir = self.runtime_root.join(safe_id).join("packs");
+                // A previous start for the same student may have staged a
+                // different pack list — clear the scratch dir first.
+                if dir.exists() {
+                    std::fs::remove_dir_all(&dir).map_err(|e| {
+                        SeatError::Spawn(format!("cannot clear pack scratch {dir:?}: {e}"))
+                    })?;
+                }
+                std::fs::create_dir_all(&dir).map_err(|e| {
+                    SeatError::Spawn(format!("cannot create pack staging dir {dir:?}: {e}"))
+                })?;
+                std::fs::copy(&upload_file, dir.join(name)).map_err(|e| {
+                    SeatError::Spawn(format!("cannot stage uploaded pack {name:?}: {e}"))
+                })?;
+                packs_dir = Some(dir);
+                staged.push(format!("/packs/{name}"));
+            } else {
+                // Not in the upload dir: a seed name (resolved in-seat) or
+                // a name that no longer exists anywhere (logged in-seat).
+                staged.push(name.to_string());
+            }
+        }
+        Ok((Some(staged.join(",")), packs_dir))
+    }
+
+    /// The exact sandbox shape approved 2026-11-19/20 (see module docs).
+    fn build_bwrap_command(        &self,
         safe_id: &str,
         collection_dir: &std::path::Path,
         svc_dir: &std::path::Path,
@@ -514,6 +595,7 @@ impl SeatManager {
         student_email: Option<&str>,
         deck: Option<&str>,
         packs: Option<&str>,
+        packs_dir: Option<&std::path::Path>,
     ) -> Command {
         let mut cmd = Command::new(&self.bwrap);
         cmd.arg("--ro-bind").arg(&self.rootfs).arg("/")
@@ -545,12 +627,18 @@ impl SeatManager {
             .arg("--unshare-uts")
             .arg("--die-with-parent");
         // The staged writable service tree is bound WHOLESALE at /etc/service
-        // (live-proven shape — see start_seat staging comment).
+        // (live-proven shape — see start_seat staging comment). Staged
+        // uploaded packs (T-234) mount read-only at /packs so the in-seat
+        // importer resolves `/packs/<name>` entries without the sandbox
+        // seeing the whole upload dir.
         cmd.arg("--bind")
             .arg(svc_dir)
-            .arg("/etc/service")
-            // Seat entry point (delegates to the image s6 init).
-            .arg("/stream/start-seat.sh")
+            .arg("/etc/service");
+        if let Some(dir) = packs_dir {
+            cmd.arg("--ro-bind").arg(dir).arg("/packs");
+        }
+        // Seat entry point (delegates to the image s6 init).
+        cmd.arg("/stream/start-seat.sh")
             .env("ANKITOV_SEAT_PORT", port.to_string())
             .env("ANKITOV_SEAT_STUDENT", safe_id)
             .env("ANKITOV_BACKEND_URL", &self.backend_url)
@@ -849,7 +937,7 @@ fn reconcile_orphans(runtime_root: &std::path::Path, expected_comm: &str) -> usi
     reaped
 }
 
-/// Seat collection dir — mirrors `collection_store`'s layout
+/// Seat collection dir — mirrors the seat-side Anki base layout
 /// ({collection_root}/{student_id}) without importing its private sanitizer.
 fn collection_dir_for(safe_id: &str, preview: bool) -> PathBuf {
     let root = std::env::var("ANKITOV_COLLECTION_ROOT")
@@ -880,8 +968,8 @@ fn wipe_preview_scratch(info: &SeatInfo, runtime_root: &std::path::Path) {
     }
 }
 
-/// Allow only [A-Za-z0-9._-], reject "." / ".." / traversal — the same class
-/// of guard `collection_store::sanitize_student_id` applies before SQLite use.
+/// Allow only [A-Za-z0-9._-], reject "." / ".." / traversal — this guard
+/// applies before any SQLite path use.
 fn sanitize_student_id(student_id: &str) -> Option<String> {
     if student_id.is_empty()
         || student_id.len() > 64

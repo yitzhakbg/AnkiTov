@@ -403,6 +403,9 @@ pub async fn upload_producer_deck(
         uploaded_by: Set(uuid::Uuid::nil().to_string()),
         created_at: Set(ts),
         updated_at: Set(ts),
+        // Producer decks are verified from a temp upload that is then
+        // deleted — never persisted to a package library (T-234).
+        package_file: ActiveValue::NotSet,
     }
     .insert(&ctx.db)
     .await

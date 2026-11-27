@@ -45,6 +45,7 @@ pub mod anki_connect;
 pub mod anki_launcher;
 pub mod deck_health;
 pub mod forensic_reader;
+pub mod deck_paths;
 
 // Interleaved Mastery Pipeline — Phase 3 (Capsule Generation Engine)
 pub mod capsule_delivery;
@@ -75,10 +76,7 @@ pub mod auth;
 pub mod password_policy;
 
 // TypeSafe System One (Jev) prompt translator
-pub mod card_renderer;
-pub mod collection_store;
 pub mod jev_translator;
-pub mod review_ingest;
 
 // Selkies + bwrap seat runtime (Product Law 2026-11-18: practice = real Anki)
 pub mod seat_manager;

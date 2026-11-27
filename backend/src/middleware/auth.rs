@@ -122,17 +122,13 @@ pub async fn require_auth_for_management(
 ) -> Result<Response, std::convert::Infallible> {
     let path = req.uri().path();
     let is_mgmt = path.starts_with("/api/v1/management") || path.starts_with("/management");
-    // Solo Web Reviewer API (spec §3.2): JWT required, any authenticated role
-    // (students review; teachers/admins may preview). The static SPA under
-    // /reviewer stays public (it is the login surface).
-    let is_reviewer_api = path.starts_with("/api/v1/reviewer/");
-    if !is_mgmt && !is_reviewer_api {
+    if !is_mgmt {
         // Public path — pass through without touching the auth header.
         return Ok(next.run(req).await);
     }
     // Defense in depth for the management prefix: decode the role BEFORE
-    // require_auth consumes the request. Students authenticate fine (they
-    // need /reviewer) but must not reach ANY management handler — including
+    // require_auth consumes the request. Students authenticate fine but must
+    // not reach ANY management handler — including
     // the ones that predate per-handler `ensure_role` (students.rs,
     // stats.rs, compliance.rs, probe.rs, anki_ops.rs …).
     if is_mgmt {

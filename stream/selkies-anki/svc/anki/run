@@ -49,8 +49,14 @@ if [ "${SELKIES_WAYLAND:-false}" = "true" ]; then
   if [ -n "${WAYLAND_DISPLAY}" ]; then
     export WAYLAND_DISPLAY
     export QT_QPA_PLATFORM=wayland
+    export ANKI_WAYLAND=1
     export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
     export XDG_SESSION_TYPE=wayland
+    # Anki treats native Wayland as opt-in: under a GNOME session it silently
+    # overrides QT_QPA_PLATFORM=wayland back to xcb unless ANKI_WAYLAND is set
+    # (ankitects/anki#1767; aqt/__init__.py is_gnome override). The seat runs
+    # labwc, so the override should not fire — the var is the documented force
+    # flag and a guard against desktop-detection misfire / host env leakage.
     echo "[anki] Wayland session socket: ${WAYLAND_DISPLAY}" >&2
   else
     # No session socket (compositor "none", or it never came up): fall to XWayland.

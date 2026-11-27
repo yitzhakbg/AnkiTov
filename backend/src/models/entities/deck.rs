@@ -17,6 +17,12 @@ pub struct Model {
     /// Optional foreign key to `tracks.id` — P2 minimal deck-track binding.
     /// NULL means the deck is unassigned (library-wide).
     pub track_id: Option<String>,
+    /// Persisted file name (bare, no directory) of an UPLOADED package
+    /// under the upload dir (T-234) — e.g. `a1b2c3d4-my-deck.apkg`. NULL
+    /// for seed-library decks (resolvable by name) and producer-verified
+    /// decks (never persisted). Lets drill links and seat staging recover
+    /// the on-disk package from the row alone.
+    pub package_file: Option<String>,
     /// Unix timestamp in seconds (UTC).
     pub created_at: i64,
     /// Unix timestamp in seconds (UTC).

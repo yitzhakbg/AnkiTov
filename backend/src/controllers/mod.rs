@@ -9,7 +9,6 @@ pub mod auth;
 pub mod setup;
 
 // Telemetry ingestion
-pub mod reviewer;
 pub mod telemetry;
 
 // Seat stream authorization (Caddy forward_auth target — public by design,

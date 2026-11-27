@@ -40,41 +40,13 @@ use loco_rs::prelude::*;
 use sea_orm::{entity::prelude::EntityTrait, ActiveModelTrait, ActiveValue, Set};
 use serde::Serialize;
 use sha2::{Digest, Sha256};
-use std::path::PathBuf;
 use utoipa::ToSchema;
 
 const TAG: &str = "Management Console";
 
-/// Resolve the seed-packages directory.
-///
-/// Order: `ANKITOV_SEED_DIR` env override → `/app/ankitov/content/seed`
-/// (container layout) → `content/seed` relative to the working directory
-/// (local `cargo run` development).
-pub(super) fn seed_packages_dir() -> PathBuf {
-    if let Ok(dir) = std::env::var("ANKITOV_SEED_DIR") {
-        let p = PathBuf::from(&dir).join("packages");
-        if p.is_dir() {
-            return p;
-        }
-        return PathBuf::from(&dir);
-    }
-    let container = PathBuf::from("/app/ankitov/content/seed/packages");
-    if container.is_dir() {
-        return container;
-    }
-    PathBuf::from("content/seed/packages")
-}
-
-/// Validate a requested package filename: strict allowlist, no traversal.
-pub(super) fn valid_package_name(name: &str) -> bool {
-    !name.is_empty()
-        && name.len() <= 128
-        && name.ends_with(".apkg")
-        && name
-            .chars()
-            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-'))
-        && !name.contains("..")
-}
+// Package-library resolvers are shared with the seat manager (T-234) and
+// live in the service layer.
+use crate::services::deck_paths::{seed_packages_dir, valid_package_name};
 
 /// Human-friendly deck name from a package filename stem:
 /// `english-vocabulary-en.apkg` → `English Vocabulary (en)`.
@@ -193,8 +165,9 @@ pub async fn list_available_decks(
     format::json(entries)
 }
 
-/// Core listing shared by the teacher/admin console route and the student
-/// reviewer endpoint (`GET /reviewer/seed-packs`, T-204): every `.apkg` in
+/// Core listing shared by the teacher/admin console route (formerly also by
+/// the student reviewer endpoint `GET /reviewer/seed-packs`, T-204, removed
+/// with the reviewer in T-237): every `.apkg` in
 /// the seed-packages directory with manifest metadata and import status.
 pub(crate) async fn available_decks(ctx: &AppContext) -> Result<Vec<AvailableDeck>> {
     let dir = seed_packages_dir();
@@ -459,6 +432,9 @@ pub async fn import_available_deck(
         created_at: Set(now_ts),
         updated_at: Set(now_ts),
         track_id: ActiveValue::NotSet,
+        // Seed packages resolve by name against the seed library at seat
+        // spawn — no persisted-file record (T-234).
+        package_file: ActiveValue::NotSet,
     }
     .insert(&ctx.db)
     .await

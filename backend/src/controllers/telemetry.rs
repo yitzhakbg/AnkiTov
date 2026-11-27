@@ -102,8 +102,7 @@ pub async fn ingest_card_answer(
     .await;
 
     // ── B-0035: answering a card clears its active deferral override ──
-    // Best-effort (same rationale as the web-reviewer hook in
-    // review_ingest.rs): the overlay is self-healing at the next assembly.
+    // Best-effort: the overlay is self-healing at the next assembly.
     if let Err(e) =
         crate::services::schedule_triage::clear_override(db, &payload.student_id, payload.card_id)
             .await

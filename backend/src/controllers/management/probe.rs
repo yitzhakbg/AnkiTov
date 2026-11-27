@@ -84,6 +84,7 @@ pub async fn deck_insert(
             .unwrap_or_else(|| uuid::Uuid::nil().to_string())),
         created_at: Set(payload.created_at.unwrap_or(now)),
         updated_at: Set(payload.updated_at.unwrap_or(now)),
+        package_file: ActiveValue::NotSet,
     };
 
     model.insert(&ctx.db).await.map_err(|e| {
@@ -125,6 +126,7 @@ pub async fn deck_insert_minimal(
         uploaded_by: Set(uuid::Uuid::nil().to_string()),
         created_at: Set(0),
         updated_at: Set(0),
+        package_file: ActiveValue::NotSet,
     };
 
     model.insert(&ctx.db).await.map_err(|e| {

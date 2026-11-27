@@ -45,6 +45,7 @@ mod m20261030_create_web_review_log;
 mod m20261115_create_schedule_overrides;
 mod m20261123_add_kiosk_level;
 mod m20261124_create_drill_links;
+mod m20261126_add_deck_package_file;
 pub use m20261015_create_app_settings::Migration as CreateAppSettings;
 pub use m20261115_create_schedule_overrides::Migration as CreateScheduleOverrides;
 pub use m20261124_create_drill_links::Migration as CreateDrillLinks;
@@ -71,6 +72,7 @@ impl MigratorTrait for Migrator {
             Box::new(CreateScheduleOverrides),
             Box::new(m20261123_add_kiosk_level::Migration),
             Box::new(CreateDrillLinks),
+            Box::new(m20261126_add_deck_package_file::Migration),
         ]
     }
 }

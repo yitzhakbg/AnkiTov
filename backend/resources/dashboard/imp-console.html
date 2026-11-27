@@ -2205,7 +2205,7 @@ body:not([data-class-state]) .no-classes-placeholder { display: none !important;
           <!-- Classroom access -->
           <div class="card" style="padding:var(--space-5)">
             <h3 style="margin:0 0 var(--space-2);font-size:var(--text-lg)">📡 <span data-i18n="settings.classroom.title">Classroom access</span></h3>
-            <p style="margin:0 0 var(--space-3);color:var(--text-secondary);font-size:var(--text-sm)" data-i18n="settings.classroom.desc">Let students on this network open their reviewer. Off = only this computer can reach the server.</p>
+            <p style="margin:0 0 var(--space-3);color:var(--text-secondary);font-size:var(--text-sm)" data-i18n="settings.classroom.desc">Let students on this network reach the server and practice in streamed Anki seats (drill links). Off = only this computer can reach the server.</p>
             <div id="classroom-status" style="margin-bottom:var(--space-3);font-size:var(--text-sm);color:var(--text-secondary)">…</div>
             <button id="classroom-toggle" class="btn btn-primary" onclick="ClassroomUI.toggle()">Enable</button>
           </div>
@@ -3465,12 +3465,13 @@ const SessionGate = (() => {
       const user = await Session.login(email, password);
       if (user.role === 'student') {
         // Students have no business in the teacher console (field report: a
-        // student hitting the server root got the console login). They sign
-        // in ONCE here and continue straight into practice: stash the token
-        // under the reviewer's storage key and hand off (owner report
-        // 2026-11-22 — the bare public URL is the natural student entry).
-        try { localStorage.setItem('ankitov_reviewer_token', user.token); } catch (e) {}
-        window.location.assign('/reviewer');
+        // student hitting the server root got the console login). Practice is
+        // the streamed seat flow (T-237 Product Law): they open the drill
+        // link / seat URL their teacher handed out — no console session.
+        errEl.textContent = 'Students practice through the seat link your teacher shared — this console is for staff.';
+        errEl.style.display = 'block';
+        submit.disabled = false;
+        submit.textContent = t('auth.submit');
         return;
       }
       _lastUser = user;
@@ -3975,7 +3976,7 @@ const Home = {
     const host = document.getElementById('wizard-complete-extra');
     if (!host) return;
     const port = window.location.port || '5150';
-    const joinUrl = `http://${this._wizardLanIp}:${port}/reviewer`;
+    const serverUrl = `http://${this._wizardLanIp}:${port}`;
     if (this._wizardRoster && this._wizardRoster.length) {
       const rows = this._wizardRoster.map(s =>
         `<tr><td style="padding:4px">${this._escapeHtml(s.name)}</td>` +
@@ -3983,7 +3984,7 @@ const Home = {
       host.innerHTML =
         `<div style="margin-top:var(--space-5);text-align:left;background:var(--surface-secondary);border:1px solid var(--border-light);border-radius:8px;padding:var(--space-4)">` +
         `<p style="margin:0 0 var(--space-2);font-weight:var(--font-semibold)">Student logins — write these on the board:</p>` +
-        `<p style="margin:0 0 var(--space-2);font-size:var(--text-sm)">Join: <strong>${joinUrl}</strong> · Password: <strong>${this._escapeHtml(this._wizardPassword)}</strong></p>` +
+        `<p style="margin:0 0 var(--space-2);font-size:var(--text-sm)">Server: <strong>${serverUrl}</strong> · Password: <strong>${this._escapeHtml(this._wizardPassword)}</strong></p>` +
         `<button class="btn btn-outline" onclick="Home._wizardEnableClassroom(this)">📡 Open to students (classroom mode)</button>` +
         `<span id="wizard-classroom-status" style="margin-left:8px;font-size:var(--text-sm)"></span>` +
         `<table style="width:100%;font-size:var(--text-sm);border-collapse:collapse"><thead><tr>` +
@@ -3991,7 +3992,7 @@ const Home = {
         `</tr></thead><tbody>${rows}</tbody></table></div>`;
     } else {
       host.innerHTML =
-        `<p style="margin-top:var(--space-4);font-size:var(--text-sm)">Students practice at <strong>${joinUrl}</strong> once they have accounts.</p>`;
+        `<p style="margin-top:var(--space-4);font-size:var(--text-sm)">Students practice in streamed Anki seats — share drill links from the Drill links page once they have accounts.</p>`;
     }
   },
 
@@ -4002,7 +4003,7 @@ const Home = {
     try {
       const s = await API.post('/classroom/enable', {});
       const st = document.getElementById('wizard-classroom-status');
-      if (st) st.innerHTML = `✅ Students can join at <strong>${s.join_url}</strong>`;
+      if (st) st.innerHTML = `✅ Open to students — server at <strong>${s.server_url}</strong> (students join via drill links)`;
       if (btn) btn.style.display = 'none';
       ClassroomUI._render(s); // keep the Settings card in sync
     } catch (e) {
@@ -4124,8 +4125,8 @@ const ClassroomUI = {
     const btn = document.getElementById('classroom-toggle');
     if (!status || !btn) return;
     if (s.enabled) {
-      const url = s.join_url || `http://${s.lan_ip || window.location.hostname}:${s.port || window.location.port || 5150}/reviewer`;
-      status.innerHTML = `✅ Open to students — join URL: <strong>${url}</strong>`;
+      const url = s.server_url || `http://${s.lan_ip || window.location.hostname}:${s.port || window.location.port || 5150}`;
+      status.innerHTML = `✅ Open to students — server: <strong>${url}</strong> (students join via drill links → streamed seats)`;
       btn.textContent = 'Disable';
       btn.dataset.enabled = '1';
       btn.classList.remove('btn-primary');
